@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta (Français) -->
+    <title>Testeur d'Expressions Régulières (Regex) en ligne | Outil interactif gratuit</title>
+    <meta name="description" content="Testez, visualisez et comprenez vos expressions régulières en temps réel. Surlignage des matches, explication en langage naturel, flags et bibliothèque de patterns.">
+    <link rel="canonical" href="https://devstoolsbox.dev/fr/outils/testeur-regex">
+    <link rel="alternate" hreflang="fr" href="https://devstoolsbox.dev/fr/outils/testeur-regex">
+    <link rel="alternate" hreflang="en" href="https://devstoolsbox.dev/tools/regex-tester">
+    <link rel="alternate" hreflang="x-default" href="https://devstoolsbox.dev/tools/regex-tester">
+
+    <style>
+        /* ----- Variables & Reset (cohérent avec les autres outils) ----- */
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            
+            /* Couleurs des groupes capturants */
+            --group-colors: #f87171, #60a5fa, #fbbf24, #34d399, #a78bfa, #fb923c, #94a3b8, #f472b6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container { max-width: 1300px; width: 100%; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); }
+        .lang-switch { display: flex; gap: 8px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); }
+        .lang-btn {
+            padding: 8px 16px; border-radius: 32px; border: none; background: transparent;
+            font-weight: 500; cursor: pointer; transition: all 0.2s; color: var(--text-light);
+            text-decoration: none;
+        }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        /* Tool Card */
+        .tool-card {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1.1rem; }
+
+        /* Zone de saisie regex */
+        .regex-input-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .regex-input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: 60px;
+            padding: 4px 4px 4px 20px;
+            transition: border 0.2s;
+        }
+        .regex-input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .regex-input-wrapper span {
+            color: var(--text-light);
+            font-family: monospace;
+            font-size: 1.2rem;
+            margin-right: 8px;
+        }
+        #regexInput {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 14px 0;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 1rem;
+            outline: none;
+        }
+        .flags-selector {
+            display: flex;
+            gap: 4px;
+            background: var(--surface);
+            padding: 4px 8px;
+            border-radius: 40px;
+            border: 1px solid var(--border);
+        }
+        .flag-btn {
+            padding: 8px 12px;
+            border-radius: 30px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-light);
+            position: relative;
+        }
+        .flag-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .flag-btn:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-bottom: 6px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Zone de texte à tester */
+        .test-textarea {
+            margin: 20px 0;
+        }
+        .test-textarea label {
+            font-weight: 600; margin-bottom: 8px; display: block;
+        }
+        #testInput {
+            width: 100%;
+            padding: 16px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        /* Résultats et surlignage */
+        .matches-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 0 8px;
+        }
+        .match-counter {
+            font-weight: 600;
+            background: var(--primary);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+        }
+        #highlightedOutput {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .match-highlight {
+            border-radius: 4px;
+            padding: 2px 0;
+            margin: 0 -1px;
+        }
+        .group-detail {
+            margin-top: 16px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .group-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .group-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: white;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .group-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        /* Explication en langage naturel */
+        .explanation-box {
+            background: #eef2ff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+        .explanation-box h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+        #explanationText {
+            font-size: 0.95rem;
+        }
+
+        /* Bibliothèque de regex */
+        .library-section {
+            margin: 24px 0;
+        }
+        .library-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pattern-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pattern-chip {
+            padding: 8px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pattern-chip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Section Article */
+        .article-section {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        .article-section h2 { font-size: 1.8rem; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+        .article-section h3 { margin-top: 24px; margin-bottom: 12px; }
+        .faq-item { margin-bottom: 24px; }
+        .faq-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+
+        .footer { text-align: center; color: var(--text-light); margin-top: 24px; }
+        .error-msg { color: var(--error); margin-top: 8px; font-size: 0.9rem; min-height: 24px; }
+        .toast-msg {
+            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: white;
+            padding: 10px 20px; border-radius: 40px; font-size: 0.9rem; opacity: 0;
+            transition: opacity 0.3s; pointer-events: none; box-shadow: var(--shadow); z-index: 1000;
+        }
+
+        /* Boutons d'action */
+        .button-group { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+        .btn {
+            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
+            cursor: pointer; transition: all 0.2s; background: white; color: var(--text);
+            border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline:hover { background: var(--bg); border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <span class="logo">📦 DevToolbox</span>
+        <div class="lang-switch">
+            <a href="/tools/regex-tester" class="lang-btn">EN</a>
+            <a href="/fr/outils/testeur-regex" class="lang-btn active" aria-current="page">FR</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            <h1> Testeur d'Expressions Régulières</h1>
+            <div class="subhead">Testez, visualisez et comprenez vos regex en temps réel. Surlignage, groupes, explications.</div>
+
+            <!-- Saisie regex + flags -->
+            <div class="regex-input-area">
+                <div class="regex-input-wrapper">
+                    <span>/</span>
+                    <input type="text" id="regexInput" placeholder="[a-z]+@[a-z]+\.[a-z]+" value="([A-Z][a-z]+) (\d+)" spellcheck="false">
+                    <span>/</span>
+                </div>
+                <div class="flags-selector" id="flagsContainer">
+                    <button class="flag-btn" data-flag="g" data-tip="Global : trouve toutes les correspondances">g</button>
+                    <button class="flag-btn" data-flag="i" data-tip="Insensible à la casse">i</button>
+                    <button class="flag-btn" data-flag="m" data-tip="Multiligne : ^ et $ correspondent aux débuts/fins de ligne">m</button>
+                    <button class="flag-btn" data-flag="s" data-tip="DotAll : . correspond aussi aux sauts de ligne">s</button>
+                    <button class="flag-btn" data-flag="u" data-tip="Unicode : support complet des caractères Unicode">u</button>
+                </div>
+            </div>
+            <div id="regexError" class="error-msg"></div>
+
+            <!-- Explication en langage naturel -->
+            <div class="explanation-box" id="explanationBox">
+                <h3> Explication</h3>
+                <div id="explanationText">Saisissez une expression régulière...</div>
+            </div>
+
+            <!-- Zone de test -->
+            <div class="test-textarea">
+                <label for="testInput">Texte à tester :</label>
+                <textarea id="testInput" placeholder="Collez ou tapez votre texte ici...">Jean 25 ans\nMarie 32 ans\nPaul 18 ans</textarea>
+            </div>
+
+            <!-- Résultats -->
+            <div class="matches-header">
+                <span style="font-weight: 600;">Correspondances</span>
+                <span class="match-counter" id="matchCounter">0 match</span>
+            </div>
+            <div id="highlightedOutput"></div>
+            
+            <!-- Groupes capturants détaillés -->
+            <div class="group-detail" id="groupDetailPanel">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600;"> Groupes capturants</span>
+                    <button class="btn copy-btn" id="copyMatchesBtn" style="padding: 4px 12px;"> Copier</button>
+                </div>
+                <div id="groupListContainer" class="group-list"></div>
+            </div>
+
+            <!-- Bibliothèque de regex -->
+            <div class="library-section">
+                <div class="library-title">
+                    <span> Bibliothèque de patterns courants</span>
+                    <span style="font-size: 0.8rem; color: var(--text-light);">(cliquez pour charger)</span>
+                </div>
+                <div class="pattern-chips" id="patternLibrary">
+                    <span class="pattern-chip" data-pattern="^[\w\.-]+@[\w\.-]+\.\w+$" data-flags="">Email</span>
+                    <span class="pattern-chip" data-pattern="https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)" data-flags="">URL</span>
+                    <span class="pattern-chip" data-pattern="\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b" data-flags="">IPv4</span>
+                    <span class="pattern-chip" data-pattern="^(\+\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}$" data-flags="">Téléphone</span>
+                    <span class="pattern-chip" data-pattern="\b\d{4}-\d{2}-\d{2}\b" data-flags="">Date (YYYY-MM-DD)</span>
+                    <span class="pattern-chip" data-pattern="\b[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\b" data-flags="i">UUID</span>
+                    <span class="pattern-chip" data-pattern="^\d{5}$" data-flags="">Code postal FR</span>
+                    <span class="pattern-chip" data-pattern="^#[0-9A-F]{6}$" data-flags="i">Couleur hex</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-outline" id="clearAllBtn"> Tout effacer</button>
+                <button class="btn btn-outline" id="copyRegexBtn"> Copier la regex</button>
+            </div>
+        </div>
+
+        <!-- SECTION EXPLICATIVE & FAQ -->
+            <section class="article-section">
+    <h2>Testeur Regex en ligne : comprendre et utiliser les expressions régulières</h2>
+
+    <p>Une <strong>expression régulière (regex)</strong> est une suite de caractères utilisée pour définir un motif de recherche. Un <strong>testeur regex en ligne</strong> permet de tester, valider et déboguer vos expressions en temps réel.</p>
+
+    <p>Les regex sont largement utilisées en développement web, en validation de formulaires, en traitement de texte et en extraction de données. Grâce à un <strong>outil regex en ligne gratuit</strong>, vous pouvez analyser rapidement vos expressions sans installer de logiciel.</p>
+
+    <h3>Comment utiliser ce testeur regex ?</h3>
+    <ul>
+        <li>Saisissez votre expression régulière</li>
+        <li>Ajoutez les flags si nécessaire (g, i, m...)</li>
+        <li>Collez votre texte à analyser</li>
+        <li>Visualisez les correspondances en temps réel</li>
+    </ul>
+
+    <h3>Syntaxe de base des expressions régulières</h3>
+    <ul style="margin-left: 20px; margin-bottom: 20px;">
+        <li><code>.</code> : n'importe quel caractère (sauf saut de ligne)</li>
+        <li><code>*</code> : 0 ou plusieurs occurrences</li>
+        <li><code>+</code> : 1 ou plusieurs occurrences</li>
+        <li><code>?</code> : 0 ou 1 occurrence</li>
+        <li><code>[]</code> : classe de caractères</li>
+        <li><code>()</code> : groupe capturant</li>
+        <li><code>^</code> : début de chaîne</li>
+        <li><code>$</code> : fin de chaîne</li>
+    </ul>
+
+    <h3>Cas d'utilisation courants des regex</h3>
+    <ul>
+        <li>Validation d'email</li>
+        <li>Validation de mots de passe</li>
+        <li>Extraction de données dans du texte</li>
+        <li>Recherche et remplacement avancé</li>
+    </ul>
+
+    <h3>Signification des flags regex</h3>
+    <p><strong>g</strong> : correspondances globales<br>
+    <strong>i</strong> : insensible à la casse<br>
+    <strong>m</strong> : mode multiligne<br>
+    <strong>s</strong> : permet au point de matcher les retours à la ligne<br>
+    <strong>u</strong> : support Unicode</p>
+
+    <h3>Foire Aux Questions</h3>
+
+    <div class="faq-item">
+        <div class="faq-question">Qu'est-ce qu'un testeur regex ?</div>
+        <p>Un testeur regex est un outil qui permet de tester et valider des expressions régulières en temps réel.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Comment tester une regex en ligne ?</div>
+        <p>Entrez votre expression, ajoutez les options nécessaires et testez-la directement avec votre texte.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">À quoi servent les expressions régulières ?</div>
+        <p>Elles servent à rechercher, valider, extraire ou remplacer du texte selon un motif précis.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Quelle est la différence entre une regex et une recherche classique ?</div>
+        <p>Une regex permet des recherches avancées basées sur des motifs, contrairement à une recherche simple.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Peut-on utiliser les regex pour valider des formulaires ?</div>
+        <p>Oui, elles sont très utilisées pour valider emails, mots de passe et numéros de téléphone.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Les regex sont-elles difficiles à apprendre ?</div>
+        <p>Elles peuvent sembler complexes au début, mais avec la pratique et des outils comme ce testeur, elles deviennent plus simples.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Mes données sont-elles envoyées à un serveur ?</div>
+        <p>Non. Tout est traité localement dans votre navigateur, garantissant la confidentialité.</p>
+    </div>
+
+    <!-- Maillage interne -->
+    <h3>Autres outils utiles</h3>
+    <ul>
+        <li><a href="/fr/outils/formateur-json">Formateur JSON</a></li>
+        <li><a href="/fr/outils/encodeur-base64">Encodeur Base64</a></li>
+        <li><a href="/fr/outils/decodeur-jwt">Décodeur JWT</a></li>
+        <li><a href="/fr/outils/convertisseur-timestamp">Convertisseur Timestamp</a></li>
+    </ul>
+</section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 DevToolbox — Outils 100% côté client pour les développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg">Copié !</div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Testeur d'Expressions Régulières",
+  "url": "https://yourdomain.com/fr/outils/testeur-regex",
+  "description": "Testeur de regex en ligne gratuit et interactif. Surlignage en temps réel, explication en langage naturel, bibliothèque de patterns.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Quels sont les flags disponibles et leur signification ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "g: global, i: insensible à la casse, m: multiligne, s: dotAll, u: unicode." }
+    },
+    {
+      "@type": "Question",
+      "name": "Mes données sont-elles envoyées à un serveur ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Non, tout s'exécute dans votre navigateur." }
+    }
+  ]
+}
+</script>
+
+<script>
+    (function(){
+        // DOM Elements
+        const regexInput = document.getElementById('regexInput');
+        const testInput = document.getElementById('testInput');
+        const highlightedOutput = document.getElementById('highlightedOutput');
+        const matchCounter = document.getElementById('matchCounter');
+        const regexError = document.getElementById('regexError');
+        const explanationText = document.getElementById('explanationText');
+        const groupListContainer = document.getElementById('groupListContainer');
+        const flagsContainer = document.getElementById('flagsContainer');
+        const patternChips = document.querySelectorAll('.pattern-chip');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const copyRegexBtn = document.getElementById('copyRegexBtn');
+        const copyMatchesBtn = document.getElementById('copyMatchesBtn');
+        const toast = document.getElementById('toast');
+
+        let currentFlags = new Set(['g']); // par défaut 'g' activé
+
+        // Initialisation des flags actifs
+        document.querySelectorAll('.flag-btn').forEach(btn => {
+            if (btn.dataset.flag === 'g') btn.classList.add('active');
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const flag = btn.dataset.flag;
+                if (currentFlags.has(flag)) {
+                    currentFlags.delete(flag);
+                    btn.classList.remove('active');
+                } else {
+                    currentFlags.add(flag);
+                    btn.classList.add('active');
+                }
+                updateRegex();
+            });
+        });
+
+        // Bibliothèque de patterns
+        patternChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                const pattern = chip.dataset.pattern;
+                const flags = chip.dataset.flags || '';
+                regexInput.value = pattern;
+                // Réinitialiser les flags
+                currentFlags.clear();
+                document.querySelectorAll('.flag-btn').forEach(btn => btn.classList.remove('active'));
+                for (let f of flags) {
+                    currentFlags.add(f);
+                    document.querySelector(`.flag-btn[data-flag="${f}"]`)?.classList.add('active');
+                }
+                // Activer 'g' par défaut si aucun flag spécifié
+                if (flags.length === 0) {
+                    currentFlags.add('g');
+                    document.querySelector('.flag-btn[data-flag="g"]')?.classList.add('active');
+                }
+                updateRegex();
+                showToast(`Pattern "${chip.textContent}" chargé`);
+            });
+        });
+
+        // Explication en langage naturel (parser simple)
+        function explainRegex(pattern) {
+            if (!pattern) return "Aucune expression régulière saisie.";
+            let explanation = [];
+            let i = 0;
+            while (i < pattern.length) {
+                let char = pattern[i];
+                if (char === '^') { explanation.push("début de chaîne/ligne"); i++; }
+                else if (char === '$') { explanation.push("fin de chaîne/ligne"); i++; }
+                else if (char === '.') { explanation.push("n'importe quel caractère (sauf saut de ligne)"); i++; }
+                else if (char === '*') { explanation.push("0 ou plusieurs fois"); i++; }
+                else if (char === '+') { explanation.push("1 ou plusieurs fois"); i++; }
+                else if (char === '?') { explanation.push("0 ou 1 fois"); i++; }
+                else if (char === '|') { explanation.push("ou"); i++; }
+                else if (char === '\\') {
+                    if (i+1 < pattern.length) {
+                        let next = pattern[i+1];
+                        if (next === 'd') { explanation.push("chiffre (0-9)"); }
+                        else if (next === 'w') { explanation.push("caractère alphanumérique ou _"); }
+                        else if (next === 's') { explanation.push("espace blanc"); }
+                        else if (next === 'b') { explanation.push("limite de mot"); }
+                        else if (next === 'D') { explanation.push("non-chiffre"); }
+                        else if (next === 'W') { explanation.push("non-caractère de mot"); }
+                        else if (next === 'S') { explanation.push("non-espace blanc"); }
+                        else { explanation.push(`caractère spécial \\${next}`); }
+                        i += 2;
+                    } else { explanation.push("\\"); i++; }
+                }
+                else if (char === '[') {
+                    let end = pattern.indexOf(']', i);
+                    if (end !== -1) {
+                        let inside = pattern.substring(i+1, end);
+                        if (inside.startsWith('^')) explanation.push(`aucun des caractères : ${inside.substring(1)}`);
+                        else if (inside.includes('-')) explanation.push(`intervalle de caractères : ${inside}`);
+                        else explanation.push(`un des caractères : ${inside}`);
+                        i = end + 1;
+                    } else { explanation.push("["); i++; }
+                }
+                else if (char === '(') {
+                    if (pattern.substring(i).startsWith('(?:')) {
+                        explanation.push("groupe non-capturant");
+                        i += 3;
+                    } else {
+                        explanation.push("groupe capturant");
+                        i++;
+                    }
+                }
+                else if (char === '{') {
+                    let end = pattern.indexOf('}', i);
+                    if (end !== -1) {
+                        let quant = pattern.substring(i+1, end);
+                        explanation.push(`exactement ${quant} fois`);
+                        i = end + 1;
+                    } else { explanation.push("{"); i++; }
+                }
+                else {
+                    // caractère littéral
+                    explanation.push(`"${char}"`);
+                    i++;
+                }
+            }
+            return explanation.join(' → ');
+        }
+
+        // Mise à jour de l'affichage
+        function updateRegex() {
+            const pattern = regexInput.value;
+            const text = testInput.value;
+            let flags = Array.from(currentFlags).join('');
+            
+            // Explication
+            explanationText.textContent = explainRegex(pattern);
+            
+            // Validation regex
+            let regex;
+            try {
+                regex = new RegExp(pattern, flags);
+                regexError.textContent = '';
+            } catch (e) {
+                regexError.textContent = 'Regex invalide : ' + e.message;
+                highlightedOutput.textContent = text; // afficher texte brut
+                matchCounter.textContent = '0 match';
+                groupListContainer.innerHTML = '';
+                return;
+            }
+
+            // Recherche des correspondances
+            const matches = [];
+            let match;
+            if (flags.includes('g')) {
+                while ((match = regex.exec(text)) !== null) {
+                    matches.push(match);
+                    if (match[0].length === 0) regex.lastIndex++; // éviter boucle infinie
+                }
+            } else {
+                match = regex.exec(text);
+                if (match) matches.push(match);
+            }
+
+            // Mise à jour compteur
+            const count = matches.length;
+            matchCounter.textContent = count + ' match' + (count !== 1 ? 'es' : '');
+
+            // Surlignage
+            if (count === 0) {
+                highlightedOutput.textContent = text;
+            } else {
+                let resultHtml = '';
+                let lastIndex = 0;
+                const colorPalette = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fecaca', '#e9d5ff', '#fed7aa'];
+                let colorIdx = 0;
+                
+                // Trier les matches par index
+                const sortedMatches = [...matches].sort((a,b) => a.index - b.index);
+                
+                for (let m of sortedMatches) {
+                    const start = m.index;
+                    const end = start + m[0].length;
+                    // Texte avant
+                    resultHtml += escapeHtml(text.substring(lastIndex, start));
+                    // Texte matché avec surlignage
+                    const bgColor = colorPalette[colorIdx % colorPalette.length];
+                    resultHtml += `<span class="match-highlight" style="background-color: ${bgColor};">${escapeHtml(m[0])}</span>`;
+                    lastIndex = end;
+                    colorIdx++;
+                }
+                resultHtml += escapeHtml(text.substring(lastIndex));
+                highlightedOutput.innerHTML = resultHtml;
+            }
+
+            // Affichage des groupes
+            let groupsHtml = '';
+            if (matches.length > 0) {
+                const groupColors = ['#f87171', '#60a5fa', '#fbbf24', '#34d399', '#a78bfa', '#fb923c', '#94a3b8', '#f472b6'];
+                for (let i = 0; i < matches.length; i++) {
+                    const m = matches[i];
+                    if (m.length > 1) {
+                        for (let g = 1; g < m.length; g++) {
+                            if (m[g] !== undefined) {
+                                const color = groupColors[(g-1) % groupColors.length];
+                                groupsHtml += `<div class="group-item"><span class="group-color" style="background: ${color};"></span> Groupe ${g}: "${escapeHtml(m[g])}"</div>`;
+                            }
+                        }
+                    }
+                }
+            }
+            groupListContainer.innerHTML = groupsHtml || '<span style="color: var(--text-light);">Aucun groupe capturant</span>';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 2000);
+        }
+
+        // Événements
+        regexInput.addEventListener('input', updateRegex);
+        testInput.addEventListener('input', updateRegex);
+        
+        clearAllBtn.addEventListener('click', () => {
+            regexInput.value = '';
+            testInput.value = '';
+            updateRegex();
+        });
+
+        copyRegexBtn.addEventListener('click', async () => {
+            const pattern = regexInput.value;
+            if (!pattern) { showToast('Rien à copier'); return; }
+            try {
+                await navigator.clipboard.writeText('/' + pattern + '/' + Array.from(currentFlags).join(''));
+                showToast('Regex copiée !');
+            } catch { showToast('Échec de la copie'); }
+        });
+
+        copyMatchesBtn.addEventListener('click', async () => {
+            const text = highlightedOutput.innerText || testInput.value;
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('Texte copié');
+            } catch { showToast('Échec'); }
+        });
+
+        // Initialisation
+        updateRegex();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Base64 Encoder / Decoder Online | Instant Text &amp; Image Conversion</title>
+    <meta name="description" content="Free Base64 encoder and decoder online. Convert text to Base64, decode Base64 to text, image to Data URL. URL-safe mode (Base64url). 100% client-side, no data sent to server.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://devstoolsbox.dev/tools/base64-encoder">
+    <link rel="alternate" hreflang="en" href="https://devstoolsbox.dev/tools/base64-encoder">
+    <link rel="alternate" hreflang="fr" href="https://devstoolsbox.dev/fr/outils/encodeur-base64">
+    <link rel="alternate" hreflang="x-default" href="https://devstoolsbox.dev/tools/base64-encoder">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Base64 Encoder / Decoder Online | Instant Conversion">
+    <meta property="og:description" content="Convert text and images to Base64 and back. URL-safe mode, drag-and-drop image to Data URL. 100% client-side.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devstoolsbox.dev/tools/base64-encoder">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Base64 Encoder / Decoder Online">
+    <meta name="twitter:description" content="Convert text and images to Base64. URL-safe mode, image to Data URL. 100% client-side.">
+
+    <style>
+        /* ===== Variables ===== */
+        :root {
+            --bg:       #f8fafc;
+            --surface:  #ffffff;
+            --primary:  #3b82f6;
+            --pdk:      #2563eb;
+            --text:     #1e293b;
+            --text-2:   #64748b;
+            --text-3:   #94a3b8;
+            --border:   #e2e8f0;
+            --success:  #10b981;
+            --warning:  #f59e0b;
+            --error:    #ef4444;
+            --radius:   16px;
+            --shadow:   0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --mono:     'SF Mono','Menlo','Cascadia Code',monospace;
+            --code-bg:  #f9f9fb;
+            --input-bg: #f8fafc;
+            --drop-bg:  #f1f5f9;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg:       #0f172a;
+                --surface:  #1e293b;
+                --primary:  #60a5fa;
+                --pdk:      #3b82f6;
+                --text:     #f1f5f9;
+                --text-2:   #94a3b8;
+                --text-3:   #64748b;
+                --border:   #334155;
+                --success:  #34d399;
+                --warning:  #fbbf24;
+                --error:    #f87171;
+                --shadow:   0 10px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.3);
+                --code-bg:  #0f172a;
+                --input-bg: #0f172a;
+                --drop-bg:  #1e293b;
+            }
+        }
+
+        .dark-forced {
+            --bg:#0f172a; --surface:#1e293b; --primary:#60a5fa; --pdk:#3b82f6;
+            --text:#f1f5f9; --text-2:#94a3b8; --text-3:#64748b; --border:#334155;
+            --success:#34d399; --warning:#fbbf24; --error:#f87171;
+            --shadow:0 10px 25px -5px rgba(0,0,0,0.4),0 8px 10px -6px rgba(0,0,0,0.3);
+            --code-bg:#0f172a; --input-bg:#0f172a; --drop-bg:#1e293b;
+        }
+        .light-forced {
+            --bg:#f8fafc; --surface:#ffffff; --primary:#3b82f6; --pdk:#2563eb;
+            --text:#1e293b; --text-2:#64748b; --text-3:#94a3b8; --border:#e2e8f0;
+            --success:#10b981; --warning:#f59e0b; --error:#ef4444;
+            --shadow:0 10px 25px -5px rgba(0,0,0,0.05),0 8px 10px -6px rgba(0,0,0,0.02);
+            --code-bg:#f9f9fb; --input-bg:#f8fafc; --drop-bg:#f1f5f9;
+        }
+
+        /* ===== Reset ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container { max-width: 1200px; width: 100%; margin: 0 auto; }
+
+        /* ===== Header ===== */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
+        }
+        .logo { font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; color: var(--primary); text-decoration: none; }
+        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        .theme-toggle {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 40px;
+            padding: 6px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500;
+            color: var(--text-2); display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s; box-shadow: var(--shadow); font-family: inherit;
+        }
+        .theme-toggle:hover { color: var(--text); border-color: var(--primary); }
+
+        .lang-switch {
+            display: flex; gap: 6px; background: var(--surface); padding: 4px;
+            border-radius: 40px; box-shadow: var(--shadow); border: 1px solid var(--border);
+        }
+        .lang-btn {
+            padding: 6px 14px; border-radius: 32px; border: none; background: transparent;
+            font-weight: 500; cursor: pointer; transition: all 0.2s; color: var(--text-2);
+            text-decoration: none; font-size: 0.83rem; font-family: inherit;
+        }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        /* ===== Tool card ===== */
+        .tool-card {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        h1 { font-size: 2.1rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; color: var(--text); }
+        .subhead { color: var(--text-2); margin-bottom: 28px; font-size: 1.02rem; }
+
+        /* ===== Converter panels ===== */
+        .converter-wrap { position: relative; margin-bottom: 8px; }
+
+        .converter-panels {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0;
+            align-items: stretch;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 700px) {
+            .converter-panels { grid-template-columns: 1fr; }
+            .divider-col { display: none; }
+        }
+
+        .panel {
+            background: var(--bg); border-radius: 14px; border: 1px solid var(--border);
+            padding: 20px; display: flex; flex-direction: column; gap: 10px;
+            transition: background 0.3s, border-color 0.2s;
+        }
+        .panel:focus-within { border-color: var(--primary); }
+
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .panel-title {
+            font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-2);
+        }
+        .panel-meta {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .char-count { font-size: 0.75rem; color: var(--text-3); }
+
+        textarea {
+            width: 100%; padding: 14px;
+            font-family: var(--mono); font-size: 13px;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            background: var(--surface); color: var(--text);
+            resize: vertical; min-height: 200px; flex: 1;
+            transition: border 0.2s, background 0.3s, color 0.3s;
+            line-height: 1.6;
+        }
+        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        textarea::placeholder { color: var(--text-3); opacity: 0.7; }
+
+        /* copy btn in panel footer */
+        .panel-footer {
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+        }
+        .size-badge {
+            font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 99px;
+            background: var(--surface); border: 1px solid var(--border); color: var(--text-3);
+        }
+        .size-badge.bigger { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+        .size-badge.smaller { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+        @media (prefers-color-scheme: dark) {
+            .size-badge.bigger { background: #451a03; color: #fcd34d; }
+            .size-badge.smaller { background: #022c22; color: #6ee7b7; }
+        }
+        .dark-forced .size-badge.bigger { background: #451a03; color: #fcd34d; }
+        .dark-forced .size-badge.smaller { background: #022c22; color: #6ee7b7; }
+
+        /* ===== Divider column ===== */
+        .divider-col {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 0 12px; gap: 8px;
+        }
+        .divider-line { flex: 1; width: 1px; background: var(--border); }
+        .swap-btn {
+            width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border);
+            background: var(--surface); cursor: pointer; display: flex; align-items: center;
+            justify-content: center; color: var(--text-2); transition: all 0.18s;
+            flex-shrink: 0;
+        }
+        .swap-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .swap-btn svg { width: 16px; height: 16px; }
+
+        /* ===== Auto-detect hint ===== */
+        .detect-hint {
+            font-size: 0.78rem; color: var(--text-3); min-height: 20px;
+            display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+        }
+        .detect-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+
+        /* ===== URL-safe toggle ===== */
+        .urlsafe-bar {
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+            padding: 12px 18px; background: var(--bg); border-radius: 40px;
+            border: 1px solid var(--border); margin-bottom: 8px; transition: background 0.3s;
+        }
+        .toggle-row {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            font-size: 0.88rem; font-weight: 500; color: var(--text); user-select: none;
+        }
+        /* custom toggle switch */
+        .switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; inset: 0; background: var(--border); border-radius: 20px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .slider::before {
+            content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+            background: white; left: 3px; top: 3px; transition: transform 0.2s;
+        }
+        input:checked + .slider { background: var(--primary); }
+        input:checked + .slider::before { transform: translateX(16px); }
+        .urlsafe-info { font-size: 0.78rem; color: var(--text-3); }
+
+        /* ===== Error ===== */
+        .error-msg { color: var(--error); font-size: 0.85rem; min-height: 20px; margin-bottom: 8px; font-family: var(--mono); }
+
+        /* ===== Image section ===== */
+        .image-section {
+            background: var(--bg); border-radius: 14px; padding: 20px;
+            border: 1px solid var(--border); margin-bottom: 20px; transition: background 0.3s;
+        }
+        .image-section-title {
+            font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-2); margin-bottom: 14px;
+        }
+        .dropzone {
+            border: 1.5px dashed var(--border); border-radius: 12px;
+            padding: 32px 20px; text-align: center; background: var(--surface);
+            cursor: pointer; transition: border-color 0.2s, background 0.2s;
+            position: relative;
+        }
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--primary); background: rgba(59,130,246,0.04);
+        }
+        .dropzone input[type="file"] { display: none; }
+        .drop-icon {
+            width: 40px; height: 40px; border-radius: 10px; background: var(--bg);
+            border: 1px solid var(--border); display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 12px; color: var(--text-3);
+        }
+        .drop-icon svg { width: 20px; height: 20px; }
+        .drop-text { font-size: 0.9rem; color: var(--text-2); margin-bottom: 4px; }
+        .drop-hint { font-size: 0.78rem; color: var(--text-3); }
+
+        /* image preview */
+        .img-preview-wrap {
+            display: none; margin-top: 16px;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 16px; gap: 16px; align-items: flex-start; flex-wrap: wrap;
+        }
+        .img-preview-wrap.visible { display: flex; }
+        .img-preview-wrap img {
+            max-width: 120px; max-height: 120px; border-radius: 8px;
+            border: 1px solid var(--border); object-fit: cover; flex-shrink: 0;
+        }
+        .img-meta { flex: 1; min-width: 160px; }
+        .img-name { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .img-details { font-size: 0.78rem; color: var(--text-2); line-height: 1.6; }
+        .img-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .dataurl-preview {
+            margin-top: 10px; padding: 10px 12px;
+            background: var(--bg); border-radius: 8px; border: 1px solid var(--border);
+            font-family: var(--mono); font-size: 0.72rem; color: var(--text-3);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        /* ===== History ===== */
+        .history-section { margin-bottom: 16px; }
+        .history-label { font-size: 0.75rem; font-weight: 600; color: var(--text-2); margin-bottom: 7px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+        .history-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+        .history-chip {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+            padding: 3px 11px; font-size: 0.75rem; cursor: pointer; color: var(--text-3);
+            transition: all 0.15s; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-family: var(--mono);
+        }
+        .history-chip:hover { border-color: var(--primary); color: var(--text); }
+
+        /* ===== Buttons ===== */
+        .btn {
+            padding: 9px 18px; border-radius: 40px; font-weight: 600; font-size: 0.85rem;
+            border: 1px solid var(--border); cursor: pointer; transition: all 0.18s;
+            background: var(--surface); color: var(--text);
+            display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+        }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--pdk); }
+        .btn-primary:hover { background: var(--pdk); transform: translateY(-1px); }
+        .btn-sm { padding: 5px 13px; font-size: 0.78rem; }
+        .btn:hover:not(.btn-primary) { background: var(--bg); border-color: var(--primary); }
+        .button-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+        /* ===== Article ===== */
+        .article-section {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+            transition: background 0.3s;
+        }
+        .article-section h2 { font-size: 1.65rem; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; color: var(--text); }
+        .article-section h3 { margin-top: 22px; margin-bottom: 10px; color: var(--text); font-size: 1.02rem; }
+        .article-section p { color: var(--text-2); margin-bottom: 12px; font-size: 0.93rem; }
+        .article-section ul { margin-left: 20px; margin-bottom: 16px; }
+        .article-section li { color: var(--text-2); margin-bottom: 6px; font-size: 0.93rem; }
+        .article-section strong { color: var(--text); }
+        .article-section code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 0.87em; color: var(--text); font-family: var(--mono); }
+        .article-section a { color: var(--primary); text-decoration: none; }
+        .article-section a:hover { text-decoration: underline; }
+        .faq-item { margin-bottom: 20px; }
+        .faq-question { font-weight: 700; font-size: 0.98rem; margin-bottom: 5px; color: var(--text); }
+
+        /* ===== Toast / Footer ===== */
+        .footer { text-align: center; color: var(--text-2); margin-top: 24px; font-size: 0.87rem; }
+        .toast-msg {
+            position: fixed; bottom: 24px; right: 24px;
+            background: var(--text); color: var(--surface);
+            padding: 10px 20px; border-radius: 40px; font-size: 0.88rem;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+            box-shadow: var(--shadow); z-index: 1000;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            body { padding: 16px; }
+            h1 { font-size: 1.65rem; }
+            .tool-card, .article-section { padding: 20px; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/base64-encoder" class="lang-btn active" aria-current="page">EN</a>
+                <a href="/fr/outils/encodeur-base64" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            <h1>Base64 Encoder / Decoder</h1>
+            <div class="subhead">Instant text &#8596; Base64 conversion. URL-safe mode, image to Data URL, auto-detect.</div>
+
+            <!-- Detect hint -->
+            <div class="detect-hint" id="detectHint"></div>
+
+            <!-- Main converter -->
+            <div class="converter-panels">
+
+                <!-- Plain text -->
+                <div class="panel" id="plainPanel">
+                    <div class="panel-header">
+                        <span class="panel-title">Plain text</span>
+                    </div>
+                    <textarea id="plainText"
+                        placeholder="Type or paste text here..."
+                        aria-label="Plain text input"
+                        spellcheck="false">Hello, World!</textarea>
+                    <div class="panel-footer">
+                        <span class="char-count" id="plainCount">13 chars</span>
+                        <button class="btn btn-sm" id="copyPlainBtn" aria-label="Copy plain text">Copy</button>
+                    </div>
+                </div>
+
+                <!-- Divider with swap -->
+                <div class="divider-col" aria-hidden="true">
+                    <div class="divider-line"></div>
+                    <button class="swap-btn" id="swapBtn" title="Swap fields" aria-label="Swap plain and Base64 content">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                            <path d="M2 5h12M10 2l4 3-4 3M14 11H2M6 8l-4 3 4 3"/>
+                        </svg>
+                    </button>
+                    <div class="divider-line"></div>
+                </div>
+
+                <!-- Base64 -->
+                <div class="panel" id="base64Panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Base64</span>
+                        <span class="size-badge" id="sizeBadge"></span>
+                    </div>
+                    <textarea id="base64Text"
+                        placeholder="Or paste Base64 here to decode..."
+                        aria-label="Base64 input/output"
+                        spellcheck="false">SGVsbG8sIFdvcmxkIQ==</textarea>
+                    <div class="panel-footer">
+                        <span class="char-count" id="base64Count">20 chars</span>
+                        <button class="btn btn-sm" id="copyBase64Btn" aria-label="Copy Base64 result">Copy</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- URL-safe toggle -->
+            <div class="urlsafe-bar">
+                <label class="toggle-row" for="urlsafeCheck">
+                    <span class="switch">
+                        <input type="checkbox" id="urlsafeCheck" aria-label="Enable URL-safe Base64url mode">
+                        <span class="slider"></span>
+                    </span>
+                    URL-safe mode (Base64url)
+                </label>
+                <span class="urlsafe-info">Replaces <code>+</code> &#8594; <code>-</code> and <code>/</code> &#8594; <code>_</code>, removes <code>=</code> padding &mdash; used in JWT, OAuth</span>
+            </div>
+
+            <div id="conversionError" class="error-msg" role="alert" aria-live="polite"></div>
+
+            <!-- History -->
+            <div class="history-section" id="historySection" style="display:none">
+                <span class="history-label">Recent</span>
+                <div class="history-chips" id="historyChips"></div>
+            </div>
+
+            <!-- Image to Data URL -->
+            <div class="image-section" aria-label="Image to Base64 converter">
+                <div class="image-section-title">Image &#8594; Base64 Data URL</div>
+                <div class="dropzone" id="dropzone" role="button" tabindex="0"
+                    aria-label="Drag and drop an image or click to select">
+                    <input type="file" id="imageInput" accept="image/*" aria-hidden="true">
+                    <div class="drop-icon" aria-hidden="true">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                        </svg>
+                    </div>
+                    <div class="drop-text">Drag &amp; drop an image, or <strong>click to select</strong></div>
+                    <div class="drop-hint">PNG, JPG, GIF, WebP, SVG &mdash; any size</div>
+                </div>
+
+                <div class="img-preview-wrap" id="imgPreviewWrap">
+                    <img id="imgPreview" src="" alt="Image preview">
+                    <div class="img-meta">
+                        <div class="img-name" id="imgName"></div>
+                        <div class="img-details" id="imgDetails"></div>
+                        <div class="img-actions">
+                            <button class="btn btn-sm btn-primary" id="copyDataUrlBtn" aria-label="Copy full Data URL">Copy Data URL</button>
+                            <button class="btn btn-sm" id="copyBase64OnlyBtn" aria-label="Copy Base64 part only">Copy Base64 only</button>
+                        </div>
+                        <div class="dataurl-preview" id="dataUrlPreview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn" id="clearAllBtn" aria-label="Clear all fields">Clear all</button>
+                <button class="btn" id="sampleBtn" aria-label="Load a sample text">Load sample</button>
+            </div>
+        </div>
+
+        <!-- Article & FAQ -->
+        <section class="article-section" aria-label="Base64 documentation">
+            <h2>What is Base64 encoding?</h2>
+            <p>Base64 is a binary-to-text encoding scheme that represents binary data using a set of 64 printable ASCII characters (A&#8211;Z, a&#8211;z, 0&#8211;9, <code>+</code>, <code>/</code>). It is used to safely transmit binary data over channels that only support text, such as email, JSON, XML, or HTTP headers.</p>
+            <p><strong>Important: Base64 is not encryption.</strong> It is a fully reversible encoding with no key or secret. Never use it to secure sensitive data.</p>
+
+            <h3>Common use cases</h3>
+            <ul>
+                <li><strong>Inline images in CSS/HTML</strong> &mdash; <code>data:image/png;base64,...</code> embeds images directly without a separate HTTP request.</li>
+                <li><strong>Email attachments</strong> &mdash; MIME encoding uses Base64 to attach binary files to text-based emails.</li>
+                <li><strong>JWT tokens</strong> &mdash; The header and payload parts of a JWT are Base64url-encoded JSON objects.</li>
+                <li><strong>Binary data in JSON APIs</strong> &mdash; When you need to send files or images in a JSON body.</li>
+                <li><strong>Basic Auth headers</strong> &mdash; HTTP Basic Authentication encodes <code>username:password</code> in Base64.</li>
+            </ul>
+
+            <h3>Standard Base64 vs URL-safe Base64 (Base64url)</h3>
+            <p>Standard Base64 uses <code>+</code>, <code>/</code>, and <code>=</code> (padding). These characters are reserved in URLs, which causes issues when Base64 strings appear in query parameters, JWT tokens, or filenames.</p>
+            <p><strong>Base64url</strong> solves this by replacing <code>+</code> with <code>-</code> and <code>/</code> with <code>_</code>, and omitting the <code>=</code> padding. It is the variant used in JWT, OAuth 2.0 PKCE, and most modern APIs. Use the toggle above to switch between the two modes.</p>
+
+            <h3>Size impact</h3>
+            <p>Base64 encoding increases data size by approximately <strong>33%</strong>. Every 3 bytes of binary input become 4 ASCII characters. For inline images, this tradeoff is often worth eliminating an HTTP request &mdash; but for large assets it is usually better to serve the original file.</p>
+
+            <h3>Frequently Asked Questions</h3>
+
+            <div class="faq-item">
+                <div class="faq-question">Is Base64 encryption?</div>
+                <p>No. Base64 is a reversible encoding with no key or password. Anyone who has a Base64-encoded string can decode it instantly. Do not use it to protect sensitive data &mdash; use proper encryption (AES, RSA) instead.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">What is the difference between Base64 and Base64url?</div>
+                <p>Base64url replaces the two URL-unsafe characters: <code>+</code> becomes <code>-</code>, and <code>/</code> becomes <code>_</code>. The <code>=</code> padding is also removed. The result can safely appear in URLs, filenames, and HTTP headers. JWTs always use Base64url for their header and payload parts.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How do I convert an image to Base64 in my browser?</div>
+                <p>Use the drop zone on this page. Drag and drop an image or click to select one &mdash; the full Data URL is generated immediately, ready to use in your HTML or CSS. No upload to any server occurs.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How do I encode Base64 in JavaScript?</div>
+                <p>Use <code>btoa(str)</code> for plain ASCII strings, or for Unicode: <code>btoa(unescape(encodeURIComponent(str)))</code>. For files, use the <code>FileReader</code> API with <code>readAsDataURL()</code>. To decode: <code>atob(base64str)</code>.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How do I encode Base64 in Python?</div>
+                <p>Use the <code>base64</code> module: <code>import base64; base64.b64encode(b"Hello")</code>. For URL-safe: <code>base64.urlsafe_b64encode(b"Hello")</code>. To decode: <code>base64.b64decode(encoded)</code>.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Why does Base64 sometimes end with == ?</div>
+                <p>Base64 encodes 3 bytes at a time into 4 characters. When the input length is not a multiple of 3, padding characters <code>=</code> are added to make the output length a multiple of 4. One <code>=</code> means 1 byte of padding was needed; two <code>==</code> means 2 bytes. Base64url omits this padding entirely.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Is my data sent to a server?</div>
+                <p>No. All encoding, decoding, and image processing happens entirely in your browser via JavaScript. Nothing you paste or upload ever leaves your machine.</p>
+            </div>
+
+            <h3>Other useful developer tools</h3>
+            <ul>
+                <li><a href="/tools/jwt-decoder">JWT Decoder</a> &mdash; the header and payload of a JWT are Base64url-encoded</li>
+                <li><a href="/tools/json-formatter">JSON Formatter &amp; Validator</a></li>
+                <li><a href="/tools/regex-tester">Regex Tester</a></li>
+                <li><a href="/tools/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 DevToolbox &mdash; 100% client-side tools for developers.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Base64 Encoder / Decoder",
+  "url": "https://devstoolsbox.dev/tools/base64-encoder",
+  "description": "Free Base64 encoder and decoder online. Convert text to Base64, decode Base64 to text, image to Data URL. URL-safe mode. 100% client-side.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is Base64 encryption?", "acceptedAnswer": { "@type": "Answer", "text": "No. Base64 is a fully reversible encoding with no key. Anyone can decode it instantly." } },
+    { "@type": "Question", "name": "What is the difference between Base64 and Base64url?", "acceptedAnswer": { "@type": "Answer", "text": "Base64url replaces + with - and / with _, and removes = padding, making the string safe for URLs and JWT tokens." } },
+    { "@type": "Question", "name": "How do I encode Base64 in JavaScript?", "acceptedAnswer": { "@type": "Answer", "text": "Use btoa(str) for ASCII strings. For Unicode: btoa(unescape(encodeURIComponent(str))). To decode: atob(base64str)." } },
+    { "@type": "Question", "name": "How do I encode Base64 in Python?", "acceptedAnswer": { "@type": "Answer", "text": "import base64; base64.b64encode(b'Hello'). For URL-safe: base64.urlsafe_b64encode(b'Hello')." } },
+    { "@type": "Question", "name": "Why does Base64 end with == ?", "acceptedAnswer": { "@type": "Answer", "text": "Base64 encodes 3 bytes at a time. When input length is not a multiple of 3, = padding is added to reach a multiple of 4 characters." } },
+    { "@type": "Question", "name": "Is my data sent to a server?", "acceptedAnswer": { "@type": "Answer", "text": "No. All processing happens in your browser. Nothing leaves your machine." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://devstoolsbox.dev/tools/" },
+    { "@type": "ListItem", "position": 3, "name": "Base64 Encoder", "item": "https://devstoolsbox.dev/tools/base64-encoder" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ---- DOM refs ---- */
+    const plainText       = document.getElementById('plainText');
+    const base64Text      = document.getElementById('base64Text');
+    const plainCount      = document.getElementById('plainCount');
+    const base64Count     = document.getElementById('base64Count');
+    const sizeBadge       = document.getElementById('sizeBadge');
+    const urlsafeCheck    = document.getElementById('urlsafeCheck');
+    const conversionError = document.getElementById('conversionError');
+    const copyPlainBtn    = document.getElementById('copyPlainBtn');
+    const copyBase64Btn   = document.getElementById('copyBase64Btn');
+    const swapBtn         = document.getElementById('swapBtn');
+    const clearAllBtn     = document.getElementById('clearAllBtn');
+    const sampleBtn       = document.getElementById('sampleBtn');
+    const dropzone        = document.getElementById('dropzone');
+    const imageInput      = document.getElementById('imageInput');
+    const imgPreviewWrap  = document.getElementById('imgPreviewWrap');
+    const imgPreview      = document.getElementById('imgPreview');
+    const imgName         = document.getElementById('imgName');
+    const imgDetails      = document.getElementById('imgDetails');
+    const copyDataUrlBtn  = document.getElementById('copyDataUrlBtn');
+    const copyBase64OnlyBtn = document.getElementById('copyBase64OnlyBtn');
+    const dataUrlPreview  = document.getElementById('dataUrlPreview');
+    const detectHint      = document.getElementById('detectHint');
+    const historySection  = document.getElementById('historySection');
+    const historyChips    = document.getElementById('historyChips');
+    const toast           = document.getElementById('toast');
+    const themeToggle     = document.getElementById('themeToggle');
+    const themeIcon       = document.getElementById('themeIcon');
+    const themeLabel      = document.getElementById('themeLabel');
+
+    let updating   = false;
+    let currentDataUrl = '';
+    let history    = [];
+    let toastTimer = null;
+    let currentTheme;
+
+    /* ---- Theme ---- */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    currentTheme = savedTheme;
+
+    function applyTheme(t) {
+        document.body.classList.remove('dark-forced', 'light-forced');
+        if (t === 'dark')  { document.body.classList.add('dark-forced');  themeIcon.textContent = '\u2600'; themeLabel.textContent = 'Light'; }
+        else if (t === 'light') { document.body.classList.add('light-forced'); themeIcon.textContent = '\u263D'; themeLabel.textContent = 'Dark'; }
+        else {
+            const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            themeIcon.textContent  = dark ? '\u2600' : '\u263D';
+            themeLabel.textContent = dark ? 'Light' : 'Dark';
+        }
+        localStorage.setItem('devtoolbox-theme', t);
+        currentTheme = t;
+    }
+    themeToggle.addEventListener('click', () => applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+    applyTheme(savedTheme);
+
+    /* ---- Encode / Decode helpers ---- */
+    function encode(str, urlSafe) {
+        let b64 = btoa(unescape(encodeURIComponent(str)));
+        if (urlSafe) b64 = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        return b64;
+    }
+
+    function decode(b64, urlSafe) {
+        let s = b64.trim();
+        if (urlSafe || /[-_]/.test(s)) {
+            s = s.replace(/-/g, '+').replace(/_/g, '/');
+            while (s.length % 4) s += '=';
+        }
+        return decodeURIComponent(escape(atob(s)));
+    }
+
+    /* ---- Size badge ---- */
+    function updateSizeBadge(plain, b64) {
+        if (!plain || !b64) { sizeBadge.textContent = ''; sizeBadge.className = 'size-badge'; return; }
+        const ratio = ((b64.length / plain.length) - 1) * 100;
+        if (ratio > 0) {
+            sizeBadge.textContent = '+' + Math.round(ratio) + '% larger';
+            sizeBadge.className = 'size-badge bigger';
+        } else {
+            sizeBadge.textContent = Math.round(ratio) + '% smaller';
+            sizeBadge.className = 'size-badge smaller';
+        }
+    }
+
+    /* ---- Auto-detect Base64 in plain field ---- */
+    const B64_RE = /^[A-Za-z0-9+/\-_]+=*$/;
+    function isLikelyBase64(str) {
+        return str.length > 12 && B64_RE.test(str.trim()) && str.trim().length % 4 <= 2;
+    }
+
+    /* ---- Update from plain → base64 ---- */
+    function fromPlain() {
+        if (updating) return;
+        updating = true;
+        const plain = plainText.value;
+        plainCount.textContent = plain.length + ' chars';
+
+        // hint
+        if (isLikelyBase64(plain)) {
+            detectHint.innerHTML = '<span class="detect-dot"></span>Looks like Base64 &mdash; paste it in the right field to decode';
+        } else { detectHint.textContent = ''; }
+
+        try {
+            const b64 = encode(plain, urlsafeCheck.checked);
+            base64Text.value = b64;
+            base64Count.textContent = b64.length + ' chars';
+            updateSizeBadge(plain, b64);
+            conversionError.textContent = '';
+        } catch(e) { conversionError.textContent = 'Encoding failed: ' + e.message; }
+        updating = false;
+    }
+
+    /* ---- Update from base64 → plain ---- */
+    function fromBase64() {
+        if (updating) return;
+        updating = true;
+        const b64 = base64Text.value;
+        base64Count.textContent = b64.length + ' chars';
+        if (!b64.trim()) {
+            plainText.value = '';
+            plainCount.textContent = '0 chars';
+            sizeBadge.textContent = '';
+            sizeBadge.className = 'size-badge';
+            conversionError.textContent = '';
+            detectHint.textContent = '';
+            updating = false;
+            return;
+        }
+        try {
+            const plain = decode(b64, urlsafeCheck.checked);
+            plainText.value = plain;
+            plainCount.textContent = plain.length + ' chars';
+            updateSizeBadge(plain, b64.trim());
+            conversionError.textContent = '';
+            detectHint.textContent = '';
+            saveHistory(b64.trim().substring(0, 60) + (b64.length > 60 ? '…' : ''));
+        } catch(e) { conversionError.textContent = 'Invalid Base64: ' + e.message; }
+        updating = false;
+    }
+
+    /* ---- History ---- */
+    function loadHistory() {
+        try { history = JSON.parse(localStorage.getItem('b64-history') || '[]'); }
+        catch { history = []; }
+        renderHistory();
+    }
+    function saveHistory(entry) {
+        history = history.filter(h => h !== entry);
+        history.unshift(entry);
+        if (history.length > 5) history = history.slice(0, 5);
+        try { localStorage.setItem('b64-history', JSON.stringify(history)); } catch(e){}
+        renderHistory();
+    }
+    function renderHistory() {
+        if (!history.length) { historySection.style.display = 'none'; return; }
+        historySection.style.display = 'block';
+        historyChips.innerHTML = history.map((h, i) =>
+            `<button class="history-chip" data-i="${i}" title="${h}">${h}</button>`
+        ).join('');
+        historyChips.querySelectorAll('.history-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                base64Text.value = history[+btn.dataset.i];
+                fromBase64();
+            });
+        });
+    }
+
+    /* ---- Image handling ---- */
+    function handleImage(file) {
+        if (!file.type.startsWith('image/')) { showToast('Please select an image file'); return; }
+        const reader = new FileReader();
+        reader.onload = e => {
+            currentDataUrl = e.target.result;
+            imgPreview.src = currentDataUrl;
+            imgName.textContent = file.name;
+            const kb = (file.size / 1024).toFixed(1);
+            const b64part = currentDataUrl.split(',')[1] || '';
+            const b64kb = (b64part.length / 1024).toFixed(1);
+            imgDetails.innerHTML =
+                `Type: <strong>${file.type}</strong><br>` +
+                `Original: <strong>${kb} KB</strong> &rarr; Base64: <strong>${b64kb} KB</strong> ` +
+                `<span style="color:var(--warning)">(+${Math.round((b64part.length / file.size - 1)*100)}%)</span>`;
+            dataUrlPreview.textContent = currentDataUrl.substring(0, 80) + '…';
+            imgPreviewWrap.classList.add('visible');
+            showToast('Image loaded — ' + kb + ' KB');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /* ---- Samples ---- */
+    const SAMPLES = [
+        'Hello, World!',
+        '{"user":"john","role":"admin","iat":1716239022}',
+        'The quick brown fox jumps over the lazy dog',
+        'https://example.com/api?token=abc123&lang=en'
+    ];
+    let sampleIdx = 0;
+
+    /* ---- Events ---- */
+    plainText.addEventListener('input', fromPlain);
+    base64Text.addEventListener('input', fromBase64);
+    urlsafeCheck.addEventListener('change', fromPlain);
+
+    copyPlainBtn.addEventListener('click', () => copyText(plainText.value, 'Plain text copied'));
+    copyBase64Btn.addEventListener('click', () => { copyText(base64Text.value, 'Base64 copied'); saveHistory(base64Text.value.substring(0,60)); });
+    copyDataUrlBtn.addEventListener('click', () => { if (currentDataUrl) copyText(currentDataUrl, 'Data URL copied'); });
+    copyBase64OnlyBtn.addEventListener('click', () => {
+        if (currentDataUrl) copyText(currentDataUrl.split(',')[1] || '', 'Base64 (image only) copied');
+    });
+
+    swapBtn.addEventListener('click', () => {
+        const tmp = plainText.value;
+        plainText.value = base64Text.value;
+        base64Text.value = tmp;
+        fromBase64();
+    });
+
+    clearAllBtn.addEventListener('click', () => {
+        plainText.value = ''; base64Text.value = '';
+        currentDataUrl = '';
+        imgPreviewWrap.classList.remove('visible');
+        sizeBadge.textContent = ''; sizeBadge.className = 'size-badge';
+        conversionError.textContent = ''; detectHint.textContent = '';
+        plainCount.textContent = '0 chars'; base64Count.textContent = '0 chars';
+    });
+
+    sampleBtn.addEventListener('click', () => {
+        plainText.value = SAMPLES[sampleIdx % SAMPLES.length];
+        sampleIdx++;
+        fromPlain();
+        showToast('Sample loaded');
+    });
+
+    /* ---- Dropzone ---- */
+    dropzone.addEventListener('click', () => imageInput.click());
+    dropzone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') imageInput.click(); });
+    imageInput.addEventListener('change', e => { if (e.target.files[0]) handleImage(e.target.files[0]); });
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', e => {
+        e.preventDefault(); dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files[0]) handleImage(e.dataTransfer.files[0]);
+    });
+
+    /* ---- Copy helper ---- */
+    async function copyText(text, msg) {
+        try { await navigator.clipboard.writeText(text); showToast(msg); }
+        catch { showToast('Copy failed'); }
+    }
+
+    /* ---- Toast ---- */
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.style.opacity = '0', 2200);
+    }
+
+    /* ---- Init ---- */
+    loadHistory();
+    fromPlain();
+})();
+</script>
+</body>
+</html>

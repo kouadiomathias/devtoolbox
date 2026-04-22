@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta (English) -->
+    <title>URL Encoder / Decoder Online | Percent Encoding Tool</title>
+    <meta name="description" content="Encode and decode URLs or strings using percent-encoding. Instant conversion, 100% secure, no server involved. Ideal for web developers.">
+    <meta name="keywords" content="URL encoder, URL decoder, percent encoding, urlencode, urldecode, developer tool, RFC 3986, GET parameters, query string">
+    <meta name="author" content="DevToolbox">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="URL Encoder / Decoder - Free Online Tool">
+    <meta property="og:description" content="Convert your strings to URL-safe format (percent-encoding) and back. 100% client-side processing, fast and reliable.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://devstoolsbox.dev/tools/url-encoder-decoder">
+    <meta property="og:image" content="https://devstoolsbox.dev/og-image-url.png">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="URL Encoder / Decoder">
+    <meta name="twitter:description" content="Instant URL encoding and decoding for developers and SEO.">
+    
+    <!-- Canonical and alternate links -->
+    <link rel="canonical" href="https://devstoolsbox.dev/tools/url-encoder-decoder">
+    <link rel="alternate" hreflang="en" href="https://devstoolsbox.dev/tools/url-encoder-decoder">
+    <link rel="alternate" hreflang="fr" href="https://devstoolsbox.dev/fr/outils/encodeur-decodeur-url">
+    <link rel="alternate" hreflang="x-default" href="https://devstoolsbox.dev/tools/url-encoder-decoder">
+
+    <!-- Design System (consistent with other tools) -->
+    <style>
+        /* ----- Variables & Reset ----- */
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Dark mode */
+        body.dark {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #3b82f6;
+            --primary-dark: #60a5fa;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .container { max-width: 1200px; width: 100%; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); }
+        .lang-switch { display: flex; gap: 8px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); }
+        .lang-btn {
+            padding: 8px 16px; border-radius: 32px; border: none; background: transparent;
+            font-weight: 500; cursor: pointer; transition: all 0.2s; color: var(--text-light);
+            text-decoration: none;
+        }
+        .lang-btn.active { background: var(--primary); color: white; }
+        
+        /* Dark mode toggle */
+        .dark-toggle {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 4px;
+            display: flex;
+            margin-left: 8px;
+        }
+        .theme-btn {
+            padding: 8px 16px;
+            border-radius: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .theme-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Tool Card */
+        .tool-card {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1.1rem; }
+
+        /* Panels */
+        .converter-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 700px) {
+            .converter-panels { grid-template-columns: 1fr; }
+        }
+        .panel {
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+        .panel h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel textarea {
+            width: 100%;
+            padding: 16px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text);
+            resize: vertical;
+            min-height: 200px;
+            margin-bottom: 8px;
+        }
+        .char-count {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-align: right;
+        }
+
+        /* Encoding options */
+        .encoding-options {
+            margin: 16px 0;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        /* Article Section */
+        .article-section {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        .article-section h2 { font-size: 1.8rem; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+        .article-section h3 { margin-top: 24px; margin-bottom: 12px; }
+        .faq-item { margin-bottom: 24px; }
+        .faq-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+
+        .footer { text-align: center; color: var(--text-light); margin-top: 24px; }
+        .error-msg { color: var(--error); margin-top: 8px; font-size: 0.9rem; min-height: 24px; }
+        .toast-msg {
+            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg);
+            padding: 10px 20px; border-radius: 40px; font-size: 0.9rem; opacity: 0;
+            transition: opacity 0.3s; pointer-events: none; box-shadow: var(--shadow); z-index: 1000;
+        }
+        body.dark .toast-msg { color: var(--text); background: var(--surface); }
+
+        /* Buttons */
+        .button-group { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+        .btn {
+            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
+            cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--text);
+            border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline:hover { background: var(--bg); border-color: var(--primary); }
+
+        /* Tooltip */
+        .info-tip {
+            border-bottom: 1px dashed var(--text-light);
+            cursor: help;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <span class="logo">DevToolbox</span>
+            <div style="display: flex; gap: 12px;">
+                <div class="lang-switch">
+                    <a href="/tools/url-encoder-decoder" class="lang-btn active" aria-current="page">EN</a>
+                    <a href="/fr/outils/encodeur-decodeur-url" class="lang-btn">FR</a>
+                </div>
+                <div class="dark-toggle" id="themeToggle">
+                    <button class="theme-btn active" data-theme="light">Light</button>
+                    <button class="theme-btn" data-theme="dark">Dark</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/">Home</a> &rsaquo; 
+            <a href="/tools/">Tools</a> &rsaquo; 
+            <span>URL Encoder / Decoder</span>
+        </div>
+
+        <main>
+            <div class="tool-card">
+                <h1>URL Encoder / Decoder</h1>
+                <div class="subhead">Instant conversion between plain text and URL-encoded format (percent-encoding). 100% local processing.</div>
+
+                <!-- Converter panels -->
+                <div class="converter-panels">
+                    <div class="panel">
+                        <h2>Plain Text</h2>
+                        <textarea id="plainTextarea" placeholder="Type your text here...">Hello World!</textarea>
+                        <div class="char-count" id="plainCharCount">0 characters</div>
+                        <button class="btn btn-outline btn-small" id="copyPlainBtn">Copy</button>
+                    </div>
+                    <div class="panel">
+                        <h2>URL Encoded</h2>
+                        <textarea id="encodedTextarea" placeholder="Or paste an encoded string...">Hello%20World%21</textarea>
+                        <div class="char-count" id="encodedCharCount">0 characters</div>
+                        <button class="btn btn-outline btn-small" id="copyEncodedBtn">Copy</button>
+                    </div>
+                </div>
+
+                <!-- Options -->
+                <div class="encoding-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="encodeAllCheckbox"> Encode all non-ASCII characters (recommended)
+                    </label>
+                    <span class="info-tip" title="By default, only reserved characters are encoded. This option also encodes accents and symbols.">ⓘ</span>
+                </div>
+                <div id="conversionError" class="error-msg"></div>
+
+                <div class="button-group">
+                    <button class="btn btn-outline" id="swapBtn">Swap</button>
+                    <button class="btn btn-outline" id="clearAllBtn">Clear All</button>
+                </div>
+            </div>
+
+            <!-- EXPLANATION & FAQ SECTION -->
+            <section class="article-section">
+                <h2>What is URL encoding (percent-encoding)?</h2>
+                <p>URL encoding, also known as <strong>percent-encoding</strong>, is a mechanism to represent special or non-ASCII characters in a URL. It replaces problematic characters with a percent sign (<code>%</code>) followed by their hexadecimal code. For example, a space becomes <code>%20</code>.</p>
+                <p>This encoding is essential for transmitting parameters in GET requests, forms, or constructing valid URLs according to RFC 3986. Without encoding, characters like <code>&</code>, <code>=</code>, <code>?</code>, or accented letters could break the URL.</p>
+                
+                <h3>Common use cases</h3>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li><strong>Query parameters</strong>: <code>?q=encoded%20string</code></li>
+                    <li><strong>URL paths with spaces</strong>: <code>/my%20file.pdf</code></li>
+                    <li><strong>Links in emails</strong> (to avoid breakage)</li>
+                    <li><strong>Data injection in REST APIs</strong></li>
+                </ul>
+
+                <h3>Standard encoding vs full encoding</h3>
+                <p>By default, our tool encodes only reserved characters according to RFC 3986 (such as <code>:</code>, <code>/</code>, <code>?</code>, <code>#</code>, <code>[</code>, <code>]</code>, <code>@</code>, <code>!</code>, <code>$</code>, <code>&</code>, <code>'</code>, <code>(</code>, <code>)</code>, <code>*</code>, <code>+</code>, <code>,</code>, <code>;</code>, <code>=</code>) as well as spaces. The "Encode all non-ASCII characters" option also converts accented letters, currency symbols, etc. This can be useful for maximum compatibility with older systems.</p>
+
+                <h3>Frequently Asked Questions</h3>
+                <div class="faq-item">
+                    <div class="faq-question">What is the difference between encodeURIComponent and encodeURI?</div>
+                    <p><code>encodeURIComponent</code> encodes all characters except letters, digits, and <code>- _ . ! ~ * ' ( )</code>. It is designed to encode the value of a parameter. <code>encodeURI</code> preserves reserved characters that are part of the URL structure (<code>:/?#[]@!$&'()*+,;=</code>). Our tool uses an equivalent of <code>encodeURIComponent</code>.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Why do we sometimes see <code>+</code> instead of <code>%20</code> for spaces?</div>
+                    <p>The <code>+</code> is a historical convention used in HTML forms (<code>application/x-www-form-urlencoded</code>). In a standard URL (the part after the <code>?</code>), both are often accepted, but <code>%20</code> is more standard. Our decoder interprets both.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Is this tool secure? Is my data sent anywhere?</div>
+                    <p>Absolutely. All conversion happens directly in your browser (JavaScript). No information is sent to any server. You can use it for sensitive data with confidence.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">How do I encode a full URL without breaking its structure?</div>
+                    <p>It is recommended to encode only the variable parts (like parameter values). Our tool is ideal for encoding a complete query string after the <code>?</code> or a path segment. For an entire URL, use our partial encoding function.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© 2025 DevToolbox — 100% client-side tools for developers.</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast-msg">Copied!</div>
+
+    <!-- JSON-LD: WebApplication, FAQPage, BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "URL Encoder / Decoder",
+      "url": "https://devstoolsbox.dev/tools/url-encoder-decoder",
+      "description": "Encode and decode URLs or strings using percent-encoding. Instant conversion, 100% secure, no server involved.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the difference between encodeURIComponent and encodeURI?",
+          "acceptedAnswer": { "@type": "Answer", "text": "encodeURIComponent encodes all characters except letters, digits and - _ . ! ~ * ' ( ). encodeURI preserves reserved characters of the URL." }
+        },
+        {
+          "@type": "Question",
+          "name": "Why do we sometimes see + instead of %20 for spaces?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The + is a historical convention from HTML forms. Our decoder accepts both." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is this tool secure?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes, 100% client-side. No data is sent to a server." }
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://devstoolsbox.dev/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Tools",
+          "item": "https://devstoolsbox.dev/tools/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "URL Encoder / Decoder",
+          "item": "https://devstoolsbox.dev/tools/url-encoder-decoder"
+        }
+      ]
+    }
+    </script>
+
+    <script>
+        (function(){
+            // DOM Elements
+            const plainTextarea = document.getElementById('plainTextarea');
+            const encodedTextarea = document.getElementById('encodedTextarea');
+            const plainCharCount = document.getElementById('plainCharCount');
+            const encodedCharCount = document.getElementById('encodedCharCount');
+            const encodeAllCheckbox = document.getElementById('encodeAllCheckbox');
+            const conversionError = document.getElementById('conversionError');
+            const copyPlainBtn = document.getElementById('copyPlainBtn');
+            const copyEncodedBtn = document.getElementById('copyEncodedBtn');
+            const swapBtn = document.getElementById('swapBtn');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const toast = document.getElementById('toast');
+
+            let updating = false;
+
+            // Custom encode function (similar to encodeURIComponent but configurable)
+            function customEncode(str, encodeAll) {
+                if (encodeAll) {
+                    // Encode everything except A-Z a-z 0-9 - _ . ! ~ * ' ( )
+                    return str.replace(/[^\w\-_.!~*'()]/g, function(ch) {
+                        return '%' + ch.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
+                    });
+                } else {
+                    // Standard behavior: encode reserved characters + non-ASCII
+                    return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+                        return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+                    });
+                }
+            }
+
+            function customDecode(str) {
+                // Handle + to space conversion (form-urlencoded)
+                let decoded = str.replace(/\+/g, ' ');
+                try {
+                    return decodeURIComponent(decoded);
+                } catch(e) {
+                    throw new Error('Invalid encoded string');
+                }
+            }
+
+            function updateFromPlain() {
+                if (updating) return;
+                updating = true;
+                const plain = plainTextarea.value;
+                plainCharCount.textContent = plain.length + ' character' + (plain.length !== 1 ? 's' : '');
+                try {
+                    const encodeAll = encodeAllCheckbox.checked;
+                    const encoded = customEncode(plain, encodeAll);
+                    encodedTextarea.value = encoded;
+                    encodedCharCount.textContent = encoded.length + ' character' + (encoded.length !== 1 ? 's' : '');
+                    conversionError.textContent = '';
+                } catch (e) {
+                    conversionError.textContent = e.message;
+                }
+                updating = false;
+            }
+
+            function updateFromEncoded() {
+                if (updating) return;
+                updating = true;
+                const encoded = encodedTextarea.value;
+                encodedCharCount.textContent = encoded.length + ' character' + (encoded.length !== 1 ? 's' : '');
+                if (encoded === '') {
+                    plainTextarea.value = '';
+                    plainCharCount.textContent = '0 characters';
+                    conversionError.textContent = '';
+                    updating = false;
+                    return;
+                }
+                try {
+                    const decoded = customDecode(encoded);
+                    plainTextarea.value = decoded;
+                    plainCharCount.textContent = decoded.length + ' character' + (decoded.length !== 1 ? 's' : '');
+                    conversionError.textContent = '';
+                } catch (e) {
+                    conversionError.textContent = e.message;
+                }
+                updating = false;
+            }
+
+            // Event listeners
+            plainTextarea.addEventListener('input', updateFromPlain);
+            encodedTextarea.addEventListener('input', updateFromEncoded);
+            encodeAllCheckbox.addEventListener('change', updateFromPlain);
+
+            // Copy
+            copyPlainBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(plainTextarea.value);
+                    showToast('Text copied');
+                } catch { showToast('Copy failed'); }
+            });
+            copyEncodedBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(encodedTextarea.value);
+                    showToast('Encoded URL copied');
+                } catch { showToast('Copy failed'); }
+            });
+
+            // Swap
+            swapBtn.addEventListener('click', () => {
+                const plain = plainTextarea.value;
+                plainTextarea.value = encodedTextarea.value;
+                updateFromPlain();
+            });
+
+            clearAllBtn.addEventListener('click', () => {
+                plainTextarea.value = '';
+                encodedTextarea.value = '';
+                updateFromPlain();
+                conversionError.textContent = '';
+            });
+
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 2000);
+            }
+
+            // Dark mode
+            const themeToggle = document.getElementById('themeToggle');
+            const themeButtons = themeToggle.querySelectorAll('.theme-btn');
+            function setTheme(theme) {
+                if (theme === 'dark') {
+                    document.body.classList.add('dark');
+                    themeButtons[0].classList.remove('active');
+                    themeButtons[1].classList.add('active');
+                } else {
+                    document.body.classList.remove('dark');
+                    themeButtons[0].classList.add('active');
+                    themeButtons[1].classList.remove('active');
+                }
+                localStorage.setItem('theme', theme);
+            }
+            themeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setTheme(btn.dataset.theme);
+                });
+            });
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+
+            // Initialize with example
+            updateFromPlain();
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta (Français) -->
+    <title>Formateur JSON en ligne gratuit (Beautifier + Validator + Minifier)</title>
+    <meta name="description" content="Formateur, validateur et minificateur JSON gratuit. Mettez en forme vos données JSON dans le navigateur, sans serveur. Guide complet et FAQ inclus.">
+    <link rel="canonical" href="https://devstoolsbox.dev/fr/outils/formateur-json">
+    <!-- Alternatives linguistiques -->
+    <link rel="alternate" hreflang="fr" href="https://devstoolsbox.dev/fr/outils/formateur-json">
+    <link rel="alternate" hreflang="en" href="https://devstoolsbox.dev/tools/json-formatter">
+    <link rel="alternate" hreflang="x-default" href="https://devstoolsbox.dev/tools/json-formatter">
+
+    <!-- Design Moderne : Police, Reset, Variables -->
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Header & Navigation */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            color: var(--primary);
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 8px;
+            background: var(--surface);
+            padding: 4px;
+            border-radius: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border-radius: 32px;
+            border: none;
+            background: transparent;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-light);
+            text-decoration: none;
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Card de l'outil */
+        .tool-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .subhead {
+            color: var(--text-light);
+            margin-bottom: 28px;
+            font-size: 1.1rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 16px;
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            resize: vertical;
+            min-height: 200px;
+            transition: border 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: 1px solid var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg);
+            border-color: var(--primary);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border-color: #0d9488;
+        }
+
+        .output-area {
+            margin-top: 24px;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 14px;
+            border: 1px solid #1e293b;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            background: var(--surface);
+            border-radius: 20px;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--text);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+        }
+
+        /* Article Section */
+        .article-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        .article-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .article-section h3 {
+            margin-top: 24px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .faq-item {
+            margin-bottom: 24px;
+        }
+
+        .faq-question {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: var(--text-light);
+            margin-top: 24px;
+        }
+
+        /* Error message */
+        .error-msg {
+            color: var(--error);
+            margin-top: 8px;
+            font-size: 0.9rem;
+            min-height: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header avec switch de langue -->
+    <header class="header">
+        <span class="logo">📦 DevToolbox</span>
+        <div class="lang-switch">
+            <a href="/tools/json-formatter" class="lang-btn">EN</a>
+            <a href="/fr/outils/formateur-json" class="lang-btn active" aria-current="page">FR</a>
+        </div>
+    </header>
+
+    <!-- OUTIL PRINCIPAL -->
+    <main>
+        <div class="tool-card">
+            <h1>Formateur JSON en ligne (Beautifier, Validator et Minifier gratuit)</h1>
+            <div class="subhead">Formatez, validez et minifiez vos données JSON — instantanément dans votre navigateur.</div>
+            
+            <textarea id="jsonInput" placeholder='Collez votre JSON ici... ex: {"nom":"Jean","age":30,"ville":"Paris"}'>{"nom":"Jean","age":30,"ville":"Paris"}</textarea>
+            <div id="errorMsg" class="error-msg"></div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="formatBtn"> Formater / Beautifier</button>
+                <button class="btn btn-outline" id="minifyBtn"> Minifier</button>
+                <button class="btn btn-outline" id="validateBtn">✅ Valider</button>
+                <button class="btn btn-outline" id="clearBtn"> Effacer</button>
+            </div>
+
+            <div class="output-area">
+                <div class="output-header">
+                    <span style="font-weight: 600;">Résultat</span>
+                    <button class="btn copy-btn" id="copyBtn"> Copier</button>
+                </div>
+                <pre id="jsonOutput">// Le JSON formaté apparaîtra ici</pre>
+            </div>
+        </div>
+
+        <!-- ARTICLE EXPLICATIF + FAQ (version française) -->
+            <section class="article-section">
+    <h2>Formateur JSON en ligne : pourquoi et comment l'utiliser ?</h2>
+
+    <p>Un <strong>formateur JSON en ligne</strong> permet de rendre lisibles des données JSON minifiées en ajoutant automatiquement des sauts de ligne et une indentation. Cet outil est indispensable pour les développeurs qui travaillent avec des API, des fichiers de configuration ou du débogage.</p>
+
+    <p>Le <strong>JSON (JavaScript Object Notation)</strong> est aujourd’hui le format standard d’échange de données sur le web. Mais lorsqu’il est compressé (minifié), il devient difficile à lire. Grâce à un <strong>JSON formatter gratuit</strong>, vous pouvez instantanément transformer un bloc illisible en structure claire et exploitable.</p>
+
+    <h3>Comment utiliser ce formateur JSON ?</h3>
+    <p>Utiliser cet outil est très simple :</p>
+    <ul>
+        <li>Collez votre JSON dans la zone de texte</li>
+        <li>Cliquez sur <strong>Formater / Beautifier</strong></li>
+        <li>Corrigez les erreurs si nécessaire avec le validateur</li>
+        <li>Copiez le résultat propre et lisible</li>
+    </ul>
+
+    <h3>Exemple de JSON formaté</h3>
+    <p>Voici un exemple simple :</p>
+    <pre>{
+  "nom": "Jean",
+  "age": 30,
+  "ville": "Paris"
+}</pre>
+
+    <h3>Pourquoi utiliser un validateur JSON ?</h3>
+    <p>Un <strong>validateur JSON</strong> permet de détecter rapidement les erreurs de syntaxe comme :</p>
+    <ul>
+        <li>Virgules en trop ou manquantes</li>
+        <li>Guillemets incorrects</li>
+        <li>Accolades ou crochets non fermés</li>
+    </ul>
+
+    <p>Cela évite les bugs dans vos applications et garantit que vos données sont exploitables par les API.</p>
+
+    <h3>Erreurs JSON fréquentes</h3>
+    <ul>
+        <li> Oublier les guillemets autour des clés</li>
+        <li> Ajouter une virgule après le dernier élément</li>
+        <li> Mauvaise structure des objets ou tableaux</li>
+    </ul>
+
+    <p>Notre outil vous aide à identifier ces erreurs immédiatement.</p>
+
+    <h3>Outil 100% sécurisé</h3>
+    <p>Ce <strong>JSON formatter online</strong> fonctionne entièrement dans votre navigateur. Aucune donnée n’est envoyée sur un serveur, ce qui garantit la confidentialité de vos informations.</p>
+
+    <h3>Foire Aux Questions (FAQ)</h3>
+
+    <div class="faq-item">
+        <div class="faq-question"> Ce formateur JSON est-il gratuit ?</div>
+        <p>Oui, ce <strong>formateur JSON gratuit en ligne</strong> est accessible sans inscription et sans limitation.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question"> Quelle est la différence entre formater et minifier ?</div>
+        <p><strong>Formater</strong> (beautify) rend le JSON lisible avec indentation. <strong>Minifier</strong> réduit sa taille en supprimant les espaces inutiles.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question"> Puis-je valider de gros fichiers JSON ?</div>
+        <p>Oui, mais pour des fichiers très volumineux, les performances dépendent de votre appareil.</p>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question"> Cet outil est-il sécurisé ?</div>
+        <p>Oui, toutes les opérations sont effectuées côté client. Vos données ne quittent jamais votre navigateur.</p>
+    </div>
+
+    <!-- BONUS SEO : Maillage interne -->
+    <h3>Autres outils utiles pour développeurs</h3>
+    <p>Découvrez également :</p>
+    <ul>
+        <li><a href="/fr/outils/convertisseur-timestamp">Convertisseur Timestamp</a></li>
+        <li><a href="/fr/outils/decodeur-jwt">Décodeur JWT</a></li>
+        <li><a href="/fr/outils/encodeur-base64">Encodeur Base64</a></li>
+        <li><a href="/fr/outils/testeur-regex">Testeur Regex</a></li>
+    </ul>
+</section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 DevToolbox — Outils 100% côté client pour les développeurs.</p>
+    </footer>
+</div>
+
+<!-- Toast message pour Copie -->
+<div id="toast" class="toast-msg">Copié dans le presse-papier !</div>
+
+<!-- JSON-LD Structured Data pour SEO (version française) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Formateur et Validateur JSON",
+  "url": "https://devstoolsbox.dev/fr/outils/formateur-json",
+  "description": "Formateur, validateur et minificateur JSON gratuit. Traitez vos données JSON en toute sécurité dans votre navigateur.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requiert JavaScript.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "featureList": [
+    "Beautifier JSON",
+    "Minifier JSON",
+    "Validation de syntaxe",
+    "Copie dans le presse-papier",
+    "Traitement côté client"
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Ce formateur JSON est-il gratuit ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui, totalement gratuit. Sans inscription, sans limite."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quelle est la différence entre formater et minifier ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Formater rend le JSON lisible avec une indentation. Minifier supprime tous les espaces blancs pour réduire la taille du fichier en production."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Puis-je valider de gros fichiers JSON ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui, mais les performances dépendent de votre appareil. Pour des fichiers très volumineux (10 Mo+), envisagez d'utiliser un éditeur natif. La plupart des réponses d'API fonctionnent parfaitement."
+      }
+    }
+  ]
+}
+</script>
+
+<script>
+    (function() {
+        const inputEl = document.getElementById('jsonInput');
+        const outputEl = document.getElementById('jsonOutput');
+        const errorEl = document.getElementById('errorMsg');
+        const toast = document.getElementById('toast');
+
+        // Helper: traiter le JSON selon l'action
+        function processJSON(action) {
+            const raw = inputEl.value.trim();
+            if (!raw) {
+                outputEl.textContent = '// En attente de données...';
+                errorEl.textContent = '';
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(raw);
+                errorEl.textContent = ''; // Efface l'erreur
+                if (action === 'format') {
+                    outputEl.textContent = JSON.stringify(parsed, null, 2);
+                } else if (action === 'minify') {
+                    outputEl.textContent = JSON.stringify(parsed);
+                } else if (action === 'validate') {
+                    outputEl.textContent = '✅ JSON valide !';
+                }
+            } catch (e) {
+                errorEl.textContent = `❌ JSON invalide : ${e.message}`;
+                outputEl.textContent = '// Corrigez le JSON pour voir le résultat';
+            }
+        }
+
+        // Format
+        document.getElementById('formatBtn').addEventListener('click', () => processJSON('format'));
+        // Minify
+        document.getElementById('minifyBtn').addEventListener('click', () => processJSON('minify'));
+        // Validate
+        document.getElementById('validateBtn').addEventListener('click', () => processJSON('validate'));
+        // Clear
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            inputEl.value = '';
+            outputEl.textContent = '// Le JSON formaté apparaîtra ici';
+            errorEl.textContent = '';
+        });
+
+        // Copier dans le presse-papier
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const text = outputEl.textContent;
+            if (!text || text.startsWith('//')) {
+                toast.textContent = 'Rien à copier';
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 2000);
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+                toast.textContent = '✅ Copié dans le presse-papier !';
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 2000);
+            } catch (err) {
+                toast.textContent = '❌ Échec de la copie';
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 2000);
+            }
+        });
+
+        // Formater automatiquement l'exemple au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            processJSON('format');
+        });
+    })();
+</script>
+
+</body>
+</html>
