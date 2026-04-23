@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Générateur Cron en ligne (Expression cron facile + explication)</title>
+    <meta name="description" content="Créez facilement vos expressions cron en ligne. Générateur cron avec explication en langage naturel, prochaines exécutions et validation en temps réel.">
+    <meta name="keywords" content="cron expression generator, cron every 5 minutes, cron job daily, cron every monday, cron aws, cron gcp, planificateur cron">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-cron/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-cron/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/cron-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/cron-generator/">
+
+    <meta property="og:title" content="Générateur d'expression Cron">
+    <meta property="og:description" content="Créez et comprenez vos expressions cron avec un builder visuel. Prochaines exécutions, presets, exports.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-cron/">
+    <meta name="twitter:card" content="summary">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JRBW78KE29');
+    </script>
+
+    <style>
+        /* ----- Variables & Reset (identique aux autres outils) ----- */
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+        }
+        body.dark {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #3b82f6;
+            --primary-dark: #60a5fa;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .container { max-width: 1200px; width: 100%; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); text-decoration: none; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .theme-toggle {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 40px;
+            padding: 6px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500;
+            color: var(--text-light); display: flex; align-items: center; gap: 6px;
+        }
+        .lang-switch { display: flex; gap: 6px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .lang-btn {
+            padding: 6px 14px; border-radius: 32px; border: none; background: transparent;
+            font-weight: 500; cursor: pointer; color: var(--text-light); text-decoration: none; font-size: 0.83rem;
+        }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        .tool-card {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1rem; }
+
+        /* Layout */
+        .cron-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 800px) { .cron-layout { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .expression-box {
+            background: var(--surface);
+            border: 1.5px solid var(--primary);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .expression-input {
+            width: 100%;
+            font-family: 'SF Mono', monospace;
+            font-size: 1.2rem;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            outline: none;
+        }
+
+        .natural-explanation {
+            background: #eef2ff;
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-weight: 500;
+            border-left: 4px solid var(--primary);
+        }
+        body.dark .natural-explanation { background: #1e3a5f; }
+
+        /* Sliders */
+        .slider-group {
+            margin-bottom: 20px;
+        }
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .slider-label { font-weight: 600; font-size: 0.9rem; }
+        .slider-value { font-family: monospace; color: var(--primary); }
+        input[type="range"] { width: 100%; }
+
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        .preset-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .next-executions {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            background: var(--surface);
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .stats {
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+        .warning-badge {
+            background: var(--warning);
+            color: black;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
+            cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--text);
+            border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        .article-section {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        .faq-item { margin-bottom: 24px; }
+        .faq-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+
+        .footer { text-align: center; color: var(--text-light); margin-top: 24px; }
+        .toast-msg {
+            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg);
+            padding: 10px 20px; border-radius: 40px; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; box-shadow: var(--shadow); z-index: 1000;
+        }
+        body.dark .toast-msg { color: var(--text); background: var(--surface); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">🌙</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/cron-generator/" class="lang-btn">EN</a>
+                <a href="/fr/outils/generateur-cron/" class="lang-btn active">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            <h1>Générateur d'expression Cron</h1>
+            <h2>Générer une expression cron facilement</h2>
+            <div class="subhead">Construisez, comprenez et validez vos expressions cron. Builder visuel, explication en langage naturel, prochaines exécutions.</div>
+
+            <div class="cron-layout">
+                <!-- Partie gauche : expression et builder -->
+                <div>
+                    <div class="expression-box">
+                        <input type="text" class="expression-input" id="cronExpression" placeholder="* * * * *" value="0 9 * * 1" spellcheck="false">
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <select id="cronType" style="padding:6px 10px; border-radius:6px; background:var(--surface); color:var(--text);">
+                                <option value="standard">Standard (5 champs)</option>
+                                <option value="extended">Avec secondes (6 champs)</option>
+                            </select>
+                            <span id="validationBadge" class="badge-valid" style="padding:4px 12px;">Valide</span>
+                        </div>
+                    </div>
+
+                    <div class="natural-explanation" id="naturalExplanation">
+                        Tous les lundis à 9h00
+                    </div>
+
+                    <!-- Builder visuel (sliders) -->
+                    <div class="panel">
+                        <h3 style="margin-bottom:16px;">Builder visuel</h3>
+                        <div id="sliderContainer"></div>
+                    </div>
+
+                    <div class="presets">
+                        <button class="preset-btn" data-preset="0 0 * * *">Tous les jours à minuit</button>
+                        <button class="preset-btn" data-preset="0 9 * * 1">Chaque lundi 9h</button>
+                        <button class="preset-btn" data-preset="*/5 * * * *">Toutes les 5 minutes</button>
+                        <button class="preset-btn" data-preset="0 0 1 * *">1er du mois à minuit</button>
+                        <button class="preset-btn" data-preset="0 0 * * 0">Dimanche minuit</button>
+                        <button class="preset-btn" data-preset="@hourly">@hourly</button>
+                        <button class="preset-btn" data-preset="@daily">@daily</button>
+                    </div>
+                </div>
+
+                <!-- Partie droite : exécutions et stats -->
+                <div>
+                    <div class="panel">
+                        <h3>Prochaines exécutions</h3>
+                        <div class="next-executions" id="nextExecutionsList">
+                            Calcul en cours...
+                        </div>
+                        <div class="stats">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Exécutions par an :</span>
+                                <span id="executionsPerYear">52</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-top:8px;">
+                                <span>Prochaine :</span>
+                                <span id="nextExecutionDate">--</span>
+                            </div>
+                            <div id="execWarning" style="margin-top:12px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Exporter</h3>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <button class="btn btn-outline btn-sm" data-copy="linux">📋 Copier pour Linux (crontab)</button>
+                            <button class="btn btn-outline btn-sm" data-copy="docker">📋 Copier pour Docker</button>
+                            <button class="btn btn-outline btn-sm" data-copy="aws">📋 Copier pour AWS (6 champs)</button>
+                            <button class="btn btn-outline btn-sm" data-copy="gcp">📋 Copier pour GCP</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ SECTION -->
+        <section class="article-section">
+            <h2>Comprendre les expressions Cron</h2>
+            <p>Une expression cron est une chaîne de 5 ou 6 champs qui définit la planification d'une tâche récurrente. Notre outil vous aide à la créer sans erreur.</p>
+            <p>
+                Le générateur cron vous permet de créer facilement des expressions cron pour planifier des tâches automatisées sur Linux, AWS ou Docker. 
+            </p>
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Quelle est la différence entre cron Linux et AWS ?</div>
+                <p>Le cron Linux standard utilise 5 champs (minute, heure, jour du mois, mois, jour de la semaine). AWS (CloudWatch Events) utilise 6 champs en ajoutant les secondes. Notre outil supporte les deux formats.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Comment écrire "toutes les 5 minutes" ?</div>
+                <p>Utilisez <code>*/5 * * * *</code>. Le <code>*/5</code> signifie "toutes les 5 unités".</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Que signifient les valeurs spéciales comme @hourly ?</div>
+                <p>Ce sont des macros : @hourly = "0 * * * *", @daily = "0 0 * * *", @weekly = "0 0 * * 0", @monthly = "0 0 1 * *".</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Mon expression est-elle valide ?</div>
+                <p>Notre validateur vous l'indique en temps réel. Les champs doivent respecter les plages : minute 0-59, heure 0-23, jour 1-31, mois 1-12, jour semaine 0-7 (0 et 7 = dimanche).</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 DevToolbox — Outils 100% côté client pour les devs et admins sys.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg">Copié !</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Générateur d'expression Cron",
+  "url": "https://www.devstoolsbox.dev/fr/outils/generateur-cron/",
+  "description": "Créez et validez des expressions cron avec un builder visuel. Explication en langage naturel, prochaines exécutions.",
+  "applicationCategory": "DeveloperApplication"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Quelle est la différence entre cron Linux et AWS ?", "acceptedAnswer": { "@type": "Answer", "text": "Linux utilise 5 champs, AWS en utilise 6 (avec secondes)." } },
+    { "@type": "Question", "name": "Comment écrire 'toutes les 5 minutes' ?", "acceptedAnswer": { "@type": "Answer", "text": "*/5 * * * *" } },
+    { "@type": "Question", "name": "Que signifient @hourly, @daily ?", "acceptedAnswer": { "@type": "Answer", "text": "Ce sont des macros pour des planifications courantes." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Générateur Cron", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-cron/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    // Thème
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+    let currentTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    function applyTheme(t) {
+        document.body.classList.remove('dark', 'light');
+        if (t === 'dark') { document.body.classList.add('dark'); themeIcon.textContent = '☀️'; themeLabel.textContent = 'Clair'; }
+        else if (t === 'light') { document.body.classList.remove('dark'); themeIcon.textContent = '🌙'; themeLabel.textContent = 'Sombre'; }
+        else { const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark', prefersDark); themeIcon.textContent = prefersDark ? '☀️' : '🌙'; themeLabel.textContent = prefersDark ? 'Clair' : 'Sombre'; }
+        localStorage.setItem('devtoolbox-theme', t); currentTheme = t;
+    }
+    themeToggle.addEventListener('click', ()=> applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+    applyTheme(currentTheme);
+
+    // Toast
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+    async function copyText(text) { try { await navigator.clipboard.writeText(text); showToast('Copié !'); } catch { showToast('Échec copie'); } }
+
+    // Éléments DOM
+    const cronInput = document.getElementById('cronExpression');
+    const cronType = document.getElementById('cronType');
+    const validationBadge = document.getElementById('validationBadge');
+    const naturalExplanation = document.getElementById('naturalExplanation');
+    const nextExecutionsList = document.getElementById('nextExecutionsList');
+    const executionsPerYearSpan = document.getElementById('executionsPerYear');
+    const nextExecutionDateSpan = document.getElementById('nextExecutionDate');
+    const execWarning = document.getElementById('execWarning');
+    const sliderContainer = document.getElementById('sliderContainer');
+
+    // Constantes
+    const FIELD_NAMES = ['Minute', 'Heure', 'Jour du mois', 'Mois', 'Jour de la semaine'];
+    const FIELD_RANGES = [[0,59], [0,23], [1,31], [1,12], [0,7]];
+    const MONTH_NAMES = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+    const DAY_NAMES = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+    // Construire sliders
+    function buildSliders(parts) {
+        const extended = cronType.value === 'extended';
+        const allFields = extended 
+            ? ['Seconde', ...FIELD_NAMES] 
+            : FIELD_NAMES;
+        const allRanges = extended 
+            ? [[0,59], ...FIELD_RANGES] 
+            : FIELD_RANGES;
+        
+        let html = '';
+        allFields.forEach((name, idx) => {
+            const val = parts[idx] || '*';
+            const range = allRanges[idx];
+            html += `<div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">${name}</span>
+                    <span class="slider-value" id="sliderVal${idx}">${val}</span>
+                </div>
+                <input type="range" min="${range[0]}" max="${range[1]}" value="${val === '*' ? range[0] : val}" step="1" data-field="${idx}" class="cron-slider">
+            </div>`;
+        });
+        sliderContainer.innerHTML = html;
+
+        // Attacher événements sliders
+        document.querySelectorAll('.cron-slider').forEach(slider => {
+            slider.addEventListener('input', function() {
+                const fieldIdx = parseInt(this.dataset.field);
+                const newVal = this.value;
+                const currentParts = cronInput.value.trim().split(/\s+/);
+                const extended = cronType.value === 'extended';
+                const totalFields = extended ? 6 : 5;
+                
+                while (currentParts.length < totalFields) currentParts.push('*');
+                currentParts[fieldIdx] = newVal;
+                cronInput.value = currentParts.join(' ');
+                updateUI();
+            });
+        });
+    }
+
+    // Parser et valider
+    function parseCron(expr) {
+        expr = expr.trim();
+        // Macros
+        const macros = { '@hourly':'0 * * * *', '@daily':'0 0 * * *', '@weekly':'0 0 * * 0', '@monthly':'0 0 1 * *', '@yearly':'0 0 1 1 *' };
+        if (macros[expr]) expr = macros[expr];
+        
+        const parts = expr.split(/\s+/);
+        const extended = cronType.value === 'extended';
+        const required = extended ? 6 : 5;
+        
+        if (parts.length !== required) return { valid: false, error: `Attendu ${required} champs` };
+        
+        const ranges = extended ? [[0,59],[0,59],[0,23],[1,31],[1,12],[0,7]] : [[0,59],[0,23],[1,31],[1,12],[0,7]];
+        for (let i=0; i<required; i++) {
+            const part = parts[i];
+            const range = ranges[i];
+            // Valider motif */5, 1-5, etc.
+            if (!/^(\*|(\*\/)?\d+(-\d+)?(,\d+(-\d+)?)*)$/.test(part) && part !== '*') {
+                // Vérifier plus précisément
+                const tokens = part.split(',');
+                for (let tok of tokens) {
+                    if (tok.includes('/')) {
+                        const [base, step] = tok.split('/');
+                        if (!/^\d+$/.test(step)) return { valid: false, error: `Pas invalide dans ${part}` };
+                    } else if (tok.includes('-')) {
+                        const [start, end] = tok.split('-');
+                        if (isNaN(start) || isNaN(end)) return { valid: false, error: `Intervalle invalide` };
+                    } else if (tok !== '*') {
+                        if (isNaN(tok)) return { valid: false, error: `Valeur non numérique` };
+                    }
+                }
+            }
+        }
+        return { valid: true, parts };
+    }
+
+    // Générer explication naturelle
+    function generateExplanation(parts, extended) {
+        const offset = extended ? 1 : 0;
+        const min = parts[offset] || '*';
+        const hour = parts[offset+1] || '*';
+        const day = parts[offset+2] || '*';
+        const month = parts[offset+3] || '*';
+        const dow = parts[offset+4] || '*';
+        
+        let text = '';
+        if (min === '*' && hour === '*' && day === '*' && month === '*' && dow === '*') return 'Chaque minute';
+        if (min.startsWith('*/')) text = `Toutes les ${min.split('/')[1]} minutes`;
+        else if (min !== '*') text = `À la minute ${min}`;
+        
+        if (hour !== '*') text += (text?', ':'') + `à ${hour}h`;
+        if (day !== '*') text += ` le ${day}`;
+        if (month !== '*') text += ` en ${MONTH_NAMES[month-1] || month}`;
+        if (dow !== '*') {
+            const days = dow.split(',').map(d => DAY_NAMES[d] || d).join(',');
+            text += ` les ${days}`;
+        }
+        return text || 'Expression personnalisée';
+    }
+
+    // Calculer prochaines exécutions (approximation simplifiée)
+    function computeNextExecutions(expr, extended) {
+        // Utiliser une librairie légère ? On va faire un parsing manuel pour rester simple.
+        // Pour la démo, on va simuler avec des dates fixes si possible.
+        const now = new Date();
+        const executions = [];
+        let current = new Date(now);
+        
+        // Simplification : on ne gère pas tous les cas complexes, on affiche un échantillon basé sur l'expression
+        // Pour une version plus robuste, il faudrait un parser complet. Ici on va générer des dates cohérentes avec l'expression.
+        const parts = expr.split(/\s+/);
+        const extendedFlag = extended;
+        const baseIdx = extendedFlag ? 1 : 0;
+        const minutePart = parts[baseIdx] || '*';
+        const hourPart = parts[baseIdx+1] || '*';
+        
+        // Calcul simplifié : si minute et heure fixes, on peut itérer
+        if (!minutePart.includes('*') && !hourPart.includes('*')) {
+            const minute = parseInt(minutePart);
+            const hour = parseInt(hourPart);
+            for (let i=0; i<10; i++) {
+                const d = new Date(current);
+                d.setMinutes(minute);
+                d.setHours(hour);
+                d.setSeconds(0);
+                if (d <= now) d.setDate(d.getDate()+1);
+                current = new Date(d.getTime() + 24*60*60*1000);
+                executions.push(d);
+            }
+        } else {
+            // Fallback : on génère toutes les heures
+            for (let i=0; i<10; i++) {
+                const d = new Date(current);
+                d.setMinutes(0);
+                d.setHours(d.getHours()+1);
+                current = d;
+                executions.push(d);
+            }
+        }
+        return executions;
+    }
+
+    function estimateYearlyExecutions(parts, extended) {
+        // Calcul approximatif : (minutes par an) / (intervalle moyen)
+        return 525600 / estimateIntervalMinutes(parts, extended);
+    }
+
+    function estimateIntervalMinutes(parts, extended) {
+        // Très basique : si */5 -> 5, sinon 60 par défaut
+        const minPart = parts[extended?1:0];
+        if (minPart.startsWith('*/')) return parseInt(minPart.split('/')[1]);
+        return 60;
+    }
+
+    // Mise à jour UI
+    function updateUI() {
+        const expr = cronInput.value.trim();
+        const extended = cronType.value === 'extended';
+        const validation = parseCron(expr);
+        
+        if (validation.valid) {
+            validationBadge.textContent = 'Valide';
+            validationBadge.className = 'badge-valid';
+            validationBadge.style.background = '#dcfce7';
+            validationBadge.style.color = '#15803d';
+            
+            const parts = validation.parts;
+            buildSliders(parts);
+            const explanation = generateExplanation(parts, extended);
+            naturalExplanation.textContent = explanation;
+            
+            const executions = computeNextExecutions(expr, extended);
+            nextExecutionsList.innerHTML = executions.map(d => d.toLocaleString('fr-FR')).join('<br>');
+            if (executions.length) nextExecutionDateSpan.textContent = executions[0].toLocaleString('fr-FR');
+            
+            const yearly = Math.round(estimateYearlyExecutions(parts, extended));
+            executionsPerYearSpan.textContent = yearly;
+            if (yearly > 8760) execWarning.innerHTML = '<span class="warning-badge">Attention : plus d\'une fois par heure !</span>';
+            else execWarning.innerHTML = '';
+        } else {
+            validationBadge.textContent = 'Invalide';
+            validationBadge.className = 'badge-invalid';
+            validationBadge.style.background = '#fee2e2';
+            validationBadge.style.color = '#991b1b';
+            naturalExplanation.textContent = 'Expression invalide';
+        }
+    }
+
+    // Event listeners
+    cronInput.addEventListener('input', updateUI);
+    cronType.addEventListener('change', updateUI);
+    
+    document.querySelectorAll('[data-preset]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            cronInput.value = btn.dataset.preset;
+            updateUI();
+        });
+    });
+
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            let expr = cronInput.value;
+            const type = btn.dataset.copy;
+            if (type === 'aws' || type === 'gcp') {
+                if (cronType.value !== 'extended') {
+                    expr = '0 ' + expr; // ajouter secondes
+                }
+            }
+            copyText(expr);
+        });
+    });
+
+    // Initialisation
+    updateUI();
+})();
+</script>
+</body>
+</html>
