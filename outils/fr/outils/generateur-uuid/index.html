@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Générateur UUID en ligne — v1, v4, v5 &amp; ULID</title>
+    <meta name="description" content="Générez des UUID v1, v4, v5 et ULID en ligne gratuitement. Validez, décodez et exportez en JSON ou CSV. Outil rapide et sécurisé.">
+    <meta name="keywords" content="uuid generator, uuid v4 generator, ulid vs uuid, generate uuid javascript, uuid v4, ulid decoder, uuid validator">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/uuid-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/uuid-generator/">
+
+    <meta property="og:title" content="Générateur UUID et ULID en ligne">
+    <meta property="og:description" content="Générez UUID v1/v4/v5 et ULID. Validez, décodez, snippets de code.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-uuid/">
+    <meta name="twitter:card" content="summary">
+        <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JRBW78KE29');
+    </script>
+
+    <style>
+        /* ----- Variables & Reset (identique aux autres outils) ----- */
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+        }
+        body.dark {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #3b82f6;
+            --primary-dark: #60a5fa;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .container { max-width: 1300px; width: 100%; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); text-decoration: none; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .theme-toggle {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 40px;
+            padding: 6px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500;
+            color: var(--text-light); display: flex; align-items: center; gap: 6px;
+        }
+        .lang-switch { display: flex; gap: 6px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .lang-btn {
+            padding: 6px 14px; border-radius: 32px; border: none; background: transparent;
+            font-weight: 500; cursor: pointer; color: var(--text-light); text-decoration: none; font-size: 0.83rem;
+        }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        .tool-card {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1rem; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.18s;
+        }
+        .tab-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Panels génériques */
+        .panel {
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+        .btn {
+            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
+            cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--text);
+            border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline:hover { background: var(--bg); border-color: var(--primary); }
+        .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+
+        select, input[type="text"], input[type="number"] {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-valid { background: #dcfce7; color: #15803d; }
+        .badge-invalid { background: #fee2e2; color: #991b1b; }
+        body.dark .badge-valid { background: #14532d; color: #86efac; }
+        body.dark .badge-invalid { background: #7f1d1d; color: #fca5a5; }
+
+        .code-snippet {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin: 12px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .article-section {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        .faq-item { margin-bottom: 24px; }
+        .faq-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+
+        .footer { text-align: center; color: var(--text-light); margin-top: 24px; }
+        .toast-msg {
+            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg);
+            padding: 10px 20px; border-radius: 40px; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; box-shadow: var(--shadow); z-index: 1000;
+        }
+        body.dark .toast-msg { color: var(--text); background: var(--surface); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">🌙</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/uuid-generator/" class="lang-btn">EN</a>
+                <a href="/fr/outils/generateur-uuid/" class="lang-btn active">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            <h1>Générateur UUID / ULID</h1>
+            <div class="subhead">Générez des UUID v1, v4, v5 et ULID. Validez, décodez, snippets de code. 100% client.</div>
+
+            <!-- Onglets -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="generate">Générer</button>
+                <button class="tab-btn" data-tab="validate">Valider</button>
+                <button class="tab-btn" data-tab="decode">Décoder</button>
+                <button class="tab-btn" data-tab="compare">Comparer</button>
+            </div>
+
+            <!-- PANEL GENERER -->
+            <div class="tab-panel active" id="panel-generate">
+                <div class="panel">
+                    <div class="flex-row">
+                        <select id="genType">
+                            <option value="v4">UUID v4 (aléatoire)</option>
+                            <option value="v1">UUID v1 (timestamp + MAC)</option>
+                            <option value="v5">UUID v5 (SHA-1 namespace)</option>
+                            <option value="ulid">ULID (triable)</option>
+                        </select>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label>Quantité :</label>
+                            <input type="number" id="genCount" min="1" max="1000" value="1" style="width:80px;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label><input type="checkbox" id="genNoHyphens"> Sans tirets</label>
+                            <label><input type="checkbox" id="genUppercase"> Majuscules</label>
+                        </div>
+                        <button class="btn btn-primary" id="generateBtn">Générer</button>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <textarea id="genOutput" rows="8" style="width:100%; font-family: monospace;" readonly></textarea>
+                    </div>
+                    <div class="flex-row" style="margin-top: 8px;">
+                        <button class="btn btn-outline btn-sm" id="copyGenBtn">Copier</button>
+                        <button class="btn btn-outline btn-sm" id="copyGenJsonBtn">Copier en JSON</button>
+                        <button class="btn btn-outline btn-sm" id="copyGenCsvBtn">Copier en CSV</button>
+                    </div>
+                </div>
+                <!-- Options spécifiques v5 -->
+                <div class="panel" id="v5Options" style="display:none;">
+                    <div class="flex-row">
+                        <label>Namespace :</label>
+                        <select id="v5Namespace">
+                            <option value="dns">DNS (6ba7b810-9dad-11d1-80b4-00c04fd430c8)</option>
+                            <option value="url">URL (6ba7b811-9dad-11d1-80b4-00c04fd430c8)</option>
+                            <option value="oid">OID (6ba7b812-9dad-11d1-80b4-00c04fd430c8)</option>
+                            <option value="x500">X500 (6ba7b814-9dad-11d1-80b4-00c04fd430c8)</option>
+                        </select>
+                        <label>Nom :</label>
+                        <input type="text" id="v5Name" placeholder="ex: example.com" value="example.com">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL VALIDER -->
+            <div class="tab-panel" id="panel-validate">
+                <div class="panel">
+                    <textarea id="validateInput" placeholder="Collez un UUID ou ULID ici..." rows="3" style="width:100%; font-family:monospace;"></textarea>
+                    <button class="btn btn-primary" id="validateBtn" style="margin-top:12px;">Valider</button>
+                    <div id="validateResult" style="margin-top:16px;"></div>
+                </div>
+            </div>
+
+            <!-- PANEL DECODER -->
+            <div class="tab-panel" id="panel-decode">
+                <div class="panel">
+                    <label>UUID v1 ou ULID à décoder :</label>
+                    <input type="text" id="decodeInput" placeholder="ex: 018e9a2c-1b7e-7a5c-9b3e-123456789abc" style="width:100%; font-family:monospace;">
+                    <button class="btn btn-primary" id="decodeBtn" style="margin-top:12px;">Décoder</button>
+                    <div id="decodeResult" style="margin-top:16px;"></div>
+                </div>
+            </div>
+
+            <!-- PANEL COMPARER -->
+            <div class="tab-panel" id="panel-compare">
+                <div class="panel">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr><th>Caractéristique</th><th>UUID v4</th><th>UUID v1</th><th>ULID</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Triable</td><td>❌ Non</td><td>✅ Oui (temporel)</td><td>✅ Oui (lexicographique)</td></tr>
+                            <tr><td>Entropie</td><td>122 bits</td><td>~60 bits (timestamp)</td><td>80 bits aléatoire</td></tr>
+                            <tr><td>Taille</td><td>36 caractères</td><td>36 caractères</td><td>26 caractères</td></tr>
+                            <tr><td>Encodage</td><td>Hexadécimal</td><td>Hexadécimal</td><td>Base32 (Crockford)</td></tr>
+                            <tr><td>Usage typique</td><td>Clés aléatoires</td><td>Logs, tri temporel</td><td>Clés primaires triables</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="panel">
+                    <h3>Snippets de code</h3>
+                    <select id="snippetLang" style="margin-bottom:12px;">
+                        <option value="js">JavaScript</option>
+                        <option value="python">Python</option>
+                        <option value="go">Go</option>
+                        <option value="sql">SQL (PostgreSQL)</option>
+                    </select>
+                    <div class="code-snippet" id="snippetDisplay">// Sélectionnez un langage</div>
+                    <button class="btn btn-outline btn-sm" id="copySnippetBtn">Copier le snippet</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION FAQ -->
+        <section class="article-section">
+            <h2>UUID et ULID : guide complet</h2>
+            <p>UUID (Universally Unique Identifier) est un standard pour générer des identifiants uniques. ULID (Universally Unique Lexicographically Sortable Identifier) combine timestamp et aléatoire pour un tri naturel.</p>
+            
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Quelle est la différence entre UUID v4 et v5 ?</div>
+                <p>UUID v4 est généré aléatoirement (122 bits d'entropie). UUID v5 est déterministe : il utilise SHA-1 sur un namespace et un nom, produisant toujours le même UUID pour les mêmes entrées. Utilisez v4 pour des identifiants uniques, v5 pour des identifiants reproductibles.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Pourquoi choisir ULID plutôt qu'UUID ?</div>
+                <p>ULID est plus court (26 caractères), triable lexicographiquement (les plus récents après les anciens), et utilise un alphabet lisible (Crockford Base32). Idéal pour les bases de données où le tri par date de création est important.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Qu'est-ce qu'un UUID nil ?</div>
+                <p>L'UUID nil est <code>00000000-0000-0000-0000-000000000000</code>. Il est utilisé comme valeur spéciale pour indiquer l'absence d'UUID.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Mes données sont-elles envoyées à un serveur ?</div>
+                <p>Non, tout est généré et validé localement dans votre navigateur.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 DevToolbox — Outils 100% côté client pour développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg">Copié !</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Générateur UUID et ULID",
+  "url": "https://www.devstoolsbox.dev/fr/outils/generateur-uuid/",
+  "description": "Générez UUID v1/v4/v5 et ULID. Validez, décodez, snippets de code.",
+  "applicationCategory": "DeveloperApplication"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Quelle est la différence entre UUID v4 et v5 ?", "acceptedAnswer": { "@type": "Answer", "text": "v4 est aléatoire, v5 est déterministe basé sur SHA-1 d'un namespace et nom." } },
+    { "@type": "Question", "name": "Pourquoi choisir ULID plutôt qu'UUID ?", "acceptedAnswer": { "@type": "Answer", "text": "ULID est plus court, triable lexicographiquement, et utilise Base32 lisible." } },
+    { "@type": "Question", "name": "Qu'est-ce qu'un UUID nil ?", "acceptedAnswer": { "@type": "Answer", "text": "00000000-0000-0000-0000-000000000000, indique l'absence d'UUID." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Générateur UUID/ULID", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-uuid/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    // Thème
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+    let currentTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    function applyTheme(t) {
+        document.body.classList.remove('dark', 'light');
+        if (t === 'dark') { document.body.classList.add('dark'); themeIcon.textContent = '☀️'; themeLabel.textContent = 'Clair'; }
+        else if (t === 'light') { document.body.classList.remove('dark'); themeIcon.textContent = '🌙'; themeLabel.textContent = 'Sombre'; }
+        else { const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark', prefersDark); themeIcon.textContent = prefersDark ? '☀️' : '🌙'; themeLabel.textContent = prefersDark ? 'Clair' : 'Sombre'; }
+        localStorage.setItem('devtoolbox-theme', t); currentTheme = t;
+    }
+    themeToggle.addEventListener('click', ()=> applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+    applyTheme(currentTheme);
+
+    // Toast
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+    async function copyText(text, label) { try { await navigator.clipboard.writeText(text); showToast(label || 'Copié !'); } catch { showToast('Échec copie'); } }
+
+    // Onglets
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            panels.forEach(p => p.classList.remove('active'));
+            document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+        });
+    });
+
+    // Afficher options v5
+    const genType = document.getElementById('genType');
+    genType.addEventListener('change', () => {
+        document.getElementById('v5Options').style.display = genType.value === 'v5' ? 'block' : 'none';
+    });
+
+    // === GÉNÉRATION UUID/ULID ===
+    function randomBytes(n) {
+        const arr = new Uint8Array(n);
+        crypto.getRandomValues(arr);
+        return arr;
+    }
+
+    function uuidv4() {
+        const bytes = randomBytes(16);
+        bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+        bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant
+        const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+    }
+
+    function uuidv1() {
+        const bytes = randomBytes(16);
+        const now = Date.now() * 10000 + 122192928000000000; // 100ns intervals since 1582
+        const timeLow = now & 0xffffffff;
+        const timeMid = (now >> 32) & 0xffff;
+        const timeHigh = ((now >> 48) & 0x0fff) | 0x1000; // version 1
+        const clockSeq = (randomBytes(2)[0] & 0x3f) | 0x80;
+        const node = randomBytes(6);
+        node[0] |= 0x01; // multicast bit
+        
+        const hex = [
+            timeLow.toString(16).padStart(8,'0'),
+            timeMid.toString(16).padStart(4,'0'),
+            timeHigh.toString(16).padStart(4,'0'),
+            clockSeq.toString(16).padStart(4,'0'),
+            Array.from(node).map(b => b.toString(16).padStart(2,'0')).join('')
+        ];
+        return `${hex[0]}-${hex[1]}-${hex[2]}-${hex[3].slice(0,2)}${hex[3].slice(2)}-${hex[4]}`;
+    }
+
+    async function uuidv5(namespace, name) {
+        const nsBytes = new Uint8Array(namespace.split('-').flatMap(part => {
+            const bytes = [];
+            for (let i = 0; i < part.length; i+=2) bytes.push(parseInt(part.substr(i,2), 16));
+            return bytes;
+        }));
+        const nameBytes = new TextEncoder().encode(name);
+        const data = new Uint8Array(nsBytes.length + nameBytes.length);
+        data.set(nsBytes);
+        data.set(nameBytes, nsBytes.length);
+        const hash = await crypto.subtle.digest('SHA-1', data);
+        const hashArr = new Uint8Array(hash);
+        hashArr[6] = (hashArr[6] & 0x0f) | 0x50; // version 5
+        hashArr[8] = (hashArr[8] & 0x3f) | 0x80;
+        const hex = Array.from(hashArr.slice(0,16)).map(b => b.toString(16).padStart(2,'0')).join('');
+        return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+    }
+
+    function ulid() {
+        const time = Date.now();
+        const timePart = time.toString(16).padStart(10, '0');
+        const rand = randomBytes(10);
+        const randPart = Array.from(rand).map(b => b.toString(16).padStart(2,'0')).join('');
+        return (timePart + randPart).toLowerCase();
+    }
+
+    function formatOutput(id, noHyphens, uppercase) {
+        let out = id;
+        if (noHyphens) out = out.replace(/-/g, '');
+        if (uppercase) out = out.toUpperCase();
+        return out;
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+        const type = genType.value;
+        const count = parseInt(document.getElementById('genCount').value, 10);
+        const noHyphens = document.getElementById('genNoHyphens').checked;
+        const uppercase = document.getElementById('genUppercase').checked;
+        const output = document.getElementById('genOutput');
+        const ids = [];
+        
+        try {
+            for (let i = 0; i < count; i++) {
+                let id;
+                if (type === 'v4') id = uuidv4();
+                else if (type === 'v1') id = uuidv1();
+                else if (type === 'v5') {
+                    const nsSelect = document.getElementById('v5Namespace');
+                    const name = document.getElementById('v5Name').value;
+                    const nsMap = {
+                        dns: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+                        url: '6ba7b811-9dad-11d1-80b4-00c04fd430c8',
+                        oid: '6ba7b812-9dad-11d1-80b4-00c04fd430c8',
+                        x500: '6ba7b814-9dad-11d1-80b4-00c04fd430c8'
+                    };
+                    id = await uuidv5(nsMap[nsSelect.value], name);
+                } else if (type === 'ulid') id = ulid();
+                ids.push(formatOutput(id, noHyphens, uppercase));
+            }
+            output.value = ids.join('\n');
+        } catch (e) {
+            output.value = 'Erreur: ' + e.message;
+        }
+    });
+
+    document.getElementById('copyGenBtn').addEventListener('click', ()=> copyText(document.getElementById('genOutput').value));
+    document.getElementById('copyGenJsonBtn').addEventListener('click', ()=> {
+        const lines = document.getElementById('genOutput').value.split('\n').filter(l=>l);
+        copyText(JSON.stringify(lines, null, 2), 'Copié en JSON');
+    });
+    document.getElementById('copyGenCsvBtn').addEventListener('click', ()=> {
+        const lines = document.getElementById('genOutput').value.split('\n').filter(l=>l);
+        copyText(lines.join(','), 'Copié en CSV');
+    });
+
+    // === VALIDATION ===
+    function detectType(str) {
+        str = str.trim();
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)) {
+            const version = str.charAt(14);
+            return `UUID v${version}`;
+        } else if (/^[0-9a-f]{32}$/i.test(str)) return 'UUID (sans tirets)';
+        else if (/^[0-7][0-9A-HJKMNP-TV-Z]{25}$/i.test(str)) return 'ULID';
+        else return null;
+    }
+
+    document.getElementById('validateBtn').addEventListener('click', () => {
+        const input = document.getElementById('validateInput').value.trim();
+        const resDiv = document.getElementById('validateResult');
+        if (!input) return;
+        const type = detectType(input);
+        if (type) {
+            resDiv.innerHTML = `<span class="badge badge-valid">Valide</span> Type : ${type}`;
+        } else {
+            resDiv.innerHTML = `<span class="badge badge-invalid">Invalide</span> Format non reconnu.`;
+        }
+    });
+
+    // === DÉCODAGE ===
+    function decodeUlid(ulid) {
+        const timePart = ulid.slice(0,10);
+        const timestamp = parseInt(timePart, 16);
+        const date = new Date(timestamp);
+        return { timestamp, date: date.toISOString() };
+    }
+    function decodeUuidV1(uuid) {
+        const hex = uuid.replace(/-/g,'');
+        const timeLow = parseInt(hex.slice(0,8), 16);
+        const timeMid = parseInt(hex.slice(8,12), 16);
+        const timeHigh = parseInt(hex.slice(12,16), 16);
+        const timestamp = ((timeHigh & 0x0fff) * 0x100000000 + timeMid * 0x10000 + timeLow) / 10000 - 12219292800000;
+        const node = hex.slice(32);
+        return { timestamp, date: new Date(timestamp).toISOString(), node };
+    }
+
+    document.getElementById('decodeBtn').addEventListener('click', () => {
+        const input = document.getElementById('decodeInput').value.trim();
+        const resDiv = document.getElementById('decodeResult');
+        const type = detectType(input);
+        if (type && type.includes('v1')) {
+            const dec = decodeUuidV1(input);
+            resDiv.innerHTML = `✅ UUID v1<br>Timestamp: ${dec.timestamp}<br>Date: ${dec.date}<br>Node: ${dec.node}`;
+        } else if (type === 'ULID') {
+            const dec = decodeUlid(input);
+            resDiv.innerHTML = `✅ ULID<br>Timestamp: ${dec.timestamp}<br>Date: ${dec.date}`;
+        } else {
+            resDiv.innerHTML = `<span class="badge badge-invalid">Non décodable</span> (seuls UUID v1 et ULID contiennent un timestamp).`;
+        }
+    });
+
+    // === SNIPPETS ===
+    const snippets = {
+        js: `// UUID v4 (aléatoire)\nfunction uuidv4() {\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  });\n}`,
+        python: `import uuid\n# UUID v4\nuuid.uuid4()\n# ULID (librairie ulid-py)\nfrom ulid import ULID\nulid = ULID()`,
+        go: `import "github.com/google/uuid"\nid := uuid.New()  // v4\n// ULID: import "github.com/oklog/ulid/v2"\nulid.MustNew(ulid.Timestamp(time.Now()), entropy)`,
+        sql: `-- PostgreSQL\nCREATE EXTENSION IF NOT EXISTS "uuid-ossp";\nSELECT uuid_generate_v4();`
+    };
+    const snippetDisplay = document.getElementById('snippetDisplay');
+    const snippetLang = document.getElementById('snippetLang');
+    snippetLang.addEventListener('change', () => snippetDisplay.textContent = snippets[snippetLang.value]);
+    snippetDisplay.textContent = snippets.js;
+    document.getElementById('copySnippetBtn').addEventListener('click', ()=> copyText(snippetDisplay.textContent, 'Snippet copié'));
+
+    // Génération initiale
+    document.getElementById('generateBtn').click();
+})();
+</script>
+</body>
+</html>
