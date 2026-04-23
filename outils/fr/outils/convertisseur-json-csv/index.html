@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Convertisseur JSON ⇄ CSV en ligne (JSON to CSV & CSV to JSON)</title>
+    <meta name="description" content="Convertissez JSON en CSV et CSV en JSON facilement. Aplatissement automatique, aperçu tableau, export Excel UTF-8. Outil gratuit 100% côté client.">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/json-csv-converter/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/json-csv-converter/">
+
+    <meta property="og:title" content="Convertisseur JSON CSV en ligne">
+    <meta property="og:description" content="Conversion JSON ↔ CSV avec aplatissement, aperçu tableau, drag & drop. Export prêt pour Excel.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">
+    <meta name="twitter:card" content="summary">
+
+        <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JRBW78KE29');
+    </script>
+
+    <style>
+        /* ----- Variables & Reset (identique aux autres outils) ----- */
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+        }
+        body.dark {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #3b82f6;
+            --primary-dark: #60a5fa;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .container { max-width: 1400px; width: 100%; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); text-decoration: none; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .theme-toggle {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 40px;
+            padding: 6px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500;
+            color: var(--text-light); display: flex; align-items: center; gap: 6px;
+        }
+        .lang-switch { display: flex; gap: 6px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .lang-btn {
+            padding: 6px 14px; border-radius: 32px; border: none; background: transparent;
+            font-weight: 500; cursor: pointer; color: var(--text-light); text-decoration: none; font-size: 0.83rem;
+        }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        .tool-card {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1rem; }
+
+        /* Mise en page principale */
+        .converter-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 900px) { .converter-layout { grid-template-columns: 1fr; } }
+        .panel {
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+        .panel h2 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text);
+            resize: vertical;
+            min-height: 200px;
+            margin-bottom: 12px;
+        }
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: border 0.2s;
+        }
+        .dropzone:hover, .dropzone.dragover { border-color: var(--primary); background: rgba(59,130,246,0.05); }
+        .dropzone input { display: none; }
+
+        .options-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 16px 0;
+            align-items: center;
+        }
+        .option-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .option-group label { font-size: 0.85rem; color: var(--text-light); }
+        select, input[type="text"] {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        .btn {
+            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
+            cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--text);
+            border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline:hover { background: var(--bg); border-color: var(--primary); }
+        .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+
+        /* Aperçu tableau */
+        .table-preview {
+            margin-top: 20px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: auto;
+            max-height: 300px;
+            background: var(--surface);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin: 12px 0;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .article-section {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        .article-section h2 { font-size: 1.8rem; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+        .faq-item { margin-bottom: 24px; }
+        .faq-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+
+        .footer { text-align: center; color: var(--text-light); margin-top: 24px; }
+        .toast-msg {
+            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg);
+            padding: 10px 20px; border-radius: 40px; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; box-shadow: var(--shadow); z-index: 1000;
+        }
+        body.dark .toast-msg { color: var(--text); background: var(--surface); }
+        .error-msg { color: var(--error); font-size: 0.85rem; margin-top: 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">🌙</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/json-csv-converter/" class="lang-btn">EN</a>
+                <a href="/fr/outils/convertisseur-json-csv/" class="lang-btn active">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            <h1>Convertisseur JSON ⇄ CSV</h1>
+            <h2>Convertir JSON en CSV et CSV en JSON facilement</h2>
+            <div class="subhead">Conversion bidirectionnelle avec aplatissement automatique, aperçu en tableau et options avancées. 100% côté client.</div>
+
+            <div class="converter-layout">
+                <!-- Partie gauche : JSON -->
+                <div class="panel">
+                    <h2>📄 JSON</h2>
+                    <div class="dropzone" id="jsonDropzone">
+                        <p>Glissez-déposez un fichier JSON ici ou cliquez pour sélectionner</p>
+                        <input type="file" id="jsonFileInput" accept=".json,application/json">
+                    </div>
+                    <textarea id="jsonInput" placeholder='Collez votre JSON ici... ex: [{"nom":"Jean","age":30}]'></textarea>
+                    <div class="options-bar">
+                        <div class="option-group">
+                            <label for="jsonPath">Chemin du tableau :</label>
+                            <input type="text" id="jsonPath" placeholder="ex: data.users" value="" style="width:140px;">
+                        </div>
+                        <div class="option-group">
+                            <label><input type="checkbox" id="flattenJson" checked> Aplatir les objets</label>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-primary" id="jsonToCsvBtn">Convertir en CSV →</button>
+                        <button class="btn btn-outline btn-sm" id="clearJsonBtn">Effacer</button>
+                        <button class="btn btn-outline btn-sm" id="copyJsonBtn">Copier</button>
+                    </div>
+                    <div id="jsonError" class="error-msg"></div>
+                </div>
+
+                <!-- Partie droite : CSV -->
+                <div class="panel">
+                    <h2>📊 CSV</h2>
+                    <div class="dropzone" id="csvDropzone">
+                        <p>Glissez-déposez un fichier CSV ici ou cliquez pour sélectionner</p>
+                        <input type="file" id="csvFileInput" accept=".csv,text/csv,text/plain">
+                    </div>
+                    <textarea id="csvInput" placeholder='Collez votre CSV ici...'></textarea>
+                    <div class="options-bar">
+                        <div class="option-group">
+                            <label for="delimiter">Délimiteur :</label>
+                            <select id="delimiter">
+                                <option value=",">Virgule (,)</option>
+                                <option value=";">Point-virgule (;)</option>
+                                <option value="\t">Tabulation</option>
+                                <option value="|">Pipe (|)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label><input type="checkbox" id="csvHasHeader" checked> 1ère ligne = en-têtes</label>
+                        </div>
+                        <div class="option-group">
+                            <label for="nullValue">Valeurs nulles :</label>
+                            <select id="nullValue">
+                                <option value="">Chaîne vide</option>
+                                <option value="null">null</option>
+                                <option value="0">0</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-primary" id="csvToJsonBtn">← Convertir en JSON</button>
+                        <button class="btn btn-outline btn-sm" id="clearCsvBtn">Effacer</button>
+                        <button class="btn btn-outline btn-sm" id="copyCsvBtn">Copier</button>
+                    </div>
+                    <div id="csvError" class="error-msg"></div>
+                </div>
+            </div>
+
+            <!-- Aperçu tableau commun -->
+            <div style="margin-top: 24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-size:1.1rem;">Aperçu du tableau</h3>
+                    <div class="stats" id="statsDisplay">
+                        <span>Lignes: <span id="rowCount">0</span></span>
+                        <span>Colonnes: <span id="colCount">0</span></span>
+                        <span>Taille: <span id="dataSize">0</span> octets</span>
+                    </div>
+                </div>
+                <div class="table-preview" id="tablePreview">
+                    <table id="previewTable">
+                        <thead><tr><th>Aucune donnée</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                    <button class="btn btn-outline btn-sm" id="downloadCsvBtn">⬇ Télécharger CSV (UTF-8 BOM)</button>
+                    <button class="btn btn-outline btn-sm" id="downloadJsonBtn">⬇ Télécharger JSON</button>
+                    <button class="btn btn-outline btn-sm" id="copyTableBtn">📋 Copier le tableau</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION FAQ -->
+        <section class="article-section">
+            <h2>Convertisseur JSON / CSV : tout ce qu'il faut savoir</h2>
+            <p>
+                Ce convertisseur JSON CSV permet de transformer rapidement des données JSON en CSV pour Excel ou Google Sheets, et inversement. Il supporte les structures imbriquées, l’aplatissement automatique et différents délimiteurs.
+            </p>
+            <p>Il permet egalement de passer facilement du format JSON (utilisé par les APIs) au format CSV (compatible Excel, Google Sheets) et inversement. Grâce à l'aplatissement automatique des objets imbriqués, vous pouvez traiter des données complexes en un clic.</p>
+            
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Comment gérer les tableaux imbriqués dans un JSON ?</div>
+                <p>Utilisez le champ "Chemin du tableau" pour pointer vers l'emplacement exact de votre tableau. Par exemple, si votre JSON a la structure <code>{ "data": { "users": [ ... ] } }</code>, saisissez <code>data.users</code>. L'outil extraira automatiquement le tableau cible.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Pourquoi l'export CSV inclut-il un BOM UTF-8 ?</div>
+                <p>Le BOM (Byte Order Mark) indique à Excel que le fichier est encodé en UTF-8. Sans cela, Excel peut mal afficher les accents et caractères spéciaux. Notre option "Télécharger CSV" ajoute automatiquement ce BOM pour une compatibilité parfaite avec Excel français.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Comment sont traitées les valeurs nulles ou vides ?</div>
+                <p>Vous pouvez choisir dans le menu dédié comment représenter les valeurs <code>null</code>, <code>undefined</code> ou chaînes vides lors de la conversion CSV → JSON : chaîne vide, "null" ou zéro.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Puis-je convertir un fichier CSV avec un autre délimiteur que la virgule ?</div>
+                <p>Oui, vous pouvez choisir parmi virgule, point-virgule, tabulation ou pipe. La détection automatique est également active : si vous collez des données sans préciser, l'outil essaie de deviner le délimiteur.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Mes données sont-elles envoyées à un serveur ?</div>
+                <p>Non, absolument tout est traité dans votre navigateur. Aucune donnée ne quitte votre ordinateur.</p>
+            </div>
+                <div class="faq-item">
+                <div class="faq-question">Quelle est la différence entre JSON et CSV ?</div>
+                <p>Le JSON (JavaScript Object Notation) est un format structuré utilisé par les APIs, tandis que le CSV (Comma-Separated Values) est un format tabulaire utilisé dans Excel ou Google Sheets. Le JSON est plus flexible, alors que le CSV est plus simple pour l’analyse de données.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Comment convertir un JSON en CSV facilement ?</div>
+                <p>Collez votre JSON dans l’outil ou importez un fichier, puis cliquez sur "Convertir en CSV". L’outil transforme automatiquement vos données en tableau compatible avec Excel.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Comment convertir un fichier CSV en JSON ?</div>
+                <p>Collez votre CSV ou importez-le, choisissez le délimiteur si nécessaire, puis cliquez sur "Convertir en JSON". Le résultat sera généré instantanément sous forme de tableau JSON.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Comment gérer les objets JSON imbriqués lors de la conversion ?</div>
+                <p>Activez l’option d’aplatissement (flatten). L’outil va transformer les objets imbriqués en colonnes simples, ce qui permet une compatibilité parfaite avec les fichiers CSV et Excel.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Pourquoi mon CSV ne s'affiche pas correctement dans Excel ?</div>
+                <p>Excel peut mal interpréter l’encodage ou le délimiteur. Utilisez l’option d’export avec BOM UTF-8 et choisissez le bon délimiteur (virgule ou point-virgule) selon votre région.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Quelle est la taille maximale des fichiers supportés ?</div>
+                <p>Tout dépend de votre navigateur et de votre machine. En général, les fichiers jusqu’à plusieurs Mo sont supportés sans problème. Pour des fichiers très volumineux, utilisez un outil local.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Mes données sont-elles sécurisées lors de la conversion ?</div>
+                <p>Oui, toutes les conversions sont effectuées directement dans votre navigateur. Aucune donnée n’est envoyée à un serveur, garantissant une confidentialité totale.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Quels délimiteurs CSV sont pris en charge ?</div>
+                <p>L’outil prend en charge les délimiteurs les plus courants : virgule (,), point-virgule (;), tabulation et pipe (|). Une détection automatique est également disponible.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Puis-je utiliser cet outil pour convertir JSON vers Excel ?</div>
+                <p>Oui, en convertissant votre JSON en CSV, vous pouvez ensuite ouvrir le fichier directement dans Excel ou Google Sheets. L’export est optimisé pour une compatibilité maximale.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 DevToolbox — Outils 100% côté client pour développeurs et analystes.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg">Copié !</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Convertisseur JSON CSV",
+  "url": "https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/",
+  "description": "Convertissez JSON en CSV et inversement. Aplatissement, aperçu, export Excel UTF-8 BOM.",
+  "applicationCategory": "DeveloperApplication"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Comment gérer les tableaux imbriqués dans un JSON ?", "acceptedAnswer": { "@type": "Answer", "text": "Utilisez le champ Chemin du tableau pour pointer vers l'emplacement exact (ex: data.users)." } },
+    { "@type": "Question", "name": "Pourquoi l'export CSV inclut-il un BOM UTF-8 ?", "acceptedAnswer": { "@type": "Answer", "text": "Le BOM indique à Excel l'encodage UTF-8 pour afficher correctement les accents." } },
+    { "@type": "Question", "name": "Mes données sont-elles envoyées à un serveur ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, tout est traité localement dans votre navigateur." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Convertisseur JSON CSV", "item": "https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Quelle est la différence entre JSON et CSV ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Le JSON est un format structuré utilisé par les APIs tandis que le CSV est un format tabulaire utilisé dans Excel."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Comment convertir un JSON en CSV ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Collez votre JSON puis cliquez sur convertir. Le résultat est généré instantanément."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Les données sont-elles sécurisées ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui, tout est traité localement dans votre navigateur."
+      }
+    }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    // Thème
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+    let currentTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    function applyTheme(t) {
+        document.body.classList.remove('dark', 'light');
+        if (t === 'dark') { document.body.classList.add('dark'); themeIcon.textContent = '☀️'; themeLabel.textContent = 'Clair'; }
+        else if (t === 'light') { document.body.classList.remove('dark'); themeIcon.textContent = '🌙'; themeLabel.textContent = 'Sombre'; }
+        else { const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark', prefersDark); themeIcon.textContent = prefersDark ? '☀️' : '🌙'; themeLabel.textContent = prefersDark ? 'Clair' : 'Sombre'; }
+        localStorage.setItem('devtoolbox-theme', t); currentTheme = t;
+    }
+    themeToggle.addEventListener('click', ()=> applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+    applyTheme(currentTheme);
+
+    // Toast
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+    async function copyText(text, label) { try { await navigator.clipboard.writeText(text); showToast(label || 'Copié !'); } catch { showToast('Échec copie'); } }
+
+    // Éléments DOM
+    const jsonInput = document.getElementById('jsonInput');
+    const csvInput = document.getElementById('csvInput');
+    const jsonDropzone = document.getElementById('jsonDropzone');
+    const csvDropzone = document.getElementById('csvDropzone');
+    const jsonFileInput = document.getElementById('jsonFileInput');
+    const csvFileInput = document.getElementById('csvFileInput');
+    const previewTable = document.getElementById('previewTable');
+    const rowCountSpan = document.getElementById('rowCount');
+    const colCountSpan = document.getElementById('colCount');
+    const dataSizeSpan = document.getElementById('dataSize');
+    const jsonError = document.getElementById('jsonError');
+    const csvError = document.getElementById('csvError');
+    const jsonPathInput = document.getElementById('jsonPath');
+    const flattenJsonCheck = document.getElementById('flattenJson');
+    const delimiterSelect = document.getElementById('delimiter');
+    const csvHasHeaderCheck = document.getElementById('csvHasHeader');
+    const nullValueSelect = document.getElementById('nullValue');
+
+    let currentData = []; // tableau d'objets affiché dans l'aperçu
+
+    // === Fonctions utilitaires ===
+    function flattenObject(obj, prefix = '') {
+        const result = {};
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                const newKey = prefix ? `${prefix}.${key}` : key;
+                if (obj[key] !== null && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+                    Object.assign(result, flattenObject(obj[key], newKey));
+                } else {
+                    result[newKey] = obj[key];
+                }
+            }
+        }
+        return result;
+    }
+
+    function getNestedValue(obj, path) {
+        return path.split('.').reduce((o, k) => (o || {})[k], obj);
+    }
+
+    function detectDelimiter(csvText) {
+        const firstLine = csvText.split('\n')[0];
+        const delimiters = [',', ';', '\t', '|'];
+        let best = { delim: ',', count: 0 };
+        for (let d of delimiters) {
+            const count = (firstLine.match(new RegExp(`\\${d}`, 'g')) || []).length;
+            if (count > best.count) best = { delim: d, count };
+        }
+        return best.delim;
+    }
+
+    function parseCSV(csv, delim, hasHeader) {
+        const lines = csv.trim().split('\n').filter(l => l.trim());
+        if (lines.length === 0) return [];
+        const headers = hasHeader ? lines[0].split(delim).map(h => h.trim()) : null;
+        const startIdx = hasHeader ? 1 : 0;
+        const result = [];
+        for (let i = startIdx; i < lines.length; i++) {
+            const values = lines[i].split(delim);
+            if (!hasHeader) {
+                const row = {};
+                values.forEach((v, idx) => row[`col${idx+1}`] = v);
+                result.push(row);
+            } else {
+                const row = {};
+                headers.forEach((h, idx) => row[h] = values[idx] || '');
+                result.push(row);
+            }
+        }
+        return result;
+    }
+
+    function unparseCSV(data, delim = ',') {
+        if (!data.length) return '';
+        const headers = Object.keys(data[0]);
+        const lines = [headers.join(delim)];
+        for (let row of data) {
+            const values = headers.map(h => {
+                let val = row[h] !== undefined ? row[h] : '';
+                if (typeof val === 'string' && (val.includes(delim) || val.includes('"'))) {
+                    val = `"${val.replace(/"/g, '""')}"`;
+                }
+                return val;
+            });
+            lines.push(values.join(delim));
+        }
+        return lines.join('\n');
+    }
+
+    // Conversion JSON -> CSV
+    function jsonToCsv() {
+        jsonError.textContent = '';
+        let jsonText = jsonInput.value.trim();
+        if (!jsonText) { jsonError.textContent = 'Veuillez coller un JSON.'; return; }
+        try {
+            let parsed = JSON.parse(jsonText);
+            // Appliquer le chemin
+            const path = jsonPathInput.value.trim();
+            if (path) parsed = getNestedValue(parsed, path);
+            if (!Array.isArray(parsed)) throw new Error('Le résultat doit être un tableau.');
+            
+            let data = parsed;
+            if (flattenJsonCheck.checked) {
+                data = parsed.map(item => flattenObject(item));
+            }
+            const csv = unparseCSV(data, ',');
+            csvInput.value = csv;
+            updatePreview(data);
+            showToast('Conversion JSON → CSV réussie');
+        } catch (e) {
+            jsonError.textContent = 'Erreur : ' + e.message;
+        }
+    }
+
+    // Conversion CSV -> JSON
+    function csvToJson() {
+        csvError.textContent = '';
+        let csvText = csvInput.value.trim();
+        if (!csvText) { csvError.textContent = 'Veuillez coller un CSV.'; return; }
+        try {
+            let delim = delimiterSelect.value;
+            if (delim === '\\t') delim = '\t';
+            else if (delim === 'auto') delim = detectDelimiter(csvText);
+            const hasHeader = csvHasHeaderCheck.checked;
+            const data = parseCSV(csvText, delim, hasHeader);
+            
+            // Appliquer règle valeurs nulles
+            const nullOpt = nullValueSelect.value;
+            data.forEach(row => {
+                for (let k in row) {
+                    if (row[k] === '' || row[k] === undefined) {
+                        if (nullOpt === 'null') row[k] = null;
+                        else if (nullOpt === '0') row[k] = 0;
+                        else row[k] = '';
+                    }
+                }
+            });
+            
+            jsonInput.value = JSON.stringify(data, null, 2);
+            updatePreview(data);
+            showToast('Conversion CSV → JSON réussie');
+        } catch (e) {
+            csvError.textContent = 'Erreur : ' + e.message;
+        }
+    }
+
+    // Mise à jour aperçu tableau
+    function updatePreview(data) {
+        currentData = data;
+        if (!data.length) {
+            previewTable.innerHTML = '<thead><tr><th>Aucune donnée</th></tr></thead><tbody></tbody>';
+            rowCountSpan.textContent = '0';
+            colCountSpan.textContent = '0';
+            dataSizeSpan.textContent = '0';
+            return;
+        }
+        const headers = Object.keys(data[0]);
+        const thead = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+        const tbody = data.slice(0, 100).map(row => 
+            `<tr>${headers.map(h => `<td>${row[h] !== undefined ? row[h] : ''}</td>`).join('')}</tr>`
+        ).join('');
+        previewTable.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
+        rowCountSpan.textContent = data.length;
+        colCountSpan.textContent = headers.length;
+        const jsonSize = new Blob([JSON.stringify(data)]).size;
+        const csvSize = new Blob([unparseCSV(data, ',')]).size;
+        dataSizeSpan.textContent = `${jsonSize} / ${csvSize}`;
+    }
+
+    // Gestion fichiers
+    function handleFileUpload(file, targetTextarea, isJson = true) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            targetTextarea.value = e.target.result;
+            if (isJson) jsonToCsv(); else csvToJson();
+        };
+        reader.readAsText(file);
+    }
+
+    // Event listeners
+    document.getElementById('jsonToCsvBtn').addEventListener('click', jsonToCsv);
+    document.getElementById('csvToJsonBtn').addEventListener('click', csvToJson);
+    
+    document.getElementById('clearJsonBtn').addEventListener('click', ()=> { jsonInput.value = ''; jsonError.textContent = ''; });
+    document.getElementById('clearCsvBtn').addEventListener('click', ()=> { csvInput.value = ''; csvError.textContent = ''; });
+    document.getElementById('copyJsonBtn').addEventListener('click', ()=> copyText(jsonInput.value, 'JSON copié'));
+    document.getElementById('copyCsvBtn').addEventListener('click', ()=> copyText(csvInput.value, 'CSV copié'));
+    
+    // Drag & drop JSON
+    jsonDropzone.addEventListener('click', ()=> jsonFileInput.click());
+    jsonDropzone.addEventListener('dragover', (e)=> { e.preventDefault(); jsonDropzone.classList.add('dragover'); });
+    jsonDropzone.addEventListener('dragleave', ()=> jsonDropzone.classList.remove('dragover'));
+    jsonDropzone.addEventListener('drop', (e)=> {
+        e.preventDefault(); jsonDropzone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileUpload(file, jsonInput, true);
+    });
+    jsonFileInput.addEventListener('change', (e)=> { if (e.target.files[0]) handleFileUpload(e.target.files[0], jsonInput, true); });
+    
+    // Drag & drop CSV
+    csvDropzone.addEventListener('click', ()=> csvFileInput.click());
+    csvDropzone.addEventListener('dragover', (e)=> { e.preventDefault(); csvDropzone.classList.add('dragover'); });
+    csvDropzone.addEventListener('dragleave', ()=> csvDropzone.classList.remove('dragover'));
+    csvDropzone.addEventListener('drop', (e)=> {
+        e.preventDefault(); csvDropzone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileUpload(file, csvInput, false);
+    });
+    csvFileInput.addEventListener('change', (e)=> { if (e.target.files[0]) handleFileUpload(e.target.files[0], csvInput, false); });
+
+    // Téléchargements
+    function download(content, filename, mimeType, addBom = false) {
+        const blob = new Blob([addBom ? '\uFEFF' : '', content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+    }
+    document.getElementById('downloadCsvBtn').addEventListener('click', ()=> {
+        if (!csvInput.value) return showToast('Aucun CSV à télécharger');
+        download(csvInput.value, 'data.csv', 'text/csv', true);
+        showToast('CSV avec BOM UTF-8 téléchargé');
+    });
+    document.getElementById('downloadJsonBtn').addEventListener('click', ()=> {
+        if (!jsonInput.value) return showToast('Aucun JSON à télécharger');
+        download(jsonInput.value, 'data.json', 'application/json');
+        showToast('JSON téléchargé');
+    });
+    document.getElementById('copyTableBtn').addEventListener('click', ()=> {
+        if (!currentData.length) return showToast('Aucune donnée');
+        const csv = unparseCSV(currentData, ',');
+        copyText(csv, 'Tableau copié en CSV');
+    });
+
+    // Exemple initial
+    const sampleJson = '[{"nom":"Jean","age":30,"ville":"Paris"},{"nom":"Marie","age":25,"ville":"Lyon"}]';
+    jsonInput.value = sampleJson;
+    jsonToCsv();
+})();
+</script>
+</body>
+</html>
