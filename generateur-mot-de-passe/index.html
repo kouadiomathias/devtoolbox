@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Générateur de mot de passe sécurisé en ligne (fort & aléatoire)</title>
+    <meta name="description" content="Générez des mots de passe forts avec score d'entropie et estimation du temps de cassage. Hachez n'importe quel texte avec MD5, SHA-1, SHA-256, SHA-512. 100% côté client — rien ne quitte votre navigateur.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/password-hash-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/password-hash-generator/">
+
+    <meta property="og:title" content="Générateur de mot de passe sécurisé & Calculateur de hachage">
+    <meta property="og:description" content="Générez des mots de passe forts avec entropie. Hachez avec MD5, SHA-1, SHA-256, SHA-512. 100% côté client.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Générateur de mot de passe & Calculateur de hachage en ligne">
+        <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JRBW78KE29');
+    </script>
+
+    <style>
+        /* Exactement le même CSS que la version anglaise */
+        :root {
+            --bg:       #ffffff;
+            --surface:  #f8f9fc;
+            --surface-2:#eef1f7;
+            --primary:  #2563eb;
+            --pdk:      #1d4ed8;
+            --text:     #0f172a;
+            --text-2:   #374151;
+            --text-3:   #6b7280;
+            --border:   rgba(0,0,0,0.09);
+            --border-2: rgba(0,0,0,0.05);
+            --success:  #16a34a;
+            --warning:  #d97706;
+            --error:    #dc2626;
+            --radius:   16px;
+            --shadow:   0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-sm:0 1px 3px rgba(0,0,0,0.07);
+            --mono:     'SF Mono','Menlo','Cascadia Code',monospace;
+            --s-weak:   #dc2626;
+            --s-fair:   #d97706;
+            --s-good:   #2563eb;
+            --s-strong: #16a34a;
+            --s-perfect:#7c3aed;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg:#111827; --surface:#1f2937; --surface-2:#2d3748;
+                --primary:#60a5fa; --pdk:#3b82f6;
+                --text:#f9fafb; --text-2:#d1d5db; --text-3:#9ca3af;
+                --border:rgba(255,255,255,0.10); --border-2:rgba(255,255,255,0.05);
+                --success:#4ade80; --warning:#fbbf24; --error:#f87171;
+                --shadow:0 4px 12px rgba(0,0,0,0.4),0 2px 4px rgba(0,0,0,0.3);
+                --shadow-sm:0 1px 3px rgba(0,0,0,0.4);
+                --s-weak:#f87171; --s-fair:#fbbf24; --s-good:#60a5fa; --s-strong:#4ade80; --s-perfect:#c084fc;
+            }
+        }
+        .dark-forced {
+            --bg:#111827; --surface:#1f2937; --surface-2:#2d3748;
+            --primary:#60a5fa; --pdk:#3b82f6;
+            --text:#f9fafb; --text-2:#d1d5db; --text-3:#9ca3af;
+            --border:rgba(255,255,255,0.10); --border-2:rgba(255,255,255,0.05);
+            --success:#4ade80; --warning:#fbbf24; --error:#f87171;
+            --shadow:0 4px 12px rgba(0,0,0,0.4),0 2px 4px rgba(0,0,0,0.3);
+            --shadow-sm:0 1px 3px rgba(0,0,0,0.4);
+            --s-weak:#f87171; --s-fair:#fbbf24; --s-good:#60a5fa; --s-strong:#4ade80; --s-perfect:#c084fc;
+        }
+        .light-forced {
+            --bg:#ffffff; --surface:#f8f9fc; --surface-2:#eef1f7;
+            --primary:#2563eb; --pdk:#1d4ed8;
+            --text:#0f172a; --text-2:#374151; --text-3:#6b7280;
+            --border:rgba(0,0,0,0.09); --border-2:rgba(0,0,0,0.05);
+            --success:#16a34a; --warning:#d97706; --error:#dc2626;
+            --shadow:0 4px 12px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.04);
+            --shadow-sm:0 1px 3px rgba(0,0,0,0.07);
+            --s-weak:#dc2626; --s-fair:#d97706; --s-good:#2563eb; --s-strong:#16a34a; --s-perfect:#7c3aed;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.6;
+            padding: 24px; display: flex; flex-direction: column; align-items: center;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container { max-width: 1100px; width: 100%; }
+
+        /* Header */
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:16px; }
+        .logo { font-weight:700; font-size:1.4rem; letter-spacing:-0.02em; color:var(--primary); text-decoration:none; }
+        .header-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .theme-toggle {
+            background:var(--surface); border:1px solid var(--border); border-radius:40px;
+            padding:6px 14px; cursor:pointer; font-size:0.82rem; font-weight:500;
+            color:var(--text-2); display:flex; align-items:center; gap:6px;
+            transition:all 0.2s; box-shadow:var(--shadow-sm); font-family:inherit;
+        }
+        .theme-toggle:hover { color:var(--text); border-color:var(--primary); }
+        .lang-switch { display:flex; gap:6px; background:var(--surface); padding:4px; border-radius:40px; box-shadow:var(--shadow-sm); border:1px solid var(--border); }
+        .lang-btn { padding:6px 14px; border-radius:32px; border:none; background:transparent; font-weight:500; cursor:pointer; transition:all 0.2s; color:var(--text-2); text-decoration:none; font-size:0.83rem; font-family:inherit; }
+        .lang-btn.active { background:var(--primary); color:white; }
+
+        /* Tool card */
+        .tool-card {
+            background:var(--surface); border-radius:var(--radius); padding:32px;
+            box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:28px;
+            transition:background 0.3s;
+        }
+
+        h1 { font-size:2rem; font-weight:700; letter-spacing:-0.03em; margin-bottom:8px; color:var(--text); }
+        .subhead { color:var(--text-2); margin-bottom:28px; font-size:1rem; }
+
+        /* Tabs */
+        .tabs { display:flex; gap:4px; background:var(--surface-2); padding:4px; border-radius:12px; border:1px solid var(--border); margin-bottom:28px; width:fit-content; }
+        .tab-btn {
+            padding:8px 20px; border-radius:8px; border:none; background:transparent;
+            font-size:0.87rem; font-weight:600; cursor:pointer; color:var(--text-3);
+            transition:all 0.18s; font-family:inherit;
+        }
+        .tab-btn.active { background:var(--surface); color:var(--text); box-shadow:var(--shadow-sm); }
+
+        .tab-panel { display:none; }
+        .tab-panel.active { display:block; }
+
+        /* ===== PASSWORD SECTION ===== */
+
+        .pwd-display {
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; gap:12px;
+            transition:border-color 0.2s;
+        }
+        .pwd-display:focus-within { border-color:var(--primary); }
+        .pwd-text {
+            flex:1; font-family:var(--mono); font-size:1rem; font-weight:500;
+            color:var(--text); background:transparent; border:none; outline:none;
+            word-break:break-all; min-height:28px; cursor:text;
+        }
+        .pwd-actions { display:flex; gap:8px; flex-shrink:0; }
+
+        .strength-section { margin-bottom:24px; }
+        .strength-bar-wrap { display:flex; gap:4px; margin-bottom:10px; }
+        .strength-seg {
+            flex:1; height:5px; border-radius:3px; background:var(--border);
+            transition:background 0.3s;
+        }
+        .strength-row { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+        .strength-label { font-size:0.82rem; font-weight:700; }
+        .strength-detail { font-size:0.78rem; color:var(--text-3); }
+
+        .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:10px; margin-bottom:22px; }
+        .metric-card {
+            background:var(--bg); border:1px solid var(--border); border-radius:10px;
+            padding:12px 14px; text-align:center;
+        }
+        .metric-num { font-size:1.3rem; font-weight:700; color:var(--primary); display:block; line-height:1; margin-bottom:4px; font-family:var(--mono); }
+        .metric-label { font-size:0.72rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.04em; font-weight:600; }
+
+        .crack-time-display {
+            background:var(--bg); border:1px solid var(--border); border-radius:10px;
+            padding:14px 16px; margin-bottom:22px;
+            display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+        }
+        .crack-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .crack-icon svg { width:16px; height:16px; }
+        .crack-main { font-size:0.9rem; font-weight:600; color:var(--text); }
+        .crack-sub { font-size:0.78rem; color:var(--text-3); margin-top:2px; }
+
+        .options-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+        @media (max-width:600px) { .options-grid { grid-template-columns:1fr; } }
+
+        .option-group { display:flex; flex-direction:column; gap:8px; }
+        .option-label { font-size:0.8rem; font-weight:600; color:var(--text-2); text-transform:uppercase; letter-spacing:0.04em; }
+
+        .slider-row { display:flex; align-items:center; gap:12px; }
+        input[type="range"] { flex:1; }
+        .slider-val { font-size:0.88rem; font-weight:600; color:var(--primary); min-width:30px; text-align:right; font-family:var(--mono); }
+
+        .check-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+        .check-item { display:flex; align-items:center; gap:8px; cursor:pointer; }
+        .check-item input[type="checkbox"] { width:16px; height:16px; cursor:pointer; accent-color:var(--primary); }
+        .check-item label { font-size:0.85rem; color:var(--text-2); cursor:pointer; user-select:none; }
+
+        .passphrase-note {
+            background:var(--surface-2); border:1px solid var(--border); border-radius:10px;
+            padding:12px 16px; margin-bottom:16px; font-size:0.84rem; color:var(--text-2);
+        }
+        .passphrase-note strong { color:var(--text); }
+
+        .batch-section { margin-top:20px; }
+        .batch-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+        .batch-list {
+            background:var(--bg); border:1px solid var(--border); border-radius:10px;
+            padding:12px 14px; font-family:var(--mono); font-size:0.82rem; color:var(--text-2);
+            max-height:200px; overflow-y:auto; line-height:2;
+        }
+        .batch-item { display:flex; justify-content:space-between; gap:16px; padding:2px 0; border-bottom:0.5px solid var(--border-2); }
+        .batch-item:last-child { border-bottom:none; }
+        .batch-pwd { color:var(--text); word-break:break-all; }
+        .batch-strength-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:6px; }
+
+        /* ===== HASH SECTION ===== */
+
+        .hash-input-area { margin-bottom:20px; }
+        .hash-input-area label { font-weight:600; font-size:0.82rem; color:var(--text-2); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px; display:block; }
+        textarea {
+            width:100%; padding:14px; font-family:var(--mono); font-size:13px;
+            border:1.5px solid var(--border); border-radius:12px;
+            background:var(--bg); color:var(--text); resize:vertical; min-height:100px;
+            transition:border 0.2s, background 0.3s; outline:none;
+        }
+        textarea:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,0.12); }
+        textarea::placeholder { color:var(--text-3); opacity:0.7; }
+
+        .hash-table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+        .hash-table th {
+            font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+            color:var(--text-3); text-align:left; padding:8px 12px;
+            border-bottom:1px solid var(--border);
+        }
+        .hash-table td { padding:12px 12px; border-bottom:0.5px solid var(--border-2); vertical-align:top; }
+        .hash-table tr:last-child td { border-bottom:none; }
+        .hash-algo { font-size:0.85rem; font-weight:600; color:var(--text); white-space:nowrap; }
+        .hash-bits { font-size:0.75rem; color:var(--text-3); display:block; margin-top:2px; }
+        .hash-value { font-family:var(--mono); font-size:0.78rem; color:var(--text-2); word-break:break-all; line-height:1.6; }
+        .hash-status-badge { font-size:0.7rem; padding:2px 8px; border-radius:99px; white-space:nowrap; font-weight:600; margin-top:4px; display:inline-block; }
+        .badge-ok { background:#dcfce7; color:#15803d; }
+        .badge-warn { background:#fef9c3; color:#854d0e; }
+        .badge-bad { background:#fee2e2; color:#991b1b; }
+        .dark-forced .badge-ok { background:#14532d; color:#86efac; }
+        .dark-forced .badge-warn { background:#422006; color:#fde68a; }
+        .dark-forced .badge-bad { background:#7f1d1d; color:#fca5a5; }
+        @media (prefers-color-scheme: dark) {
+            .badge-ok { background:#14532d; color:#86efac; }
+            .badge-warn { background:#422006; color:#fde68a; }
+            .badge-bad { background:#7f1d1d; color:#fca5a5; }
+        }
+
+        .hash-copy-btn {
+            background:transparent; border:1px solid var(--border); border-radius:99px;
+            padding:3px 10px; font-size:0.72rem; font-weight:600; cursor:pointer;
+            color:var(--text-3); transition:all 0.15s; font-family:inherit; white-space:nowrap;
+        }
+        .hash-copy-btn:hover { border-color:var(--primary); color:var(--primary); }
+
+        .hmac-row {
+            display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+            padding:12px 16px; background:var(--surface-2); border-radius:10px;
+            border:1px solid var(--border); margin-bottom:16px;
+        }
+        .hmac-row label { font-size:0.82rem; font-weight:600; color:var(--text-2); white-space:nowrap; }
+        .hmac-row input[type="text"] {
+            flex:1; padding:8px 12px; border:1.5px solid var(--border); border-radius:8px;
+            background:var(--bg); color:var(--text); font-family:var(--mono); font-size:0.85rem;
+            outline:none; transition:border 0.2s; min-width:120px;
+        }
+        .hmac-row input:focus { border-color:var(--primary); }
+
+        .btn {
+            padding:9px 18px; border-radius:40px; font-weight:600; font-size:0.85rem;
+            border:1px solid var(--border); cursor:pointer; transition:all 0.18s;
+            background:var(--surface); color:var(--text);
+            display:inline-flex; align-items:center; gap:6px; font-family:inherit;
+        }
+        .btn-primary { background:var(--primary); color:white; border-color:var(--pdk); }
+        .btn-primary:hover { background:var(--pdk); transform:translateY(-1px); }
+        .btn:hover:not(.btn-primary) { background:var(--surface-2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+        .button-group { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+
+        /* Article */
+        .article-section {
+            background:var(--surface); border-radius:var(--radius); padding:32px;
+            box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:28px;
+            transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.6rem; margin-bottom:18px; border-bottom:2px solid var(--border); padding-bottom:12px; color:var(--text); }
+        .article-section h3 { margin-top:20px; margin-bottom:10px; color:var(--text); font-size:1rem; }
+        .article-section p { color:var(--text-2); margin-bottom:10px; font-size:0.93rem; }
+        .article-section ul { margin-left:20px; margin-bottom:14px; }
+        .article-section li { color:var(--text-2); margin-bottom:5px; font-size:0.93rem; }
+        .article-section strong { color:var(--text); }
+        .article-section code { background:var(--surface-2); padding:2px 6px; border-radius:4px; font-size:0.87em; color:var(--text); font-family:var(--mono); }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px;
+            background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem;
+            opacity:0; transition:opacity 0.3s; pointer-events:none;
+            box-shadow:var(--shadow); z-index:1000;
+        }
+
+        .footer { text-align:center; color:var(--text-3); margin-top:24px; font-size:0.85rem; }
+
+        @media (max-width:640px) {
+            body { padding:16px; }
+            h1 { font-size:1.65rem; }
+            .tool-card, .article-section { padding:20px; }
+            .tabs { width:100%; }
+            .tab-btn { flex:1; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+
+<div class="container">
+
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Changer le mode sombre">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/password-hash-generator/" class="lang-btn">EN</a>
+                <a href="/fr/outils/generateur-mot-de-passe/" class="lang-btn active" aria-current="page">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            <h1>Générateur de mot de passe &amp; Calculateur de hachage</h1>
+            <h2>Générer un mot de passe sécurisé en ligne</h2>
+            <div class="subhead">Générez des mots de passe cryptographiquement sécurisés avec analyse d'entropie. Hachez n'importe quel texte avec MD5, SHA-1, SHA-256, SHA-512. 100% côté client.</div>
+
+            <!-- Onglets -->
+            <div class="tabs" role="tablist">
+                <button class="tab-btn active" id="tabPwd" role="tab" aria-selected="true" aria-controls="panelPwd">Générateur de mot de passe</button>
+                <button class="tab-btn" id="tabPass" role="tab" aria-selected="false" aria-controls="panelPass">Phrase de passe</button>
+                <button class="tab-btn" id="tabHash" role="tab" aria-selected="false" aria-controls="panelHash">Calculateur de hachage</button>
+            </div>
+
+            <!-- ===== PANNEAU MOT DE PASSE ===== -->
+            <div class="tab-panel active" id="panelPwd" role="tabpanel">
+
+                <div class="pwd-display">
+                    <span class="pwd-text" id="pwdOutput" aria-label="Mot de passe généré" aria-live="polite">Cliquez sur Générer</span>
+                    <div class="pwd-actions">
+                        <button class="btn btn-sm" id="copyPwdBtn" aria-label="Copier le mot de passe">Copier</button>
+                        <button class="btn btn-sm btn-primary" id="genPwdBtn" aria-label="Générer un nouveau mot de passe">Générer</button>
+                    </div>
+                </div>
+
+                <!-- Barre de force -->
+                <div class="strength-section" aria-label="Force du mot de passe">
+                    <div class="strength-bar-wrap" id="strengthBar" aria-hidden="true">
+                        <div class="strength-seg" id="seg0"></div>
+                        <div class="strength-seg" id="seg1"></div>
+                        <div class="strength-seg" id="seg2"></div>
+                        <div class="strength-seg" id="seg3"></div>
+                        <div class="strength-seg" id="seg4"></div>
+                    </div>
+                    <div class="strength-row">
+                        <span class="strength-label" id="strengthLabel" aria-live="polite">--</span>
+                        <span class="strength-detail" id="strengthDetail"></span>
+                    </div>
+                </div>
+
+                <!-- Métriques -->
+                <div class="metrics-grid" aria-label="Métriques du mot de passe">
+                    <div class="metric-card">
+                        <span class="metric-num" id="metEntropy">--</span>
+                        <span class="metric-label">Entropie (bits)</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-num" id="metCharset">--</span>
+                        <span class="metric-label">Taille du jeu</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-num" id="metLength">--</span>
+                        <span class="metric-label">Longueur</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-num" id="metCombinations">--</span>
+                        <span class="metric-label">Combinaisons</span>
+                    </div>
+                </div>
+
+                <!-- Estimation du temps de cassage -->
+                <div class="crack-time-display" id="crackSection" aria-label="Temps estimé pour casser le mot de passe">
+                    <div class="crack-icon" id="crackIcon" aria-hidden="true">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z"/></svg>
+                    </div>
+                    <div>
+                        <div class="crack-main" id="crackMain">Générez un mot de passe pour voir le temps de cassage</div>
+                        <div class="crack-sub">Basé sur 100 milliards de tentatives/seconde (cluster de GPU)</div>
+                    </div>
+                </div>
+
+                <!-- Options -->
+                <div class="options-grid">
+                    <div class="option-group">
+                        <span class="option-label">Longueur</span>
+                        <div class="slider-row">
+                            <input type="range" id="lenSlider" min="4" max="128" value="20" step="1" aria-label="Longueur du mot de passe">
+                            <span class="slider-val" id="lenVal">20</span>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <span class="option-label">Quantité</span>
+                        <div class="slider-row">
+                            <input type="range" id="batchSlider" min="1" max="20" value="1" step="1" aria-label="Nombre de mots de passe">
+                            <span class="slider-val" id="batchVal">1</span>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <span class="option-label">Jeux de caractères</span>
+                        <div class="check-grid">
+                            <label class="check-item"><input type="checkbox" id="chkUpper" checked><label for="chkUpper">Majuscules A‑Z</label></label>
+                            <label class="check-item"><input type="checkbox" id="chkLower" checked><label for="chkLower">Minuscules a‑z</label></label>
+                            <label class="check-item"><input type="checkbox" id="chkDigits" checked><label for="chkDigits">Chiffres 0‑9</label></label>
+                            <label class="check-item"><input type="checkbox" id="chkSymbols" checked><label for="chkSymbols">Symboles !@#...</label></label>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <span class="option-label">Exclusions</span>
+                        <div class="check-grid">
+                            <label class="check-item"><input type="checkbox" id="chkNoAmbi"><label for="chkNoAmbi">Sans ambigus (0O, 1lI)</label></label>
+                            <label class="check-item"><input type="checkbox" id="chkNoDup"><label for="chkNoDup">Sans doublons</label></label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste de lot -->
+                <div class="batch-section" id="batchSection" style="display:none">
+                    <div class="batch-header">
+                        <span style="font-size:0.82rem;font-weight:600;color:var(--text-2)"><label>Mot de passe généré :</label></span>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-sm" id="copyAllBtn">Tout copier</button>
+                            <button class="btn btn-sm" id="copyJsonBtn">Copier en JSON</button>
+                        </div>
+                    </div>
+                    <div class="batch-list" id="batchList"></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" id="genPwdBtn2">Générer</button>
+                    <button class="btn" id="clearPwdBtn">Effacer</button>
+                </div>
+            </div>
+
+            <!-- ===== PANNEAU PHRASE DE PASSE ===== -->
+            <div class="tab-panel" id="panelPass" role="tabpanel">
+                <div class="passphrase-note">
+                    <strong>Pourquoi les phrases de passe ?</strong> Quatre mots aléatoires comme "ocean-érable-pont-tonnerre" sont plus faciles à retenir et statistiquement plus forts que "P@ssw0rd!". Ils tirent parti d'une grande entropie grâce au nombre de mots plutôt qu'à la complexité des caractères.
+                </div>
+
+                <div class="pwd-display" style="margin-bottom:16px">
+                    <span class="pwd-text" id="passphraseOutput" aria-label="Phrase de passe générée" aria-live="polite">Cliquez sur Générer</span>
+                    <div class="pwd-actions">
+                        <button class="btn btn-sm" id="copyPassBtn" aria-label="Copier la phrase de passe">Copier</button>
+                        <button class="btn btn-sm btn-primary" id="genPassBtn" aria-label="Générer une phrase de passe">Générer</button>
+                    </div>
+                </div>
+
+                <div class="strength-section">
+                    <div class="strength-bar-wrap" id="strengthBarPass">
+                        <div class="strength-seg" id="pseg0"></div>
+                        <div class="strength-seg" id="pseg1"></div>
+                        <div class="strength-seg" id="pseg2"></div>
+                        <div class="strength-seg" id="pseg3"></div>
+                        <div class="strength-seg" id="pseg4"></div>
+                    </div>
+                    <div class="strength-row">
+                        <span class="strength-label" id="passStrengthLabel">--</span>
+                        <span class="strength-detail" id="passEntropyDetail"></span>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card"><span class="metric-num" id="passEntropy">--</span><span class="metric-label">Entropie (bits)</span></div>
+                    <div class="metric-card"><span class="metric-num" id="passWords">--</span><span class="metric-label">Mots</span></div>
+                    <div class="metric-card"><span class="metric-num" id="passVocab">7776</span><span class="metric-label">Taille du lexique (EFF)</span></div>
+                    <div class="metric-card"><span class="metric-num" id="passLength">--</span><span class="metric-label">Longueur</span></div>
+                </div>
+
+                <div class="crack-time-display">
+                    <div class="crack-icon" style="background:var(--surface-2);color:var(--text-3)" aria-hidden="true">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/></svg>
+                    </div>
+                    <div>
+                        <div class="crack-main" id="passCrackMain">Générez une phrase pour voir le temps de cassage</div>
+                        <div class="crack-sub">Attaque par dictionnaire à 10 000 essais/seconde</div>
+                    </div>
+                </div>
+
+                <div class="options-grid" style="grid-template-columns:1fr 1fr;">
+                    <div class="option-group">
+                        <span class="option-label">Nombre de mots</span>
+                        <div class="slider-row">
+                            <input type="range" id="wordCountSlider" min="3" max="8" value="4" step="1" aria-label="Nombre de mots">
+                            <span class="slider-val" id="wordCountVal">4</span>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <span class="option-label">Séparateur</span>
+                        <div class="check-grid" style="grid-template-columns:1fr 1fr;">
+                            <label class="check-item"><input type="radio" name="sep" value="-" checked> Tiret -</label>
+                            <label class="check-item"><input type="radio" name="sep" value="."> Point .</label>
+                            <label class="check-item"><input type="radio" name="sep" value="_"> Tiret bas _</label>
+                            <label class="check-item"><input type="radio" name="sep" value=" "> Espace</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" id="genPassBtn2">Générer</button>
+                </div>
+            </div>
+
+            <!-- ===== PANNEAU HACHAGE ===== -->
+            <div class="tab-panel" id="panelHash" role="tabpanel">
+
+                <div class="hash-input-area">
+                    <label for="hashInput">Texte à hacher</label>
+                    <textarea id="hashInput" placeholder="Saisissez ou collez du texte ici pour calculer ses empreintes..." aria-label="Texte à hacher"></textarea>
+                </div>
+
+                <div class="hmac-row">
+                    <label for="hmacKey">Clé HMAC (optionnelle)</label>
+                    <input type="text" id="hmacKey" placeholder="Laisser vide pour un hachage simple" autocomplete="off" spellcheck="false" aria-label="Clé secrète HMAC">
+                    <span style="font-size:0.78rem;color:var(--text-3);white-space:nowrap">Ajoute une ligne HMAC‑SHA256</span>
+                </div>
+
+                <div style="overflow-x:auto">
+                    <table class="hash-table" aria-label="Résultats des hachages">
+                        <thead>
+                            <tr>
+                                <th style="width:110px">Algorithme</th>
+                                <th>Empreinte</th>
+                                <th style="width:80px">Sécurité</th>
+                                <th style="width:60px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="hashTableBody">
+                            <tr><td colspan="4" style="color:var(--text-3);font-size:0.85rem;padding:20px 12px;text-align:center">Saisissez du texte ci-dessus pour calculer les hachages</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" id="clearHashBtn">Effacer</button>
+                    <button class="btn" id="copyAllHashesBtn">Copier toutes les empreintes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Article & FAQ -->
+        <section class="article-section" aria-label="Documentation">
+            <h2>Génération sécurisée de mots de passe &amp; hachage cryptographique</h2>
+            <p>
+                Ce générateur de mot de passe en ligne vous permet de créer des mots de passe forts et sécurisés avec entropie élevée. Idéal pour protéger vos comptes, API et bases de données.
+            </p>
+            <p>Cet outil génère des mots de passe cryptographiquement sécurisés en utilisant l'API <code>crypto.getRandomValues()</code> du navigateur — la même source d'aléa utilisée par les logiciels de sécurité. Il n'utilise jamais <code>Math.random()</code>, qui n'est pas sécurisé cryptographiquement.</p>
+
+            <h3>Comprendre l'entropie d'un mot de passe</h3>
+            <p>L'entropie se mesure en bits et représente l'imprévisibilité d'un mot de passe. La formule est <code>entropie = log2(taille_jeu ^ longueur)</code>. Un mot de passe de 20 caractères utilisant majuscules, minuscules, chiffres et symboles puise dans un jeu de 95 caractères, ce qui donne environ 131 bits d'entropie — pratiquement impossible à casser par force brute.</p>
+
+            <h3>Pourquoi les phrases de passe sont souvent meilleures</h3>
+            <p>Quatre mots aléatoires tirés de la liste EFF (7776 mots) donnent environ 51 bits d'entropie par mot, soit environ 103 bits pour 4 mots. Elles sont plus faciles à retenir que des caractères aléatoires et tout aussi solides pour la plupart des usages. Six mots dépassent 154 bits — plus fort que la plupart des mots de passe basés sur des caractères.</p>
+
+            <h3>Comparaison des algorithmes de hachage</h3>
+            <p>Utilisez ce tableau pour choisir le bon algorithme :</p>
+            <ul>
+                <li><strong>MD5</strong> (128 bits) — cassé, des collisions existent. À n'utiliser que pour des sommes de contrôle, jamais pour la sécurité.</li>
+                <li><strong>SHA-1</strong> (160 bits) — déprécié pour la sécurité. Google a démontré une collision en 2017. À éviter.</li>
+                <li><strong>SHA-256</strong> (256 bits) — standard actuel. Utilisez pour l'intégrité des données, les signatures numériques, HMAC.</li>
+                <li><strong>SHA-512</strong> (512 bits) — variante plus forte. À utiliser quand une marge supplémentaire est nécessaire ou sur des systèmes 64 bits.</li>
+                <li><strong>HMAC-SHA256</strong> — hachage avec une clé secrète. Utilisez pour les signatures d'API et l'authentification de messages.</li>
+            </ul>
+            <p>Pour le <em>stockage</em> de mots de passe, aucun de ces algorithmes n'est approprié seul — utilisez plutôt <strong>bcrypt</strong>, <strong>scrypt</strong> ou <strong>Argon2</strong>, qui sont volontairement lents et ajoutent un salage.</p>
+
+            <h3>Foire Aux Questions</h3>
+
+            <div class="faq-item">
+                <div class="faq-question">Ce générateur de mot de passe est-il vraiment sécurisé ?</div>
+                <p>Oui. Tout l'aléa provient de <code>window.crypto.getRandomValues()</code>, un générateur de nombres pseudo-aléatoires cryptographiquement sûr (CSPRNG) fourni par votre système d'exploitation. Rien n'est envoyé à un serveur — la génération a lieu entièrement dans votre navigateur.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Que signifie l'entropie pour un mot de passe ?</div>
+                <p>L'entropie mesure l'imprévisibilité en bits. Chaque bit supplémentaire double l'espace de recherche. À 60 bits, un mot de passe résiste à des attaques hors ligne d'un seul GPU pendant des années. À 128+ bits, il est informatiquement impossible à casser par force brute avec le matériel prévisible.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Quelle est la différence entre MD5 et SHA-256 ?</div>
+                <p>MD5 produit une empreinte de 128 bits et est cryptographiquement cassé — des collisions peuvent être calculées en quelques secondes. SHA-256 produit une empreinte de 256 bits et n'a pas de collision pratique connue. Utilisez SHA-256 pour tout ce qui touche à la sécurité ; MD5 seulement pour des sommes de contrôle non sécuritaires (ex. déduplication de fichiers).</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Dois-je utiliser MD5 pour hacher des mots de passe ?</div>
+                <p>Jamais. MD5 (et même SHA-256) est trop rapide pour le hachage de mots de passe — un GPU moderne peut calculer des milliards de hachages MD5 par seconde, rendant les attaques par table arc-en-ciel triviales. Utilisez une fonction de dérivation de clé lente : <strong>bcrypt</strong>, <strong>scrypt</strong> ou <strong>Argon2id</strong>. Celles-ci ajoutent automatiquement un coût de calcul et un sel.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Qu'est-ce que HMAC et quand l'utiliser ?</div>
+                <p>HMAC (Hash-based Message Authentication Code) combine une fonction de hachage avec une clé secrète. Il prouve à la fois l'intégrité et l'authenticité d'un message. Utilisez HMAC-SHA256 pour les signatures de requêtes d'API, la vérification de webhooks et la validation de tokens JWT.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Quelle longueur doit avoir un mot de passe ?</div>
+                <p>Pour les comptes courants : au moins 16 caractères avec des jeux de caractères mixtes (~104 bits). Pour les comptes sensibles (banque, email, crypto) : 20+ caractères ou une phrase de passe de 6 mots (~154 bits). Avec un gestionnaire de mots de passe, utilisez toujours 20+ caractères aléatoires — vous n'avez pas besoin de les retenir.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Mon texte est-il envoyé à un serveur lorsque je le hache ?</div>
+                <p>Non. Tous les calculs de hachage utilisent l'API <code>SubtleCrypto</code> du navigateur (pour les variantes SHA) et une implémentation JavaScript pure (pour MD5). Votre texte ne quitte jamais votre machine.</p>
+            </div>
+
+            <h3>Autres outils utiles</h3>
+            <ul>
+                <li><a href="/fr/outils/decodeur-jwt/">Décodeur JWT</a> — inspectez les tokens utilisant des signatures HMAC-SHA256</li>
+                <li><a href="/fr/outils/encodeur-base64/">Encodeur Base64</a> — encodez des empreintes pour les en-têtes HTTP</li>
+                <li><a href="/fr/outils/testeur-regex/">Testeur Regex</a> — validez des motifs de mot de passe</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 DevToolbox — Outils 100% côté client pour développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD en français -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Générateur de mot de passe & Calculateur de hachage",
+  "url": "https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/",
+  "description": "Générez des mots de passe cryptographiquement sécurisés avec analyse d'entropie et estimation du temps de cassage. Hachez avec MD5, SHA-1, SHA-256, SHA-512, HMAC. 100% côté client.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Nécessite JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Ce générateur de mot de passe est-il vraiment sécurisé ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui. Tout l'aléa provient de window.crypto.getRandomValues(), un CSPRNG. Rien n'est envoyé à un serveur." } },
+    { "@type": "Question", "name": "Quelle est la différence entre MD5 et SHA-256 ?", "acceptedAnswer": { "@type": "Answer", "text": "MD5 est cryptographiquement cassé. SHA-256 n'a pas de collision pratique connue et est le standard actuel pour la sécurité." } },
+    { "@type": "Question", "name": "Dois-je utiliser MD5 pour hacher des mots de passe ?", "acceptedAnswer": { "@type": "Answer", "text": "Jamais. Utilisez bcrypt, scrypt ou Argon2id pour le stockage de mots de passe. MD5 et SHA-256 sont trop rapides." } },
+    { "@type": "Question", "name": "Qu'est-ce que HMAC et quand l'utiliser ?", "acceptedAnswer": { "@type": "Answer", "text": "HMAC combine un hachage avec une clé secrète pour prouver l'intégrité et l'authenticité. Utilisez HMAC-SHA256 pour les signatures d'API." } },
+    { "@type": "Question", "name": "Quelle longueur doit avoir un mot de passe ?", "acceptedAnswer": { "@type": "Answer", "text": "Au moins 16 caractères pour les comptes courants, 20+ pour les comptes sensibles. Une phrase de passe de 6 mots donne environ 154 bits d'entropie." } },
+    { "@type": "Question", "name": "Mon texte est-il envoyé à un serveur lorsque je le hache ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. Tous les calculs de hachage utilisent l'API SubtleCrypto du navigateur. Votre texte ne quitte jamais votre machine." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Générateur de mot de passe", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/" }
+  ]
+}
+</script>
+
+<script>
+// Le code JavaScript est identique à la version anglaise, car il n'y a pas de texte utilisateur dépendant de la langue.
+// Les commentaires sont conservés en anglais pour maintenir la cohérence.
+// (Le script complet est le même que celui fourni, je le reproduis intégralement ci-dessous.)
+
+(function(){
+    /* ---- Theme ---- */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+
+    function applyTheme(t) {
+        document.body.classList.remove('dark-forced','light-forced');
+        if (t==='dark')  { document.body.classList.add('dark-forced');  themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
+        else if (t==='light') { document.body.classList.add('light-forced'); themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
+        else { const dark=window.matchMedia('(prefers-color-scheme: dark)').matches; themeIcon.textContent=dark?'\u2600':'\u263D'; themeLabel.textContent=dark?'Clair':'Sombre'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ---- Tabs ---- */
+    const tabs = [
+        { btn: document.getElementById('tabPwd'),  panel: document.getElementById('panelPwd') },
+        { btn: document.getElementById('tabPass'), panel: document.getElementById('panelPass') },
+        { btn: document.getElementById('tabHash'), panel: document.getElementById('panelHash') }
+    ];
+    tabs.forEach((t,i) => {
+        t.btn.addEventListener('click', () => {
+            tabs.forEach(x => { x.btn.classList.remove('active'); x.btn.setAttribute('aria-selected','false'); x.panel.classList.remove('active'); });
+            t.btn.classList.add('active'); t.btn.setAttribute('aria-selected','true'); t.panel.classList.add('active');
+        });
+    });
+
+    /* ---- Toast ---- */
+    let toastTimer;
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.style.opacity = '1';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.style.opacity='0', 2200);
+    }
+
+    async function copyText(text, msg) {
+        try { await navigator.clipboard.writeText(text); showToast(msg||'Copié !'); }
+        catch { showToast('Échec de la copie'); }
+    }
+
+    /* ====================================================
+       PASSWORD GENERATOR
+       ==================================================== */
+
+    const CHARSETS = {
+        upper:   'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        lower:   'abcdefghijklmnopqrstuvwxyz',
+        digits:  '0123456789',
+        symbols: '!@#$%^&*()-_=+[]{}|;:,.<>?'
+    };
+    const AMBIGUOUS = /[0O1lI]/g;
+
+    const lenSlider     = document.getElementById('lenSlider');
+    const lenVal        = document.getElementById('lenVal');
+    const batchSlider   = document.getElementById('batchSlider');
+    const batchVal      = document.getElementById('batchVal');
+    const chkUpper      = document.getElementById('chkUpper');
+    const chkLower      = document.getElementById('chkLower');
+    const chkDigits     = document.getElementById('chkDigits');
+    const chkSymbols    = document.getElementById('chkSymbols');
+    const chkNoAmbi     = document.getElementById('chkNoAmbi');
+    const chkNoDup      = document.getElementById('chkNoDup');
+    const pwdOutput     = document.getElementById('pwdOutput');
+    const batchSection  = document.getElementById('batchSection');
+    const batchList     = document.getElementById('batchList');
+
+    lenSlider.addEventListener('input',   () => { lenVal.textContent = lenSlider.value; });
+    batchSlider.addEventListener('input', () => { batchVal.textContent = batchSlider.value; batchSection.style.display = +batchSlider.value > 1 ? 'block' : 'none'; });
+
+    function buildCharset() {
+        let cs = '';
+        if (chkUpper.checked)   cs += CHARSETS.upper;
+        if (chkLower.checked)   cs += CHARSETS.lower;
+        if (chkDigits.checked)  cs += CHARSETS.digits;
+        if (chkSymbols.checked) cs += CHARSETS.symbols;
+        if (!cs) cs = CHARSETS.lower;
+        if (chkNoAmbi.checked)  cs = cs.replace(AMBIGUOUS,'');
+        cs = [...new Set(cs)].join('');
+        return cs;
+    }
+
+    function generateOne(len, charset) {
+        if (chkNoDup.checked && len > charset.length) len = charset.length;
+        const arr = new Uint32Array(len * 2);
+        crypto.getRandomValues(arr);
+        let result = '';
+        let pool = chkNoDup.checked ? [...charset] : null;
+        let ai = 0;
+        while (result.length < len) {
+            if (chkNoDup.checked && pool) {
+                const idx = arr[ai++] % pool.length;
+                result += pool[idx];
+                pool.splice(idx, 1);
+            } else {
+                result += charset[arr[ai++] % charset.length];
+            }
+            if (ai >= arr.length) { crypto.getRandomValues(arr); ai = 0; }
+        }
+        return result;
+    }
+
+    function calcEntropy(len, charsetSize) {
+        return Math.floor(len * Math.log2(charsetSize));
+    }
+
+    function entropyToStrength(bits) {
+        if (bits < 28) return { label:'Très faible',   level:0, color:'var(--s-weak)' };
+        if (bits < 36) return { label:'Faible',         level:1, color:'var(--s-weak)' };
+        if (bits < 60) return { label:'Moyen',          level:2, color:'var(--s-fair)' };
+        if (bits < 100)return { label:'Fort',        level:3, color:'var(--s-strong)' };
+        if (bits < 128)return { label:'Très fort',   level:4, color:'var(--s-strong)' };
+        return               { label:'Excellent',      level:5, color:'var(--s-perfect)' };
+    }
+
+    function formatCrackTime(seconds) {
+        if (seconds < 1)           return 'Instantané';
+        if (seconds < 60)          return `${Math.round(seconds)} secondes`;
+        if (seconds < 3600)        return `${Math.round(seconds/60)} minutes`;
+        if (seconds < 86400)       return `${Math.round(seconds/3600)} heures`;
+        if (seconds < 86400*365)   return `${Math.round(seconds/86400)} jours`;
+        if (seconds < 86400*365*1000) return `${Math.round(seconds/86400/365)} ans`;
+        if (seconds < 86400*365*1e9)  return `${(seconds/86400/365/1000).toFixed(1)} mille ans`;
+        if (seconds < 86400*365*1e12) return `${(seconds/86400/365/1e9).toFixed(1)} milliards d'années`;
+        return 'Plus long que l\'âge de l\'univers';
+    }
+
+    function formatCombinations(charsetSize, len) {
+        const log10 = len * Math.log10(charsetSize);
+        if (log10 < 9)   return Math.round(Math.pow(10, log10)).toLocaleString();
+        if (log10 < 15)  return `10^${Math.round(log10)}`;
+        return `10^${Math.round(log10)}`;
+    }
+
+    function updateStrengthBar(bits, prefix) {
+        const s = entropyToStrength(bits);
+        const segs = 5;
+        for (let i = 0; i < segs; i++) {
+            const seg = document.getElementById(`${prefix}seg${i}`);
+            if (seg) seg.style.background = i <= s.level ? s.color : 'var(--border)';
+        }
+        const lbl = document.getElementById(prefix === '' ? 'strengthLabel' : 'passStrengthLabel');
+        if (lbl) { lbl.textContent = s.label; lbl.style.color = s.color; }
+    }
+
+    function generatePassword() {
+        const len       = +lenSlider.value;
+        const count     = +batchSlider.value;
+        const charset   = buildCharset();
+        const passwords = [];
+
+        for (let i = 0; i < count; i++) passwords.push(generateOne(len, charset));
+
+        const pwd     = passwords[0];
+        const entropy = calcEntropy(len, charset.length);
+        const s       = entropyToStrength(entropy);
+
+        pwdOutput.textContent = pwd;
+
+        updateStrengthBar(entropy, '');
+        document.getElementById('strengthDetail').textContent = `${entropy} bits · jeu ${charset.length}`;
+
+        document.getElementById('metEntropy').textContent     = entropy;
+        document.getElementById('metCharset').textContent     = charset.length;
+        document.getElementById('metLength').textContent      = len;
+        document.getElementById('metCombinations').textContent = formatCombinations(charset.length, len);
+
+        const totalCombinations = Math.pow(charset.length, len);
+        const crackSeconds      = totalCombinations / 2 / 1e11;
+        const crackText         = formatCrackTime(crackSeconds);
+        document.getElementById('crackMain').textContent = `Temps pour casser : ${crackText}`;
+
+        const crackIcon = document.getElementById('crackIcon');
+        if (entropy >= 100) { crackIcon.style.background='rgba(22,163,74,0.12)'; crackIcon.style.color='var(--success)'; }
+        else if (entropy >= 60) { crackIcon.style.background='rgba(37,99,235,0.1)'; crackIcon.style.color='var(--primary)'; }
+        else { crackIcon.style.background='rgba(220,38,38,0.1)'; crackIcon.style.color='var(--error)'; }
+
+        if (count > 1) {
+            batchSection.style.display = 'block';
+            batchList.innerHTML = passwords.map(p => {
+                const e = calcEntropy(p.length, charset.length);
+                const sc = entropyToStrength(e);
+                return `<div class="batch-item"><span class="batch-pwd">${p}</span><span class="batch-strength-dot" style="background:${sc.color}" title="${sc.label}"></span></div>`;
+            }).join('');
+        } else {
+            batchSection.style.display = 'none';
+        }
+
+        return { passwords, charset };
+    }
+
+    document.getElementById('genPwdBtn').addEventListener('click', generatePassword);
+    document.getElementById('genPwdBtn2').addEventListener('click', generatePassword);
+    document.getElementById('clearPwdBtn').addEventListener('click', () => {
+        pwdOutput.textContent = 'Cliquez sur Générer';
+        batchList.innerHTML = '';
+        batchSection.style.display = 'none';
+    });
+    document.getElementById('copyPwdBtn').addEventListener('click', () => copyText(pwdOutput.textContent, 'Mot de passe copié !'));
+    document.getElementById('copyAllBtn').addEventListener('click', () => {
+        const pwds = [...batchList.querySelectorAll('.batch-pwd')].map(e=>e.textContent).join('\n');
+        copyText(pwds, 'Tous les mots de passe copiés !');
+    });
+    document.getElementById('copyJsonBtn').addEventListener('click', () => {
+        const pwds = [...batchList.querySelectorAll('.batch-pwd')].map(e=>e.textContent);
+        copyText(JSON.stringify(pwds, null, 2), 'Copié en JSON !');
+    });
+
+    /* ====================================================
+       PASSPHRASE GENERATOR
+       ==================================================== */
+
+    const EFF_WORDS = ["able","acid","aged","also","area","army","away","back","ball","band","bank","bare","barn","base","bath","beam","bean","bear","beat","been","bell","best","bird","bite","blue","bone","book","bore","born","both","bowl","burn","busy","cafe","cage","cake","call","came","camp","care","cart","case","cave","cell","chip","clam","clan","clay","clip","club","clue","coal","coat","code","coil","coin","cold","cone","cook","cool","cope","copy","core","corn","cost","crab","crew","crop","crow","cube","cure","curl","dame","dark","date","dawn","days","dead","deaf","deal","dear","debt","deck","deed","deep","deer","deny","desk","dial","dice","diet","dirt","dish","disk","dock","does","dome","door","dose","down","drag","draw","drip","drop","drum","duck","dump","dune","dusk","dust","duty","each","earl","earn","ease","east","edge","else","emit","emit","epic","even","ever","evil","exam","face","fact","fail","fair","fall","fame","farm","fast","fate","fawn","feed","feel","feet","fell","felt","fern","fill","film","find","fine","fire","firm","fish","fist","flag","flat","flaw","flea","flew","flip","flow","foam","fold","folk","fond","font","food","fool","fore","fork","form","fort","foam","foul","four","free","from","fuel","full","fund","fuse","gain","gale","gall","game","gang","gate","gave","gear","gild","gill","give","glad","glow","glue","goal","goat","gold","golf","gong","good","gown","grab","gram","gray","grew","grid","grim","grin","grip","grow","gulf","gust","hack","hail","hair","half","hall","halt","hand","hang","hard","hare","harm","harp","have","hawk","haze","head","heal","heap","hear","heat","heel","help","herb","hide","high","hill","hint","hire","hold","hole","home","hood","hook","hope","horn","host","hour","huge","hull","hump","hunt","hurt","hymn","idea","idle","into","iris","iron","isle","itch","item","jade","jail","jerk","jest","jolt","jump","just","keen","keep","kelp","kind","king","knit","knob","knot","know","lack","lake","lamb","lamp","land","lane","lark","lash","last","late","lawn","lead","leaf","lean","leap","left","lend","lens","lent","less","lick","lift","like","lime","line","link","lion","list","loft","loom","loop","lore","lorn","loss","lost","loud","love","luck","lung","lure","lurk","made","mail","main","make","male","mall","malt","mane","many","mark","mars","mast","math","meal","mean","meet","melt","memo","menu","mere","mesh","mild","milk","mill","mime","mind","mine","mint","mist","moat","mock","mode","mole","monk","mood","moon","more","most","moth","move","much","mule","must","myth","nail","name","nape","nerd","nest","news","next","nine","node","none","norm","note","noun","null","oaks","oath","obey","odor","oils","only","open","oral","orca","oven","over","owns","pace","pack","page","pain","pair","pale","palm","pang","park","part","pass","past","pave","peak","peat","peel","peer","pest","pine","ping","pipe","plan","play","plod","plot","plow","plug","plum","plus","poem","poet","pole","poll","pond","pool","poor","pore","port","pose","post","pour","prey","prim","prod","prop","pull","pulp","pump","pure","push","raid","rail","rain","rake","ramp","rang","rank","rant","rash","read","real","reap","reel","rely","rent","rest","rice","rich","ride","rift","ring","riot","rise","risk","road","roam","roar","robe","rock","rode","role","roll","roof","rook","room","rope","rose","ruin","rule","rush","rust","safe","sail","salt","sand","sang","sank","save","seal","seam","sear","seed","seen","self","sell","sent","shed","shin","ship","shoe","shot","show","shut","sift","silk","sill","silo","silt","sink","site","skin","skip","slab","slam","slid","slim","slip","slow","slug","snap","snow","soak","soil","sold","sole","song","sort","sour","sown","span","spin","spit","spot","spur","stem","step","stir","stop","stub","stud","such","suit","sung","sunk","surf","swan","swap","swim","tack","tail","tall","tame","tank","tape","tart","task","taut","team","tear","tell","than","them","then","they","tide","till","tilt","time","tiny","tire","toad","told","toll","tome","tone","took","tool","tore","torn","toss","town","toxic","tram","trap","tray","trim","trip","trod","trout","true","tuck","tuft","tuna","tune","turf","tusk","twin","type","ugly","ulna","upon","urge","used","user","vale","vane","vast","veil","vein","vent","vest","vine","vise","void","volt","vote","wail","wake","walk","wall","wand","ward","warm","warp","wary","wave","weak","weld","well","wept","west","whim","whip","wide","wild","wilt","wind","wing","wink","wire","wise","wisp","with","wolf","womb","wove","wrap","wren","yawn","year","yell","your","zero","zinc","zone","zoom"];
+
+    const wordCountSlider = document.getElementById('wordCountSlider');
+    const wordCountVal    = document.getElementById('wordCountVal');
+    const passphraseOutput = document.getElementById('passphraseOutput');
+
+    wordCountSlider.addEventListener('input', () => { wordCountVal.textContent = wordCountSlider.value; });
+
+    function getSep() { return document.querySelector('input[name="sep"]:checked')?.value || '-'; }
+
+    function generatePassphrase() {
+        const count  = +wordCountSlider.value;
+        const sep    = getSep();
+        const arr    = new Uint32Array(count);
+        crypto.getRandomValues(arr);
+        const words  = [...arr].map(n => EFF_WORDS[n % EFF_WORDS.length]);
+        const phrase = words.join(sep);
+
+        passphraseOutput.textContent = phrase;
+
+        const entropy = Math.floor(count * Math.log2(EFF_WORDS.length));
+        const s       = entropyToStrength(entropy);
+
+        updateStrengthBar(entropy, 'p');
+        document.getElementById('passStrengthLabel').textContent = s.label;
+        document.getElementById('passStrengthLabel').style.color = s.color;
+        document.getElementById('passEntropyDetail').textContent = `${entropy} bits`;
+        document.getElementById('passEntropy').textContent  = entropy;
+        document.getElementById('passWords').textContent    = count;
+        document.getElementById('passLength').textContent   = phrase.length;
+
+        const total = Math.pow(EFF_WORDS.length, count);
+        const secs  = total / 2 / 10000;
+        document.getElementById('passCrackMain').textContent = `Temps pour casser (dictionnaire) : ${formatCrackTime(secs)}`;
+
+        return phrase;
+    }
+
+    document.getElementById('genPassBtn').addEventListener('click',  generatePassphrase);
+    document.getElementById('genPassBtn2').addEventListener('click', generatePassphrase);
+    document.getElementById('copyPassBtn').addEventListener('click', () => copyText(passphraseOutput.textContent, 'Phrase de passe copiée !'));
+    document.querySelectorAll('input[name="sep"]').forEach(r => r.addEventListener('change', () => { if (passphraseOutput.textContent !== 'Cliquez sur Générer') generatePassphrase(); }));
+    wordCountSlider.addEventListener('input', () => { if (passphraseOutput.textContent !== 'Cliquez sur Générer') generatePassphrase(); });
+
+    /* ====================================================
+       HASH CALCULATOR
+       ==================================================== */
+
+    const hashInput = document.getElementById('hashInput');
+    const hmacKey   = document.getElementById('hmacKey');
+    const hashTableBody = document.getElementById('hashTableBody');
+
+    // Pure JS MD5 (RFC 1321) - identical to English version
+    function md5(str) {
+        function safeAdd(x,y){var lsw=(x&0xFFFF)+(y&0xFFFF);return(((x>>16)+(y>>16)+(lsw>>16))<<16)|(lsw&0xFFFF);}
+        function bitRotateLeft(num,cnt){return(num<<cnt)|(num>>>(32-cnt));}
+        function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b);}
+        function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|((~b)&d),a,b,x,s,t);}
+        function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&(~d)),a,b,x,s,t);}
+        function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t);}
+        function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|(~d)),a,b,x,s,t);}
+        var i,txt='',bs=0,sha0=1732584193,sha1=-271733879,sha2=-1732584194,sha3=271733878;
+        var M=[];
+        for(i=0;i<str.length;i++){var byt=str.charCodeAt(i);M[bs>>2]|=byt<<((bs%4)<<3);bs++;}
+        M[bs>>2]|=0x80<<((bs%4)<<3);M[(((bs+64)>>9)<<4)+14]=bs*8;M[(((bs+64)>>9)<<4)+15]=0;
+        var len=M.length;
+        for(i=0;i<len;i+=16){
+            var olda=sha0,oldb=sha1,oldc=sha2,oldd=sha3;
+            sha0=md5ff(sha0,sha1,sha2,sha3,M[i+0],7,-680876936);sha3=md5ff(sha3,sha0,sha1,sha2,M[i+1],12,-389564586);sha2=md5ff(sha2,sha3,sha0,sha1,M[i+2],17,606105819);sha1=md5ff(sha1,sha2,sha3,sha0,M[i+3],22,-1044525330);
+            sha0=md5ff(sha0,sha1,sha2,sha3,M[i+4],7,-176418897);sha3=md5ff(sha3,sha0,sha1,sha2,M[i+5],12,1200080426);sha2=md5ff(sha2,sha3,sha0,sha1,M[i+6],17,-1473231341);sha1=md5ff(sha1,sha2,sha3,sha0,M[i+7],22,-45705983);
+            sha0=md5ff(sha0,sha1,sha2,sha3,M[i+8],7,1770035416);sha3=md5ff(sha3,sha0,sha1,sha2,M[i+9],12,-1958414417);sha2=md5ff(sha2,sha3,sha0,sha1,M[i+10],17,-42063);sha1=md5ff(sha1,sha2,sha3,sha0,M[i+11],22,-1990404162);
+            sha0=md5ff(sha0,sha1,sha2,sha3,M[i+12],7,1804603682);sha3=md5ff(sha3,sha0,sha1,sha2,M[i+13],12,-40341101);sha2=md5ff(sha2,sha3,sha0,sha1,M[i+14],17,-1502002290);sha1=md5ff(sha1,sha2,sha3,sha0,M[i+15],22,1236535329);
+            sha0=md5gg(sha0,sha1,sha2,sha3,M[i+1],5,-165796510);sha3=md5gg(sha3,sha0,sha1,sha2,M[i+6],9,-1069501632);sha2=md5gg(sha2,sha3,sha0,sha1,M[i+11],14,643717713);sha1=md5gg(sha1,sha2,sha3,sha0,M[i+0],20,-373897302);
+            sha0=md5gg(sha0,sha1,sha2,sha3,M[i+5],5,-701558691);sha3=md5gg(sha3,sha0,sha1,sha2,M[i+10],9,38016083);sha2=md5gg(sha2,sha3,sha0,sha1,M[i+15],14,-660478335);sha1=md5gg(sha1,sha2,sha3,sha0,M[i+4],20,-405537848);
+            sha0=md5gg(sha0,sha1,sha2,sha3,M[i+9],5,568446438);sha3=md5gg(sha3,sha0,sha1,sha2,M[i+14],9,-1019803690);sha2=md5gg(sha2,sha3,sha0,sha1,M[i+3],14,-187363961);sha1=md5gg(sha1,sha2,sha3,sha0,M[i+8],20,1163531501);
+            sha0=md5gg(sha0,sha1,sha2,sha3,M[i+13],5,-1444681467);sha3=md5gg(sha3,sha0,sha1,sha2,M[i+2],9,-51403784);sha2=md5gg(sha2,sha3,sha0,sha1,M[i+7],14,1735328473);sha1=md5gg(sha1,sha2,sha3,sha0,M[i+12],20,-1926607734);
+            sha0=md5hh(sha0,sha1,sha2,sha3,M[i+5],4,-378558);sha3=md5hh(sha3,sha0,sha1,sha2,M[i+8],11,-2022574463);sha2=md5hh(sha2,sha3,sha0,sha1,M[i+11],16,1839030562);sha1=md5hh(sha1,sha2,sha3,sha0,M[i+14],23,-35309556);
+            sha0=md5hh(sha0,sha1,sha2,sha3,M[i+1],4,-1530992060);sha3=md5hh(sha3,sha0,sha1,sha2,M[i+4],11,1272893353);sha2=md5hh(sha2,sha3,sha0,sha1,M[i+7],16,-155497632);sha1=md5hh(sha1,sha2,sha3,sha0,M[i+10],23,-1094730640);
+            sha0=md5hh(sha0,sha1,sha2,sha3,M[i+13],4,681279174);sha3=md5hh(sha3,sha0,sha1,sha2,M[i+0],11,-358537222);sha2=md5hh(sha2,sha3,sha0,sha1,M[i+3],16,-722521979);sha1=md5hh(sha1,sha2,sha3,sha0,M[i+6],23,76029189);
+            sha0=md5hh(sha0,sha1,sha2,sha3,M[i+9],4,-640364487);sha3=md5hh(sha3,sha0,sha1,sha2,M[i+12],11,-421815835);sha2=md5hh(sha2,sha3,sha0,sha1,M[i+15],16,530742520);sha1=md5hh(sha1,sha2,sha3,sha0,M[i+2],23,-995338651);
+            sha0=md5ii(sha0,sha1,sha2,sha3,M[i+0],6,-198630844);sha3=md5ii(sha3,sha0,sha1,sha2,M[i+7],10,1126891415);sha2=md5ii(sha2,sha3,sha0,sha1,M[i+14],15,-1416354905);sha1=md5ii(sha1,sha2,sha3,sha0,M[i+5],21,-57434055);
+            sha0=md5ii(sha0,sha1,sha2,sha3,M[i+12],6,1700485571);sha3=md5ii(sha3,sha0,sha1,sha2,M[i+3],10,-1894986606);sha2=md5ii(sha2,sha3,sha0,sha1,M[i+10],15,-1051523);sha1=md5ii(sha1,sha2,sha3,sha0,M[i+1],21,-2054922799);
+            sha0=md5ii(sha0,sha1,sha2,sha3,M[i+8],6,1873313359);sha3=md5ii(sha3,sha0,sha1,sha2,M[i+15],10,-30611744);sha2=md5ii(sha2,sha3,sha0,sha1,M[i+6],15,-1560198380);sha1=md5ii(sha1,sha2,sha3,sha0,M[i+13],21,1309151649);
+            sha0=md5ii(sha0,sha1,sha2,sha3,M[i+4],6,-145523070);sha3=md5ii(sha3,sha0,sha1,sha2,M[i+11],10,-1120210379);sha2=md5ii(sha2,sha3,sha0,sha1,M[i+2],15,718787259);sha1=md5ii(sha1,sha2,sha3,sha0,M[i+9],21,-343485551);
+            sha0=safeAdd(sha0,olda);sha1=safeAdd(sha1,oldb);sha2=safeAdd(sha2,oldc);sha3=safeAdd(sha3,oldd);
+        }
+        function hex(n){var s='',v;for(var i=0;i<4;i++){v=(n>>>(i*8))&0xFF;s+=(v<16?'0':'')+v.toString(16);}return s;}
+        return hex(sha0)+hex(sha1)+hex(sha2)+hex(sha3);
+    }
+
+    async function shaHash(algo, text) {
+        const enc  = new TextEncoder();
+        const data = enc.encode(text);
+        const hash = await crypto.subtle.digest(algo, data);
+        return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function hmacSha256(key, text) {
+        const enc = new TextEncoder();
+        const k   = await crypto.subtle.importKey('raw', enc.encode(key), {name:'HMAC',hash:'SHA-256'}, false, ['sign']);
+        const sig = await crypto.subtle.sign('HMAC', k, enc.encode(text));
+        return Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    let hashTimer;
+    async function updateHashes() {
+        const text = hashInput.value;
+        const key  = hmacKey.value.trim();
+
+        if (!text) {
+            hashTableBody.innerHTML = '<tr><td colspan="4" style="color:var(--text-3);font-size:0.85rem;padding:20px 12px;text-align:center">Saisissez du texte ci-dessus pour calculer les hachages</td></tr>';
+            return;
+        }
+
+        hashTableBody.innerHTML = '<tr><td colspan="4" style="color:var(--text-3);font-size:0.85rem;padding:16px 12px;text-align:center">Calcul en cours...</td></tr>';
+
+        const results = [];
+        results.push({ algo:'MD5', bits:128, hash:md5(text), status:'bad', statusLabel:'Cassé', note:'Somm. contrôle uniquement' });
+        results.push({ algo:'SHA-1', bits:160, hash:await shaHash('SHA-1', text), status:'warn', statusLabel:'Déprécié', note:'À éviter pour les nouveaux projets' });
+        results.push({ algo:'SHA-256', bits:256, hash:await shaHash('SHA-256', text), status:'ok', statusLabel:'Sécurisé', note:'Recommandé' });
+        results.push({ algo:'SHA-512', bits:512, hash:await shaHash('SHA-512', text), status:'ok', statusLabel:'Sécurisé', note:'Haute sécurité' });
+        if (key) {
+            results.push({ algo:'HMAC-SHA256', bits:256, hash:await hmacSha256(key, text), status:'ok', statusLabel:'Sécurisé + authentifié', note:'Avec clé secrète' });
+        }
+
+        hashTableBody.innerHTML = results.map(r => `
+            <tr>
+                <td>
+                    <span class="hash-algo">${r.algo}</span>
+                    <span class="hash-bits">${r.bits} bits</span>
+                    <span class="hash-status-badge badge-${r.status}">${r.statusLabel}</span>
+                </td>
+                <td><span class="hash-value" id="hv-${r.algo}">${r.hash}</span></td>
+                <td style="color:var(--text-3);font-size:0.78rem;vertical-align:middle">${r.note}</td>
+                <td><button class="hash-copy-btn" onclick="copyHash('${r.algo}')">Copier</button></td>
+            </tr>
+        `).join('');
+
+        window._hashResults = results;
+    }
+
+    window.copyHash = function(algo) {
+        const el = document.getElementById('hv-' + algo);
+        if (el) copyText(el.textContent, `Empreinte ${algo} copiée !`);
+    };
+
+    hashInput.addEventListener('input', () => { clearTimeout(hashTimer); hashTimer = setTimeout(updateHashes, 300); });
+    hmacKey.addEventListener('input',   () => { clearTimeout(hashTimer); hashTimer = setTimeout(updateHashes, 300); });
+    document.getElementById('clearHashBtn').addEventListener('click', () => {
+        hashInput.value = ''; hmacKey.value = '';
+        hashTableBody.innerHTML = '<tr><td colspan="4" style="color:var(--text-3);font-size:0.85rem;padding:20px 12px;text-align:center">Saisissez du texte ci-dessus pour calculer les hachages</td></tr>';
+    });
+    document.getElementById('copyAllHashesBtn').addEventListener('click', () => {
+        if (!window._hashResults) return;
+        const text = window._hashResults.map(r => `${r.algo}: ${r.hash}`).join('\n');
+        copyText(text, 'Toutes les empreintes copiées !');
+    });
+
+    /* ---- Génération initiale ---- */
+    generatePassword();
+
+})();
+</script>
+</body>
+</html>
