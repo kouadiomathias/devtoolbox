@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Formes CSS en ligne | Clip-path, Blob, Border-radius</title>
+    <meta name="description" content="Créez des formes CSS complexes (clip-path, blobs, border-radius) visuellement avec édition par points. Code CSS, Tailwind, JSX. Présets, partage URL, simulateur daltonisme.">
+    <meta name="keywords" content="générateur clip-path, blob generator, border radius generator, formes css, css shapes, tailwind shapes, svg blob, perlin noise blob, éditeur visuel css">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <meta name="theme-color" content="#2563eb">
+
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/css-shap-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/css-shap-generator/">
+
+    <meta property="og:title" content="Générateur de Formes CSS en ligne">
+    <meta property="og:description" content="Créez des formes CSS : clip-path, blobs, border-radius. Édition visuelle par points, bruit de Perlin, partage URL.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
+    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:locale" content="fr_FR">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Générateur de Formes CSS">
+    <meta name="twitter:description" content="Clip-path, blobs, border-radius avec édition visuelle par points et simulateur daltonisme.">
+
+    <!-- JSON-LD FAQ Schema -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "Qu'est-ce qu'un clip-path en CSS ?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "La propriété CSS clip-path permet de découper un élément HTML selon une forme géométrique définie (polygone, cercle, ellipse, inset). Le générateur DevToolbox permet de créer ces formes visuellement en faisant glisser des points de contrôle directement sur l'aperçu, puis de copier le code CSS, Tailwind ou JSX correspondant."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Comment créer un blob organique avec ce générateur ?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Sélectionnez l'onglet 'Blob' pour accéder aux formes organiques. L'outil utilise un algorithme de bruit de Perlin/Simplex pour générer des contours naturels et fluides. Vous pouvez ajuster la complexité (nombre d'octaves du bruit), la graine aléatoire (seed) et l'échelle. Chaque blob est unique et peut être exporté en CSS (border-radius complexe ou clip-path) ou en SVG inline."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Puis-je modifier la forme directement sur l'aperçu ?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Oui, en mode 'Clip-Path', l'outil affiche des poignées de contrôle (handles) directement sur la forme dans la zone d'aperçu. Vous pouvez cliquer et faire glisser chaque point pour ajuster la forme en temps réel. Les coordonnées sont mises à jour instantanément dans le code CSS généré. Cette édition visuelle par glisser-déposer rend la création de polygones personnalisés extrêmement intuitive."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Comment fonctionne le simulateur de daltonisme ?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Le simulateur applique des filtres SVG basés sur des matrices de conversion LMS (Long, Medium, Short wavelengths) pour reproduire fidèlement la perception des couleurs par les personnes atteintes de protanopie (cécité au rouge), deutéranopie (cécité au vert) et tritanopie (cécité au bleu). Ces filtres utilisent des calculs de confusion colorimétrique conformes aux modèles de Brettel-Viénot, offrant une simulation réaliste de l'accessibilité visuelle."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Quels formats de code puis-je exporter ?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Le générateur exporte le code CSS natif (clip-path, border-radius), les classes Tailwind CSS avec la syntaxe des crochets ([clip-path:...]), et le style JSX pour React. Vous pouvez également copier le SVG inline pour les blobs. Un bouton 'Partager URL' encode tous les paramètres dans l'URL pour sauvegarder et partager vos créations sans base de données."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Le générateur de formes CSS est-il gratuit ?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Oui, cet outil est entièrement gratuit, sans inscription et sans publicité. Toutes les formes que vous créez vous appartiennent et peuvent être utilisées librement dans vos projets personnels ou professionnels. Il fait partie de la suite DevToolbox, une collection d'outils pour développeurs web."
+                    }
+                }
+            ]
+        }
+    </script>
+
+    <!-- JSON-LD BreadcrumbList -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+                { "@type": "ListItem", "position": 3, "name": "Générateur de Formes CSS", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/" }
+            ]
+        }
+    </script>
+
+    <!-- JSON-LD WebApplication -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Générateur de Formes CSS",
+            "url": "https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/",
+            "description": "Créez des formes CSS complexes visuellement avec édition par points et bruit de Perlin.",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "All",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+        }
+    </script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JRBW78KE29');
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: rgba(37, 99, 235, 0.12);
+            --text: #0f172a;
+            --text2: #334155;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --border2: #cbd5e1;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --success: #10b981;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body.dark {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface2: #273549;
+            --primary: #60a5fa;
+            --primary-dark: #3b82f6;
+            --primary-light: rgba(96, 165, 250, 0.15);
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #334155;
+            --border2: #475569;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo::before {
+            content: '🛠️';
+            font-size: 1.3rem;
+        }
+        .header-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .theme-toggle,
+        .lang-switch {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 4px;
+            box-shadow: var(--shadow);
+            display: flex;
+        }
+        .lang-btn,
+        .theme-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text2);
+            border-radius: 32px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .lang-btn.active,
+        .theme-btn.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* Tool Card */
+        .tool-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 6px;
+        }
+        .subhead {
+            color: var(--text3);
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface2);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text3);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+
+        /* Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 1000px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+        .panel-label {
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text3);
+            margin-bottom: 10px;
+        }
+
+        /* Preview Area */
+        .preview-area {
+            position: relative;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            border: 2px dashed var(--border2);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            cursor: default;
+            transition: filter 0.3s;
+        }
+        .preview-area.simulating {
+            filter: var(--sim-filter);
+        }
+        #shapeSvg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        #shapeSvg .drag-handle {
+            pointer-events: all;
+            cursor: grab;
+            transition: r 0.15s;
+        }
+        #shapeSvg .drag-handle:hover {
+            r: 9;
+            fill: #fff;
+            stroke: var(--primary);
+            stroke-width: 2.5;
+        }
+        #shapeSvg .drag-handle:active {
+            cursor: grabbing;
+            r: 10;
+        }
+        #shapeSvg .polygon-outline {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 2;
+            stroke-dasharray: 6 3;
+            pointer-events: none;
+        }
+        .shape-display {
+            width: 220px;
+            height: 220px;
+            background: var(--primary);
+            transition: all 0.25s;
+            position: relative;
+            z-index: 1;
+        }
+        .shape-display.blob-mode {
+            background: transparent !important;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .shape-display.blob-mode svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Simulator Bar */
+        .simulator-bar {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .sim-btn {
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text2);
+            transition: var(--transition);
+        }
+        .sim-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* Action Buttons Row */
+        .action-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .control-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .value-display {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.8rem;
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Presets */
+        .presets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .preset-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text2);
+            transition: var(--transition);
+            text-transform: capitalize;
+        }
+        .preset-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Code Output */
+        .code-output {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 12px;
+            max-height: 160px;
+            overflow-y: auto;
+            color: var(--text);
+            line-height: 1.5;
+        }
+        .copy-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            background: var(--surface2);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 0.75rem;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        .faq-section h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .faq-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 768px) {
+            .faq-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .faq-item {
+            padding: 16px;
+            background: var(--surface2);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .faq-item h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .faq-item p {
+            font-size: 0.85rem;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text3);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 16px;
+        }
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Toast */
+        .toast-msg {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--text);
+            color: var(--bg);
+            padding: 10px 22px;
+            border-radius: 40px;
+            opacity: 0;
+            z-index: 1000;
+            font-weight: 600;
+            font-size: 0.85rem;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+        .toast-msg.visible {
+            opacity: 1;
+        }
+
+        /* Hidden file input */
+        #bgImageInput {
+            display: none;
+        }
+
+        /* SVG filters for color blindness simulation */
+        .svg-filters {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- SVG Filters for Color Blindness Simulation (Brettel-Viénot model) -->
+    <svg class="svg-filters" xmlns="http://www.w3.org/2000/svg">
+        <filter id="protanopia-filter" color-interpolation-filters="sRGB">
+            <feColorMatrix type="matrix" values="
+            0.567, 0.433, 0, 0, 0,
+            0.558, 0.442, 0, 0, 0,
+            0, 0.242, 0.758, 0, 0,
+            0, 0, 0, 1, 0" />
+        </filter>
+        <filter id="deuteranopia-filter" color-interpolation-filters="sRGB">
+            <feColorMatrix type="matrix" values="
+            0.625, 0.375, 0, 0, 0,
+            0.7, 0.3, 0, 0, 0,
+            0, 0.3, 0.7, 0, 0,
+            0, 0, 0, 1, 0" />
+        </filter>
+        <filter id="tritanopia-filter" color-interpolation-filters="sRGB">
+            <feColorMatrix type="matrix" values="
+            0.95, 0.05, 0, 0, 0,
+            0, 0.433, 0.567, 0, 0,
+            0, 0.475, 0.525, 0, 0,
+            0, 0, 0, 1, 0" />
+        </filter>
+    </svg>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <a href="/" class="logo" aria-label="DevToolbox - Accueil">DevToolbox</a>
+            <div class="header-right">
+                <div class="theme-toggle" role="radiogroup" aria-label="Thème">
+                    <button class="theme-btn active" data-theme="light" aria-checked="true">☀️ Clair</button>
+                    <button class="theme-btn" data-theme="dark" aria-checked="false">🌙 Sombre</button>
+                </div>
+                <nav class="lang-switch" aria-label="Langue">
+                    <a href="/tools/css-shap-generator/" class="lang-btn" hreflang="en">EN</a>
+                    <a href="/fr/outils/generateur-forme-css/" class="lang-btn active" hreflang="fr" aria-current="page">FR</a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <!-- Main Tool -->
+            <article class="tool-card" aria-labelledby="main-title">
+                <h1 id="main-title">Générateur de Formes CSS</h1>
+                <p class="subhead">Créez des formes complexes visuellement : <strong>clip-path</strong> avec points déplaçables, <strong>blobs</strong> par bruit de Perlin, <strong>border-radius</strong>. Export CSS, Tailwind, JSX. Simulateur daltonisme intégré.</p>
+
+                <!-- Mode Tabs -->
+                <nav class="tabs" id="modeTabs" aria-label="Modes de forme">
+                    <button class="tab-btn active" data-mode="clip-path" aria-pressed="true">📐 Clip-Path</button>
+                    <button class="tab-btn" data-mode="blob" aria-pressed="false">🫧 Blob (Perlin)</button>
+                    <button class="tab-btn" data-mode="border-radius" aria-pressed="false">🔲 Border-Radius</button>
+                </nav>
+
+                <div class="main-layout">
+                    <!-- Left: Preview -->
+                    <div class="panel">
+                        <div class="panel-label">Aperçu en direct</div>
+                        <div class="preview-area" id="previewArea">
+                            <svg id="shapeSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+                            <div class="shape-display" id="shapeDisplay"></div>
+                        </div>
+                        <!-- Simulator -->
+                        <div class="simulator-bar" role="radiogroup" aria-label="Simulateur daltonisme">
+                            <button class="sim-btn active" data-sim="normal" aria-pressed="true">👁️ Normal</button>
+                            <button class="sim-btn" data-sim="protanopia" aria-pressed="false">🔴 Protanopie</button>
+                            <button class="sim-btn" data-sim="deuteranopia" aria-pressed="false">🟢 Deutéranopie</button>
+                            <button class="sim-btn" data-sim="tritanopia" aria-pressed="false">🔵 Tritanopie</button>
+                        </div>
+                        <!-- Action Buttons -->
+                        <div class="action-row">
+                            <button class="btn btn-sm" id="uploadBgBtn">🖼️ Fond image</button>
+                            <input type="file" id="bgImageInput" accept="image/*">
+                            <button class="btn btn-sm" id="randomShapeBtn">🎲 Aléatoire</button>
+                            <button class="btn btn-primary btn-sm" id="shareUrlBtn">🔗 Partager URL</button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Controls -->
+                    <div class="panel">
+                        <div class="panel-label">Paramètres et code</div>
+                        <div class="controls" id="controlsContainer"></div>
+                        <div class="presets-grid" id="presetsContainer"></div>
+                        <div class="copy-btns">
+                            <button class="btn btn-primary btn-sm" id="copyCssBtn">📋 Copier CSS</button>
+                            <button class="btn btn-sm" id="copyTailwindBtn">📋 Copier Tailwind</button>
+                            <button class="btn btn-sm" id="copyJsxBtn">📋 Copier JSX</button>
+                        </div>
+                        <div class="code-output" id="codeOutput" aria-live="polite">/* Code CSS */</div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- FAQ Section -->
+            <section class="faq-section" aria-labelledby="faq-title">
+                <h2 id="faq-title">Questions fréquentes</h2>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <h3>Qu'est-ce qu'un clip-path en CSS ?</h3>
+                        <p>La propriété <code>clip-path</code> découpe un élément HTML selon une forme géométrique. Cet outil permet de <strong>faire glisser les points</strong> directement sur l'aperçu pour un contrôle visuel total.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Comment sont générés les blobs ?</h3>
+                        <p>Les blobs utilisent un <strong>algorithme de bruit de Perlin/Simplex</strong> pour créer des contours organiques naturels. Ajustez la complexité et la graine (seed) pour des formes uniques.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Le simulateur de daltonisme est-il réaliste ?</h3>
+                        <p>Oui, il applique des <strong>filtres SVG basés sur le modèle de Brettel-Viénot</strong> avec des matrices LMS pour simuler fidèlement la protanopie, deutéranopie et tritanopie.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Puis-je exporter pour Tailwind ou React ?</h3>
+                        <p>Absolument. Les boutons dédiés génèrent le code <strong>Tailwind CSS</strong> (avec syntaxe [clip-path:...]) et <strong>JSX</strong> pour React. Le code CSS natif est toujours disponible.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Comment partager ma forme ?</h3>
+                        <p>Cliquez sur <strong>« Partager URL »</strong> : tous les paramètres sont encodés dans le hash de l'URL. Envoyez le lien, votre collègue retrouvera exactement la même configuration.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>L'outil est-il gratuit ?</h3>
+                        <p>Oui, <strong>100% gratuit</strong>, sans inscription et sans publicité. Toutes les formes créées vous appartiennent.</p>
+                        <p>Découvrez aussi notre <a href="/fr/outils/generateur-arriere-plans/">générateur d’arrière-plans CSS</a></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>© 2025 <a href="/">DevToolbox</a> — Outils 100% côté client • Générateur de formes CSS</p>
+        </footer>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+    <script>
+        (function() {
+            // ==================== THEME ====================
+            const themeBtns = document.querySelectorAll('.theme-btn');
+
+            function setTheme(t) {
+                document.body.classList.toggle('dark', t === 'dark');
+                themeBtns.forEach(b => {
+                    b.classList.toggle('active', b.dataset.theme === t);
+                    b.setAttribute('aria-checked', b.dataset.theme === t ? 'true' : 'false');
+                });
+                localStorage.setItem('shape-theme', t);
+            }
+            themeBtns.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
+            const savedTheme = localStorage.getItem('shape-theme') || 'light';
+            setTheme(savedTheme);
+
+            // ==================== TOAST ====================
+            const toastEl = document.getElementById('toast');
+            let toastTimer;
+
+            function toast(msg) {
+                clearTimeout(toastTimer);
+                toastEl.textContent = msg;
+                toastEl.classList.add('visible');
+                toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 2000);
+            }
+
+            async function copyText(txt) {
+                try {
+                    await navigator.clipboard.writeText(txt);
+                    toast('✅ Copié !');
+                } catch {
+                    const ta = document.createElement('textarea');
+                    ta.value = txt;
+                    ta.style.cssText = 'position:fixed;opacity:0;';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    toast('✅ Copié (fallback)');
+                }
+            }
+
+            // ==================== DOM REFS ====================
+            const previewArea = document.getElementById('previewArea');
+            const shapeDisplay = document.getElementById('shapeDisplay');
+            const shapeSvg = document.getElementById('shapeSvg');
+            const controlsContainer = document.getElementById('controlsContainer');
+            const codeOutput = document.getElementById('codeOutput');
+            const presetsContainer = document.getElementById('presetsContainer');
+
+            // ==================== SIMPLEX NOISE (Perlin-like) ====================
+            // Implementation of 2D simplex noise for blob generation
+            const SimplexNoise = (function() {
+                const grad3 = [
+                    [1, 1, 0],
+                    [-1, 1, 0],
+                    [1, -1, 0],
+                    [-1, -1, 0],
+                    [1, 0, 1],
+                    [-1, 0, 1],
+                    [1, 0, -1],
+                    [-1, 0, -1],
+                    [0, 1, 1],
+                    [0, -1, 1],
+                    [0, 1, -1],
+                    [0, -1, -1]
+                ];
+                const perm = new Uint8Array(512);
+                const permMod12 = new Uint8Array(512);
+                let _seed = 0;
+
+                function seed(s) {
+                    _seed = s;
+                    for (let i = 0; i < 256; i++) {
+                        perm[i] = i;
+                    }
+                    // Fisher-Yates shuffle with seed
+                    let s2 = _seed;
+                    for (let i = 255; i > 0; i--) {
+                        s2 = (s2 * 16807 + 0) % 2147483647;
+                        const j = s2 % (i + 1);
+                        [perm[i], perm[j]] = [perm[j], perm[i]];
+                    }
+                    for (let i = 0; i < 512; i++) {
+                        perm[i] = perm[i & 255];
+                        permMod12[i] = perm[i] % 12;
+                    }
+                }
+
+                function dot(g, x, y) {
+                    return g[0] * x + g[1] * y;
+                }
+
+                function noise(x, y) {
+                    const F2 = 0.5 * (Math.sqrt(3) - 1);
+                    const G2 = (3 - Math.sqrt(3)) / 6;
+                    const s = (x + y) * F2;
+                    const i = Math.floor(x + s);
+                    const j = Math.floor(y + s);
+                    const t = (i + j) * G2;
+                    const X0 = i - t;
+                    const Y0 = j - t;
+                    const x0 = x - X0;
+                    const y0 = y - Y0;
+                    let i1, j1;
+                    if (x0 > y0) { i1 = 1;
+                        j1 = 0; } else { i1 = 0;
+                        j1 = 1; }
+                    const x1 = x0 - i1 + G2;
+                    const y1 = y0 - j1 + G2;
+                    const x2 = x0 - 1 + 2 * G2;
+                    const y2 = y0 - 1 + 2 * G2;
+                    const ii = i & 255;
+                    const jj = j & 255;
+                    let n0 = 0,
+                        n1 = 0,
+                        n2 = 0;
+                    const gi0 = permMod12[ii + perm[jj]];
+                    const gi1 = permMod12[ii + i1 + perm[jj + j1]];
+                    const gi2 = permMod12[ii + 1 + perm[jj + 1]];
+                    let t0 = 0.5 - x0 * x0 - y0 * y0;
+                    if (t0 >= 0) { t0 *= t0;
+                        n0 = t0 * t0 * dot(grad3[gi0], x0, y0); }
+                    let t1 = 0.5 - x1 * x1 - y1 * y1;
+                    if (t1 >= 0) { t1 *= t1;
+                        n1 = t1 * t1 * dot(grad3[gi1], x1, y1); }
+                    let t2 = 0.5 - x2 * x2 - y2 * y2;
+                    if (t2 >= 0) { t2 *= t2;
+                        n2 = t2 * t2 * dot(grad3[gi2], x2, y2); }
+                    return 70 * (n0 + n1 + n2);
+                }
+                return { seed, noise };
+            })();
+
+            // ==================== STATE ====================
+            let currentMode = 'clip-path';
+            const shapeParams = {
+                'clip-path': { points: 5, roundness: 0, rotation: 0, customPoints: null },
+                'blob': { complexity: 4, seed: 42, scale: 1, octaves: 3 },
+                'border-radius': { tl: 30, tr: 70, bl: 20, br: 80 }
+            };
+
+            // For drag handles
+            let dragPointIndex = -1;
+            let customClipPoints = null; // Array of {x, y} in percentage (0-100)
+
+            // ==================== CLIP-PATH POINTS ====================
+            function generateDefaultPolygonPoints(num, rotation) {
+                const pts = [];
+                const rotRad = rotation * Math.PI / 180;
+                for (let i = 0; i < num; i++) {
+                    const angle = (i / num) * Math.PI * 2 + rotRad;
+                    const x = 50 + 42 * Math.cos(angle);
+                    const y = 50 + 42 * Math.sin(angle);
+                    pts.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 });
+                }
+                return pts;
+            }
+
+            function getCurrentClipPoints() {
+                if (customClipPoints && customClipPoints.length >= 3) {
+                    return customClipPoints;
+                }
+                const params = shapeParams['clip-path'];
+                return generateDefaultPolygonPoints(params.points, params.rotation);
+            }
+
+            function setClipPoints(pts) {
+                customClipPoints = pts.map(p => ({ x: p.x, y: p.y }));
+            }
+
+            function clearCustomPoints() {
+                customClipPoints = null;
+            }
+
+            // ==================== BLOB GENERATION (Perlin noise) ====================
+            function generateBlobPath(complexity, seedVal, scale, octaves) {
+                SimplexNoise.seed(seedVal);
+                const numPoints = Math.min(100, 60 + complexity * 6);
+                const points = [];
+                const centerX = 100;
+                const centerY = 100;
+                const baseRadius = 85 * scale;
+
+                for (let i = 0; i < numPoints; i++) {
+                    const angle = (i / numPoints) * Math.PI * 2;
+                    const nx = Math.cos(angle) * 2.5;
+                    const ny = Math.sin(angle) * 2.5;
+
+                    let noiseVal = 0;
+                    let amp = 1;
+                    let freq = 1;
+                    let maxVal = 0;
+                    for (let o = 0; o < octaves; o++) {
+                        noiseVal += SimplexNoise.noise(nx * freq + seedVal * 0.1, ny * freq + seedVal * 0.1) * amp;
+                        maxVal += Math.abs(amp);
+                        amp *= 0.55;
+                        freq *= 2.1;
+                    }
+                    noiseVal = noiseVal / (maxVal || 1);
+
+                    const radiusVariation = 0.6 + 0.4 * ((noiseVal + 1) / 2);
+                    const r = baseRadius * radiusVariation;
+                    const x = centerX + r * Math.cos(angle);
+                    const y = centerY + r * Math.sin(angle);
+                    points.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 });
+                }
+                return points;
+            }
+
+            function pointsToSvgPath(points, close = true) {
+                if (points.length === 0) return '';
+                let d = `M ${points[0].x} ${points[0].y}`;
+                for (let i = 1; i < points.length; i++) {
+                    d += ` L ${points[i].x} ${points[i].y}`;
+                }
+                if (close) d += ' Z';
+                return d;
+            }
+
+            function pointsToClipPathPolygon(points) {
+                return `polygon(${points.map(p => `${p.x}% ${p.y}%`).join(', ')})`;
+            }
+
+            // ==================== UPDATE SHAPE ====================
+            function updateShape(resetCustomPoints = false) {
+                if (resetCustomPoints) clearCustomPoints();
+
+                const mode = currentMode;
+                const params = shapeParams[mode];
+                let clipValue = '';
+                let borderRadius = '';
+                let svgBlobContent = '';
+                let displayPoints = [];
+
+                shapeDisplay.classList.remove('blob-mode');
+                shapeDisplay.innerHTML = '';
+                shapeSvg.innerHTML = '';
+
+                if (mode === 'clip-path') {
+                    const pts = getCurrentClipPoints();
+                    displayPoints = pts;
+                    clipValue = pointsToClipPathPolygon(pts);
+                    shapeDisplay.style.clipPath = clipValue;
+                    shapeDisplay.style.borderRadius = '';
+                    shapeDisplay.style.background = 'var(--primary)';
+                    // Draw SVG handles
+                    drawDragHandles(pts);
+                } else if (mode === 'blob') {
+                    const blobPts = generateBlobPath(params.complexity, params.seed, params.scale, params.octaves ||
+                        3);
+                    displayPoints = blobPts;
+                    const pathD = pointsToSvgPath(blobPts);
+                    svgBlobContent =
+                        `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="${pathD}" fill="currentColor"/></svg>`;
+                    shapeDisplay.classList.add('blob-mode');
+                    shapeDisplay.innerHTML = svgBlobContent;
+                    shapeDisplay.style.background = 'transparent';
+                    shapeDisplay.style.color = 'var(--primary)';
+                    shapeDisplay.style.clipPath = '';
+                    shapeDisplay.style.borderRadius = '';
+                    clipValue = pointsToClipPathPolygon(blobPts);
+                } else if (mode === 'border-radius') {
+                    const { tl, tr, bl, br } = params;
+                    borderRadius =
+                        `${tl}% ${100-tl}% ${100-br}% ${br}% / ${tl}% ${tr}% ${100-bl}% ${bl}%`;
+                    shapeDisplay.style.borderRadius = borderRadius;
+                    shapeDisplay.style.clipPath = '';
+                    shapeDisplay.style.background = 'var(--primary)';
+                    shapeDisplay.innerHTML = '';
+                }
+
+                updateCodeOutput(clipValue, borderRadius, svgBlobContent);
+                updateControls();
+                updatePresets();
+            }
+
+            function drawDragHandles(points) {
+                if (currentMode !== 'clip-path') return;
+                shapeSvg.innerHTML = '';
+                // Draw outline
+                const pathD = pointsToSvgPath(points.map(p => ({ x: p.x * 2, y: p.y * 2 })));
+                const outline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                outline.setAttribute('d', pathD);
+                outline.setAttribute('class', 'polygon-outline');
+                shapeSvg.appendChild(outline);
+
+                // Draw handles
+                points.forEach((pt, i) => {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', pt.x * 2);
+                    circle.setAttribute('cy', pt.y * 2);
+                    circle.setAttribute('r', '7');
+                    circle.setAttribute('fill', '#fff');
+                    circle.setAttribute('stroke', 'var(--primary)');
+                    circle.setAttribute('stroke-width', '2');
+                    circle.setAttribute('class', 'drag-handle');
+                    circle.setAttribute('data-index', i);
+                    circle.addEventListener('mousedown', onDragStart);
+                    circle.addEventListener('touchstart', onDragStart, { passive: false });
+                    shapeSvg.appendChild(circle);
+                });
+            }
+
+            // ==================== DRAG HANDLERS ====================
+            function onDragStart(e) {
+                if (currentMode !== 'clip-path') return;
+                e.preventDefault();
+                const index = parseInt(e.target.getAttribute('data-index'));
+                if (isNaN(index)) return;
+                dragPointIndex = index;
+
+                // Ensure we are working with custom points
+                const currentPts = getCurrentClipPoints();
+                setClipPoints(currentPts);
+
+                document.addEventListener('mousemove', onDragMove);
+                document.addEventListener('mouseup', onDragEnd);
+                document.addEventListener('touchmove', onDragMove, { passive: false });
+                document.addEventListener('touchend', onDragEnd);
+            }
+
+            function onDragMove(e) {
+                if (dragPointIndex < 0 || !customClipPoints) return;
+                e.preventDefault();
+                const rect = shapeSvg.getBoundingClientRect();
+                let clientX, clientY;
+                if (e.touches) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                const svgX = ((clientX - rect.left) / rect.width) * 200;
+                const svgY = ((clientY - rect.top) / rect.height) * 200;
+                const percentX = Math.max(2, Math.min(98, svgX / 2));
+                const percentY = Math.max(2, Math.min(98, svgY / 2));
+                customClipPoints[dragPointIndex] = { x: Math.round(percentX * 10) / 10, y: Math.round(percentY * 10) /
+                        10 };
+                updateShape();
+            }
+
+            function onDragEnd() {
+                dragPointIndex = -1;
+                document.removeEventListener('mousemove', onDragMove);
+                document.removeEventListener('mouseup', onDragEnd);
+                document.removeEventListener('touchmove', onDragMove);
+                document.removeEventListener('touchend', onDragEnd);
+            }
+
+            // ==================== CODE OUTPUT ====================
+            function updateCodeOutput(clipValue, borderRadius, svgBlobContent) {
+                let css = '';
+                if (clipValue && currentMode !== 'border-radius') {
+                    css = `clip-path: ${clipValue};\n`;
+                }
+                if (borderRadius) {
+                    css = `border-radius: ${borderRadius};\n`;
+                }
+                if (svgBlobContent) {
+                    css += `\n/* SVG inline pour le blob : */\n${svgBlobContent}\n`;
+                    css += `\n/* Alternative CSS avec clip-path approximatif : */\n`;
+                    if (clipValue) css += `clip-path: ${clipValue};\n`;
+                }
+                if (!css.trim()) css = '/* Aucune propriété CSS */';
+                codeOutput.textContent = css.trim();
+            }
+
+            // ==================== CONTROLS ====================
+            function sliderHTML(key, label, min, max, val, step = 1, unit = '') {
+                return `
+                <div class="control-group">
+                <label>${label} <span class="value-display" id="${key}Val">${val}${unit}</span></label>
+                <input type="range" class="shape-slider" data-key="${key}" min="${min}" max="${max}" value="${val}" step="${step}" aria-label="${label}">
+                </div>`;
+            }
+
+            function updateControls() {
+                const mode = currentMode;
+                const params = shapeParams[mode];
+                let html = '';
+
+                if (mode === 'clip-path') {
+                    if (!customClipPoints) {
+                        html += sliderHTML('points', 'Nombre de côtés', 3, 12, params.points);
+                    } else {
+                        html +=
+                            `<p style="font-size:0.8rem;color:var(--text3);margin-bottom:4px;">✨ Points personnalisés (glissez les poignées)</p>`;
+                        html +=
+                            `<button class="btn btn-sm" id="resetPointsBtn" style="margin-bottom:8px;">↩️ Réinitialiser les points</button>`;
+                    }
+                    html += sliderHTML('rotation', 'Rotation', 0, 360, params.rotation, 1, '°');
+                    html += sliderHTML('roundness', 'Arrondi (inset)', 0, 50, params.roundness, 1, '%');
+                } else if (mode === 'blob') {
+                    html += sliderHTML('complexity', 'Complexité', 1, 10, params.complexity);
+                    html += sliderHTML('seed', 'Graine (seed)', 1, 200, params.seed);
+                    html += sliderHTML('scale', 'Échelle', 0.3, 1.8, params.scale, 0.05);
+                    html += sliderHTML('octaves', 'Octaves de bruit', 1, 6, params.octaves || 3);
+                } else if (mode === 'border-radius') {
+                    html += sliderHTML('tl', 'Haut-gauche', 0, 100, params.tl, 1, '%');
+                    html += sliderHTML('tr', 'Haut-droit', 0, 100, params.tr, 1, '%');
+                    html += sliderHTML('bl', 'Bas-gauche', 0, 100, params.bl, 1, '%');
+                    html += sliderHTML('br', 'Bas-droit', 0, 100, params.br, 1, '%');
+                }
+
+                controlsContainer.innerHTML = html;
+
+                // Attach slider events
+                document.querySelectorAll('.shape-slider').forEach(s => {
+                    s.addEventListener('input', function() {
+                        const key = this.dataset.key;
+                        const val = parseFloat(this.value);
+                        shapeParams[mode][key] = val;
+                        const valDisplay = document.getElementById(key + 'Val');
+                        if (valDisplay) {
+                            const unit = (key === 'rotation') ? '°' : (['tl', 'tr', 'bl', 'br',
+                                'roundness'
+                            ].includes(key) ? '%' : '');
+                            valDisplay.textContent = val + unit;
+                        }
+                        if (key === 'points' || key === 'rotation') {
+                            clearCustomPoints();
+                        }
+                        updateShape();
+                    });
+                });
+
+                // Reset points button
+                const resetBtn = document.getElementById('resetPointsBtn');
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', () => {
+                        clearCustomPoints();
+                        updateShape(true);
+                    });
+                }
+            }
+
+            function updatePresets() {
+                const mode = currentMode;
+                let presets = [];
+                if (mode === 'clip-path') presets = ['triangle', 'pentagone', 'hexagone', 'étoile', 'flèche',
+                'losange'];
+                else if (mode === 'blob') presets = ['bulle', 'organique', 'vague', 'éclaboussure', 'galet'];
+                else presets = ['cercle', 'ellipse', 'goutte', 'feuille', 'amibe'];
+
+                presetsContainer.innerHTML = presets.map(p =>
+                    `<button class="preset-btn" data-preset="${p}">${p}</button>`
+                ).join('');
+
+                document.querySelectorAll('.preset-btn').forEach(b => {
+                    b.addEventListener('click', () => applyPreset(b.dataset.preset));
+                });
+            }
+
+            function applyPreset(preset) {
+                const mode = currentMode;
+                clearCustomPoints();
+
+                const presetsMap = {
+                    'triangle': { points: 3, rotation: 0, roundness: 0 },
+                    'pentagone': { points: 5, rotation: 0, roundness: 0 },
+                    'hexagone': { points: 6, rotation: 0, roundness: 0 },
+                    'étoile': { points: 5, rotation: 0, roundness: 25 },
+                    'flèche': { points: 3, rotation: 90, roundness: 5 },
+                    'losange': { points: 4, rotation: 45, roundness: 0 },
+                    'bulle': { complexity: 3, seed: 42, scale: 1, octaves: 3 },
+                    'organique': { complexity: 6, seed: 77, scale: 1.1, octaves: 4 },
+                    'vague': { complexity: 3, seed: 120, scale: 0.9, octaves: 2 },
+                    'éclaboussure': { complexity: 8, seed: 200, scale: 1, octaves: 5 },
+                    'galet': { complexity: 2, seed: 55, scale: 0.8, octaves: 2 },
+                    'cercle': { tl: 50, tr: 50, bl: 50, br: 50 },
+                    'ellipse': { tl: 65, tr: 65, bl: 35, br: 35 },
+                    'goutte': { tl: 75, tr: 25, bl: 25, br: 75 },
+                    'feuille': { tl: 20, tr: 80, bl: 80, br: 20 },
+                    'amibe': { tl: 40, tr: 60, bl: 55, br: 45 }
+                };
+
+                const presetData = presetsMap[preset];
+                if (presetData) {
+                    Object.assign(shapeParams[mode], presetData);
+                }
+                updateShape();
+            }
+
+            // ==================== SIMULATOR ====================
+            document.querySelectorAll('.sim-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.sim-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-pressed', 'false');
+                    });
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-pressed', 'true');
+                    const sim = btn.dataset.sim;
+
+                    const filterMap = {
+                        normal: 'none',
+                        protanopia: 'url(#protanopia-filter)',
+                        deuteranopia: 'url(#deuteranopia-filter)',
+                        tritanopia: 'url(#tritanopia-filter)'
+                    };
+                    previewArea.style.filter = filterMap[sim] || 'none';
+                });
+            });
+
+            // ==================== EVENT LISTENERS ====================
+            // Mode tabs
+            document.querySelectorAll('#modeTabs .tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#modeTabs .tab-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-pressed', 'false');
+                    });
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-pressed', 'true');
+                    currentMode = btn.dataset.mode;
+                    clearCustomPoints();
+                    updateShape();
+                });
+            });
+
+            // Random
+            document.getElementById('randomShapeBtn').addEventListener('click', () => {
+                clearCustomPoints();
+                const mode = currentMode;
+                if (mode === 'clip-path') {
+                    shapeParams[mode].points = Math.floor(Math.random() * 10) + 3;
+                    shapeParams[mode].rotation = Math.floor(Math.random() * 360);
+                    shapeParams[mode].roundness = Math.floor(Math.random() * 40);
+                } else if (mode === 'blob') {
+                    shapeParams[mode].complexity = Math.floor(Math.random() * 9) + 2;
+                    shapeParams[mode].seed = Math.floor(Math.random() * 200) + 1;
+                    shapeParams[mode].scale = Math.random() * 1.2 + 0.4;
+                    shapeParams[mode].octaves = Math.floor(Math.random() * 5) + 2;
+                } else {
+                    ['tl', 'tr', 'bl', 'br'].forEach(k => {
+                        shapeParams[mode][k] = Math.floor(Math.random() * 100);
+                    });
+                }
+                updateShape();
+            });
+
+            // Image background
+            document.getElementById('uploadBgBtn').addEventListener('click', () => document.getElementById(
+                'bgImageInput').click());
+            document.getElementById('bgImageInput').addEventListener('change', function() {
+                const file = this.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    previewArea.style.backgroundImage = `url(${e.target.result})`;
+                    previewArea.style.backgroundSize = 'cover';
+                    previewArea.style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Copy buttons
+            document.getElementById('copyCssBtn').addEventListener('click', () => copyText(codeOutput.textContent));
+            document.getElementById('copyTailwindBtn').addEventListener('click', () => {
+                const clip = shapeDisplay.style.clipPath;
+                const radius = shapeDisplay.style.borderRadius;
+                let tailwind = '';
+                if (clip && clip !== 'none') tailwind += `[clip-path:${clip}] `;
+                if (radius && radius !== '') tailwind += `[border-radius:${radius}]`;
+                if (!tailwind.trim()) tailwind = '/* Pas de classe Tailwind spécifique */';
+                copyText(tailwind.trim());
+            });
+            document.getElementById('copyJsxBtn').addEventListener('click', () => {
+                const clip = shapeDisplay.style.clipPath;
+                const radius = shapeDisplay.style.borderRadius;
+                let jsx = '';
+                if (clip && clip !== 'none') jsx += `clipPath: "${clip}"`;
+                if (radius && radius !== '') jsx += (jsx ? ', ' : '') + `borderRadius: "${radius}"`;
+                if (!jsx) jsx = '/* Pas de style JSX */';
+                copyText(`style={{ ${jsx} }}`);
+            });
+
+            // Share URL
+            document.getElementById('shareUrlBtn').addEventListener('click', () => {
+                const state = {
+                    mode: currentMode,
+                    params: JSON.parse(JSON.stringify(shapeParams[currentMode])),
+                    customPoints: customClipPoints
+                };
+                const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+                window.location.hash = hash;
+                const url = window.location.origin + window.location.pathname + '#' + hash;
+                copyText(url);
+                toast('🔗 URL copiée ! Partagez cette forme.');
+            });
+
+            // Load from hash
+            function loadFromHash() {
+                if (!window.location.hash) return;
+                try {
+                    const hash = window.location.hash.slice(1);
+                    const json = decodeURIComponent(atob(hash));
+                    const state = JSON.parse(json);
+                    if (state.mode) {
+                        currentMode = state.mode;
+                        document.querySelectorAll('#modeTabs .tab-btn').forEach(b => {
+                            b.classList.toggle('active', b.dataset.mode === currentMode);
+                            b.setAttribute('aria-pressed', b.dataset.mode === currentMode ?
+                                'true' : 'false');
+                        });
+                    }
+                    if (state.params) {
+                        shapeParams[currentMode] = { ...shapeParams[currentMode], ...state.params };
+                    }
+                    if (state.customPoints && currentMode === 'clip-path') {
+                        customClipPoints = state.customPoints;
+                    } else {
+                        clearCustomPoints();
+                    }
+                    updateShape();
+                    toast('📂 Forme restaurée depuis l\'URL');
+                } catch (e) {
+                    console.warn('Impossible de restaurer depuis le hash:', e);
+                }
+            }
+
+            // ==================== INIT ====================
+            updateShape();
+            loadFromHash();
+        })();
+    </script>
+</body>
+</html>
