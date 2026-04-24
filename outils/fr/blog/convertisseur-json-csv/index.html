@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment convertir JSON en CSV et inversement — Guide complet</title>
+    <meta name="description" content="Apprenez à convertir des fichiers JSON en CSV (et vice-versa) facilement. Aplatissage des objets, chemin personnalisé, BOM UTF‑8 pour Excel, gestion des valeurs nulles. Tutoriel étape par étape.">
+    <meta name="keywords" content="convertir json en csv, json to csv converter, comment aplatir un json, csv délimiteur, utf-8 bom excel, json imbriqué, convertir csv en json">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/convertisseur-json-csv/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/convertisseur-json-csv/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/blog/convert-json-csv-guid/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/blog/convert-json-csv-guide/">
+
+    <meta property="og:title" content="Comment convertir JSON en CSV et inversement — Guide complet">
+    <meta property="og:description" content="Guide étape par étape pour transformer vos données JSON en tableaux CSV exploitables dans Excel et vice-versa, avec des astuces concrètes.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/convertisseur-json-csv/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Guide : convertir JSON ↔ CSV">
+    <meta name="twitter:description" content="Aplatissage, BOM UTF‑8, chemins personnalisés… tout pour réussir vos conversions.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Comment Convertir un Fichier JSON en CSV (et Vice-Versa) Facilement",
+            "author": { "@type": "Person", "name": "L'équipe DevToolbox" },
+            "datePublished": "2025-04-24",
+            "dateModified": "2025-04-24",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/convertisseur-json-csv/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/fr/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Convertir JSON en CSV", "item": "https://www.devstoolsbox.dev/fr/blog/convertir-json-csv-guide-complet/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        /* Header */
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        /* Article */
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light">☀️ Clair</button>
+                <button class="theme-btn" data-theme="dark">🌙 Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/blog/convert-json-csv-guide/" class="lang-btn">EN</a>
+                <a href="/fr/blog/convertisseur-json-csv/" class="lang-btn active">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Article -->
+    <main>
+        <article class="article-card">
+            <h1>Comment Convertir un Fichier JSON en CSV (et Vice‑Versa) Facilement : Guide Complet avec Exemples</h1>
+            <div class="meta">Publié le 24 avril 2025 par l'équipe DevToolbox — Lecture 8 min</div>
+
+            <p><strong>JSON</strong> et <strong>CSV</strong> sont deux formats que tout développeur, analyste ou administrateur système rencontre quotidiennement. Le premier est le langage des API modernes, le second celui des tableurs comme Excel ou Google Sheets. Savoir passer de l’un à l’autre rapidement, sans perdre d’informations ni déformer les caractères (accents, symboles), est une compétence précieuse.</p>
+            <p>Dans ce guide, je vous montre <strong>étape par étape</strong> comment utiliser le <a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">convertisseur JSON ↔ CSV gratuit de DevToolbox</a> pour transformer vos données en quelques secondes, <strong>sans jamais envoyer le moindre octet à un serveur distant</strong>.</p>
+
+            <h2>Pourquoi passer de JSON à CSV (et inversement) ?</h2>
+            <p>JSON (JavaScript Object Notation) est hiérarchique, capable de représenter des tableaux, des objets imbriqués et des types variés. CSV (Comma‑Separated Values) est plat, tabulaire, compris par <strong>tous</strong> les outils de bureautique. Voici trois situations concrètes :</p>
+            <ul>
+                <li><strong>Exploiter une réponse d’API dans Excel</strong> : je reçois un JSON, mais mon collègue marketing a besoin d’un tableau. Plutôt que d’écrire un script Python, je convertis directement.</li>
+                <li><strong>Alimenter une base de données</strong> : beaucoup d’ETL acceptent le CSV en entrée. Si mes données sont en JSON, je les convertis avant import.</li>
+                <li><strong>Générer un JSON propre pour une app frontend</strong> : je récupère un export CRM en CSV et je le transforme en JSON structuré.</li>
+            </ul>
+            <p>Les deux sens ont une vraie utilité, et un bon convertisseur doit les traiter avec autant de soin.</p>
+
+            <h2>Étape 1 : Accéder à l’outil et y coller ses données</h2>
+            <p>Rendez-vous sur la page <a href="https://www.devstoolsbox.dev/fr/outils/formateur-jwt/">Convertisseur JSON / CSV</a>. La page fonctionne entièrement dans le navigateur : <strong>aucune donnée n’est transmise à un serveur</strong>, ce qui est crucial lorsque l’on manipule des informations sensibles (clients, factures, tokens).</p>
+            <p>L’interface est divisée en deux zones : <strong>JSON</strong> à gauche et <strong>CSV</strong> à droite. Vous pouvez soit <strong>coller votre texte directement</strong>, soit <strong>glisser-déposer un fichier</strong> depuis votre ordinateur. La détection du format est automatique : si vous collez du JSON, la conversion se fera vers CSV, et inversement.</p>
+
+            <h2>Étape 2 : Extraire le tableau d’un JSON complexe (chemin du tableau)</h2>
+            <p>C’est l’une des fonctionnalités qui rend cet outil vraiment utile face à des solutions plus rudimentaires. Imaginez une API qui vous renvoie un JSON comme celui‑ci :</p>
+            <pre>{
+  "success": true,
+  "data": {
+    "users": [
+      {"id": 1, "nom": "Alice", "age": 30},
+      {"id": 2, "nom": "Bob", "age": 25}
+    ]
+  }
+}</pre>
+            <p>Le tableau que vous voulez se trouve imbriqué sous <code>data.users</code>. Plutôt que de recopier uniquement la partie utile, indiquez simplement <code>data.users</code> dans le champ <strong>Chemin du tableau</strong> (situé sous la zone JSON). L’outil va automatiquement descendre dans l’objet et ne convertir que le tableau ciblé.</p>
+            <p>Cette technique fait gagner un temps considérable quand l’API encapsule les données dans plusieurs couches (<code>success</code>, <code>data</code>, <code>response</code>…).</p>
+
+            <h2>Étape 3 : Aplatir les objets imbriqués</h2>
+            <p>Le JSON peut contenir des sous‑objets à l’intérieur de chaque élément du tableau. Prenez cet exemple :</p>
+            <pre>[
+  {
+    "nom": "Alice",
+    "adresse": {
+      "ville": "Paris",
+      "code_postal": "75001"
+    }
+  }
+]</pre>
+            <p>Si vous convertissez tel quel, la colonne <code>adresse</code> contiendra <code>[object Object]</code> — inexploitable dans un tableur. <strong>Cochez la case « Aplatir les objets »</strong>. Résultat :</p>
+            <pre>| nom   | adresse.ville | adresse.code_postal |
+| Alice | Paris         | 75001               |</pre>
+            <p>L’outil transforme la hiérarchie en colonnes à plat avec une notation par points. Vous pouvez ensuite renommer les colonnes dans Excel si nécessaire.</p>
+
+            <h2>Étape 4 : Convertir et visualiser le tableau</h2>
+            <p>Cliquez sur le bouton <strong>« Convertir en CSV → »</strong>. Immédiatement, un <strong>aperçu sous forme de tableau HTML</strong> apparaît en bas de page. Vous voyez les premières lignes, les en‑têtes de colonnes, et les statistiques : nombre de lignes, de colonnes, taille du JSON d’origine et du CSV généré.</p>
+            <p>Avant même de télécharger, vous pouvez vérifier que la conversion est correcte. Si une colonne vous semble bizarre (par exemple des valeurs null inattendues), vous pouvez revenir sur les options.</p>
+
+            <h2>Étape 5 : Télécharger le CSV prêt pour Excel (BOM UTF‑8)</h2>
+            <p>Cliquez sur <strong>« Télécharger CSV (UTF-8 BOM) »</strong>. Le <strong>BOM UTF‑8</strong> est un petit marqueur invisible placé en début de fichier. Sans lui, Excel peut mal interpréter les accents ou les caractères spéciaux, notamment avec les versions françaises du logiciel. En utilisant cette option, vous êtes certain que vos <code>é</code>, <code>è</code>, <code>€</code> s’afficheront correctement à l’ouverture, même en double‑cliquant sur le fichier.</p>
+            <p>Le fichier téléchargé porte l’extension <code>.csv</code> et s’ouvre directement dans Excel, Google Sheets ou n’importe quel éditeur de texte.</p>
+
+            <h2>Convertir du CSV vers JSON : options avancées</h2>
+            <p>La conversion inverse est tout aussi simple :</p>
+            <ol>
+                <li><strong>Collez votre CSV</strong> dans la zone de droite.</li>
+                <li><strong>Choisissez le délimiteur</strong> : virgule, point‑virgule, tabulation ou pipe (<code>|</code>). Si vous ne savez pas, laissez la détection automatique : l’outil analyse la première ligne et trouve le caractère le plus fréquent.</li>
+                <li><strong>Indiquez si la première ligne contient les en‑têtes</strong> (case cochée par défaut). Si votre CSV n’a pas d’en‑têtes, l’outil nommera automatiquement les colonnes <code>col1</code>, <code>col2</code>, etc.</li>
+                <li><strong>Gérez les valeurs nulles</strong> : dans un CSV, une cellule vide peut signifier « rien », mais en JSON on peut vouloir <code>null</code>, une chaîne vide <code>""</code>, ou même le chiffre <code>0</code>. Utilisez le menu « Valeurs nulles » pour choisir le comportement souhaité.</li>
+                <li>Cliquez sur <strong>« ← Convertir en JSON »</strong>. Le résultat est formaté avec une indentation propre, directement réutilisable dans votre code.</li>
+            </ol>
+
+            <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/fr/outils/formateur-json/" class="btn-tool">🔧 Essayer le convertisseur JSON / CSV</a></p>
+
+            <h2>Astuces de pro pour des conversions impeccables</h2>
+            <ul>
+                <li><strong>Pré-formatez votre JSON</strong> : utilisez le <a href="/fr/outils/formateur-json/">formateur JSON</a> de DevToolbox pour valider et indenter vos données avant conversion.</li>
+                <li><strong>Attention aux nombres</strong> : les zéros non significatifs (ex. code postal <code>01234</code>) peuvent être interprétés comme des entiers. Pensez à les encadrer de guillemets dans le CSV si nécessaire.</li>
+                <li><strong>Gros volumes</strong> : tout est traité localement, mais pour des JSON de plusieurs dizaines de mégaoctets, privilégiez un script en ligne de commande. L’outil reste parfait pour les exports d’API classiques (quelques milliers de lignes).</li>
+                <li><strong>UTF‑8 BOM pour Excel français</strong> : activez toujours cette option si le fichier est destiné à un utilisateur d’Excel. Cela évite les caractères « ? » ou les symboles étranges.</li>
+            </ul>
+
+            <h2>Questions fréquentes (FAQ)</h2>
+            <h3>Le convertisseur modifie‑t‑il mon fichier original ?</h3>
+            <p>Non, tout se passe dans votre navigateur. Aucune donnée n’est envoyée à un serveur. Votre fichier reste privé.</p>
+
+            <h3>Puis‑je convertir un JSON très profond (plusieurs niveaux d’objets) ?</h3>
+            <p>Oui, l’option « Aplatir les objets » gère autant de niveaux que nécessaire. Les clés seront concaténées avec un point.</p>
+
+            <h3>Quel délimiteur choisir pour un CSV qui s’ouvre par défaut avec le séparateur point‑virgule ?</h3>
+            <p>En France, Excel utilise souvent le point‑virgule comme séparateur par défaut. Spécifiez <code>;</code> dans le menu déroulant avant conversion, ou générez un CSV avec virgule puis importez-le via l’onglet « Données » d’Excel.</p>
+
+            <h3>Le BOM UTF‑8 est‑il toujours nécessaire ?</h3>
+            <p>Il est fortement recommandé pour Excel sous Windows. Google Sheets et LibreOffice le gèrent correctement aussi, mais il n’est pas obligatoire.</p>
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 <a href="/">DevToolbox</a> — Outils gratuits pour développeurs et designers. <a href="/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox/fr/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<!-- Script thème -->
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
