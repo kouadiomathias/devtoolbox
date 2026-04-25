@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Create a Glassmorphism Background Without Images (Pure CSS & Free Tool)</title>
+    <meta name="description" content="Learn how to achieve a realistic frosted glass effect in a few lines of CSS, without downloading any images. Use our free generator to prototype and export the code immediately.">
+    <meta name="keywords" content="glassmorphism css, frosted glass css, glass effect generator, pure css glass, backdrop-filter tutorial, glassmorphism without images">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/css-glassmorphism-guide/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/css-glassmorphism-guide/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/glassmorphism-css-comment-faire/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/css-glassmorphism-guide/">
+
+    <meta property="og:title" content="Create a Glassmorphism Background Without Images (Pure CSS)">
+    <meta property="og:description" content="Master the frosted glass effect with pure CSS. Use our free visual generator to prototype and export the code.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/css-glassmorphism-guide/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Glassmorphism in Pure CSS – Guide">
+    <meta name="twitter:description" content="Build a frosted glass effect with pure CSS and a free visual generator.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "How to Create a Glassmorphism Background Without Images (Pure CSS & Free Tool)",
+            "author": { "@type": "Person", "name": "DevToolbox Team" },
+            "datePublished": "2026-04-24",
+            "dateModified": "2026-04-24",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/css-glassmorphism-guide/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Glassmorphism Pure CSS Guide", "item": "https://www.devstoolsbox.dev/tools/blog/css-glassmorphism-guide/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        /* Header */
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        /* Article */
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Light</button>
+                <button class="theme-btn" data-theme="dark"> Dark</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/blog/css-glassmorphism-guide/" class="lang-btn active">EN</a>
+                <a href="/fr/blog/glassmorphism-css-comment-faire/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Article -->
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-04-24">
+            <meta itemprop="author" content="DevToolbox">
+
+            <h1 itemprop="headline">How to Create a Glassmorphism Background Without Images (Pure CSS &amp; Free Tool)</h1>
+            <div class="meta">Published on April 24, 2026 by the DevToolbox Team — 7 min read</div>
+
+            <div itemprop="articleBody">
+                <p>Glassmorphism is more than a passing trend: it's an elegant way to layer content on top of complex backgrounds without sacrificing readability. Popularised by Apple and Microsoft, this style relies on blur and transparency to create the illusion of glass. In this article, I'll show you how to reproduce it in pure CSS, without images, and introduce a free tool that speeds up the whole process.</p>
+
+                <h2>What exactly is glassmorphism?</h2>
+                <p>Glassmorphism (or "frosted glass effect") combines three ingredients:</p>
+                <ul>
+                    <li>A <strong>semi‑transparent background</strong> (often white or a light tint)</li>
+                    <li>A <strong>blur applied behind the element</strong> (backdrop‑filter)</li>
+                    <li>A <strong>subtle border</strong> that reinforces the glass feel</li>
+                </ul>
+                <p>It's used on cards, navigation bars, modals… any component that needs to stand out from a busy background while remaining visually light.</p>
+                <p>You have probably seen interfaces where a panel reveals the shapes and colours of the image or gradient behind it, as if through a window. That's exactly it.</p>
+
+                <h2>The essential CSS properties</h2>
+                <p>No JavaScript or library is needed. Two CSS properties do the bulk of the work:</p>
+                <ul>
+                    <li><code>background: rgba(255, 255, 255, 0.2);</code> – sets a white colour at 20% opacity.</li>
+                    <li><code>backdrop-filter: blur(10px);</code> – applies a blur to everything behind the element.</li>
+                </ul>
+                <p>Add a <code>border-radius</code> to round the corners, a very light <code>border</code>, and a subtle <code>box-shadow</code>, and you have a glass card.</p>
+
+                <h2>Building your first glass card – step by step</h2>
+                <p>Here is how to do it concretely. We'll style a simple content card.</p>
+
+                <h3>1. The HTML structure</h3>
+                <pre><code>&lt;div class="glass-card"&gt;
+  &lt;h2&gt;Hello glassmorphism&lt;/h2&gt;
+  &lt;p&gt;A clean and modern effect.&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+
+                <h3>2. The background behind the card</h3>
+                <p>For the effect to be visible, you need an animated background or a gradient behind. Apply a gradient to the body:</p>
+                <pre><code>body {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}</code></pre>
+
+                <h3>3. The glass card styles</h3>
+                <pre><code>.glass-card {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px); /* Safari */
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 28px;
+  max-width: 380px;
+  color: #fff;
+}</code></pre>
+
+                <p>With those few lines, the card blurs what lies behind it and lets light through. If you open this page in a browser, you'll see the result immediately.</p>
+
+                <h3>4. Improving readability</h3>
+                <p>A common pitfall: white text on a background that is too transparent becomes hard to read. Adjust the background opacity (for example 0.25 or 0.3) or add a subtle <code>text-shadow</code>. You can also use our <strong>built‑in contrast checker</strong> in the DevToolbox tool to be certain you meet WCAG standards.</p>
+
+                <h2>Using the free DevToolbox generator</h2>
+                <p>To avoid juggling values manually, I designed a <strong>visual effects generator</strong> that lets you adjust each parameter with live sliders. Choose the "Glassmorphism" mode, tweak the blur, opacity, shadow, and the CSS code updates automatically. The tool also exports to Tailwind and React components.</p>
+                <p>Here's how to use it:</p>
+                <ol>
+                    <li>Go to the <a href="https://www.devstoolsbox.dev/tools/visual-effects-generator/">Visual Effects Generator</a>.</li>
+                    <li>Select the "Glassmorphism" tab.</li>
+                    <li>Customise the blur, opacity, shadows, and border.</li>
+                    <li>Click "Copy code" and paste it into your project.</li>
+                </ol>
+                <p>The live preview shows you exactly how the effect renders on a card, a button, or even a navigation bar. You can even share the URL with a colleague so they can retrieve the same configuration.</p>
+
+                <h2>Accessibility and best practices</h2>
+                <p>A beautiful effect must never sacrifice readability. Here are a few rules I always apply:</p>
+                <ul>
+                    <li><strong>Sufficient contrast</strong>: the text should have a contrast ratio of at least 4.5:1 (AA) against the background visible through the glass.</li>
+                    <li><strong>Safari prefix</strong>: don't forget <code>-webkit-backdrop-filter</code> for recent versions of Safari.</li>
+                    <li><strong>Fallback for older browsers</strong>: <code>backdrop-filter</code> is not supported everywhere. Provide a more opaque background colour as a fallback (<code>background: rgba(255,255,255,0.7);</code> for instance).</li>
+                    <li><strong>Don't overdo it</strong>: avoid applying the effect to too many elements on the same page; it can make the interface confusing.</li>
+                </ul>
+
+                <h2>Going further: variants and combinations</h2>
+                <p>You can push the effect further:</p>
+                <ul>
+                    <li><strong>Glass + Neumorphism</strong>: with our "Hybrid" mode, you get a glass background that blends with soft UI shadows.</li>
+                    <li><strong>Animation on hover</strong>: add a <code>transition</code> on the card and change the opacity or blur on :hover for an interactive effect.</li>
+                    <li><strong>Gradient glass</strong>: use a <code>background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2))</code> to give a direction to the transparency.</li>
+                </ul>
+                <p>The tool includes these options, saving you from writing all the code by hand. You can also directly export a functional React component with all the styles applied.</p>
+
+                <h2>Why is this effect relevant in 2026?</h2>
+                <p>Glassmorphism fits particularly well with modern long‑scroll designs, dashboards, and mobile applications. It gives a sense of depth without weighing down the interface. Combined with an animated gradient, it creates a memorable visual atmosphere. Moreover, because it uses no images, it remains extremely performant and accessible.</p>
+
+                <h2>Try it for yourself</h2>
+                <p>Now that you master the basics, I encourage you to try the generator. Play with the sliders, change the colours, and see live how each parameter influences the rendering. It's the best way to learn.</p>
+                <p><a href="https://www.devstoolsbox.dev/tools/visual-effects-generator/" class="btn-tool">🔗 Open the free Glassmorphism generator</a></p>
+                <p style="margin-top:1em;">If you have questions or ideas for improvements, contact me via the site. Happy coding!</p>
+
+                <div style="margin-top:32px; padding-top:24px; border-top:1px solid var(--border);">
+                    <p><strong>Continue exploring:</strong></p>
+                    <ul>
+                        <li><a href="https://www.devstoolsbox.dev/tools/json-formatter/">JSON Formatter</a> – Clean up and validate your JSON data.</li>
+                        <li><a href="https://www.devstoolsbox.dev/tools/jwt-decoder/">JWT Decoder</a> – Decode and inspect JWTs locally.</li>
+                        <li><a href="https://wwww.devstoolsbox.dev/tools/password-hash-generator/">Password &amp; Hash Generator</a> – Generate strong passwords and compute hashes.</li>
+                        <li><a href="https://www.devstoolsbox.dev/tools/regex-tester/">Regex Tester</a> – Build and test regular expressions in real time.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — Free tools for developers and designers. <a href="/blog/">Blog</a> | <a href="/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<!-- Theme script -->
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>

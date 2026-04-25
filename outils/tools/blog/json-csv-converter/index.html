@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Convert JSON to CSV and Back — Complete Guide</title>
+    <meta name="description" content="Learn how to easily convert JSON files to CSV (and vice versa). Object flattening, custom path, UTF‑8 BOM for Excel, null value handling. Step‑by‑step tutorial.">
+    <meta name="keywords" content="convert json to csv, json to csv converter, how to flatten json, csv delimiter, utf-8 bom excel, nested json, convert csv to json">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/json-csv-converter/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/json-csv-converter/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/convertisseur-json-csv/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/json-csv-converter/">
+
+    <meta property="og:title" content="How to Convert JSON to CSV and Back — Complete Guide">
+    <meta property="og:description" content="Step by step guide to transform your JSON data into CSV tables usable in Excel and vice versa, with practical tips.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/json-csv-converter/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Guide: JSON ↔ CSV Conversion">
+    <meta name="twitter:description" content="Flattening, UTF‑8 BOM, custom paths… everything you need for successful conversions.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "How to Convert a JSON File to CSV (and Vice Versa) Easily",
+            "author": { "@type": "Person", "name": "DevToolbox Team" },
+            "datePublished": "2025-04-24",
+            "dateModified": "2025-04-24",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/json-csv-converter/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/tools/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+                { "@type": "ListItem", "position": 1, "name": "tools", "item": "https://www.devstoolsbox.dev/tools/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Convert JSON to CSV", "item": "https://www.devstoolsbox.dev/tools/blog/json-csv-converter/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        /* Header */
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        /* Article */
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Light</button>
+                <button class="theme-btn" data-theme="dark"> Dark</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/blog/json-csv-converter/" class="lang-btn active">EN</a>
+                <a href="/fr/blog/convertisseur-json-csv/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Article -->
+    <main>
+        <article class="article-card">
+            <h1>How to Convert a JSON File to CSV (and Vice‑Versa) Easily: Complete Guide with Examples</h1>
+            <div class="meta">Published on April 24, 2025 by the DevToolbox Team — 8 min read</div>
+
+            <p><strong>JSON</strong> and <strong>CSV</strong> are two formats that every developer, analyst, or system administrator encounters daily. The first is the language of modern APIs, the second is the language of spreadsheets like Excel or Google Sheets. Knowing how to switch from one to the other quickly, without losing information or mangling characters (accents, symbols), is a valuable skill.</p>
+            <p>In this guide, I'll show you <strong>step by step</strong> how to use the <a href="https://www.devstoolsbox.dev/tools/json-csv-converter/">free JSON ↔ CSV converter from DevToolbox</a> to transform your data in seconds, <strong>without ever sending a single byte to a remote server</strong>.</p>
+
+            <h2>Why convert between JSON and CSV?</h2>
+            <p>JSON (JavaScript Object Notation) is hierarchical, capable of representing arrays, nested objects, and various data types. CSV (Comma‑Separated Values) is flat, tabular, understood by <strong>all</strong> office tools. Here are three concrete situations:</p>
+            <ul>
+                <li><strong>Exploit an API response in Excel</strong>: I receive a JSON, but my marketing colleague needs a table. Instead of writing a Python script, I convert directly.</li>
+                <li><strong>Feed a database</strong>: many ETL tools accept CSV as input. If my data is in JSON, I convert it before importing.</li>
+                <li><strong>Generate clean JSON for a frontend app</strong>: I retrieve a CRM export in CSV and transform it into structured JSON.</li>
+            </ul>
+            <p>Both directions are genuinely useful, and a good converter should handle them with equal care.</p>
+
+            <h2>Step 1: Access the tool and paste your data</h2>
+            <p>Go to the <a href="https://www.devstoolsbox.dev/tools/json-csv-converter/">JSON / CSV Converter</a> page. The page works entirely in the browser: <strong>no data is sent to a server</strong>, which is crucial when handling sensitive information (clients, invoices, tokens).</p>
+            <p>The interface is split into two areas: <strong>JSON</strong> on the left and <strong>CSV</strong> on the right. You can either <strong>paste your text directly</strong> or <strong>drag & drop a file</strong> from your computer. The format detection is automatic: if you paste JSON, the conversion will go to CSV, and vice versa.</p>
+
+            <h2>Step 2: Extract the array from a complex JSON (array path)</h2>
+            <p>This is one of the features that makes this tool really useful compared to simpler alternatives. Imagine an API that returns a JSON like this:</p>
+            <pre>{
+  "success": true,
+  "data": {
+    "users": [
+      {"id": 1, "name": "Alice", "age": 30},
+      {"id": 2, "name": "Bob", "age": 25}
+    ]
+  }
+}</pre>
+            <p>The array you want is nested under <code>data.users</code>. Instead of copying only the useful part, simply enter <code>data.users</code> in the <strong>Array path</strong> field (located below the JSON area). The tool will automatically descend into the object and convert only the targeted array.</p>
+            <p>This technique saves considerable time when the API wraps data in several layers (<code>success</code>, <code>data</code>, <code>response</code>…).</p>
+
+            <h2>Step 3: Flatten nested objects</h2>
+            <p>JSON can contain sub‑objects inside each element of the array. Take this example:</p>
+            <pre>[
+  {
+    "name": "Alice",
+    "address": {
+      "city": "Paris",
+      "zip": "75001"
+    }
+  }
+]</pre>
+            <p>If you convert as is, the <code>address</code> column will contain <code>[object Object]</code> — unusable in a spreadsheet. <strong>Check the "Flatten objects" box</strong>. Result:</p>
+            <pre>| name  | address.city | address.zip |
+| Alice | Paris        | 75001       |</pre>
+            <p>The tool transforms the hierarchy into flat columns with dot notation. You can then rename the columns in Excel if needed.</p>
+
+            <h2>Step 4: Convert and visualize the table</h2>
+            <p>Click the <strong>« Convert to CSV → »</strong> button. Immediately, a <strong>table preview</strong> appears at the bottom of the page. You see the first rows, column headers, and statistics: number of rows, columns, original JSON size and generated CSV size.</p>
+            <p>Before even downloading, you can verify that the conversion is correct. If a column looks odd (for instance, unexpected null values), you can go back and adjust the options.</p>
+
+            <h2>Step 5: Download the CSV ready for Excel (UTF‑8 BOM)</h2>
+            <p>Click <strong>« Download CSV (UTF-8 BOM) »</strong>. The <strong>UTF‑8 BOM</strong> is a small invisible marker placed at the beginning of the file. Without it, Excel may misinterpret accents or special characters, especially with non‑English versions. By using this option, you make sure your <code>é</code>, <code>è</code>, <code>€</code> will display correctly when opening, even by double‑clicking the file.</p>
+            <p>The downloaded file has the <code>.csv</code> extension and opens directly in Excel, Google Sheets, or any text editor.</p>
+
+            <h2>Converting from CSV to JSON: advanced options</h2>
+            <p>The reverse conversion is just as simple:</p>
+            <ol>
+                <li><strong>Paste your CSV</strong> into the right‑hand area.</li>
+                <li><strong>Choose the delimiter</strong>: comma, semicolon, tab or pipe (<code>|</code>). If you're unsure, leave the automatic detection on: the tool analyzes the first line and finds the most frequent character.</li>
+                <li><strong>Indicate whether the first row contains headers</strong> (checked by default). If your CSV has no headers, the tool will automatically name the columns <code>col1</code>, <code>col2</code>, etc.</li>
+                <li><strong>Handle null values</strong>: in a CSV, an empty cell can mean "nothing", but in JSON you might want <code>null</code>, an empty string <code>""</code>, or even the number <code>0</code>. Use the "Null values" dropdown to select the desired behavior.</li>
+                <li>Click <strong>« ← Convert to JSON »</strong>. The result is formatted with clean indentation, directly reusable in your code.</li>
+            </ol>
+
+            <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/tools/json-csv-converter/" class="btn-tool">🔧 Try the JSON / CSV Converter</a></p>
+
+            <h2>Pro tips for flawless conversions</h2>
+            <ul>
+                <li><strong>Pre‑format your JSON</strong>: use DevToolbox's <a href="https://www.devstoolsbox.dev/tools/json-formatter/">JSON formatter</a> to validate and indent your data before conversion.</li>
+                <li><strong>Watch out for numbers</strong>: non‑significant zeros (e.g. zip code <code>01234</code>) can be interpreted as integers. Consider wrapping them in quotes in the CSV if needed.</li>
+                <li><strong>Large volumes</strong>: everything is processed locally, but for JSON files of several tens of megabytes, prefer a command‑line script. The tool remains perfect for typical API exports (a few thousand lines).</li>
+                <li><strong>UTF‑8 BOM for Excel</strong>: always enable this option if the file is destined for an Excel user. It prevents strange "?" or garbled characters.</li>
+            </ul>
+
+            <h2>Frequently Asked Questions (FAQ)</h2>
+            <h3>Does the converter modify my original file?</h3>
+            <p>No, everything happens in your browser. No data is sent to a server. Your file remains private.</p>
+
+            <h3>Can I convert a deeply nested JSON (multiple levels of objects)?</h3>
+            <p>Yes, the "Flatten objects" option handles as many levels as needed. Keys will be concatenated with a dot.</p>
+
+            <h3>Which delimiter should I choose for a CSV that defaults to semicolon when opened?</h3>
+            <p>In some locales, Excel uses the semicolon as the default separator. Specify <code>;</code> in the dropdown before conversion, or generate a comma‑delimited CSV and then import it via Excel's "Data" tab.</p>
+
+            <h3>Is the UTF‑8 BOM always necessary?</h3>
+            <p>It is strongly recommended for Excel on Windows. Google Sheets and LibreOffice also handle it correctly, but it is not mandatory.</p>
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 <a href="https://www.devstoolsbox.dev/">DevToolbox</a> — Free tools for developers and designers. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<!-- Theme script -->
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
