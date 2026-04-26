@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testeur d'Expressions Régulières (Regex) en ligne | Outil interactif gratuit</title>
+<meta name="description" content="Testez, visualisez et comprenez vos expressions régulières en temps réel. Surlignage des matches, explication en langage naturel, flags et bibliothèque de patterns.">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/testeur-regex/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/testeur-regex/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/regex-tester/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/regex-tester">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Testeur d'Expressions Régulières","url":"https://www.devstoolsbox.dev/fr/outils/testeur-regex","description":"Testeur de regex en ligne gratuit et interactif. Surlignage en temps réel, explication en langage naturel, bibliothèque de patterns.","applicationCategory":"DeveloperApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Quels sont les flags disponibles et leur signification ?","acceptedAnswer":{"@type":"Answer","text":"g: global, i: insensible à la casse, m: multiligne, s: dotAll, u: unicode."}},{"@type":"Question","name":"Mes données sont-elles envoyées à un serveur ?","acceptedAnswer":{"@type":"Answer","text":"Non, tout s'exécute dans votre navigateur."}}]}
+</script>
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────────── */
+:root {
+  --bg:     #08090C;
+  --s1:     #0E1015;
+  --s2:     #141720;
+  --s3:     #1B1F2B;
+  --s4:     #232838;
+  --border: #252A38;
+  --border2:#2E3446;
+  --a:      #E8A020;
+  --a-dim:  rgba(232,160,32,0.12);
+  --a-hover:#F0B535;
+  --cyan:   #22D3EE;
+  --green:  #34D399;
+  --red:    #F87171;
+  --purple: #A78BFA;
+  --amber:  #FBB040;
+  --t1:     #F0F0EC;
+  --t2:     #9A9B9E;
+  --t3:     #5A5C62;
+  --t4:     #35373C;
+  --r:      12px;
+  --r-sm:   8px;
+  --trans:  0.18s cubic-bezier(0.4,0,0.2,1);
+  --font:   'Figtree', system-ui, sans-serif;
+  --mono:   'IBM Plex Mono', monospace;
+  --serif:  'DM Serif Display', serif;
+}
+body.light {
+  --bg:     #F4F5F7;
+  --s1:     #FFFFFF;
+  --s2:     #F0F1F4;
+  --s3:     #E8EAF0;
+  --s4:     #DDE0EA;
+  --border: #DDE0EA;
+  --border2:#C8CCDA;
+  --t1:     #0E1015;
+  --t2:     #4A4D58;
+  --t3:     #8A8D98;
+  --t4:     #C0C3CE;
+}
+
+/* ─── RESET ──────────────────────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100vh;line-height:1.6;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+
+/* ─── APP SHELL ──────────────────────────────────────────────── */
+.app{display:flex;flex-direction:column;min-height:100vh;}
+
+/* ─── TOPBAR ─────────────────────────────────────────────────── */
+.topbar{
+  display:flex;align-items:center;gap:14px;
+  padding:0 20px;height:54px;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;flex-shrink:0;
+}
+.logo{
+  font-family:var(--serif);font-size:1.25rem;color:var(--t1);
+  text-decoration:none;display:flex;align-items:center;gap:8px;
+}
+.logo-dot{width:8px;height:8px;background:var(--a);border-radius:50%;box-shadow:0 0 8px var(--a);}
+.logo-sub{font-family:var(--font);font-size:0.7rem;font-weight:700;color:var(--t3);letter-spacing:0.07em;text-transform:uppercase;}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.icon-btn{
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--border);
+  background:var(--s2);color:var(--t2);cursor:pointer;font-size:0.9rem;
+  display:grid;place-items:center;transition:var(--trans);
+}
+.icon-btn:hover{background:var(--s3);color:var(--t1);}
+.pill-btn{
+  padding:7px 14px;border-radius:20px;border:1px solid var(--border);
+  background:var(--s2);font-family:var(--font);font-weight:600;font-size:0.75rem;
+  color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px;
+  transition:var(--trans);white-space:nowrap;text-decoration:none;
+}
+.pill-btn:hover{background:var(--s3);color:var(--t1);}
+.pill-btn.active{background:var(--a);color:#000;border-color:var(--a);}
+
+/* ─── LAYOUT ─────────────────────────────────────────────────── */
+.workspace{
+  display:grid;
+  grid-template-columns:1fr 380px;
+  gap:0;flex:1;
+}
+@media(max-width:1100px){.workspace{grid-template-columns:1fr;}}
+
+/* ─── LEFT COLUMN ────────────────────────────────────────────── */
+.left-col{
+  padding:22px 24px;
+  display:flex;flex-direction:column;gap:18px;
+  overflow-y:auto;
+}
+.page-title{
+  font-size:1.6rem;font-weight:800;letter-spacing:-0.025em;
+  display:flex;align-items:center;gap:10px;
+}
+.page-sub{font-size:0.85rem;color:var(--t3);margin-top:3px;}
+
+/* ─── REGEX INPUT AREA ───────────────────────────────────────── */
+.regex-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;
+}
+.regex-bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.regex-input-wrap{
+  flex:1;min-width:200px;
+  display:flex;align-items:center;
+  background:var(--s2);border:1.5px solid var(--border);
+  border-radius:40px;padding:3px 6px 3px 18px;
+  transition:border-color 0.15s;
+}
+.regex-input-wrap:focus-within{border-color:var(--a);box-shadow:0 0 0 3px var(--a-dim);}
+.slash{font-family:var(--mono);font-size:1.1rem;color:var(--a);font-weight:500;user-select:none;}
+#regexInput{
+  flex:1;border:none;background:transparent;padding:10px 4px;
+  font-family:var(--mono);font-size:0.92rem;color:var(--t1);outline:none;
+  caret-color:var(--a);min-width:80px;
+}
+#regexInput::placeholder{color:var(--t4);}
+
+/* Flags */
+.flags-wrap{
+  display:flex;gap:3px;background:var(--s2);
+  padding:4px;border-radius:40px;border:1px solid var(--border);
+  flex-shrink:0;
+}
+.flag-btn{
+  padding:6px 11px;border-radius:30px;border:none;
+  background:transparent;font-weight:700;font-family:var(--mono);
+  font-size:0.85rem;cursor:pointer;transition:var(--trans);color:var(--t3);
+  position:relative;
+}
+.flag-btn.active{background:var(--a);color:#000;}
+.flag-btn:hover:not(.active){color:var(--t2);}
+/* Tooltip */
+.flag-btn::after{
+  content:attr(data-tip);
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:var(--s3);color:var(--t2);padding:4px 10px;
+  border-radius:8px;font-size:0.65rem;font-family:var(--font);
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s;
+  border:1px solid var(--border);z-index:10;
+}
+.flag-btn:hover::after{opacity:1;}
+
+/* Error */
+.regex-error{
+  margin-top:10px;padding:8px 14px;border-radius:8px;
+  background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);
+  color:var(--red);font-family:var(--mono);font-size:0.75rem;display:none;
+}
+.regex-error.show{display:block;}
+
+/* Stats row */
+.stats-row{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px;
+  padding-top:14px;border-top:1px solid var(--border);
+}
+.stat-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:20px;
+  font-size:0.72rem;font-weight:700;
+  background:var(--s2);color:var(--t3);border:1px solid var(--border);
+}
+.stat-chip.match{background:rgba(52,211,153,0.1);color:var(--green);border-color:rgba(52,211,153,0.2);}
+.stat-chip.group{background:rgba(167,139,250,0.1);color:var(--purple);border-color:rgba(167,139,250,0.2);}
+.stat-chip.pos{background:rgba(34,211,238,0.1);color:var(--cyan);border-color:rgba(34,211,238,0.2);}
+.stat-chip.warn{background:rgba(232,160,32,0.12);color:var(--a);border-color:rgba(232,160,32,0.3);}
+
+/* ─── EXPLANATION BOX ────────────────────────────────────────── */
+.explanation-card{
+  background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 18px;position:relative;overflow:hidden;
+}
+.explanation-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--a);border-radius:2px;
+}
+.expl-label{
+  font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--a);margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+#explanationText{
+  font-size:0.83rem;color:var(--t2);line-height:1.75;
+  font-family:var(--font);
+}
+.expl-token{
+  display:inline-block;padding:1px 6px;border-radius:5px;
+  font-family:var(--mono);font-size:0.72rem;margin:1px;
+  background:var(--s3);border:1px solid var(--border2);color:var(--t1);
+}
+
+/* ─── TEXT AREA ──────────────────────────────────────────────── */
+.input-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+}
+.input-card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;border-bottom:1px solid var(--border);
+  font-size:0.72rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--t3);
+}
+.char-count{font-family:var(--mono);font-size:0.7rem;color:var(--t4);}
+#testInput{
+  width:100%;padding:16px;min-height:160px;
+  font-family:var(--mono);font-size:0.85rem;line-height:1.7;
+  border:none;background:transparent;color:var(--t1);resize:vertical;outline:none;
+}
+#testInput::placeholder{color:var(--t4);}
+
+/* ─── HIGHLIGHTED OUTPUT ─────────────────────────────────────── */
+.output-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+}
+.output-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;border-bottom:1px solid var(--border);
+}
+.output-label{font-size:0.72rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--t3);}
+.match-badge{
+  font-family:var(--mono);font-size:0.72rem;font-weight:600;
+  padding:4px 12px;border-radius:20px;
+  background:rgba(52,211,153,0.12);color:var(--green);
+  border:1px solid rgba(52,211,153,0.2);
+}
+.match-badge.zero{background:rgba(248,113,113,0.1);color:var(--red);border-color:rgba(248,113,113,0.2);}
+#highlightedOutput{
+  padding:16px;font-family:var(--mono);font-size:0.85rem;line-height:1.75;
+  white-space:pre-wrap;word-break:break-all;max-height:240px;overflow-y:auto;
+  color:var(--t2);
+}
+.m-hl{border-radius:4px;padding:1px 0;font-weight:600;}
+
+/* ─── MATCH TABLE ────────────────────────────────────────────── */
+.match-table-wrap{overflow-x:auto;}
+.match-table{width:100%;border-collapse:collapse;font-size:0.75rem;}
+.match-table th{
+  padding:8px 12px;text-align:left;font-size:0.65rem;font-weight:700;
+  letter-spacing:0.07em;text-transform:uppercase;color:var(--t4);
+  background:var(--s2);border-bottom:1px solid var(--border);
+}
+.match-table td{
+  padding:8px 12px;border-bottom:1px solid var(--border);
+  font-family:var(--mono);color:var(--t2);
+}
+.match-table tr:last-child td{border-bottom:none;}
+.match-table tr:hover td{background:var(--s2);}
+.match-idx{color:var(--a);font-weight:600;}
+.match-val{color:var(--t1);}
+.match-pos{color:var(--cyan);}
+.group-tag{
+  display:inline-block;padding:1px 7px;border-radius:4px;
+  font-size:0.68rem;font-weight:700;margin-right:4px;
+}
+
+/* ─── REPLACE SECTION ────────────────────────────────────────── */
+.replace-row{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;
+  border-top:1px solid var(--border);
+}
+.replace-input{
+  flex:1;min-width:120px;padding:8px 14px;background:var(--s2);
+  border:1px solid var(--border);border-radius:20px;
+  font-family:var(--mono);font-size:0.82rem;color:var(--t1);outline:none;
+  transition:border-color 0.15s;
+}
+.replace-input:focus{border-color:var(--a);}
+.replace-result{
+  padding:12px 16px;background:var(--s2);border-top:1px solid var(--border);
+  font-family:var(--mono);font-size:0.82rem;color:var(--t2);
+  max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;
+  display:none;
+}
+.replace-result.show{display:block;}
+
+/* ─── PATTERN LIBRARY ────────────────────────────────────────── */
+.library-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+}
+.library-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
+.library-title{font-size:0.75rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--t3);}
+.pattern-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.pattern-chip{
+  padding:5px 13px;border-radius:20px;
+  border:1px solid var(--border);background:var(--s2);
+  font-size:0.73rem;font-weight:600;color:var(--t3);
+  cursor:pointer;transition:var(--trans);
+}
+.pattern-chip:hover{border-color:var(--a);color:var(--a);background:var(--a-dim);}
+
+/* ─── ACTION ROW ─────────────────────────────────────────────── */
+.action-row{display:flex;gap:8px;flex-wrap:wrap;}
+.action-btn{
+  padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+  background:var(--s2);color:var(--t2);font-family:var(--font);font-weight:600;
+  font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:6px;
+  transition:var(--trans);
+}
+.action-btn:hover{background:var(--s3);color:var(--t1);border-color:var(--border2);}
+.action-btn.primary{background:var(--a);color:#000;border-color:var(--a);}
+.action-btn.primary:hover{background:var(--a-hover);}
+
+/* ─── RIGHT COLUMN ───────────────────────────────────────────── */
+.right-col{
+  background:var(--s1);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+@media(max-width:1100px){.right-col{border-left:none;border-top:1px solid var(--border);}}
+
+.right-section{border-bottom:1px solid var(--border);}
+.right-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;font-size:0.68rem;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--t3);
+  cursor:pointer;user-select:none;
+}
+.right-hdr .chev{font-size:0.7rem;transition:transform 0.2s;}
+.right-hdr.col .chev{transform:rotate(-90deg);}
+.right-body{padding:12px 16px;}
+.right-body.hidden{display:none;}
+
+/* Cheat sheet */
+.cheat-grid{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;}
+.cheat-token{
+  font-family:var(--mono);font-size:0.72rem;font-weight:500;
+  color:var(--a);padding:4px 0;white-space:nowrap;
+}
+.cheat-desc{font-size:0.72rem;color:var(--t3);padding:4px 0;line-height:1.4;}
+.cheat-sep{grid-column:1/-1;height:1px;background:var(--border);margin:6px 0;}
+.cheat-cat{grid-column:1/-1;font-size:0.63rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--t4);padding:4px 0 2px;}
+
+/* History panel */
+.hist-list{display:flex;flex-direction:column;gap:4px;}
+.hist-item{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:7px;background:var(--s2);
+  border:1px solid var(--border);cursor:pointer;transition:var(--trans);
+}
+.hist-item:hover{border-color:var(--border2);}
+.hist-regex{font-family:var(--mono);font-size:0.72rem;color:var(--t2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hist-flags{font-family:var(--mono);font-size:0.65rem;color:var(--a);flex-shrink:0;}
+.hist-del{border:none;background:transparent;color:var(--t4);cursor:pointer;font-size:0.8rem;flex-shrink:0;}
+.hist-del:hover{color:var(--red);}
+
+/* Performance */
+.perf-bar{
+  display:flex;align-items:center;gap:10px;margin-top:8px;
+}
+.perf-track{flex:1;height:4px;background:var(--s3);border-radius:4px;overflow:hidden;}
+.perf-fill{height:100%;border-radius:4px;background:var(--green);transition:width 0.3s;}
+.perf-fill.warn{background:var(--amber);}
+.perf-fill.danger{background:var(--red);}
+.perf-label{font-family:var(--mono);font-size:0.68rem;color:var(--t3);white-space:nowrap;}
+
+/* ─── TOAST ──────────────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--t1);color:var(--bg);padding:10px 20px;border-radius:40px;
+  font-weight:600;font-size:0.78rem;box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  z-index:999;opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;
+  white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ─── ARTICLE / FAQ ──────────────────────────────────────────── */
+.article-wrap{
+  background:var(--s1);border-top:1px solid var(--border);
+  padding:40px 24px;
+}
+.article-inner{max-width:860px;margin:0 auto;}
+.article-inner h2{font-size:1.5rem;font-weight:800;margin-bottom:20px;letter-spacing:-0.02em;}
+.article-inner h3{font-size:1rem;font-weight:700;margin:22px 0 8px;color:var(--t1);}
+.article-inner p{font-size:0.85rem;color:var(--t2);line-height:1.75;margin-bottom:10px;}
+.article-inner ul{margin-left:18px;margin-bottom:14px;}
+.article-inner li{font-size:0.85rem;color:var(--t2);line-height:1.75;margin-bottom:4px;}
+.article-inner code{font-family:var(--mono);font-size:0.8rem;background:var(--s2);padding:1px 6px;border-radius:4px;color:var(--cyan);}
+.article-inner a{color:var(--a);text-decoration:none;font-weight:500;}
+.article-inner a:hover{text-decoration:underline;}
+
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+@media(max-width:700px){.faq-grid{grid-template-columns:1fr;}}
+.faq-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:16px;
+}
+.faq-q{font-size:0.85rem;font-weight:700;margin-bottom:6px;color:var(--t1);}
+.faq-a{font-size:0.8rem;color:var(--t3);line-height:1.65;}
+
+/* ─── FOOTER ─────────────────────────────────────────────────── */
+footer{
+  text-align:center;padding:20px;color:var(--t4);
+  border-top:1px solid var(--border);font-size:0.78rem;
+}
+footer a{color:var(--a);text-decoration:none;font-weight:500;}
+
+/* Group colors */
+.gc-0{background:rgba(248,113,113,0.2);color:#f87171;border:1px solid rgba(248,113,113,0.3);}
+.gc-1{background:rgba(96,165,250,0.2);color:#60a5fa;border:1px solid rgba(96,165,250,0.3);}
+.gc-2{background:rgba(251,191,36,0.2);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);}
+.gc-3{background:rgba(52,211,153,0.2);color:#34d399;border:1px solid rgba(52,211,153,0.3);}
+.gc-4{background:rgba(167,139,250,0.2);color:#a78bfa;border:1px solid rgba(167,139,250,0.3);}
+.gc-5{background:rgba(251,146,60,0.2);color:#fb923c;border:1px solid rgba(251,146,60,0.3);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ TOPBAR ═════════════════════════════════════════════════ -->
+<header class="topbar">
+  <a href="/" class="logo">
+    <span class="logo-dot"></span>DevToolbox
+    <span class="logo-sub">/ Regex</span>
+  </a>
+  <div class="topbar-right">
+    <button class="icon-btn" id="histToggleBtn" title="Historique">🕐</button>
+    <button class="pill-btn" id="shareBtn">🔗 Partager</button>
+    <button class="pill-btn" id="clearBtn">✕ Effacer</button>
+    <a href="/tools/regex-tester" class="pill-btn">EN</a>
+    <a href="/fr/outils/testeur-regex" class="pill-btn active">FR</a>
+    <button class="icon-btn" id="themeBtn" title="Thème">◐</button>
+  </div>
+</header>
+
+<!-- ═══ WORKSPACE ═══════════════════════════════════════════════ -->
+<div class="workspace">
+
+  <!-- ── LEFT COLUMN ──────────────────────────────────────────── -->
+  <div class="left-col">
+
+    <div>
+      <div class="page-title">Testeur Regex</div>
+      <div class="page-sub">Testez, visualisez et comprenez vos expressions régulières en temps réel</div>
+    </div>
+
+    <!-- Regex Input -->
+    <div class="regex-card">
+      <div class="regex-bar">
+        <div class="regex-input-wrap">
+          <span class="slash">/</span>
+          <input type="text" id="regexInput" placeholder="[a-z]+@[a-z]+\.[a-z]+" value="([A-Z][a-z]+) (\d+)" spellcheck="false" autocomplete="off">
+          <span class="slash">/</span>
+        </div>
+        <div class="flags-wrap" id="flagsContainer">
+          <button class="flag-btn active" data-flag="g" data-tip="Global : trouve toutes les correspondances">g</button>
+          <button class="flag-btn" data-flag="i" data-tip="Insensible à la casse">i</button>
+          <button class="flag-btn" data-flag="m" data-tip="Multiligne : ^ et $ correspondent aux débuts/fins de ligne">m</button>
+          <button class="flag-btn" data-flag="s" data-tip="DotAll : . correspond aussi aux sauts de ligne">s</button>
+          <button class="flag-btn" data-flag="u" data-tip="Unicode : support complet des caractères Unicode">u</button>
+        </div>
+      </div>
+      <div class="regex-error" id="regexError"></div>
+      <div class="stats-row" id="statsRow">
+        <span class="stat-chip match" id="statMatches">0 match</span>
+        <span class="stat-chip group" id="statGroups">0 groupe</span>
+        <span class="stat-chip pos" id="statPos">—</span>
+        <span class="stat-chip" id="statLen">0 caractères</span>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="explanation-card">
+      <div class="expl-label">✦ Explication naturelle</div>
+      <div id="explanationText">Saisissez une expression régulière…</div>
+    </div>
+
+    <!-- Test Input -->
+    <div class="input-card">
+      <div class="input-card-header">
+        Texte à tester
+        <span class="char-count" id="charCount">0 car.</span>
+      </div>
+      <textarea id="testInput" placeholder="Collez ou tapez votre texte ici…">Jean 25 ans
+Marie 32 ans
+Paul 18 ans</textarea>
+    </div>
+
+    <!-- Highlighted output -->
+    <div class="output-card">
+      <div class="output-header">
+        <span class="output-label">Correspondances</span>
+        <span class="match-badge zero" id="matchBadge">0 match</span>
+      </div>
+      <div id="highlightedOutput"></div>
+
+      <!-- Replace feature -->
+      <div class="replace-row">
+        <span style="font-size:0.72rem;font-weight:700;color:var(--t4);letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;">Remplacer par</span>
+        <input class="replace-input" type="text" id="replaceInput" placeholder="$1 — $2 →  (ex: $1)">
+        <button class="action-btn primary" id="replaceBtn">Remplacer</button>
+        <button class="action-btn" id="copyReplaceBtn" style="display:none;">📋</button>
+      </div>
+      <div class="replace-result" id="replaceResult"></div>
+    </div>
+
+    <!-- Match table -->
+    <div class="output-card" id="matchTableCard">
+      <div class="output-header">
+        <span class="output-label">Tableau des matches</span>
+        <button class="action-btn" id="copyMatchesBtn" style="padding:4px 10px;font-size:0.68rem;">📋 Copier</button>
+      </div>
+      <div class="right-body match-table-wrap" style="padding:0;">
+        <table class="match-table">
+          <thead>
+            <tr><th>#</th><th>Valeur</th><th>Position</th><th>Longueur</th><th>Groupes</th></tr>
+          </thead>
+          <tbody id="matchTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pattern Library -->
+    <div class="library-card">
+      <div class="library-header">
+        <span class="library-title">📚 Bibliothèque de patterns</span>
+        <span style="font-size:0.68rem;color:var(--t4);">cliquez pour charger</span>
+      </div>
+      <div class="pattern-chips" id="patternLibrary">
+        <span class="pattern-chip" data-pattern="^[\w\.-]+@[\w\.-]+\.\w+$" data-flags="g">Email</span>
+        <span class="pattern-chip" data-pattern="https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/=]*)" data-flags="g">URL</span>
+        <span class="pattern-chip" data-pattern="\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b" data-flags="g">IPv4</span>
+        <span class="pattern-chip" data-pattern="^(\+\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}$" data-flags="gm">Téléphone</span>
+        <span class="pattern-chip" data-pattern="\b\d{4}-\d{2}-\d{2}\b" data-flags="g">Date YYYY-MM-DD</span>
+        <span class="pattern-chip" data-pattern="\b[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\b" data-flags="gi">UUID</span>
+        <span class="pattern-chip" data-pattern="^\d{5}$" data-flags="gm">Code postal FR</span>
+        <span class="pattern-chip" data-pattern="^#[0-9A-F]{6}$" data-flags="gi">Couleur hex</span>
+        <span class="pattern-chip" data-pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$" data-flags="g">Mot de passe fort</span>
+        <span class="pattern-chip" data-pattern="\b\d{13,16}\b" data-flags="g">Carte bancaire</span>
+        <span class="pattern-chip" data-pattern="<([a-z]+)(?:\s[^>]*)?>.*?<\/\1>" data-flags="gis">Balise HTML</span>
+        <span class="pattern-chip" data-pattern="(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)" data-flags="g">IP stricte</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-row">
+      <button class="action-btn primary" id="copyRegexBtn">📋 Copier la regex</button>
+      <button class="action-btn" id="copyAllMatchesBtn">📄 Copier les matches</button>
+      <button class="action-btn" id="downloadBtn">💾 Exporter JSON</button>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT COLUMN ──────────────────────────────────────────── -->
+  <aside class="right-col">
+
+    <!-- Cheat Sheet -->
+    <div class="right-section">
+      <div class="right-hdr" data-target="cheatBody">
+        📖 Mémo Regex <span class="chev">▾</span>
+      </div>
+      <div class="right-body" id="cheatBody">
+        <div class="cheat-grid">
+          <span class="cheat-cat">Ancres</span>
+          <span class="cheat-token">^</span><span class="cheat-desc">Début de chaîne/ligne</span>
+          <span class="cheat-token">$</span><span class="cheat-desc">Fin de chaîne/ligne</span>
+          <span class="cheat-token">\b</span><span class="cheat-desc">Limite de mot</span>
+          <span class="cheat-token">\B</span><span class="cheat-desc">Non-limite de mot</span>
+          <div class="cheat-sep"></div>
+          <span class="cheat-cat">Classes</span>
+          <span class="cheat-token">.</span><span class="cheat-desc">N'importe quel caractère</span>
+          <span class="cheat-token">\d</span><span class="cheat-desc">Chiffre [0-9]</span>
+          <span class="cheat-token">\D</span><span class="cheat-desc">Non-chiffre</span>
+          <span class="cheat-token">\w</span><span class="cheat-desc">Alphanumérique + _</span>
+          <span class="cheat-token">\W</span><span class="cheat-desc">Non-alphanumérique</span>
+          <span class="cheat-token">\s</span><span class="cheat-desc">Espace, tab, retour</span>
+          <span class="cheat-token">\S</span><span class="cheat-desc">Non-espace</span>
+          <div class="cheat-sep"></div>
+          <span class="cheat-cat">Quantificateurs</span>
+          <span class="cheat-token">*</span><span class="cheat-desc">0 ou plusieurs</span>
+          <span class="cheat-token">+</span><span class="cheat-desc">1 ou plusieurs</span>
+          <span class="cheat-token">?</span><span class="cheat-desc">0 ou 1</span>
+          <span class="cheat-token">{n}</span><span class="cheat-desc">Exactement n fois</span>
+          <span class="cheat-token">{n,m}</span><span class="cheat-desc">Entre n et m fois</span>
+          <span class="cheat-token">*?</span><span class="cheat-desc">Non-greedy (lazy)</span>
+          <div class="cheat-sep"></div>
+          <span class="cheat-cat">Groupes</span>
+          <span class="cheat-token">(abc)</span><span class="cheat-desc">Groupe capturant</span>
+          <span class="cheat-token">(?:abc)</span><span class="cheat-desc">Non-capturant</span>
+          <span class="cheat-token">(?=abc)</span><span class="cheat-desc">Lookahead positif</span>
+          <span class="cheat-token">(?!abc)</span><span class="cheat-desc">Lookahead négatif</span>
+          <span class="cheat-token">(?&lt;=abc)</span><span class="cheat-desc">Lookbehind positif</span>
+          <span class="cheat-token">a|b</span><span class="cheat-desc">a ou b</span>
+          <div class="cheat-sep"></div>
+          <span class="cheat-cat">Remplacements</span>
+          <span class="cheat-token">$1</span><span class="cheat-desc">Référence groupe 1</span>
+          <span class="cheat-token">$&amp;</span><span class="cheat-desc">Tout le match</span>
+          <span class="cheat-token">$`</span><span class="cheat-desc">Avant le match</span>
+          <span class="cheat-token">$'</span><span class="cheat-desc">Après le match</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance -->
+    <div class="right-section">
+      <div class="right-hdr" data-target="perfBody">
+        ⚡ Performance <span class="chev">▾</span>
+      </div>
+      <div class="right-body" id="perfBody">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;margin-bottom:4px;">
+              <span style="color:var(--t3);font-weight:600;">Temps d'exécution</span>
+              <span class="perf-label" id="perfTime">— ms</span>
+            </div>
+            <div class="perf-bar">
+              <div class="perf-track"><div class="perf-fill" id="perfFill" style="width:0%;"></div></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="stat-chip" id="perfSteps">— étapes</span>
+            <span class="stat-chip" id="perfBacktrack">Backtracking: —</span>
+          </div>
+          <div style="font-size:0.7rem;color:var(--t4);line-height:1.5;" id="perfWarning"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="right-section">
+      <div class="right-hdr" data-target="histBody">
+        🕐 Historique <span class="chev">▾</span>
+      </div>
+      <div class="right-body" id="histBody">
+        <div class="hist-list" id="histList">
+          <span style="font-size:0.72rem;color:var(--t4);">Aucune regex testée</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Groupes capturants -->
+    <div class="right-section">
+      <div class="right-hdr" data-target="groupsBody">
+        ◉ Groupes capturants <span class="chev">▾</span>
+      </div>
+      <div class="right-body" id="groupsBody">
+        <div id="groupsContent" style="font-size:0.75rem;color:var(--t4);">Aucun groupe détecté</div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ═══ ARTICLE & FAQ ══════════════════════════════════════════ -->
+<div class="article-wrap">
+  <div class="article-inner">
+    <h2>Testeur Regex en ligne : comprendre et utiliser les expressions régulières</h2>
+    <p>Une <strong>expression régulière (regex)</strong> est une suite de caractères utilisée pour définir un motif de recherche. Un <strong>testeur regex en ligne</strong> permet de tester, valider et déboguer vos expressions en temps réel.</p>
+    <p>Les regex sont largement utilisées en développement web, en validation de formulaires, en traitement de texte et en extraction de données. Grâce à un <strong>outil regex en ligne gratuit</strong>, vous pouvez analyser rapidement vos expressions sans installer de logiciel.</p>
+
+    <h3>Comment utiliser ce testeur regex ?</h3>
+    <ul>
+      <li>Saisissez votre expression régulière dans le champ principal</li>
+      <li>Activez les flags si nécessaire (g, i, m…)</li>
+      <li>Collez votre texte à analyser</li>
+      <li>Visualisez les correspondances en temps réel avec surlignage</li>
+    </ul>
+
+    <h3>Syntaxe de base des expressions régulières</h3>
+    <ul>
+      <li><code>.</code> : n'importe quel caractère (sauf saut de ligne)</li>
+      <li><code>*</code> : 0 ou plusieurs occurrences</li>
+      <li><code>+</code> : 1 ou plusieurs occurrences</li>
+      <li><code>?</code> : 0 ou 1 occurrence</li>
+      <li><code>[]</code> : classe de caractères</li>
+      <li><code>()</code> : groupe capturant</li>
+      <li><code>^</code> : début de chaîne</li>
+      <li><code>$</code> : fin de chaîne</li>
+    </ul>
+
+    <h3>Cas d'utilisation courants des regex</h3>
+    <ul>
+      <li>Validation d'email, de mots de passe et de numéros de téléphone</li>
+      <li>Extraction de données dans du texte brut ou du HTML</li>
+      <li>Recherche et remplacement avancé dans les éditeurs de code</li>
+      <li>Parsing de logs et de fichiers CSV</li>
+    </ul>
+
+    <h3>Signification des flags regex</h3>
+    <p><strong>g</strong> : correspondances globales · <strong>i</strong> : insensible à la casse · <strong>m</strong> : mode multiligne · <strong>s</strong> : permet au point de matcher les retours à la ligne · <strong>u</strong> : support Unicode</p>
+
+    <h3>Foire Aux Questions</h3>
+    <div class="faq-grid">
+      <div class="faq-card"><div class="faq-q">Qu'est-ce qu'un testeur regex ?</div><div class="faq-a">Un testeur regex est un outil qui permet de tester et valider des expressions régulières en temps réel, avec surlignage visuel des correspondances.</div></div>
+      <div class="faq-card"><div class="faq-q">Comment tester une regex en ligne ?</div><div class="faq-a">Entrez votre expression dans le champ prévu, ajoutez les flags nécessaires et collez votre texte — les correspondances s'affichent instantanément.</div></div>
+      <div class="faq-card"><div class="faq-q">À quoi servent les expressions régulières ?</div><div class="faq-a">Elles servent à rechercher, valider, extraire ou remplacer du texte selon un motif précis, en développement web comme en data science.</div></div>
+      <div class="faq-card"><div class="faq-q">Quelle est la différence entre une regex et une recherche classique ?</div><div class="faq-a">Une regex permet des recherches avancées basées sur des motifs, contrairement à une recherche simple qui ne trouve que des chaînes exactes.</div></div>
+      <div class="faq-card"><div class="faq-q">Peut-on utiliser les regex pour valider des formulaires ?</div><div class="faq-a">Oui, elles sont très utilisées pour valider emails, mots de passe et numéros de téléphone côté client comme serveur.</div></div>
+      <div class="faq-card"><div class="faq-q">Les regex sont-elles difficiles à apprendre ?</div><div class="faq-a">Elles peuvent sembler complexes au début, mais avec la pratique et des outils comme ce testeur avec explication naturelle, elles deviennent accessibles.</div></div>
+      <div class="faq-card"><div class="faq-q">Mes données sont-elles envoyées à un serveur ?</div><div class="faq-a">Non. Tout est traité localement dans votre navigateur, aucune donnée n'est transmise, garantissant une confidentialité totale.</div></div>
+      <div class="faq-card"><div class="faq-q">Comment fonctionne la fonctionnalité Remplacer ?</div><div class="faq-a">Entrez un texte de remplacement en bas du panneau de résultats. Utilisez $1, $2… pour référencer les groupes capturants. Le résultat s'affiche en temps réel.</div></div>
+    </div>
+
+    <h3>Autres outils utiles</h3>
+    <ul>
+      <li><a href="/fr/outils/formateur-json">Formateur JSON</a></li>
+      <li><a href="/fr/outils/encodeur-base64">Encodeur Base64</a></li>
+      <li><a href="/fr/outils/decodeur-jwt">Décodeur JWT</a></li>
+      <li><a href="/fr/outils/convertisseur-timestamp">Convertisseur Timestamp</a></li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 <a href="/">DevToolbox</a> — Outils 100 % côté client pour les développeurs. Aucune donnée envoyée.</p>
+</footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════════════
+   DEVTOOLBOX — REGEX TESTER (Ether Design)
+═══════════════════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+
+// ── REFS ───────────────────────────────────────────────────────
+const regexInput=$('regexInput');
+const testInput=$('testInput');
+const highlightedOutput=$('highlightedOutput');
+const matchBadge=$('matchBadge');
+const regexError=$('regexError');
+const explanationText=$('explanationText');
+const matchTableBody=$('matchTableBody');
+const groupsContent=$('groupsContent');
+const replaceInput=$('replaceInput');
+const replaceResult=$('replaceResult');
+const copyReplaceBtn=$('copyReplaceBtn');
+
+// ── STATE ──────────────────────────────────────────────────────
+let activeFlags=new Set(['g']);
+let regexHistory=JSON.parse(localStorage.getItem('regex-hist')||'[]');
+let lastReplaceResult='';
+
+// ── UTILS ──────────────────────────────────────────────────────
+function toast(m,d=2000){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+async function copy(txt){try{await navigator.clipboard.writeText(txt);toast('✅ Copié !');}catch{const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('✅ Copié !');}}
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+
+// ── FLAGS ──────────────────────────────────────────────────────
+document.querySelectorAll('.flag-btn').forEach(btn=>{
+  if(btn.dataset.flag==='g')btn.classList.add('active');
+  btn.addEventListener('click',()=>{
+    const f=btn.dataset.flag;
+    if(activeFlags.has(f)){activeFlags.delete(f);btn.classList.remove('active');}
+    else{activeFlags.add(f);btn.classList.add('active');}
+    run();
+  });
+});
+
+// ── EXPLAIN ────────────────────────────────────────────────────
+function explain(p){
+  if(!p)return '<span style="color:var(--t4)">Saisissez une expression régulière…</span>';
+  const parts=[];let i=0;
+  function mk(txt,type){
+    const colors={anchor:'var(--cyan)',quant:'var(--a)',class:'var(--green)',group:'var(--purple)',literal:'var(--t2)',escape:'var(--amber)'};
+    return `<span class="expl-token" style="color:${colors[type]||'var(--t2)'};background:${colors[type]||'var(--t4)'}18;">${esc(txt)}</span>`;
+  }
+  const labels={
+    '^':['début de chaîne','anchor'],'$':['fin de chaîne','anchor'],
+    '.':['n\'importe quel caractère','class'],
+    '*':['0 ou plusieurs fois','quant'],'+':['1 ou plusieurs fois','quant'],
+    '?':['0 ou 1 fois','quant'],'|':['ou','literal'],
+  };
+  while(i<p.length){
+    const c=p[i];
+    if(labels[c]){parts.push(mk(c,labels[c][1])+' <em style="color:var(--t3);font-size:0.75rem;">'+labels[c][0]+'</em>');i++;continue;}
+    if(c==='\\'){
+      if(i+1<p.length){
+        const n=p[i+1];
+        const esc_map={d:['\\d','chiffre 0-9','escape'],D:['\\D','non-chiffre','escape'],w:['\\w','alphanum+_','escape'],W:['\\W','non-alphanum','escape'],s:['\\s','espace','escape'],S:['\\S','non-espace','escape'],b:['\\b','limite de mot','escape'],B:['\\B','non-limite','escape'],n:['\\n','saut de ligne','escape'],t:['\\t','tabulation','escape']};
+        if(esc_map[n]){const[tok,desc,type]=esc_map[n];parts.push(mk(tok,type)+' <em style="color:var(--t3);font-size:0.75rem;">'+desc+'</em>');}
+        else{parts.push(mk('\\'+n,'literal')+' <em style="color:var(--t3);font-size:0.75rem;">caractère spécial</em>');}
+        i+=2;continue;
+      }
+      i++;continue;
+    }
+    if(c==='['){const end=p.indexOf(']',i);if(end!==-1){const ins=p.substring(i+1,end);const neg=ins.startsWith('^');parts.push(mk('['+ins+']','class')+` <em style="color:var(--t3);font-size:0.75rem;">${neg?'aucun de : '+ins.slice(1):'un de : '+ins}</em>`);i=end+1;continue;} i++;continue;}
+    if(c==='('){if(p.substring(i).startsWith('(?:')){parts.push(mk('(?:…)','group')+' <em style="color:var(--t3);font-size:0.75rem;">groupe non-capturant</em>');i+=3;}else if(p.substring(i).startsWith('(?=')){parts.push(mk('(?=…)','group')+' <em style="color:var(--t3);font-size:0.75rem;">lookahead +</em>');i+=3;}else if(p.substring(i).startsWith('(?!')){parts.push(mk('(?!…)','group')+' <em style="color:var(--t3);font-size:0.75rem;">lookahead −</em>');i+=3;}else{parts.push(mk('(','group')+' <em style="color:var(--t3);font-size:0.75rem;">groupe capturant</em>');i++;}continue;}
+    if(c==='{'){const end=p.indexOf('}',i);if(end!==-1){parts.push(mk('{'+p.substring(i+1,end)+'}','quant')+' <em style="color:var(--t3);font-size:0.75rem;">répétition</em>');i=end+1;continue;}i++;continue;}
+    if(c!==')'&&c!=='}'){parts.push(mk(c,'literal'));i++;continue;}
+    i++;
+  }
+  return parts.join(' ');
+}
+
+// ── HIGHLIGHT COLORS ───────────────────────────────────────────
+const HL_COLORS=[
+  'rgba(232,160,32,0.3)','rgba(34,211,238,0.3)','rgba(52,211,153,0.3)',
+  'rgba(248,113,113,0.3)','rgba(167,139,250,0.3)','rgba(251,191,36,0.3)',
+];
+const GROUP_CLASSES=['gc-0','gc-1','gc-2','gc-3','gc-4','gc-5'];
+
+// ── MAIN RUN ───────────────────────────────────────────────────
+function run(){
+  const pattern=regexInput.value;
+  const text=testInput.value;
+  const flags=Array.from(activeFlags).join('');
+
+  // Char count
+  $('charCount').textContent=text.length.toLocaleString()+' car.';
+
+  // Explanation
+  explanationText.innerHTML=explain(pattern);
+
+  // Regex validation
+  let regex;
+  try{regex=new RegExp(pattern,flags);regexError.classList.remove('show');}
+  catch(e){
+    regexError.textContent='⚠ Regex invalide : '+e.message;regexError.classList.add('show');
+    highlightedOutput.textContent=text;matchBadge.textContent='Erreur';matchBadge.className='match-badge zero';
+    matchTableBody.innerHTML='<tr><td colspan="5" style="color:var(--t4);text-align:center;padding:16px;">Regex invalide</td></tr>';
+    $('statMatches').textContent='0 match';$('statGroups').textContent='0 groupe';
+    $('statPos').textContent='—';return;
+  }
+  if(!pattern){highlightedOutput.textContent=text;matchBadge.textContent='0 match';matchBadge.className='match-badge zero';matchTableBody.innerHTML='';return;}
+
+  // Performance measurement
+  const t0=performance.now();
+  const matches=[];
+  let m;
+  if(flags.includes('g')){
+    while((m=regex.exec(text))!==null){matches.push(m);if(m[0].length===0)regex.lastIndex++;}
+  }else{m=regex.exec(text);if(m)matches.push(m);}
+  const elapsed=(performance.now()-t0).toFixed(2);
+
+  // Performance display
+  $('perfTime').textContent=elapsed+' ms';
+  const pct=Math.min(100,parseFloat(elapsed)*10);
+  const fill=$('perfFill');fill.style.width=pct+'%';
+  fill.className='perf-fill'+(pct>50?' danger':pct>20?' warn':'');
+  $('perfSteps').textContent=matches.length+' matches';
+  $('perfBacktrack').textContent='Backtracking: '+(matches.length>100?'⚠ élevé':'OK');
+  $('perfWarning').innerHTML=pct>50?'⚠ Regex lente. Vérifiez les quantificateurs imbriqués (ex: <code>(a+)+</code>).':pct>20?'⚡ Performance acceptable':'';
+
+  // Stats
+  const cnt=matches.length;
+  matchBadge.textContent=cnt+' match'+(cnt!==1?'es':'');
+  matchBadge.className='match-badge'+(cnt===0?' zero':'');
+  $('statMatches').textContent=cnt+' match'+(cnt!==1?'es':'');
+  const maxGroup=matches.reduce((acc,m)=>Math.max(acc,m.length-1),0);
+  $('statGroups').textContent=maxGroup+' groupe'+(maxGroup!==1?'s':'');
+  $('statLen').textContent=pattern.length+' car.';
+  if(cnt>0) $('statPos').textContent='pos. '+matches[0].index;
+  else $('statPos').textContent='—';
+
+  // Highlighted output
+  if(cnt===0){highlightedOutput.textContent=text;}
+  else{
+    let html='',last=0;
+    const sorted=[...matches].sort((a,b)=>a.index-b.index);
+    sorted.forEach((m,ci)=>{
+      html+=esc(text.substring(last,m.index));
+      const col=HL_COLORS[ci%HL_COLORS.length];
+      html+=`<span class="m-hl" style="background:${col};" title="Match ${ci+1}: index ${m.index}">${esc(m[0])}</span>`;
+      last=m.index+m[0].length;
+    });
+    html+=esc(text.substring(last));
+    highlightedOutput.innerHTML=html;
+  }
+
+  // Match table
+  let tableHtml='';
+  if(cnt===0){tableHtml='<tr><td colspan="5" style="color:var(--t4);text-align:center;padding:20px;">Aucune correspondance</td></tr>';}
+  else{
+    matches.forEach((m,i)=>{
+      let groups='<span style="color:var(--t4)">—</span>';
+      if(m.length>1){
+        groups=Array.from({length:m.length-1},(_,g)=>
+          m[g+1]!==undefined
+            ?`<span class="group-tag ${GROUP_CLASSES[g%GROUP_CLASSES.length]}">$${g+1}: ${esc(String(m[g+1]))}</span>`
+            :`<span class="group-tag" style="background:var(--s3);color:var(--t4);">$${g+1}: undef</span>`
+        ).join('');
+      }
+      tableHtml+=`<tr>
+        <td class="match-idx">${i+1}</td>
+        <td class="match-val">${esc(m[0])||'<em style="color:var(--t4)">vide</em>'}</td>
+        <td class="match-pos">${m.index}–${m.index+m[0].length}</td>
+        <td style="color:var(--t3);">${m[0].length}</td>
+        <td>${groups}</td>
+      </tr>`;
+    });
+  }
+  matchTableBody.innerHTML=tableHtml;
+
+  // Groups panel
+  if(cnt===0||maxGroup===0){groupsContent.innerHTML='<span style="color:var(--t4);font-size:0.72rem;">Aucun groupe capturant</span>';}
+  else{
+    let gh='<div style="display:flex;flex-direction:column;gap:6px;">';
+    matches.forEach((m,mi)=>{
+      if(m.length>1){
+        for(let g=1;g<m.length;g++){
+          if(m[g]!==undefined){
+            gh+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--s2);border-radius:6px;border:1px solid var(--border);">
+              <span class="group-tag ${GROUP_CLASSES[(g-1)%GROUP_CLASSES.length]}">Match ${mi+1} / $${g}</span>
+              <span style="font-family:var(--mono);font-size:0.72rem;color:var(--t1);">${esc(m[g])}</span>
+            </div>`;
+          }
+        }
+      }
+    });
+    gh+='</div>';
+    groupsContent.innerHTML=gh;
+  }
+
+  // Replace preview
+  updateReplace(regex,text);
+
+  // History
+  addToHistory(pattern,flags);
+}
+
+// ── REPLACE ────────────────────────────────────────────────────
+function updateReplace(regex,text){
+  const repl=replaceInput.value;
+  if(!repl){replaceResult.classList.remove('show');copyReplaceBtn.style.display='none';return;}
+  try{
+    const flags=Array.from(activeFlags).join('');
+    const rx=new RegExp(regex.source,flags);
+    lastReplaceResult=text.replace(rx,repl);
+    replaceResult.textContent=lastReplaceResult;
+    replaceResult.classList.add('show');
+    copyReplaceBtn.style.display='flex';
+  }catch(e){replaceResult.classList.remove('show');}
+}
+
+// ── HISTORY ────────────────────────────────────────────────────
+function addToHistory(p,f){
+  if(!p||regexHistory.find(h=>h.p===p&&h.f===f)) return;
+  regexHistory.unshift({p,f,ts:Date.now()});
+  if(regexHistory.length>20) regexHistory=regexHistory.slice(0,20);
+  localStorage.setItem('regex-hist',JSON.stringify(regexHistory));
+  renderHistory();
+}
+function renderHistory(){
+  const list=$('histList');
+  if(!regexHistory.length){list.innerHTML='<span style="font-size:0.72rem;color:var(--t4);">Aucune regex testée</span>';return;}
+  list.innerHTML='';
+  regexHistory.slice(0,10).forEach((h,i)=>{
+    const div=document.createElement('div');div.className='hist-item';
+    div.innerHTML=`<span class="hist-regex">${esc(h.p)}</span><span class="hist-flags">${h.f?'/'+h.f:''}</span><button class="hist-del" data-i="${i}">✕</button>`;
+    div.addEventListener('click',e=>{if(e.target.classList.contains('hist-del'))return;
+      regexInput.value=h.p;
+      activeFlags=new Set(h.f.split(''));
+      document.querySelectorAll('.flag-btn').forEach(b=>b.classList.toggle('active',activeFlags.has(b.dataset.flag)));
+      run();
+    });
+    div.querySelector('.hist-del').onclick=(e)=>{e.stopPropagation();regexHistory.splice(i,1);localStorage.setItem('regex-hist',JSON.stringify(regexHistory));renderHistory();};
+    list.appendChild(div);
+  });
+}
+
+// ── COLLAPSIBLE PANELS ─────────────────────────────────────────
+document.querySelectorAll('.right-hdr[data-target]').forEach(h=>{
+  h.addEventListener('click',()=>{
+    const body=document.getElementById(h.dataset.target);if(!body)return;
+    body.classList.toggle('hidden');h.classList.toggle('col',body.classList.contains('hidden'));
+  });
+});
+
+// ── EVENTS ─────────────────────────────────────────────────────
+regexInput.addEventListener('input',run);
+testInput.addEventListener('input',run);
+replaceInput.addEventListener('input',()=>{
+  const flags=Array.from(activeFlags).join('');
+  try{const rx=new RegExp(regexInput.value,flags);updateReplace(rx,testInput.value);}catch(e){}
+});
+
+// Pattern chips
+document.querySelectorAll('.pattern-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    regexInput.value=chip.dataset.pattern;
+    const f=chip.dataset.flags||'g';
+    activeFlags=new Set(f.split(''));
+    document.querySelectorAll('.flag-btn').forEach(b=>b.classList.toggle('active',activeFlags.has(b.dataset.flag)));
+    run();toast(`Pattern "${chip.textContent}" chargé`);
+  });
+});
+
+// Topbar actions
+$('clearBtn').onclick=()=>{regexInput.value='';testInput.value='';run();};
+$('shareBtn').onclick=()=>{
+  const flags=Array.from(activeFlags).join('');
+  const h=btoa(encodeURIComponent(JSON.stringify({p:regexInput.value,f:flags,t:testInput.value})));
+  window.location.hash=h;copy(location.href);
+};
+$('themeBtn').onclick=()=>document.body.classList.toggle('light');
+
+// Copy actions
+$('copyRegexBtn').onclick=()=>{const p=regexInput.value;if(!p){toast('Rien à copier');return;}copy('/'+p+'/'+Array.from(activeFlags).join(''));};
+$('copyMatchesBtn').onclick=()=>{copy(highlightedOutput.innerText||'');};
+$('copyAllMatchesBtn').onclick=()=>{
+  const rows=matchTableBody.querySelectorAll('tr');
+  const lines=Array.from(rows).map(r=>{const cells=r.querySelectorAll('td');return cells.length?cells[1].textContent:''}).filter(Boolean);
+  copy(lines.join('\n'));
+};
+$('replaceBtn').onclick=()=>{
+  const repl=replaceInput.value;
+  if(!repl){toast('Entrez un texte de remplacement');return;}
+  const flags=Array.from(activeFlags).join('');
+  try{const rx=new RegExp(regexInput.value,flags);const res=testInput.value.replace(rx,repl);testInput.value=res;run();toast('✅ Remplacement effectué');}
+  catch(e){toast('Regex invalide');}
+};
+copyReplaceBtn.onclick=()=>copy(lastReplaceResult);
+$('downloadBtn').onclick=()=>{
+  const flags=Array.from(activeFlags).join('');
+  const data={regex:'/'+regexInput.value+'/'+flags,text:testInput.value,matches:Array.from(matchTableBody.querySelectorAll('tr')).map(r=>{const cells=r.querySelectorAll('td');return cells.length?{index:cells[0].textContent,value:cells[1].textContent,position:cells[2].textContent,length:cells[3].textContent}:null;}).filter(Boolean)};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='regex-results.json';a.click();toast('💾 JSON exporté');
+};
+
+// Keyboard shortcut
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}
+});
+
+// ── URL RESTORE ────────────────────────────────────────────────
+function loadFromHash(){
+  const h=location.hash.slice(1);if(!h)return;
+  try{
+    const s=JSON.parse(decodeURIComponent(atob(h)));
+    if(s.p)regexInput.value=s.p;
+    if(s.t)testInput.value=s.t;
+    if(s.f){activeFlags=new Set(s.f.split(''));document.querySelectorAll('.flag-btn').forEach(b=>b.classList.toggle('active',activeFlags.has(b.dataset.flag)));}
+    toast('📂 Regex restaurée');
+  }catch(e){}
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+renderHistory();
+loadFromHash();
+run();
+</script>
+</body>
+</html>
