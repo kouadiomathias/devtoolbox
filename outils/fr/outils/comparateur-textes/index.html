@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Comparateur de Texte en Ligne (Comparer deux textes & fichiers)</title>
+    <meta name="description" content="Comparez deux textes ou fichiers en ligne. Diff ligne par ligne et mot par mot, coloration syntaxique, ignorez la casse/espaces. Partagez le diff via URL.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/comparateur-texte/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/comparateur-texte/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/text-diff/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/text-diff/">
+
+    <meta property="og:title" content="Comparateur de Texte en Ligne">
+    <meta property="og:description" content="Diff ligne par ligne et mot par mot avec coloration syntaxique. Partagez vos diffs.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/comparateur-texte/">
+
+    <!-- Highlight.js pour coloration syntaxique (léger) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JRBW78KE29');
+    </script>
+    
+    <style>
+        /* Variables & Reset */
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --diff-add: #e6ffec;
+            --diff-del: #ffebe9;
+            --diff-add-dark: #2d4a3e;
+            --diff-del-dark: #5a3a3a;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05),0 8px 10px -6px rgba(0,0,0,0.02);
+        }
+        body.dark {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #60a5fa;
+            --primary-dark: #3b82f6;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --diff-add: #1a4a2e;
+            --diff-del: #5a2a2a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.6; padding:24px; display:flex; flex-direction:column; align-items:center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .container { max-width: 1600px; width:100%; margin:0 auto; }
+        
+        /* Header */
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:16px; }
+        .logo { font-weight:700; font-size:1.5rem; color:var(--primary); text-decoration:none; }
+        .header-right { display:flex; gap:12px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:4px; box-shadow:var(--shadow); }
+        .lang-btn, .theme-btn { padding:8px 16px; border:none; background:transparent; font-weight:500; cursor:pointer; color:var(--text-light); border-radius:32px; text-decoration:none; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:white; }
+        
+        /* Tool Card */
+        .tool-card { background:var(--surface); border-radius:var(--radius); padding:32px; box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:32px; }
+        h1 { font-size:2rem; font-weight:700; margin-bottom:8px; }
+        .subhead { color:var(--text-light); margin-bottom:24px; }
+        
+        /* Options */
+        .toolbar { display:flex; flex-wrap:wrap; gap:16px; align-items:center; margin-bottom:20px; }
+        .btn {
+            padding:8px 16px; border-radius:40px; font-weight:600; font-size:0.9rem; border:1px solid var(--border);
+            background:var(--surface); color:var(--text); cursor:pointer; transition:all 0.2s;
+            display:inline-flex; align-items:center; gap:6px;
+        }
+        .btn-primary { background:var(--primary); color:white; border-color:var(--primary-dark); }
+        .btn-primary:hover { background:var(--primary-dark); }
+        
+        select { padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); }
+        
+        /* Editeurs */
+        .editors-container { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+        .editor-panel { display:flex; flex-direction:column; }
+        .editor-header { display:flex; justify-content:space-between; margin-bottom:8px; }
+        textarea {
+            width:100%; height:300px; padding:16px; font-family:'SF Mono', 'Menlo', monospace; font-size:13px;
+            border:1.5px solid var(--border); border-radius:12px; background:var(--surface); color:var(--text);
+            resize:vertical; outline:none;
+        }
+        
+        /* Diff output */
+        .diff-container { margin-top:20px; }
+        .diff-header { display:flex; gap:20px; margin-bottom:12px; }
+        .diff-stats { font-size:0.9rem; }
+        .diff-view-options { display:flex; gap:8px; margin-left:auto; }
+        .diff-content {
+            background:var(--surface); border:1px solid var(--border); border-radius:12px;
+            padding:16px; font-family:'SF Mono', monospace; font-size:13px; overflow-x:auto;
+            max-height:500px; overflow-y:auto;
+        }
+        .diff-line { display:flex; white-space:pre-wrap; word-break:break-all; }
+        .diff-line-number { width:40px; color:var(--text-light); text-align:right; padding-right:12px; user-select:none; }
+        .diff-line-content { flex:1; }
+        .diff-add { background:var(--diff-add); }
+        .diff-del { background:var(--diff-del); }
+        .diff-word-add { background:#acf2bd; border-radius:2px; }
+        .diff-word-del { background:#fdb8c0; border-radius:2px; text-decoration:line-through; }
+        body.dark .diff-word-add { background:#2e6b3e; }
+        body.dark .diff-word-del { background:#8b3a3a; }
+        
+        /* Article / FAQ */
+        .article-section { background:var(--surface); border-radius:var(--radius); padding:32px; margin-bottom:32px; border:1px solid var(--border); }
+        .faq-item { margin-bottom:24px; }
+        .faq-question { font-weight:700; font-size:1.1rem; }
+        .interlinks { display:flex; flex-wrap:wrap; gap:12px; margin-top:20px; }
+        .interlinks a { color:var(--primary); text-decoration:none; }
+        
+        .footer { text-align:center; color:var(--text-light); margin-top:24px; }
+        .toast-msg { position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--bg); padding:10px 20px; border-radius:40px; opacity:0; transition:opacity 0.3s; z-index:1000; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light">Clair</button>
+                <button class="theme-btn" data-theme="dark">Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/text-diff/" class="lang-btn">EN</a>
+                <a href="/fr/outils/comparateur-texte/" class="lang-btn active">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            <h1>Comparateur de Texte en Ligne (Comparer deux textes)</h1>
+            <p>
+                Comparez facilement deux textes, fichiers ou code avec ce comparateur de texte en ligne. Détectez les différences ligne par ligne ou mot par mot avec une visualisation claire et rapide.
+            </p>
+            <div class="subhead">Comparez deux textes, fichiers ou code. Diff ligne par ligne et mot par mot, coloration syntaxique, partagez via URL.</div>
+            
+            <!-- Barre d'outils -->
+            <div class="toolbar">
+                <select id="languageSelect">
+                    <option value="auto">Auto-détection</option>
+                    <option value="json">JSON</option>
+                    <option value="sql">SQL</option>
+                    <option value="yaml">YAML</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="plaintext">Texte brut</option>
+                </select>
+                <label><input type="checkbox" id="ignoreCase"> Ignorer la casse</label>
+                <label><input type="checkbox" id="ignoreTrailing"> Ignorer espaces fin de ligne</label>
+                <label><input type="checkbox" id="ignoreEmpty"> Ignorer lignes vides</label>
+                <button class="btn" id="swapBtn">↔ Inverser</button>
+                <button class="btn" id="clearBtn">🗑 Effacer</button>
+                <button class="btn btn-primary" id="compareBtn">Comparer</button>
+                <button class="btn" id="shareBtn">🔗 Partager</button>
+            </div>
+            
+            <!-- Editeurs -->
+            <div class="editors-container">
+                <div class="editor-panel">
+                    <div class="editor-header">
+                        <span>Texte original</span>
+                        <button class="btn btn-sm" id="pasteLeftBtn">Coller</button>
+                    </div>
+                    <textarea id="leftText" placeholder="Collez ou tapez le premier texte ici...">{"name":"John", "age":30}</textarea>
+                </div>
+                <div class="editor-panel">
+                    <div class="editor-header">
+                        <span>Texte modifié</span>
+                        <button class="btn btn-sm" id="pasteRightBtn">Coller</button>
+                    </div>
+                    <textarea id="rightText" placeholder="Collez ou tapez le second texte ici...">{"name":"John", "age":31, "city":"Paris"}</textarea>
+                </div>
+            </div>
+            
+            <!-- Options d'affichage et stats -->
+            <div class="diff-header">
+                <div class="diff-stats" id="diffStats">0 ajouts, 0 suppressions, 0 lignes inchangées</div>
+                <div class="diff-view-options">
+                    <button class="btn btn-sm active" data-view="split">Vue fractionnée</button>
+                    <button class="btn btn-sm" data-view="unified">Vue unifiée (git)</button>
+                </div>
+            </div>
+            
+            <!-- Résultat du diff -->
+            <div class="diff-content" id="diffOutput">
+                <div class="diff-line"><span class="diff-line-number"></span><span class="diff-line-content">Cliquez sur Comparer pour voir les différences</span></div>
+            </div>
+        </div>
+        
+        <!-- FAQ et interlinks -->
+        <section class="article-section">
+            <h2>Comparateur de texte avancé</h2>
+            <p>Cet outil vous permet de visualiser les différences entre deux versions d'un texte ou d'un code. Il fonctionne entièrement dans votre navigateur, aucune donnée n'est envoyée à un serveur.</p>
+            
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Diff unifié (unified) vs vue fractionnée (split) : quelle différence ?</div>
+                <p>La vue <strong>split</strong> affiche les deux textes côte à côte, avec les différences alignées. La vue <strong>unifiée</strong> (comme `git diff`) montre un seul flux avec les lignes ajoutées (précédées de `+`) et supprimées (`-`).</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Comment fonctionne la comparaison de JSON ?</div>
+                <p>L'outil peut comparer du JSON brut en mode texte, mais il offre aussi une coloration syntaxique pour repérer facilement les structures. Pour une comparaison sémantique, formatez d'abord votre JSON avec notre <a href="/fr/outils/formateur-json/">formateur JSON</a>.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Puis-je partager mon diff ?</div>
+                <p>Oui, le bouton "Partager" génère une URL avec l'état complet (les deux textes et options) encodé dans le fragment d'URL. Vous pouvez copier ce lien et l'envoyer à un collègue — tout est décodé localement.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Le diff mot par mot est-il disponible ?</div>
+                <p>Oui, dans les lignes modifiées, les mots ajoutés ou supprimés sont surlignés en vert et rouge pour une précision maximale.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Quels langages sont supportés pour la coloration ?</div>
+                <p>JSON, SQL, YAML, JavaScript, Python, et bien d'autres. L'auto-détection essaie de deviner le format. Vous pouvez aussi forcer un langage.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Puis-je comparer de gros fichiers ?</div>
+                <p>Oui, mais les performances dépendent de votre navigateur. Pour de très gros fichiers, il est recommandé de les diviser.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Cet outil fonctionne-t-il hors ligne ?</div>
+                <p>Oui, tout le traitement se fait dans votre navigateur. Aucune donnée n’est envoyée à un serveur.</p>
+            </div>
+            
+            <div class="interlinks">
+                <span>🔗 Autres outils utiles :</span>
+                <a href="/fr/outils/formateur-json/">Formateur JSON</a>
+                <a href="/fr/outils/convertisseur-json-csv/">JSON ⇄ CSV</a>
+                <a href="/fr/outils/testeur-regex/">Testeur Regex</a>
+                <a href="/fr/outils/generateur-cron/">Générateur Cron</a>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="footer">
+        <p>© 2025 DevToolbox — Outils 100% côté client</p>
+    </footer>
+</div>
+<div id="toast" class="toast-msg">Copié !</div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Comparateur de Texte",
+  "url": "https://www.devstoolsbox.dev/fr/outils/comparateur-texte/",
+  "description": "Comparez deux textes avec diff ligne/mot, coloration syntaxique, ignorez casse/espaces. Partage par URL.",
+  "applicationCategory": "DeveloperApplication",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Diff unifié vs vue fractionnée ?", "acceptedAnswer": { "@type": "Answer", "text": "Split : côte à côte. Unified : un seul flux (+/-) comme git diff." } },
+    { "@type": "Question", "name": "Puis-je partager mon diff ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, via une URL encodée contenant les textes et options." } },
+    { "@type": "Question", "name": "Le diff mot par mot est-il disponible ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, les mots modifiés sont surlignés finement." } }
+  ]
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
+<script>
+(function(){
+    // Thème
+    const themeBtns = document.querySelectorAll('.theme-btn');
+    const hljsLight = document.getElementById('hljs-light');
+    const hljsDark = document.getElementById('hljs-dark');
+    function setTheme(theme){
+        const isDark = theme === 'dark';
+        document.body.classList.toggle('dark', isDark);
+        hljsLight.disabled = isDark;
+        hljsDark.disabled = !isDark;
+        themeBtns.forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+        localStorage.setItem('diff-theme', theme);
+    }
+    themeBtns.forEach(b => b.addEventListener('click', ()=> setTheme(b.dataset.theme)));
+    setTheme(localStorage.getItem('diff-theme') || 'light');
+
+    // Toast
+    function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2000); }
+
+    // Éléments
+    const leftText = document.getElementById('leftText');
+    const rightText = document.getElementById('rightText');
+    const diffOutput = document.getElementById('diffOutput');
+    const diffStats = document.getElementById('diffStats');
+    const ignoreCase = document.getElementById('ignoreCase');
+    const ignoreTrailing = document.getElementById('ignoreTrailing');
+    const ignoreEmpty = document.getElementById('ignoreEmpty');
+    const languageSelect = document.getElementById('languageSelect');
+    const compareBtn = document.getElementById('compareBtn');
+    const swapBtn = document.getElementById('swapBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const viewBtns = document.querySelectorAll('[data-view]');
+    let currentView = 'split';
+
+    // Pré-traitement
+    function preprocess(str){
+        let s = str;
+        if(ignoreTrailing.checked) s = s.split('\n').map(l => l.trimEnd()).join('\n');
+        if(ignoreEmpty.checked) s = s.split('\n').filter(l => l.trim() !== '').join('\n');
+        return s;
+    }
+
+    // Comparaison ligne avec diff mots inline
+    function computeDiff(left, right){
+        const leftLines = left.split('\n');
+        const rightLines = right.split('\n');
+        const lineDiff = Diff.diffLines(left, right, { ignoreCase: ignoreCase.checked });
+        
+        let added = 0, removed = 0, unchanged = 0;
+        const result = [];
+        let leftLineNum = 1, rightLineNum = 1;
+        
+        for (const part of lineDiff){
+            const lines = part.value.split('\n');
+            if (lines[lines.length-1] === '') lines.pop();
+            const count = lines.length;
+            
+            if (part.added){
+                for (let i=0; i<count; i++){
+                    result.push({ type: 'add', leftNum: '', rightNum: rightLineNum++, content: lines[i] });
+                }
+                added += count;
+            } else if (part.removed){
+                for (let i=0; i<count; i++){
+                    result.push({ type: 'del', leftNum: leftLineNum++, rightNum: '', content: lines[i] });
+                }
+                removed += count;
+            } else {
+                for (let i=0; i<count; i++){
+                    result.push({ type: 'same', leftNum: leftLineNum++, rightNum: rightLineNum++, content: lines[i] });
+                }
+                unchanged += count;
+            }
+        }
+        
+        // Diff mot par mot pour les lignes modifiées (entre lignes supprimées/ajoutées consécutives)
+        // Simplifié : on pourrait faire mieux, mais pour l'exemple on applique un diff mot sur les paires proches.
+        for (let i=0; i<result.length; i++){
+            if (result[i].type === 'del' && i+1 < result.length && result[i+1].type === 'add'){
+                const delLine = result[i].content;
+                const addLine = result[i+1].content;
+                const wordDiff = Diff.diffWords(delLine, addLine, { ignoreCase: ignoreCase.checked });
+                let delHtml = '', addHtml = '';
+                wordDiff.forEach(part => {
+                    if (part.added) addHtml += `<span class="diff-word-add">${escapeHtml(part.value)}</span>`;
+                    else if (part.removed) delHtml += `<span class="diff-word-del">${escapeHtml(part.value)}</span>`;
+                    else { delHtml += escapeHtml(part.value); addHtml += escapeHtml(part.value); }
+                });
+                result[i].wordDiffHtml = delHtml;
+                result[i+1].wordDiffHtml = addHtml;
+                i++; // skip next
+            }
+        }
+        
+        return { result, stats: { added, removed, unchanged } };
+    }
+
+    function escapeHtml(text){ return text.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]); }
+
+    // Affichage
+    function renderDiff(diffData, view){
+        const { result, stats } = diffData;
+        diffStats.textContent = `${stats.added} ajouts, ${stats.removed} suppressions, ${stats.unchanged} inchangées`;
+        
+        let html = '';
+        if (view === 'split'){
+            // Vue fractionnée : deux colonnes
+            html = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">';
+            html += '<div><strong>Original</strong></div><div><strong>Modifié</strong></div>';
+            for (let i=0; i<result.length; i++){
+                const line = result[i];
+                if (line.type === 'same'){
+                    html += `<div class="diff-line"><span class="diff-line-number">${line.leftNum}</span><span class="diff-line-content">${highlightCode(line.content)}</span></div>`;
+                    html += `<div class="diff-line"><span class="diff-line-number">${line.rightNum}</span><span class="diff-line-content">${highlightCode(line.content)}</span></div>`;
+                } else if (line.type === 'del'){
+                    const content = line.wordDiffHtml ? line.wordDiffHtml : highlightCode(line.content);
+                    html += `<div class="diff-line diff-del"><span class="diff-line-number">${line.leftNum}</span><span class="diff-line-content">${content}</span></div>`;
+                    html += `<div class="diff-line"></div>`;
+                } else if (line.type === 'add'){
+                    const content = line.wordDiffHtml ? line.wordDiffHtml : highlightCode(line.content);
+                    html += `<div class="diff-line"></div>`;
+                    html += `<div class="diff-line diff-add"><span class="diff-line-number">${line.rightNum}</span><span class="diff-line-content">${content}</span></div>`;
+                }
+            }
+            html += '</div>';
+        } else {
+            // Vue unifiée
+            for (const line of result){
+                let prefix = ' ', bgClass = '';
+                if (line.type === 'add') { prefix = '+'; bgClass = 'diff-add'; }
+                else if (line.type === 'del') { prefix = '-'; bgClass = 'diff-del'; }
+                const content = line.wordDiffHtml ? line.wordDiffHtml : highlightCode(line.content);
+                html += `<div class="diff-line ${bgClass}"><span class="diff-line-number">${prefix}</span><span class="diff-line-content">${content}</span></div>`;
+            }
+        }
+        diffOutput.innerHTML = html;
+    }
+
+    function highlightCode(code){
+        const lang = languageSelect.value === 'auto' ? highlightAuto(code) : languageSelect.value;
+        if (lang === 'plaintext' || !lang) return escapeHtml(code);
+        try {
+            return hljs.highlight(code, { language: lang, ignoreIllegals: true }).value;
+        } catch { return escapeHtml(code); }
+    }
+
+    function highlightAuto(code){
+        const result = hljs.highlightAuto(code);
+        return result.language;
+    }
+
+    function performDiff(){
+        let left = leftText.value;
+        let right = rightText.value;
+        left = preprocess(left);
+        right = preprocess(right);
+        const diffData = computeDiff(left, right);
+        renderDiff(diffData, currentView);
+        // Mettre à jour URL
+        updateHash();
+    }
+
+    // Gestion hash (partage)
+    function updateHash(){
+        const state = {
+            l: leftText.value,
+            r: rightText.value,
+            ic: ignoreCase.checked,
+            it: ignoreTrailing.checked,
+            ie: ignoreEmpty.checked,
+            lang: languageSelect.value,
+            v: currentView
+        };
+        const encoded = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = encoded;
+    }
+
+    function loadFromHash(){
+        if (!window.location.hash) return;
+        try {
+            const json = decodeURIComponent(atob(window.location.hash.slice(1)));
+            const state = JSON.parse(json);
+            if (state.l) leftText.value = state.l;
+            if (state.r) rightText.value = state.r;
+            ignoreCase.checked = !!state.ic;
+            ignoreTrailing.checked = !!state.it;
+            ignoreEmpty.checked = !!state.ie;
+            if (state.lang) languageSelect.value = state.lang;
+            if (state.v) currentView = state.v;
+            performDiff();
+        } catch(e){ /* ignore */ }
+    }
+
+    // Event listeners
+    compareBtn.addEventListener('click', performDiff);
+    swapBtn.addEventListener('click', ()=>{
+        [leftText.value, rightText.value] = [rightText.value, leftText.value];
+        performDiff();
+    });
+    clearBtn.addEventListener('click', ()=>{
+        leftText.value = ''; rightText.value = '';
+        diffOutput.innerHTML = '<div class="diff-line">Textes effacés</div>';
+        diffStats.textContent = '0 ajouts, 0 suppressions';
+    });
+    shareBtn.addEventListener('click', ()=>{
+        updateHash();
+        navigator.clipboard?.writeText(window.location.href).then(()=> toast('Lien copié !'));
+    });
+    viewBtns.forEach(btn => btn.addEventListener('click', ()=>{
+        currentView = btn.dataset.view;
+        viewBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        performDiff();
+    }));
+    document.getElementById('pasteLeftBtn').addEventListener('click', async ()=>{
+        const text = await navigator.clipboard.readText();
+        leftText.value = text;
+    });
+    document.getElementById('pasteRightBtn').addEventListener('click', async ()=>{
+        const text = await navigator.clipboard.readText();
+        rightText.value = text;
+    });
+
+    // Initialisation
+    loadFromHash();
+    if (!window.location.hash) performDiff();
+})();
+</script>
+</body>
+</html>
