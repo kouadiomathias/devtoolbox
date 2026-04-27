@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment créer facilement une expression cron ? Guide complet du générateur DevToolbox</title>
+    <meta name="description" content="Apprenez à écrire des expressions cron sans erreur grâce au générateur visuel DevToolbox. Builder avec sliders, explication naturelle, presets, exports Linux/AWS/Docker. Guide pratique étape par étape.">
+    <meta name="keywords" content="cron expression generator, cron every 5 minutes, cron job daily, cron every monday, cron aws, cron gcp, planificateur cron, générateur cron">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/generateur-cron/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/generateur-cron/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/cron-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/cron-generator/">
+
+    <meta property="og:title" content="Comment créer facilement une expression cron ? Guide complet du générateur DevToolbox">
+    <meta property="og:description" content="Guide pratique pour écrire des expressions cron avec un builder visuel, des presets et une explication en langage naturel. Export Linux, AWS, Docker.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/generateur-cron/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Générateur Cron : le guide complet">
+    <meta name="twitter:description" content="Créez des expressions cron sans erreur avec un générateur visuel. Explication naturelle, presets, exports.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Comment créer facilement une expression cron ? Guide complet du générateur DevToolbox",
+            "author": { "@type": "Person", "name": "L'équipe DevToolbox" },
+            "datePublished": "2026-04-27",
+            "dateModified": "2026-04-27",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/generateur-cron/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "Quelle est la différence entre cron Linux et AWS ?", "acceptedAnswer": { "@type": "Answer", "text": "Le cron Linux standard utilise 5 champs. AWS CloudWatch Events en utilise 6 (secondes en plus)." } },
+                { "@type": "Question", "name": "Comment écrire 'toutes les 5 minutes' en cron ?", "acceptedAnswer": { "@type": "Answer", "text": "L'expression est */5 * * * * (en standard)." } },
+                { "@type": "Question", "name": "Que signifient les macros @hourly, @daily ?", "acceptedAnswer": { "@type": "Answer", "text": "Ce sont des raccourcis pour des planifications courantes (toutes les heures, tous les jours)." } },
+                { "@type": "Question", "name": "Le générateur cron fonctionne-t-il hors ligne ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, tout est traité dans le navigateur. Aucune donnée n'est envoyée à un serveur." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Générateur Cron", "item": "https://www.devstoolsbox.dev/fr/blog/generateur-cron/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Clair</button>
+                <button class="theme-btn" data-theme="dark"> Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/fr/blog/generateur-cron/" class="lang-btn active">FR</a>
+                <a href="/tools/blog/cron-generator/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-04-27">
+            <meta itemprop="author" content="L'équipe DevToolbox">
+
+            <h1 itemprop="headline">Ne vous cassez plus la tête avec les expressions cron : utilisez le générateur visuel DevToolbox</h1>
+            <div class="meta">Publié le 27 avril 2026 par l'équipe DevToolbox — Lecture 7 min</div>
+
+            <div itemprop="articleBody">
+                <p>Si vous administrez un serveur Linux, utilisez AWS CloudWatch ou planifiez des tâches dans Docker, vous avez forcément croisé la syntaxe cron. Cinq ou six champs séparés par des espaces, des étoiles, des slashs… pas toujours évident à retenir. Une erreur de frappe, et la tâche ne se déclenche jamais. C'est exactement pour cela que nous avons créé le <strong>Générateur d'expressions Cron DevToolbox</strong>. Il traduit ce charabia en français, vous permet de construire une expression avec des curseurs, et vous montre les prochaines exécutions en un coup d'œil. Le tout sans rien envoyer sur un serveur.</p>
+
+                <h2>Une expression cron, c'est quoi exactement ?</h2>
+                <p>Sous Linux, une tâche planifiée (cron job) est définie par une ligne dans la crontab. La syntaxe standard comprend <strong>cinq champs</strong> : minute (0-59), heure (0-23), jour du mois (1-31), mois (1-12) et jour de la semaine (0-7, où 0 et 7 représentent dimanche). AWS CloudWatch et certaines implémentations ajoutent un sixième champ pour les secondes. Cette petite différence est une source fréquente d'erreurs.</p>
+                <p>Notre outil gère les deux formats. Vous choisissez <strong>standard (5 champs)</strong> ou <strong>étendu (6 champs)</strong>, et le validateur s'adapte immédiatement. Plus besoin de chercher la doc à chaque fois.</p>
+
+                <h2>Construire une expression sans rien mémoriser</h2>
+                <p>Ouvrez le <a href="https://www.devstoolsbox.dev/fr/outils/generateur-cron/">Générateur Cron</a>. Par défaut, l'expression <code>0 9 * * 1</code> est affichée. Une phrase en dessous l'interprète immédiatement : « Tous les lundis à 9h00 ». Si vous tapez autre chose, l'explication se met à jour en temps réel. Voici comment l'utiliser pas à pas.</p>
+
+                <h3>1. Saisir ou modifier l'expression</h3>
+                <p>Le champ principal accepte n'importe quelle expression cron valide. Mais vous pouvez aussi la construire sans rien taper. Le <strong>builder visuel</strong> transforme chaque champ en un curseur (slider) que vous faites glisser. Par exemple, pour programmer une tâche tous les jours à 14h30, placez le slider des minutes sur 30, celui des heures sur 14, et laissez les autres sur *. L'expression se met à jour automatiquement.</p>
+
+                <h3>2. Les presets pour démarrer vite</h3>
+                <p>Des boutons de presets couvrent les cas les plus courants : <strong>Tous les jours à minuit</strong>, <strong>Chaque lundi 9h</strong>, <strong>Toutes les 5 minutes</strong>, <strong>1er du mois à minuit</strong>, etc. Cliquez sur l'un d'eux, l'expression est chargée, les curseurs se repositionnent, et l'explication s'affiche. Un gain de temps énorme quand on configure un nouveau serveur.</p>
+
+                <h3>3. Macros @hourly, @daily…</h3>
+                <p>Certains systèmes acceptent des raccourcis comme <code>@hourly</code> (équivalent à <code>0 * * * *</code>) ou <code>@daily</code>. Notre outil les reconnaît et les traduit également. Si vous tapez <code>@weekly</code>, il affichera « Tous les dimanches à minuit ». Pratique pour les débutants.</p>
+
+                <h3>4. Visualiser les prochaines exécutions</h3>
+                <p>La colonne de droite liste les 10 prochaines dates où la tâche s'exécutera. Même si le calcul est simplifié (il ne gère pas encore les intervalles complexes comme <code>*/15</code>), il donne une excellente idée du rythme. En dessous, le nombre d'exécutions par an est estimé. Attention, si vous programmez une tâche toutes les minutes (ce qui donne plus de 500 000 exécutions annuelles), un badge orange vous avertit. Cela évite les mauvaises surprises sur un serveur de production.</p>
+
+                <h3>5. Exporter pour votre plateforme</h3>
+                <p>Quatre boutons permettent de copier l'expression au format adapté : <strong>Linux (crontab)</strong>, <strong>Docker</strong>, <strong>AWS</strong> (6 champs avec secondes) et <strong>GCP</strong>. D'un clic, l'expression est dans le presse-papier, prête à être collée dans votre configuration.</p>
+
+                <h2>Pièges à éviter et bonnes pratiques</h2>
+                <p>Quelques erreurs classiques quand on écrit une expression cron à la main :</p>
+                <ul>
+                    <li><strong>Confondre jour du mois et jour de la semaine</strong> : si les deux sont spécifiés, la tâche s'exécute quand l'un OU l'autre correspond. Mieux vaut n'en renseigner qu'un et laisser l'autre à <code>*</code>.</li>
+                    <li><strong>Oublier le fuseau horaire</strong> : cron utilise l'heure système du serveur. Pensez à vérifier la timezone avant de planifier.</li>
+                    <li><strong>Utiliser des scripts non testés</strong> : exécutez la commande manuellement avant de l'automatiser.</li>
+                </ul>
+                <p>Le générateur ne règle pas ces deux derniers points, mais il élimine le risque d'erreur de syntaxe, qui est la cause numéro un des tâches qui ne partent jamais.</p>
+
+                <h2>Intégration avec les autres outils DevToolbox</h2>
+                <p>Une fois votre expression cron validée, vous pouvez combiner avec d'autres utilitaires :</p>
+                <ul>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/decodeur-jwt/">Décodeur JWT</a> pour analyser les tokens d'authentification de vos jobs.</li>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/encodeur-base64/">Convertisseur Base64</a> pour encoder des identifiants dans des scripts.</li>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/">Générateur de mots de passe</a> pour sécuriser vos accès.</li>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-timestamp/">Convertisseur Unix Timestamp</a> pour manipuler les dates dans vos scripts.</li>
+                </ul>
+
+                <h2>Questions fréquentes (FAQ)</h2>
+                <h3>Puis-je utiliser le générateur hors ligne ?</h3>
+                <p>Oui. Tout le code s'exécute dans votre navigateur. Aucune dépendance réseau. Chargez la page, coupez votre connexion, l'outil reste parfaitement fonctionnel.</p>
+
+                <h3>Le générateur supporte-t-il les expressions cron complexes comme <code>1-5/2</code> ?</h3>
+                <p>Il gère la validation des motifs courants (intervalles, listes, pas). Pour les combinaisons très exotiques, le mieux est de tester avec l'aperçu des prochaines exécutions.</p>
+
+                <h3>Quelle est la différence entre <code>*/5</code> et <code>0,5,10,15,…​</code> ?</h3>
+                <p>Les deux produisent le même résultat pour les minutes. <code>*/5</code> signifie « toutes les 5 unités ». Le générateur accepte les deux syntaxes.</p>
+
+                <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/fr/outils/generateur-cron/" class="btn-tool">🔧 Essayer le générateur cron gratuit</a></p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — Outils gratuits pour développeurs. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<!-- Script thème -->
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>

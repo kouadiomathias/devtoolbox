@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de mots de passe ultra-sécurisé et calculateur de hachage : le guide complet</title>
+    <meta name="description" content="Découvrez comment générer des mots de passe inviolables avec un calculateur d'entropie, et hash vos données en MD5, SHA-256, SHA-512. Guide complet, concret, sans blabla.">
+    <meta name="keywords" content="générateur de mot de passe sécurisé, entropie mot de passe, calculateur de hachage, md5, sha-256, sha-512, hmac, temps de cassage, force brute, générateur de phrase de passe">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/generateur-mot-de-passe/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/generateur-mot-de-passe/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/password-hash-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/password-hash-generator">
+
+    <meta property="og:title" content="Générateur de mots de passe et hash – Guide complet">
+    <meta property="og:description" content="Maîtrisez la génération de mots de passe robustes et le hachage cryptographique. Testez l’outil 100% local.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/generateur-mot-de-passe/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Générateur de mot de passe & Hash – Guide complet">
+    <meta name="twitter:description" content="Entropie, temps de cassage, MD5, SHA-256, HMAC : tout ce que vous devez savoir.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Générateur de mots de passe ultra-sécurisé et calculateur de hachage : le guide complet",
+            "author": { "@type": "Person", "name": "L'équipe DevToolbox" },
+            "datePublished": "2026-04-27",
+            "dateModified": "2026-04-27",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/generateur-mot-de-passe/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "Qu’est-ce que l’entropie d’un mot de passe ?", "acceptedAnswer": { "@type": "Answer", "text": "L’entropie mesure l’imprévisibilité d’un mot de passe en bits. Chaque bit supplémentaire double le temps de cassage. Un mot de passe de 60 bits résiste des années à une attaque GPU." } },
+                { "@type": "Question", "name": "Quelle est la différence entre MD5 et SHA-256 ?", "acceptedAnswer": { "@type": "Answer", "text": "MD5 est cassé et ne doit plus être utilisé. SHA-256 est l’algorithme de hachage standard, sûr et recommandé." } },
+                { "@type": "Question", "name": "Faut-il utiliser MD5 pour stocker des mots de passe ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, jamais. Utilisez bcrypt, scrypt ou Argon2 pour le stockage." } },
+                { "@type": "Question", "name": "Les mots de passe générés sont-ils envoyés à un serveur ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, tout est calculé dans votre navigateur. Aucune donnée ne sort de votre machine." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Générateur mot de passe et hash", "item": "https://www.devstoolsbox.dev/fr/blog/generateur-mot-de-passe/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Clair</button>
+                <button class="theme-btn" data-theme="dark"> Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/fr/blog/generateur-mot-de-passe/" class="lang-btn active">FR</a>
+                <a href="/tools/blog/password-hash-generator/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-04-27">
+            <meta itemprop="author" content="L'équipe DevToolbox">
+
+            <h1 itemprop="headline">Générateur de mots de passe et calculateur de hachage : pourquoi et comment les utiliser (sans se tromper)</h1>
+            <div class="meta">Publié le 27 avril 2026 par l'équipe DevToolbox — Lecture 9 min</div>
+
+            <div itemprop="articleBody">
+                <p>En 2026, un mot de passe solide ne suffit plus. Il faut comprendre pourquoi il résiste, combien de temps il tiendra face à une attaque, et comment vérifier l'intégrité de vos données. C’est exactement ce que propose notre <strong>Générateur de mots de passe & Calculateur de hachage</strong>, un couteau suisse que j’utilise moi-même au quotidien. Plutôt que de vous noyer dans la théorie, je vais vous montrer comment l’utiliser concrètement, chiffres à l’appui, et surtout pourquoi certaines pratiques courantes (comme compter sur la complexité apparente) sont trompeuses.</p>
+
+                <h2>L’entropie, la vraie jauge de sécurité d’un mot de passe</h2>
+                <p>On lit souvent qu’un mot de passe doit contenir des majuscules, des chiffres et des caractères spéciaux. Ce n’est pas faux, mais c’est très incomplet. La véritable mesure, c’est l’<strong>entropie</strong>, exprimée en bits. Elle se calcule avec la formule : <code>entropie = log2(taille_jeu_caractères ^ longueur)</code>. En clair, plus le jeu de caractères est vaste et plus le mot de passe est long, plus l’entropie est élevée, et plus il est difficile à casser par force brute.</p>
+                <p>Notre outil affiche cette valeur en temps réel. Par exemple, un mot de passe de 20 caractères puisant dans 95 symboles atteint environ 131 bits d’entropie. Avec la puissance de calcul actuelle (on prend l’hypothèse d’un cluster GPU capable de 100 milliards de tentatives par seconde), il faudrait des milliards d’années pour le casser. À l’inverse, un mot de passe de 8 caractères même complexe tombe en quelques heures.</p>
+
+                <h2>Générer un mot de passe sécurisé en un clic (et comprendre ce qui se passe)</h2>
+                <p>L’outil propose trois onglets : un générateur de mot de passe classique, un générateur de phrase de passe, et un calculateur de hachage. Concentrons-nous d’abord sur le premier.</p>
+                <ol>
+                    <li>Réglez la <strong>longueur</strong> souhaitée (je recommande au moins 20 caractères pour les comptes sensibles).</li>
+                    <li>Cochez les <strong>jeux de caractères</strong> : majuscules, minuscules, chiffres, symboles. Plus vous en activez, plus l’entropie grimpe.</li>
+                    <li>Activez éventuellement <strong>« Sans ambigus »</strong> (supprime 0O1lI) pour éviter les confusions à la saisie, ou <strong>« Sans doublons »</strong> si la politique du site l’exige.</li>
+                    <li>Cliquez sur <strong>Générer</strong>.</li>
+                </ol>
+                <p>Immédiatement, vous voyez la jauge de force se colorer, l’entropie en bits, la taille du jeu de caractères utilisé, et une estimation du <strong>temps de cassage</strong>. Cette estimation suppose une puissance de calcul monstrueuse (100 milliards de hash par seconde), ce qui donne une marge de sécurité confortable. Si l’outil affiche « plusieurs milliards d’années », vous pouvez dormir tranquille.</p>
+
+                <h2>Les phrases de passe : plus faciles à retenir, souvent plus robustes</h2>
+                <p>Le second onglet génère des <strong>phrases de passe</strong> à partir de la liste de mots EFF (7776 mots). Pourquoi est-ce pertinent ? Parce que quatre mots aléatoires comme « correct-horse-battery-staple » donnent environ 51 bits d’entropie par mot, soit ~103 bits au total, ce qui est déjà excellent. Avec six mots, on dépasse 154 bits — plus fort que la quasi-totalité des mots de passe aléatoires de 20 caractères. Et c’est bien plus facile à mémoriser.</p>
+                <p>Vous pouvez choisir le séparateur (tiret, point, espace) et la longueur. L’outil calcule instantanément l’entropie et le temps de cassage face à une attaque par dictionnaire (10 000 essais par seconde). Même avec un dictionnaire, une phrase de 6 mots reste hors de portée.</p>
+
+                <h2>Hacher du texte : MD5, SHA-256, SHA-512… comment s’y retrouver ?</h2>
+                <p>Le troisième onglet est un calculateur de hachage qui opère entièrement dans votre navigateur. Tapez n’importe quel texte, et vous obtenez les empreintes MD5, SHA-1, SHA-256 et SHA-512. Si vous ajoutez une clé secrète, l’outil génère également un HMAC-SHA256.</p>
+                <p>À quoi ça sert ?</p>
+                <ul>
+                    <li><strong>Vérifier l’intégrité d’un fichier</strong> : comparez le hash SHA-256 fourni par un éditeur avec celui que vous calculez.</li>
+                    <li><strong>Générer une signature HMAC</strong> pour authentifier une requête API (j’utilise cette fonction chaque semaine).</li>
+                    <li><strong>Comprendre pourquoi MD5 ne doit plus être utilisé</strong> : l’outil le marque clairement comme « cassé », avec un badge rouge. C’est pédagogique et ça évite les mauvaises habitudes.</li>
+                </ul>
+                <p>Petite précision importante : pour le <strong>stockage des mots de passe</strong>, aucun de ces algorithmes n’est adapté. Il faut utiliser des fonctions de dérivation lentes comme bcrypt, scrypt ou Argon2. L’outil le rappelle dans la FAQ intégrée.</p>
+
+                <h2>Pourquoi cet outil est fiable (et ne vous espionne pas)</h2>
+                <p>Toute la génération de mots de passe utilise <code>window.crypto.getRandomValues()</code>, la même API qu’utilisent les navigateurs pour des opérations cryptographiques. Ce n’est pas du pseudo-aléatoire, c’est du hasard fort fourni par le système d’exploitation. Et surtout, <strong>rien ne sort de votre navigateur</strong>. Vous pouvez déconnecter votre connexion après avoir chargé la page, tout continuera de fonctionner. C’est la garantie que vos mots de passe ne transitent jamais par un serveur.</p>
+
+                <h2>Intégration avec les autres outils DevToolbox</h2>
+                <p>Une fois votre mot de passe généré, vous pouvez :</p>
+                <ul>
+                    <li>Encoder en Base64 via notre <a href="https://www.devstoolsbox.dev/fr/outils/encodeur-base64/">Encodeur Base64</a> (pratique pour le passer dans un header HTTP).</li>
+                    <li>Vérifier la robustesse d’une expression régulière de validation avec le <a href="https://www.devstoolsbox.dev/fr/outils/testeur-regex/">Testeur Regex</a>.</li>
+                    <li>Décoder un jeton JWT pour voir s’il utilise bien HMAC-SHA256 grâce au <a href="https://www.devstoolsbox.dev/fr/outils/decodeur-jwt/">Décodeur JWT</a>.</li>
+                </ul>
+
+                <h2>Questions fréquentes (FAQ)</h2>
+                <h3>À partir de quelle entropie un mot de passe est-il considéré comme sûr ?</h3>
+                <p>Pour un usage courant, visez au moins 60 bits (résiste à un GPU pendant plusieurs années). Pour des comptes critiques, montez à 100 bits ou plus. L’outil colore la jauge en conséquence.</p>
+                <h3>Dois-je vraiment éviter MD5 ?</h3>
+                <p>Oui, sans exception. MD5 est vulnérable aux collisions. Ne l’utilisez que pour des sommes de contrôle non sécuritaires, jamais pour de l’authentification.</p>
+                <h3>Les phrases de passe sont-elles résistantes aux attaques par force brute ?</h3>
+                <p>Oui, à condition d’utiliser assez de mots (minimum 4). L’attaquant doit tester toutes les combinaisons du dictionnaire, ce qui devient exponentiellement long.</p>
+
+                <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/" class="btn-tool">🔧 Essayer le générateur de mots de passe et hash</a></p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour développeurs. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>

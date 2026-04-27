@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparateur de texte en ligne : repérez chaque différence en un clin d'œil</title>
+    <meta name="description" content="Apprenez à utiliser le comparateur de texte DevToolbox pour détecter les différences entre deux fichiers, codes ou configurations. Diff ligne par ligne et mot par mot, coloration syntaxique, partage par URL.">
+    <meta name="keywords" content="comparateur de texte en ligne, outil diff ligne par ligne, différence entre deux textes, comparateur de fichier JSON, unified diff, partager diff via URL, text diff tool">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/comparateur-texte-guide/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/comparateur-texte-guide/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/text-diff-guide/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/text-diff-guide/">
+
+    <meta property="og:title" content="Comparateur de texte en ligne : repérez chaque différence en un clin d'œil">
+    <meta property="og:description" content="Maîtrisez l'outil de comparaison de texte de DevToolbox. Diff ligne par ligne, ignorez la casse, partagez vos diffs.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/comparateur-texte-guide/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Comparateur de texte en ligne – Guide complet">
+    <meta name="twitter:description" content="Diff ligne par ligne, coloration syntaxique, partage par URL. Tutoriel complet.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Comparateur de texte en ligne : repérez chaque différence en un clin d'œil",
+            "author": { "@type": "Person", "name": "L'équipe DevToolbox" },
+            "datePublished": "2026-04-27",
+            "dateModified": "2026-04-27",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/comparateur-texte-guide/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "Quelle est la différence entre la vue fractionnée et la vue unifiée ?", "acceptedAnswer": { "@type": "Answer", "text": "La vue fractionnée affiche les deux textes côte à côte, tandis que la vue unifiée présente un seul flux avec les lignes ajoutées et supprimées, comme git diff." } },
+                { "@type": "Question", "name": "Puis-je comparer deux fichiers JSON ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, l'outil propose une coloration syntaxique pour JSON. Pour une comparaison sémantique, formatez d'abord votre JSON avec notre formateur JSON." } },
+                { "@type": "Question", "name": "Le comparateur fonctionne-t-il hors ligne ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, tout le traitement se fait dans votre navigateur. Aucune donnée n'est envoyée à un serveur." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Guide du comparateur de texte", "item": "https://www.devstoolsbox.dev/fr/blog/comparateur-texte-guide/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Clair</button>
+                <button class="theme-btn" data-theme="dark"> Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/fr/blog/comparateur-texte-guide/" class="lang-btn active">FR</a>
+                <a href="/tools/blog/text-diff-guide/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-04-27">
+            <meta itemprop="author" content="L'équipe DevToolbox">
+
+            <h1 itemprop="headline">Comparateur de texte en ligne : repérez chaque différence en un clin d'œil</h1>
+            <div class="meta">Publié le 27 avril 2026 par l'équipe DevToolbox — Lecture 7 min</div>
+
+            <div itemprop="articleBody">
+                <p>Qui n'a jamais passé de longues minutes à relire deux versions d'un même fichier pour y dénicher une virgule manquante ou une ligne modifiée ? Que vous soyez développeur en train de relire une merge request, rédacteur comparant deux versions d'un document, ou administrateur système vérifiant un fichier de configuration, un bon comparateur de texte vous fait gagner un temps précieux. Celui de DevToolbox va encore plus loin : il fonctionne intégralement dans votre navigateur, ne conserve aucune donnée, et vous permet même de partager un lien avec vos collègues pour qu'ils voient exactement les mêmes différences que vous.</p>
+
+                <h2>Pourquoi un comparateur de texte est indispensable</h2>
+                <p>Un <strong>comparateur de texte</strong> (ou <strong>outil diff</strong>) met en évidence les ajouts, suppressions et modifications entre deux contenus. Les cas d'usage sont nombreux :</p>
+                <ul>
+                    <li><strong>Revue de code</strong> : visualisez les changements d'un commit sans ouvrir un IDE.</li>
+                    <li><strong>Configuration serveur</strong> : comparez deux fichiers <code>.env</code> ou <code>docker-compose.yml</code> pour éviter les régressions.</li>
+                    <li><strong>Données JSON</strong> : voyez immédiatement si une réponse d'API a changé entre deux versions.</li>
+                    <li><strong>Rédaction collaborative</strong> : suivez les modifications apportées à un article ou une documentation.</li>
+                </ul>
+                <p>L'outil de DevToolbox propose une interface simple mais puissante, avec des options avancées comme le <strong>diff mot par mot</strong> et la <strong>coloration syntaxique</strong>.</p>
+
+                <h2>Prendre en main le comparateur en 3 étapes</h2>
+
+                <h3>1. Collez vos deux textes</h3>
+                <p>L'interface se compose de deux grandes zones de saisie côte à côte. À gauche, le texte original ; à droite, la version modifiée. Vous pouvez taper directement, coller depuis le presse-papier (les boutons « Coller » sont là pour ça), ou même importer un fichier texte.</p>
+                <p>Un exemple est préchargé pour vous permettre de tester immédiatement : un objet JSON dont l'âge et la ville changent.</p>
+
+                <h3>2. Choisissez vos options</h3>
+                <p>Avant de lancer la comparaison, vous pouvez affiner le comportement :</p>
+                <ul>
+                    <li><strong>Ignorer la casse</strong> : pour que « Chaîne » et « chaîne » soient considérés comme identiques.</li>
+                    <li><strong>Ignorer les espaces en fin de ligne</strong> : pratique quand votre éditeur en ajoute automatiquement.</li>
+                    <li><strong>Ignorer les lignes vides</strong> : pour ne pas polluer le résultat avec des sauts de ligne inutiles.</li>
+                    <li><strong>Coloration syntaxique</strong> : choisissez un langage (JSON, SQL, JavaScript, Python...) ou laissez l'auto-détection faire son travail.</li>
+                </ul>
+
+                <h3>3. Interprétez le résultat</h3>
+                <p>Cliquez sur <strong>Comparer</strong>. Le résultat s'affiche dans un panneau sous les éditeurs. Deux modes d'affichage sont disponibles :</p>
+                <ul>
+                    <li><strong>Vue fractionnée (split)</strong> : les deux textes sont présentés côte à côte, avec les lignes ajoutées en vert et les lignes supprimées en rouge. C'est le mode le plus intuitif pour une première lecture.</li>
+                    <li><strong>Vue unifiée (unified)</strong> : inspirée de la sortie de <code>git diff</code>, elle affiche un seul flux continu. Les lignes ajoutées sont précédées d'un <code>+</code>, les lignes supprimées d'un <code>-</code>. Les développeurs la préfèrent souvent car elle ressemble à ce qu'ils voient dans leur terminal.</li>
+                </ul>
+                <p>En haut, un compteur récapitule le nombre d'ajouts, de suppressions et de lignes inchangées. Pour chaque ligne modifiée, un <strong>diff mot par mot</strong> est également affiché : les caractères ou mots exacts qui ont changé sont surlignés en rouge (supprimé) ou en vert (ajouté).</p>
+
+                <h2>Partager un diff avec vos collègues</h2>
+                <p>Une fonctionnalité que j'utilise presque quotidiennement : le bouton <strong>Partager URL</strong>. Il encode l'intégralité de votre configuration (les deux textes, les options, la vue choisie) dans le fragment d'URL de la page. Copiez ce lien et envoyez-le par message ou par email. La personne qui l'ouvrira retrouvera exactement le même état, sans rien avoir à reconfigurer. Aucune donnée n'est stockée sur un serveur : tout est décodé localement dans le navigateur.</p>
+
+                <h2>Des options pensées pour les développeurs</h2>
+                <p>La coloration syntaxique automatique détecte le langage du code que vous comparez. Si vous collez du JSON, les clés et valeurs seront colorées, ce qui rend la lecture beaucoup plus agréable. Vous pouvez également forcer un langage particulier via le menu déroulant.</p>
+                <p>Les boutons <strong>Inverser</strong> et <strong>Effacer</strong> permettent de manipuler rapidement les contenus. Le bouton <strong>Copier</strong> dans chaque zone de texte facilite le transfert vers un autre outil.</p>
+
+                <h2>Confidentialité et performance</h2>
+                <p>Comme tous les outils DevToolbox, le comparateur fonctionne entièrement dans votre navigateur. Aucune ligne de texte n'est envoyée à un serveur. Vous pouvez l'utiliser pour comparer des données sensibles (fichiers de configuration avec mots de passe, données clients) en toute sécurité. Même la fonction de partage par URL ne fait que compresser les données dans le lien, sans jamais les transmettre à un tiers.</p>
+
+                <h2>Intégration avec les autres outils de la boîte à outils</h2>
+                <p>Une fois que vous avez identifié une différence dans un fichier JSON, vous pouvez basculer vers d'autres utilitaires :</p>
+                <ul>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/formateur-json/">Formateur JSON</a> pour valider et indenter proprement les deux versions avant de les comparer.</li>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">Convertisseur JSON ↔ CSV</a> pour transformer vos données JSON en tableau et comparer visuellement les colonnes.</li>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/decodeur-jwt/">Décodeur JWT</a> pour inspecter les tokens et vérifier s'ils ont été modifiés.</li>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/generateur-cron/">Générateur d'expressions Cron</a> pour planifier des tâches qui automatisent vos comparaisons.</li>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-timestamp/">Convertisseur Unix Timestamp</a> pour déchiffrer les dates dans vos fichiers de logs.</li>
+                    <li>Le <a href="https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/">Générateur de mots de passe sécurisés</a> pour créer des identifiants forts après avoir comparé vos fichiers <code>.env</code>.</li>
+                </ul>
+
+                <h2>Questions fréquentes (FAQ)</h2>
+                <h3>Quelle est la différence entre la vue fractionnée et la vue unifiée ?</h3>
+                <p>La <strong>vue fractionnée</strong> place les deux textes côte à côte, ce qui est idéal pour comparer visuellement des versions courtes. La <strong>vue unifiée</strong> ressemble à la sortie de <code>git diff</code> : elle affiche un seul flux avec des marqueurs <code>+</code> et <code>-</code>. Les développeurs la préfèrent souvent car elle correspond à ce qu'ils voient dans leur terminal.</p>
+
+                <h3>Puis-je comparer deux fichiers JSON ?</h3>
+                <p>Oui, l'outil intègre une coloration syntaxique pour le JSON. Pour une comparaison sémantique (c'est-à-dire qui ignore l'ordre des clés), nous vous conseillons d'abord de formater vos deux JSON avec notre <a href="/fr/outils/formateur-json/">formateur JSON</a> afin d'obtenir une indentation cohérente.</p>
+
+                <h3>Le comparateur fonctionne-t-il hors ligne ?</h3>
+                <p>Absolument. Une fois la page chargée, tout le traitement s'effectue dans votre navigateur. Vous pouvez débrancher votre connexion Internet et continuer à comparer des textes.</p>
+
+                <h3>Comment puis-je comparer de très gros fichiers ?</h3>
+                <p>L'outil est optimisé pour des fichiers allant jusqu'à quelques centaines de kilooctets. Au-delà, les performances dépendent de votre machine. Pour des fichiers de plusieurs mégaoctets, mieux vaut utiliser un outil en ligne de commande comme <code>diff</code> sous Linux.</p>
+
+                <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/fr/outils/comparateur-texte/" class="btn-tool">🔧 Essayer le comparateur de texte gratuit</a></p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — Outils gratuits pour développeurs. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<!-- Script thème -->
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
