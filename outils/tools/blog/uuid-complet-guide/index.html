@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUID: What It Is, How to Generate, Decode, and Use in Python</title>
+    <meta name="description" content="Understand what a UUID is, its versions (v4, v5), how to generate one in Python, decode a UUID v1, and use our free online tool to create UUID/ULID.">
+    <meta name="keywords" content="what is uuid, python uuid generator, uuid decode, uuid v5 generator, uuid example, ulid, uuid generator online">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/uuid-complete-guide/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/uuid-complete-guide/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/uuid-guide-complet/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/uuid-complete-guide/">
+
+    <meta property="og:title" content="UUID: What It Is, How to Generate, Decode, and Use in Python">
+    <meta property="og:description" content="Learn to create UUID v4 and v5 in Python, decode a UUID v1, and use the DevToolbox generator.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/uuid-complete-guide/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="UUID: Complete Guide">
+    <meta name="twitter:description" content="Python, decoding, v4/v5 versions, UUID examples and clear explanations.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "UUID: What It Is, How to Generate, Decode, and Use in Python",
+            "author": { "@type": "Person", "name": "DevToolbox Team" },
+            "datePublished": "2026-04-28",
+            "dateModified": "2026-04-28",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/uuid-complete-guide/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "What is a UUID?", "acceptedAnswer": { "@type": "Answer", "text": "A UUID (Universally Unique Identifier) is a 128‑bit quasi‑unique identifier used to identify information in computer systems." } },
+                { "@type": "Question", "name": "How do I generate a UUID in Python?", "acceptedAnswer": { "@type": "Answer", "text": "Use the uuid module from the standard library: import uuid then uuid.uuid4() (random v4) or uuid.uuid5(namespace, name) (deterministic v5)." } },
+                { "@type": "Question", "name": "Can a UUID be decoded?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, for UUID v1 you can extract the timestamp and MAC address. UUID v4 is purely random and contains no exploitable information." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Complete UUID Guide", "item": "https://www.devstoolsbox.dev/tools/blog/uuid-complete-guide/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Light</button>
+                <button class="theme-btn" data-theme="dark"> Dark</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/blog/uuid-complete-guide/" class="lang-btn active">EN</a>
+                <a href="/fr/blog/uuid-guide-complet/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-04-28">
+            <meta itemprop="author" content="DevToolbox Team">
+
+            <h1 itemprop="headline">UUID: What It Is, How to Generate, Decode, and Use in Python</h1>
+            <div class="meta">Published on April 28, 2026 by the DevToolbox Team — 8 min read</div>
+
+            <div itemprop="articleBody">
+                <p>
+                    In software development, we constantly need unique identifiers. Whether you're building a database, a distributed system, or an API, you'll inevitably come across the term <strong>UUID</strong>. Yet behind those four letters lies a standard that is sometimes misunderstood. So, <strong>what is a UUID</strong> exactly? How do you <strong>generate a UUID in Python</strong>? Can you <strong>decode a UUID</strong>? What's the difference between UUID v4 and a <strong>UUID v5 generator</strong>?
+                </p>
+                <p>
+                    In this article, I’ll answer those questions with concrete examples, code snippets, and a free online tool that makes your life easier. I’ve also included practical tips gathered from the field, because I use these identifiers every week myself in Python and Node.js projects.
+                </p>
+
+                <h2>What is a UUID? A simple definition and a concrete example</h2>
+                <p>
+                    UUID stands for <strong>Universally Unique Identifier</strong>. It’s a 128‑bit number (16 bytes) classically represented as a 36‑character string, arranged in five groups separated by hyphens. The most common <strong>UUID example</strong> looks like this:
+                </p>
+                <pre><code>550e8400-e29b-41d4-a716-446655440000</code></pre>
+                <p>
+                    This identifier is designed to be <strong>globally unique</strong>: the probability of generating the same one twice is so low that it’s considered zero in practice. That’s why UUIDs are used as primary keys in databases, as session identifiers, as temporary file names, and so on.
+                </p>
+                <p>
+                    The main advantage of a UUID over a simple auto‑incremented integer is its ability to be generated in a decentralized manner, without coordination between machines in a cluster.
+                </p>
+
+                <h2>The different UUID versions (v1, v4, v5) explained simply</h2>
+                <p>
+                    Not all UUIDs are created equal. The RFC 4122 standard defines several <strong>versions</strong>, each with a different generation mechanism. Here are the three most common:
+                </p>
+                <ul>
+                    <li><strong>UUID v1</strong> — based on timestamp and the machine’s MAC address. It allows you to <strong>decode a UUID</strong> to retrieve the exact moment it was created. In return, it exposes network information.</li>
+                    <li><strong>UUID v4</strong> — generated from random numbers. It’s the simplest and most widely used. It offers 122 bits of effective entropy, making it unpredictable.</li>
+                    <li><strong>UUID v5</strong> — deterministic, based on a SHA‑1 hash of a <em>namespace</em> and a <em>name</em>. You use it when you want to <strong>always</strong> obtain the same UUID for the same input, which is useful for creating reproducible identifiers (e.g., from a URL or an email address).</li>
+                </ul>
+
+                <h2>Python uuid generator: how to generate a UUID in Python</h2>
+                <p>
+                    Python includes the <code>uuid</code> module in its standard library, which makes generation trivial. Here are three snippets that cover the most requested versions.
+                </p>
+
+                <h3>Generate a UUID v4 (random) in Python</h3>
+                <pre><code>import uuid
+
+id = uuid.uuid4()
+print(id)  # Example: 4ec27c8c-6c08-4d26-92b3-9d2e9c6f4ed2</code></pre>
+                <p>
+                    This is the method to use for most cases: session identifiers, primary keys, etc.
+                </p>
+
+                <h3>Generate a UUID v5 (deterministic) in Python</h3>
+                <p>
+                    For a reproducible UUID from a string, you pass through <code>uuid.uuid5()</code>. You must give it a namespace (among the predefined DNS, URL, OID, X500) and a name:
+                </p>
+                <pre><code>import uuid
+
+namespace = uuid.NAMESPACE_DNS
+identifier = uuid.uuid5(namespace, "www.example.com")
+print(identifier)  # Always the same UUID for this name</code></pre>
+                <p>
+                    This approach is ideal for turning email addresses or article slugs into stable, unique identifiers.
+                </p>
+
+                <h2>Decoding a UUID v1: extracting the timestamp and node</h2>
+                <p>
+                    Contrary to what some believe, <strong>uuid decode</strong> isn’t magic — but only UUID v1 (and to some extent v2) contain exploitable data. UUID v4 and v5 are purely random or hashed, so they cannot be deciphered.
+                </p>
+                <p>
+                    Take a UUID v1 like this one:
+                </p>
+                <pre><code>6ba7b810-9dad-11d1-80b4-00c04fd430c8</code></pre>
+                <p>
+                    When you run it through a decoder, you get:
+                </p>
+                <ul>
+                    <li><strong>Timestamp</strong>: corresponds to the number of 100‑nanosecond intervals since October 15, 1582. Converted to a readable date, it gives the <strong>exact moment</strong> of creation.</li>
+                    <li><strong>Node</strong>: the MAC address of the network card (here 00:c0:4f:d4:30:c8).</li>
+                </ul>
+                <p>
+                    Our <a href="https://www.devstoolsbox.dev/tools/uuid-generator/">online UUID / ULID generator</a> includes a <strong>Decode</strong> tab that does this automatically. You paste a UUID, it detects the version and, if it’s a v1, displays the timestamp and node. It also works for ULID, a modern sortable format.
+                </p>
+
+                <h2>Why prefer ULID over UUID in some cases?</h2>
+                <p>
+                    ULID (Universally Unique Lexicographically Sortable Identifier) is a UUID alternative that is gaining ground. Unlike UUID v4, they are <strong>sortable in creation order</strong>, because they start with a timestamp encoded in base32. This is crucial for database indexes, because an index on a sorted key is far more performant than an index on a random key.
+                </p>
+                <p>
+                    Our online tool generates both UUIDs and ULIDs with a single click. You can even produce them in batches and copy them as JSON or CSV.
+                </p>
+
+                <h2>Free UUID / ULID generator: quick start guide</h2>
+                <p>
+                    To save you from writing a Python script every time, the DevToolbox tool provides an interface with four tabs:
+                </p>
+                <ul>
+                    <li><strong>Generate</strong>: creates one or more UUIDs (v1, v4, v5) or ULIDs, with format options (hyphens, uppercase).</li>
+                    <li><strong>Validate</strong>: paste any string to find out if it’s a valid UUID, its version, or a ULID.</li>
+                    <li><strong>Decode</strong>: for UUID v1 and ULID, extracts the timestamp and the corresponding date.</li>
+                    <li><strong>Compare</strong>: side‑by‑side comparison table of UUID vs ULID (length, sorting, encoding, use cases).</li>
+                </ul>
+                <p>
+                    Everything runs in your browser, nothing leaves your machine. You can also copy code snippets for JavaScript, Go, and SQL directly from the tool.
+                </p>
+
+                <h2>Integration with other DevToolbox tools</h2>
+                <p>
+                    Once your UUID is generated, you can combine it with other platform utilities:
+                </p>
+                <ul>
+                    <li><a href="https://www.devstoolsbox.dev/tools/json-formatter/">JSON Formatter</a> — to cleanly insert your UUID into a JSON structure.</li>
+                    <li><a href="https://www.devstoolsbox.dev/tools/jwt-decoder/">JWT Decoder</a> — because many JWT tokens carry UUIDs as session identifiers.</li>
+                    <li><a href="https://www.devstoolsbox.dev/tools/base64-encoder/">Base64 Encoder</a> — if you need to encode your UUID for an HTTP header.</li>
+                    <li><a href="https://www.devstoolsbox.dev/tools/regex-tester/">Regex Tester</a> — to validate your own UUID patterns in business logic.</li>
+                </ul>
+
+                <h2>FAQ – frequently asked questions about UUIDs</h2>
+                <h3>What exactly is a UUID?</h3>
+                <p>
+                    It’s a 128‑bit standardized identifier, designed to be unique without central coordination. It is represented as <code>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code>.
+                </p>
+
+                <h3>How do I generate a UUID in Python?</h3>
+                <p>
+                    With <code>import uuid</code> then <code>uuid.uuid4()</code> for a random UUID, or <code>uuid.uuid5(ns, name)</code> for a deterministic UUID.
+                </p>
+
+                <h3>Can a UUID be decoded?</h3>
+                <p>
+                    Yes, for UUID v1: you can extract the timestamp and MAC address. UUID v4 and v5 do not contain exploitable information.
+                </p>
+
+                <h3>What’s the difference between UUID v4 and v5?</h3>
+                <p>
+                    UUID v4 is random; each call produces a different identifier. UUID v5 is deterministic: for the same <em>namespace</em> and <em>name</em>, it always returns the same UUID.
+                </p>
+
+                <h3>Can I use ULID instead of UUID?</h3>
+                <p>
+                    Yes, especially if you need chronological sorting. ULID is shorter (26 characters) and lexicographically sortable.
+                </p>
+
+                <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/tools/uuid-generator/" class="btn-tool">🔧 Try the free UUID / ULID generator</a></p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — Free tools for developers. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
