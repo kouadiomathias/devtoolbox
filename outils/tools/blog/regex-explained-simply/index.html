@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Explained Simply — Learn Regular Expressions with Clear Examples</title>
+    <meta name="description" content="Learn how regular expressions work with simple examples. Includes regex cheat sheet, email validator, phone number pattern, JavaScript tester, replace tool, and live explainer.">
+    <meta name="keywords" content="regex explained simply, regex tester javascript, regex email validator, regex for phone number, regex replace tester, regex live tester, regex explain tool, regex cheat sheet">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/regex-explained-simply/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/regex-explained-simply/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/regex-explique-simplement/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/regex-explained-simply/">
+
+    <meta property="og:title" content="Regex Explained Simply — Learn Regular Expressions with Clear Examples">
+    <meta property="og:description" content="Understand regex from scratch: email validation, phone number matching, replace tool, and live tester for JavaScript. Includes a handy cheat sheet.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/regex-explained-simply/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Regex Explained Simply">
+    <meta name="twitter:description" content="Clear regex tutorial with examples, cheat sheet, and live testing tools.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Regex Explained Simply — Learn Regular Expressions with Clear Examples",
+            "author": { "@type": "Person", "name": "DevToolbox Team" },
+            "datePublished": "2026-04-28",
+            "dateModified": "2026-04-28",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/regex-explained-simply/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "How can I test a regex in real time?", "acceptedAnswer": { "@type": "Answer", "text": "Use our free regex live tester. Paste your text, type your pattern, and see matches highlighted instantly — no server upload required." } },
+                { "@type": "Question", "name": "What regex pattern validates email addresses?", "acceptedAnswer": { "@type": "Answer", "text": "A common pattern is /^[\\w.-]+@[\\w.-]+\\.\\w+$/. Our tool includes a preset for email." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Regex Explained Simply", "item": "https://www.devstoolsbox.dev/tools/blog/regex-explained-simply/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Light</button>
+                <button class="theme-btn" data-theme="dark"> Dark</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/blog/regex-explained-simply/" class="lang-btn active">EN</a>
+                <a href="/fr/blog/regex-explique-simplement/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article class="article-card">
+            <h1>Regex Explained Simply — A Practical Guide to Regular Expressions with Real Examples</h1>
+            <div class="meta">Published on April 28, 2026 by the DevToolbox Team — 9 min read</div>
+
+            <p>
+                Regular expressions (regex) look like cryptic sequences of symbols, but they solve a very concrete problem: finding, validating, and replacing patterns in text. Whether you need to check if an email address is valid, extract all phone numbers from a document, or replace every occurrence of a word, a single regex pattern can do the job in one line.
+            </p>
+            <p>
+                In this article I’ll explain regex from scratch, with clear examples you can test immediately using a free <strong>regex live tester</strong>. No abstract theory — just patterns you’ll actually use.
+            </p>
+
+            <h2>What is a regular expression? A first example</h2>
+            <p>
+                A regular expression is a pattern written with special characters. Let’s say you want to find the word “cat” in a text. The regex is simply <code>cat</code>. But what if you want to find “cat”, “Cat”, and “CAT”? Then you write <code>[Cc][Aa][Tt]</code>. If you want to match a digit, you use <code>\d</code>; if you want to match one or more digits, <code>\d+</code>. That’s the core idea: characters have special meanings.
+            </p>
+            <p>
+                To really learn regex, you need a <strong>regex explain tool</strong> and a <strong>regex live tester</strong> where you can see what each part of the pattern does. Our 
+                <a href="https://www.devstoolsbox.dev/tools/regex-tester/">Regex Tester & Explainer</a> does exactly that: it highlights matches in real time and explains the pattern in plain English.
+            </p>
+
+            <h2>Regex cheat sheet — the essential tokens</h2>
+            <p>
+                You don’t need to memorize everything. Here’s a compact <strong>regex cheat sheet</strong> with the most common tokens:
+            </p>
+            <ul>
+                <li><code>.</code> — any single character except newline</li>
+                <li><code>\d</code> — digit (0–9)</li>
+                <li><code>\w</code> — word character (letter, digit, underscore)</li>
+                <li><code>\s</code> — whitespace (space, tab, newline)</li>
+                <li><code>+</code> — one or more of the preceding token</li>
+                <li><code>*</code> — zero or more</li>
+                <li><code>?</code> — zero or one (makes it optional)</li>
+                <li><code>{n}</code> — exactly n occurrences</li>
+                <li><code>{n,m}</code> — between n and m occurrences</li>
+                <li><code>[abc]</code> — any character in the set</li>
+                <li><code>[^abc]</code> — any character NOT in the set</li>
+                <li><code>^</code> — start of string (or line, with m flag)</li>
+                <li><code>$</code> — end of string (or line)</li>
+                <li><code>\b</code> — word boundary</li>
+                <li><code>()</code> — capturing group</li>
+                <li><code>(?: )</code> — non‑capturing group</li>
+                <li><code>|</code> — OR (alternation)</li>
+            </ul>
+            <p>
+                Using these building blocks, we can construct useful patterns.
+            </p>
+
+            <h2>Example 1: regex email validator</h2>
+            <p>
+                A basic email regex looks like this:
+            </p>
+            <pre><code>/^[\w\.-]+@[\w\.-]+\.\w{2,}$/</code></pre>
+            <p>
+                Breakdown:
+            </p>
+            <ul>
+                <li><code>^</code> — start of string</li>
+                <li><code>[\w\.-]+</code> — one or more word characters, dots, or hyphens (the local part)</li>
+                <li><code>@</code> — literal @</li>
+                <li><code>[\w\.-]+</code> — domain name (e.g., gmail, co)</li>
+                <li><code>\.</code> — literal dot before the TLD</li>
+                <li><code>\w{2,}</code> — at least 2 word characters for the top‑level domain (com, org, io)</li>
+                <li><code>$</code> — end of string</li>
+            </ul>
+            <p>
+                This catches <code>john.doe@example.com</code> and <code>jane@sub.domain.co.uk</code>. It’s not RFC‑perfect, but it handles 99% of real‑world cases. You can test it in our <strong>regex tester javascript</strong> pane — the tool highlights what matches and tells you why.
+            </p>
+
+            <h2>Example 2: regex for phone number</h2>
+            <p>
+                Phone numbers vary wildly across countries, but here’s a pattern that handles common formats:
+            </p>
+            <pre><code>/^(\+\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}$/</code></pre>
+            <p>
+                Let’s dissect:
+            </p>
+            <ul>
+                <li><code>^</code> — start</li>
+                <li><code>(\+\d{1,3}[- ]?)?</code> — optional country code (e.g., +1, +33) with optional separator</li>
+                <li><code>\(?\d{3}\)?</code> — optional parentheses around the area code</li>
+                <li><code>[- ]?</code> — optional separator (hyphen or space)</li>
+                <li><code>\d{3}[- ]?\d{4}</code> — remaining digits</li>
+                <li><code>$</code> — end</li>
+            </ul>
+            <p>
+                This matches <code>+1 234 567 8900</code>, <code>(234)567-8900</code>, <code>234.567.8900</code>. If you need a stricter format, you can tweak it in the <strong>regex live tester</strong> and immediately see which strings pass.
+            </p>
+
+            <h2>Using a regex replace tester</h2>
+            <p>
+                Regex isn’t just for finding — it’s also for replacing. In JavaScript, you’d write:
+            </p>
+            <pre><code>const text = "My number is 123-456-7890.";
+const result = text.replace(/\d{3}-\d{3}-\d{4}/, "***-***-****");
+console.log(result); // "My number is ***-***-****."</code></pre>
+            <p>
+                Our <strong>regex replace tester</strong> (inside the search‑and‑replace tab of the tool) lets you enter a pattern, a replacement string, and test it on your sample text. This is invaluable for cleaning data, redacting sensitive information, or reformatting logs.
+            </p>
+
+            <h2>JavaScript specifics: the global and case‑insensitive flags</h2>
+            <p>
+                In JavaScript, regex patterns are created with forward slashes and optional flags: <code>/pattern/flags</code>. The most common flags are:
+            </p>
+            <ul>
+                <li><code>g</code> — global (find all matches, not just the first)</li>
+                <li><code>i</code> — case‑insensitive</li>
+                <li><code>m</code> — multiline (makes <code>^</code> and <code>$</code> match line beginnings/ends)</li>
+                <li><code>s</code> — dotall (allows <code>.</code> to match newline)</li>
+                <li><code>u</code> — unicode</li>
+            </ul>
+            <p>
+                Example: <code>/hello/i</code> matches “Hello”, “HELLO”, “hello”.
+            </p>
+            <p>
+                In our <strong>regex tester javascript</strong> mode, you can toggle these flags with checkboxes and instantly see the effect on match count.
+            </p>
+
+            <h2>Why a live explain tool makes learning regex easier</h2>
+            <p>
+                Reading a regex pattern is hard; an <strong>regex explain tool</strong> breaks it into plain language. When you type <code>^\d{5}$</code>, the explainer says: “start of string, exactly 5 digits, end of string”. That’s exactly what a ZIP code pattern looks like.
+            </p>
+            <p>
+                This feature alone helps developers understand third‑party regex patterns, copy‑pasted from StackOverflow, and verify they’re safe for their use case.
+            </p>
+
+            <h2>Internal linking — other tools you might need</h2>
+            <p>
+                While working with regex, you’ll often need to format or convert the data you’re matching:
+            </p>
+            <ul>
+                <li><a href="https://www.devstoolsbox.dev/tools/json-formatter/">JSON Formatter</a> — validate and indent JSON that contains regex patterns in configuration files.</li>
+                <li><a href="https://www.devstoolsbox.dev/tools/jwt-decoder/">JWT Decoder</a> — decode tokens that may contain regex‑based claims.</li>
+                <li><a href="https://www.devstoolsbox.dev/tools/text-diff/">Text Diff Tool</a> — compare two versions of a regex pattern or the text you’re testing on.</li>
+                <li><a href="https://www.devstoolsbox/tools/json-csv-converter/">JSON to CSV Converter</a> — transform regex‑cleaned data into spreadsheets.</li>
+            </ul>
+
+            <h2>Frequently Asked Questions</h2>
+            <h3>How can I test a regex pattern in real time?</h3>
+            <p>
+                Use our free <a href="https://www.devstoolsbox.dev/tools/regex-tester/">Regex Live Tester</a>. Paste your text, type your pattern, and see matches highlighted instantly. No server involved.
+            </p>
+
+            <h3>What regex can I use to validate an email address?</h3>
+            <p>
+                A solid pattern is <code>/^[\w\.-]+@[\w\.-]+\.\w{2,}$/</code>. It validates the structure while accepting most real‑world emails. You can try it in the tester.
+            </p>
+
+            <h3>Is there a tool that explains what each part of a regex does?</h3>
+            <p>
+                Yes, our <strong>regex explain tool</strong> shows a natural language breakdown of your pattern, updated as you type.
+            </p>
+            <h2>Popular Regex Patterns</h2>
+            <ul>
+            <li>Email validation regex</li>
+            <li>Password strength regex</li>
+            <li>Phone number regex</li>
+            <li>URL matching regex</li>
+            <li>Extract numbers from text</li>
+            <li>Date validation regex</li>
+            </ul>
+            <h3>Where can I get a regex cheat sheet?</h3>
+            <p>
+                The one in this article covers the essentials. For a more extensive reference, visit the tool itself — the FAQ includes a printable cheat sheet.
+            </p>
+
+            <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/tools/regex-tester/" class="btn-tool">🔧 Try the Free Regex Tester & Explainer</a></p>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — Free online tools for developers. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
