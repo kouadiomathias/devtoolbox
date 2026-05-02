@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Décodez et générez des UUID en quelques secondes avec le générateur UUID en ligne (gratuit et privé)</title>
+    <meta name="description" content="Apprenez à décoder les timestamps des UUID v1, générer des UUID v4, v5 et des ULID, et valider vos identifiants. Inclut des extraits Python et un générateur côté client gratuit.">
+    <meta name="keywords" content="décoder uuid, uuid python, générateur uuid en ligne, decodeur uuid v1, uuid v4, uuid v5, ulid, validateur uuid, exemple uuid">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/decoder-generer-uuid-python/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/decoder-generer-uuid-python/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/decode-generate-uuid-python/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/decode-generate-uuid-python/">
+
+    <meta property="og:title" content="Décodez et générez des UUID en quelques secondes avec le générateur UUID en ligne (gratuit et privé)">
+    <meta property="og:description" content="Décodez les UUID v1, générez des UUID v4, v5 et ULID avec notre outil en ligne gratuit. Extraits Python inclus. 100% côté client, aucune donnée ne quitte votre machine.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/decoder-generer-uuid-python/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Décodez et générez des UUID : outil en ligne gratuit & guide Python">
+    <meta name="twitter:description" content="Décodez UUID v1, générez v4/v5/ULID, validez et copiez du code Python. 100% privé et instantané.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Décodez et générez des UUID en quelques secondes avec le générateur UUID en ligne (gratuit et privé)",
+            "author": { "@type": "Person", "name": "L'équipe DevToolbox" },
+            "datePublished": "2026-05-03",
+            "dateModified": "2026-05-03",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/decoder-generer-uuid-python/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "Comment décoder un UUID v1 pour obtenir le timestamp et l'adresse MAC ?", "acceptedAnswer": { "@type": "Answer", "text": "Utilisez notre décodeur UUID en ligne gratuit. Collez n'importe quel UUID v1 et il extrait instantanément le timestamp de création et l'adresse MAC d'origine." } },
+                { "@type": "Question", "name": "Comment générer un UUID en Python ?", "acceptedAnswer": { "@type": "Answer", "text": "Utilisez le module standard uuid : import uuid; id = uuid.uuid4() pour un UUID aléatoire, ou uuid.uuid5(namespace, name) pour un UUID déterministe. Notre outil peut aussi générer des UUID en ligne." } },
+                { "@type": "Question", "name": "Quelle est la différence entre UUID v4 et v5 ?", "acceptedAnswer": { "@type": "Answer", "text": "L'UUID v4 est aléatoire ; chaque appel donne un identifiant différent. L'UUID v5 est déterministe : pour un même namespace et un même nom, il retourne toujours le même UUID." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Décoder et générer des UUID", "item": "https://www.devstoolsbox.dev/fr/blog/decoder-generer-uuid-python/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08); --text: #0f172a;
+            --text2: #374151; --text3: #64748b; --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06); --radius: 16px; --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+        table {
+            width:100%; border-collapse: collapse; margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border); padding: 10px 14px; text-align: left;
+        }
+        th {
+            background: var(--surface2); font-weight: 600;
+        }
+        .ai-summary {
+            background: var(--primary-light); padding: 14px 18px; border-radius: 12px;
+            margin-bottom: 24px; font-size: 0.95rem; color: var(--text2);
+            border-left: 4px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Clair</button>
+                <button class="theme-btn" data-theme="dark"> Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/fr/blog/decoder-generer-uuid-python/" class="lang-btn active">FR</a>
+                <a href="/tools/blog/decode-generate-uuid-python/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-05-03">
+            <meta itemprop="author" content="L'équipe DevToolbox">
+
+            <h1 itemprop="headline">Décodez et générez des UUID en quelques secondes avec le générateur UUID en ligne (gratuit et privé)</h1>
+            <div class="meta">Publié le 3 mai 2026 par l'équipe DevToolbox — 7 min de lecture</div>
+
+            <div class="ai-summary">
+                <strong>En résumé :</strong> Cet outil gratuit décode les timestamps des UUID v1, génère des UUID v4, v5 et des ULID, et valide les identifiants. Il fonctionne entièrement dans votre navigateur et fournit des extraits Python prêts à copier. <strong>Aucune donnée ne quitte votre ordinateur.</strong>
+            </div>
+
+            <div itemprop="articleBody">
+                <p>Tout développeur finit par croiser des UUID — ces chaînes de 36 caractères comme <code>550e8400-e29b-41d4-a716-446655440000</code>. Ils identifient des lignes de base de données, des sessions d'API ou des objets de configuration. Mais saviez-vous que certains UUID peuvent être <strong>décodés</strong> pour révéler un timestamp ? Et que les générer en Python se résume à une seule ligne avec le module <code>uuid</code> ? Notre <strong>générateur et décodeur d'UUID</strong> rassemble tout cela dans un seul outil web privé. Vous pouvez générer des lots d'UUID, décoder un UUID v1 jusqu'à son heure de création, valider n'importe quelle saisie, et même copier des extraits de code Python, Go ou JavaScript.</p>
+
+                <!-- Bloc image à personnaliser -->
+                <figure style="margin: 28px 0; text-align: center;">
+                    <img
+                        src="/generateur-uuid.webp"
+                        alt="Interface du générateur d'UUID DevToolbox affichant les onglets Générer, Valider et Décoder"
+                        loading="lazy"
+                        decoding="async"
+                        style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
+                    >
+                    <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
+                        Le générateur, le validateur et le décodeur dans une interface épurée.
+                    </figcaption>
+                </figure>
+
+                <h2>Comment décoder et générer des UUID étape par étape</h2>
+                <ol>
+                    <li><strong>Ouvrez l'outil :</strong> rendez-vous sur le <a href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid/">générateur d'UUID / ULID</a>.</li>
+                    <li><strong>Générez des UUID :</strong> dans l'onglet <strong>Générer</strong>, choisissez UUID v4 (aléatoire), v1 (basé sur le temps), v5 (déterministe) ou ULID. Réglez la quantité (1 à 1000) et le format (tirets, majuscules). Cliquez sur <strong>Générer</strong>.</li>
+                    <li><strong>Décodez un UUID v1 :</strong> passez à l'onglet <strong>Décoder</strong>, collez un UUID v1 et appuyez sur <strong>Décoder</strong>. L'outil extrait le timestamp et l'adresse MAC d'origine (nœud). Pour les ULID, il affiche également le timestamp intégré.</li>
+                    <li><strong>Validez n'importe quel identifiant :</strong> dans l'onglet <strong>Valider</strong>, collez une chaîne pour vérifier s'il s'agit d'un UUID valide (et de quelle version) ou d'un ULID.</li>
+                    <li><strong>Comparez UUID et ULID :</strong> l'onglet <strong>Comparer</strong> vous présente un tableau côte à côte de leurs différences (longueur, tri, entropie).</li>
+                    <li><strong>Copiez des extraits de code :</strong> pour Python, JavaScript, Go et SQL, ouvrez l'onglet Galerie et copiez l'extrait prêt à coller dans votre éditeur.</li>
+                </ol>
+
+                <p><strong>Temps de traitement :</strong> quasi instantané (moins de 50 ms pour la génération par lot).<br>
+                <strong>Aucune limite de taille de fichier :</strong> vous générez les identifiants localement ; rien n'est téléversé.<br>
+                <strong>Formats de sortie :</strong> texte brut, tableau JSON ou CSV, le tout copiable.</p>
+
+                <h2>Astuces de pro</h2>
+                <ul>
+                    <li><strong>Utilisez ULID quand le tri importe :</strong> si vous avez besoin d'identifiants qui se trient par date de création, générez des ULID plutôt que des UUID v4. Notre outil vous permet de basculer instantanément.</li>
+                    <li><strong>Décodez les UUID v1 pour l'analyse forensique :</strong> lorsque vous débuguez un système ancien qui utilise des UUID v1, décodez l'identifiant pour savoir rapidement quand et où il a été créé — sans script.</li>
+                    <li><strong>Générez par lots pour les tests :</strong> réglez le curseur de quantité pour produire jusqu'à 1000 UUID à la fois, puis copiez-les au format JSON. Idéal pour peupler des bases de test.</li>
+                </ul>
+
+                <h2>Comment notre générateur d'UUID se compare aux alternatives</h2>
+                <table>
+                    <thead>
+                        <tr><th>Fonctionnalité</th><th>DevToolbox Générateur UUID</th><th>uuidgenerator.net</th><th>Module Python <code>uuid</code></th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>En ligne, sans installation</td><td>✅ Oui</td><td>✅ Oui</td><td>❌ Nécessite Python</td></tr>
+                        <tr><td>100% côté client (confidentialité)</td><td>✅ Oui</td><td>✅ Oui (version web)</td><td>✅ Oui (local)</td></tr>
+                        <tr><td>Décoder le timestamp d'un UUID v1</td><td>✅ Oui</td><td>✅ Limité</td><td>❌ Code manuel requis</td></tr>
+                        <tr><td>Générer des ULID</td><td>✅ Oui</td><td>❌ Non</td><td>❌ Bibliothèque externe</td></tr>
+                        <tr><td>Génération par lot (jusqu'à 1000)</td><td>✅ Oui</td><td>✅ Oui (jusqu'à 200)</td><td>✅ (avec boucle)</td></tr>
+                        <tr><td>Extraits de code (Python, Go, JS, SQL)</td><td>✅ Oui</td><td>❌ Non</td><td>✅ (votre propre code)</td></tr>
+                        <tr><td>Tableau comparatif UUID/ULID</td><td>✅ Oui</td><td>❌ Non</td><td>❌ Non</td></tr>
+                        <tr><td>Partage d'URL de la configuration</td><td>✅ Oui</td><td>❌ Non</td><td>❌ Non</td></tr>
+                    </tbody>
+                </table>
+
+                <h2>Cas d'usage concrets</h2>
+                <p>Les développeurs utilisent notre générateur pour créer des identifiants de session uniques pour les applications web, attribuer des identifiants stables aux objets de configuration, ou alimenter une base de données avec des clés primaires aléatoires. Les administrateurs système se fient au décodeur pour inspecter les journaux d'UUID v1 et retracer le moment où une machine a généré un token particulier. Les ingénieurs de données génèrent des ULID pour produire des identifiants d'événements triables pour des pipelines temps réel, sans bibliothèque externe.</p>
+                <p>Personnellement, je garde l'outil ouvert quand je conçois des schémas d'API — il me permet de récupérer un UUID valide instantanément pour la documentation ou des données factices, sans basculer vers un REPL Python.</p>
+
+                <h2>Confidentialité et fiabilité</h2>
+                <p>Toute la génération d'UUID utilise l'API <code>crypto.getRandomValues()</code> du navigateur — une source de hasard cryptographiquement sûre. La validation et le décodage s'effectuent entièrement en mémoire, et aucune donnée n'est envoyée à un serveur. Le partage d'URL encode votre configuration localement, sans jamais rien stocker sur un backend. Vous pouvez générer des identifiants en toute sécurité pour des systèmes de production sans risque de fuite.</p>
+
+                <h2>Essayez-le maintenant</h2>
+                <p>Prêt à générer ou décoder un UUID en quelques secondes ? Ouvrez l'outil et obtenez votre premier identifiant instantanément.</p>
+                <p style="text-align: center;"><a href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid/" class="btn-tool">🔧 Ouvrir le générateur d'UUID gratuit</a></p>
+
+                <h3 style="margin-top: 32px;">Ces outils peuvent aussi vous intéresser</h3>
+                <ul>
+                    <li><a href="https://www.devstoolsbox.dev/fr/outils/formateur-json/">Formateur JSON</a> — formatez et validez du JSON contenant des UUID</li>
+                    <li><a href="https://www.devstoolsbox.dev/fr/outils/decodeur-jwt/">Décodeur JWT</a> — décodez des tokens qui embarquent des claims UUID</li>
+                    <li><a href="https://www.devstoolsbox.dev/fr/outils/encodeur-base64/">Encodeur Base64</a> — encodez des UUID pour les en-têtes HTTP</li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — Outils en ligne gratuits pour développeurs. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
