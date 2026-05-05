@@ -1,0 +1,640 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cron Expression Evaluator — Test & Validate Your Cron Schedules Online</title>
+    <meta name="description" content="Free cron expression evaluator to test, validate and preview schedules. See next run timings and understand your cron instantly.">
+    <meta name="keywords" content="cron expression evaluator, cron evaluator, test cron expression, cron schedule preview, cron parser, cron next executions, cron checker, cron debugger">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/cron-expression-evaluator/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/cron-expression-evaluator/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/evaluateur-expression-cron/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/cron-expression-evaluator/">
+
+    <meta property="og:title" content="Cron Expression Evaluator – Test & Validate Your Cron Schedules">
+    <meta property="og:description" content="Preview next cron job runs. Free, instant, and private.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/cron-expression-evaluator/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Cron Expression Evaluator">
+    <meta name="twitter:description" content="Validate and preview your cron expressions. 100% client‑side.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .input-row { display:flex; gap:10px; margin-bottom:20px; align-items:center; flex-wrap:wrap; }
+        .cron-input {
+            flex:1; min-width:240px; padding:12px 16px;
+            font-family:var(--mono); font-size:0.92rem;
+            border:1.5px solid var(--border); border-radius:12px;
+            background:var(--bg); color:var(--text); outline:none;
+            transition:border 0.2s, box-shadow 0.2s;
+        }
+        .cron-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-light); }
+        .cron-input.valid { border-color:var(--accent-green); }
+        .cron-input.invalid { border-color:#ef4444; }
+        .validation-msg { font-size:0.78rem; margin-top:4px; }
+
+        /* Buttons */
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Results */
+        .results-panel { margin-top:20px; }
+        .stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:16px; }
+        .stat-card {
+            background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+            padding:14px; text-align:center;
+        }
+        .stat-value { font-size:1.5rem; font-weight:700; color:var(--primary); }
+        .stat-label { font-size:0.72rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.05em; }
+
+        .exec-list {
+            max-height:300px; overflow-y:auto; border:1px solid var(--border); border-radius:12px;
+            background:var(--surface);
+        }
+        .exec-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:10px 14px; border-bottom:0.5px solid var(--border);
+            font-family:var(--mono); font-size:0.83rem;
+        }
+        .exec-item:last-child { border-bottom:none; }
+        .exec-number { color:var(--text3); margin-right:12px; }
+        .exec-date { color:var(--text); }
+        .natural-explanation {
+            background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+            padding:14px; margin:16px 0; font-weight:500;
+        }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/cron-expression-evaluator/" class="lang-btn active" aria-current="page">EN</a>
+                <a href="/fr/outils/evaluateur-expression-cron/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/">Home</a> &rsaquo;
+        <a href="/tools/">Tools</a> &rsaquo;
+        <span>Cron Expression Evaluator</span>
+    </div>
+
+    <div class="seo-hook">
+        Quickly <strong>evaluate your cron expression</strong> and see the next run times. Our <strong>cron evaluator</strong> validates syntax, gives a natural‑language summary, and estimates yearly executions. No data leaves your browser.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>Free Cron Expression Evaluator (Test & Preview Schedules)</h1>
+            <div class="subhead">Paste a cron expression (standard 5‑field or extended 6‑field) and instantly preview its upcoming runs, get a plain‑English explanation, and check its frequency.</div>
+            <p>
+            Test and understand any cron expression instantly. Get next run times, explanations and frequency in one click.
+            </p>
+            <div class="input-row">
+                <input
+                    type="text"
+                    class="cron-input"
+                    id="cronInput"
+                    placeholder="e.g. */15 8-17 * * 1-5"
+                    value="*/15 8-17 * * 1-5"
+                    spellcheck="false"
+                    autocomplete="off"
+                    aria-label="Cron expression"
+                >
+                <select id="formatSelect" aria-label="Cron format" style="padding:10px 14px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
+                    <option value="standard">Standard (5 fields)</option>
+                    <option value="extended">Extended (6 fields – with seconds)</option>
+                </select>
+                <button class="btn btn-primary" id="evaluateBtn">Evaluate</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Share</button>
+            </div>
+            <div class="validation-msg" id="validationMsg"></div>
+
+            <div class="results-panel" id="resultsPanel">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Article & FAQ -->
+        <section class="article-section" aria-label="Documentation">
+            <h2>How Our Cron Expression Evaluator Works</h2>
+            <p>This tool takes a cron expression (either the classic 5‑field Linux format or the 6‑field version used by AWS, Quartz, etc.) and computes the next several execution times based on the current time. It also validates the syntax, translates the expression into plain English, and estimates how often the job would run over a year.</p>
+            <p>Everything runs locally in your browser – the expression is never sent to a server, so you can safely test crontab fragments from sensitive environments.</p>
+
+            <!-- New section: Cron Expression Example -->
+            <h2>Cron Expression Example</h2>
+            <p>Take a practical example: <code>*/15 8-17 * * 1-5</code>. This expression means “every 15 minutes, between 8 AM and 5 PM, Monday through Friday”. Paste it into the evaluator and you'll see the next runs — e.g., at 08:00, 08:15, 08:30 … 17:45 — and the tool estimates it fires about 2,080 times per year.</p>
+            <p>You can try common patterns such as <code>0 0 * * *</code> (daily at midnight), <code>0 9 * * 1</code> (every Monday at 9 AM), or <code>*/5 * * * *</code> (every 5 minutes).</p>
+
+            <!-- New section: Cron Expression Meaning -->
+            <h2>Cron Expression Meaning</h2>
+            <p>A cron expression is a string of five or six fields that define when a job runs. Here's how they break down in the standard format:</p>
+            <ul>
+                <li><strong>Minute</strong> (0–59) — when within the hour</li>
+                <li><strong>Hour</strong> (0–23) — the hour of the day</li>
+                <li><strong>Day of month</strong> (1–31) — which day</li>
+                <li><strong>Month</strong> (1–12) — which month</li>
+                <li><strong>Day of week</strong> (0–7, where both 0 and 7 mean Sunday)</li>
+            </ul>
+            <p>Each field can contain an asterisk (<code>*</code> meaning “every”), a specific number, a range (<code>1-5</code>), a step (<code>*/5</code>), or a comma‑separated list (<code>1,15,30</code>). The extended format adds a leading <strong>Second</strong> field (0‑59).</p>
+            <p>Our evaluator decodes these fields and shows you exactly when the job will fire, removing the guesswork.</p>
+
+            <!-- New section: Common Cron Expression Examples -->
+            <h2>Common Cron Expression Examples</h2>
+            <p>Here are some frequently used expressions and what they do:</p>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                <thead>
+                    <tr>
+                        <th style="text-align:left; padding:8px; border-bottom:1px solid var(--border)">Expression</th>
+                        <th style="text-align:left; padding:8px; border-bottom:1px solid var(--border)">Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>0 0 * * *</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Daily at midnight</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>*/5 * * * *</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Every 5 minutes</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>0 9 * * 1-5</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">At 9 AM, Monday to Friday</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>0 0 1 * *</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">First day of every month at midnight</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>0 0 * * 0</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Every Sunday at midnight</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>@daily</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Same as <code>0 0 * * *</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Usage Tips</h3>
+            <ul>
+                <li>The <strong>Standard</strong> format uses five fields: minute, hour, day of month, month, day of week.</li>
+                <li>The <strong>Extended</strong> format adds an initial seconds field (0‑59).</li>
+                <li>You can use macros such as <code>@hourly</code>, <code>@daily</code>, <code>@weekly</code>, <code>@monthly</code>, <code>@yearly</code>.</li>
+                <li>Supported patterns: <code>*</code>, <code>*/n</code>, <code>n-m</code>, <code>n,m</code>, and mixed ranges.</li>
+            </ul>
+
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">What does a cron expression evaluator do?</div>
+                <p>It parses a cron expression, checks if it's valid, and then calculates the exact dates and times when the job will fire. This is useful for debugging, validating, or simply understanding a schedule before you deploy it.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How many future runs does this evaluator show?</div>
+                <p>By default it displays up to 20 upcoming executions. You can adjust the number if you need more or fewer samples.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Does it handle both seconds and milliseconds?</div>
+                <p>The evaluator works with minute‑ or second‑based cron expressions. If you select the extended format, the first field is interpreted as seconds.</p>
+            </div>
+
+            <h3>Other useful tools</h3>
+            <ul>
+                <li><a href="/tools/cron-generator/">Cron Expression Generator</a> — build expressions visually</li>
+                <li><a href="/tools/unix-timestamp-converter/">Unix Timestamp Converter</a> — convert timestamps to human dates</li>
+                <li><a href="/tools/jwt-decoder/">JWT Decoder</a> — inspect tokens used in scheduled jobs</li>
+                <li><a href="/tools/regex-tester/">Regex Tester</a> — validate patterns in your scripts</li>
+                <li><a href="/tools/cron-generator/">create, validate, munify cron expression</a> Create cron expressions easily</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — 100% client‑side tools for developers.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Cron Expression Evaluator",
+  "url": "https://www.devstoolsbox.dev/tools/cron-expression-evaluator/",
+  "description": "Evaluate cron expressions instantly. See next run times, natural‑language description, and yearly frequency. 100% client‑side.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What does a cron expression evaluator do?", "acceptedAnswer": { "@type": "Answer", "text": "It parses a cron expression, validates it, and computes the upcoming execution times so you can preview your schedule." } },
+    { "@type": "Question", "name": "How many future runs does this evaluator show?", "acceptedAnswer": { "@type": "Answer", "text": "Up to 20 future runs are displayed by default. You can request more or fewer." } },
+    { "@type": "Question", "name": "Does it handle extended cron with seconds?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, you can toggle between the standard 5‑field format and the extended 6‑field format that includes seconds." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://www.devstoolsbox.dev/tools/" },
+    { "@type": "ListItem", "position": 3, "name": "Cron Expression Evaluator", "item": "https://www.devstoolsbox.dev/tools/cron-expression-evaluator/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Theme ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Light'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Dark'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Light':'Dark'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    /* ── Constants & macro mapping ── */
+    const MACROS = {
+        '@hourly':  '0 * * * *',
+        '@daily':   '0 0 * * *',
+        '@weekly':  '0 0 * * 0',
+        '@monthly': '0 0 1 * *',
+        '@yearly':  '0 0 1 1 *',
+        '@annually':'0 0 1 1 *'
+    };
+    const FIELD_NAMES_STD = ['minute','hour','day of month','month','day of week'];
+    const FIELD_NAMES_EXT = ['second','minute','hour','day of month','month','day of week'];
+    const RANGES_STD = [[0,59],[0,23],[1,31],[1,12],[0,7]];
+    const RANGES_EXT = [[0,59],[0,59],[0,23],[1,31],[1,12],[0,7]];
+
+    /* ── Parse a single field token ── */
+    function parseField(token, min, max, allowStar=true) {
+        if (token === '*') return { type:'all' };
+        if (token.startsWith('*/')) {
+            const step = parseInt(token.slice(2));
+            if (!isNaN(step) && step>=1) return { type:'step', step, start:min, end:max };
+        }
+        // list or range
+        const parts = token.split(',');
+        const values = [];
+        for (let p of parts) {
+            if (p.includes('-')) {
+                const [a,b] = p.split('-');
+                const start = parseInt(a); const end = parseInt(b);
+                if (isNaN(start)||isNaN(end)) return null;
+                for (let v=start; v<=end; v++) {
+                    if (v>=min && v<=max) values.push(v);
+                }
+            } else {
+                const v = parseInt(p);
+                if (isNaN(v)) return null;
+                if (v>=min && v<=max) values.push(v);
+                else if (min===0 && max===7 && v===7) values.push(7);
+            }
+        }
+        return { type:'list', values: [...new Set(values)].sort((a,b)=>a-b) };
+    }
+
+    /* ── Validate & return parsed fields ── */
+    function parseExpression(expr, extended) {
+        const raw = expr.trim();
+        if (MACROS[raw]) return parseExpression(MACROS[raw], false); // macros are standard
+        const parts = raw.split(/\s+/);
+        const fieldCount = extended ? 6 : 5;
+        if (parts.length !== fieldCount) return { error: `Expected ${fieldCount} fields, got ${parts.length}` };
+        const ranges = extended ? RANGES_EXT : RANGES_STD;
+        const parsed = [];
+        for (let i=0; i<fieldCount; i++) {
+            const token = parts[i];
+            const [min,max] = ranges[i];
+            const field = parseField(token, min, max);
+            if (!field) return { error: `Invalid value in field ${i+1}: "${token}"` };
+            parsed.push(field);
+        }
+        return { parsed, error: null };
+    }
+
+    /* ── Check if a single value matches a field ── */
+    function matchesField(value, field) {
+        if (field.type === 'all') return true;
+        if (field.type === 'step') {
+            return value >= field.start && value <= field.end && (value - field.start) % field.step === 0;
+        }
+        if (field.type === 'list') {
+            return field.values.includes(value);
+        }
+        return false;
+    }
+
+    /* ── Generate next N occurrences ── */
+    function generateOccurrences(parsedFields, extended, count=20) {
+        const now = new Date();
+        const results = [];
+        let current = new Date(now);
+        current.setSeconds(0,0);
+        current.setMinutes(current.getMinutes()+1); // start from next minute
+
+        const fields = parsedFields;
+        const len = extended?6:5;
+        const startIdx = extended?1:0;
+        const minuteField = fields[startIdx];
+        const hourField = fields[startIdx+1];
+        const domField = fields[startIdx+2];
+        const monthField = fields[startIdx+3];
+        const dowField = fields[startIdx+4];
+
+        let loops = 0;
+        const maxLoops = count * 1440;
+
+        while (results.length < count && loops < maxLoops) {
+            const year = current.getFullYear();
+            const month = current.getMonth()+1;
+            const day = current.getDate();
+            const hour = current.getHours();
+            const minute = current.getMinutes();
+            const second = extended ? current.getSeconds() : 0;
+            const dow = current.getDay();
+
+            if (!matchesField(month, monthField)) {
+                current.setMonth(current.getMonth()+1);
+                current.setDate(1);
+                current.setHours(0,0,0,0);
+                continue;
+            }
+
+            const domMatch = matchesField(day, domField);
+            const dowMatch = matchesField(dow, dowField);
+            const dayMatch = domMatch || dowMatch;
+
+            if (!dayMatch) {
+                current.setDate(current.getDate()+1);
+                current.setHours(0,0,0,0);
+                continue;
+            }
+
+            if (!matchesField(hour, hourField)) {
+                current.setHours(current.getHours()+1);
+                current.setMinutes(0,0,0);
+                continue;
+            }
+
+            if (!matchesField(minute, minuteField)) {
+                current.setMinutes(current.getMinutes()+1);
+                current.setSeconds(0,0);
+                continue;
+            }
+
+            if (extended) {
+                const secondField = fields[0];
+                if (!matchesField(second, secondField)) {
+                    current.setSeconds(current.getSeconds()+1,0);
+                    continue;
+                }
+            }
+
+            results.push(new Date(current));
+            if (extended) current.setSeconds(current.getSeconds()+1);
+            else current.setMinutes(current.getMinutes()+1);
+            loops++;
+        }
+        return results;
+    }
+
+    /* ── Natural language description ── */
+    function describeExpression(parsedFields, extended) {
+        const names = extended ? FIELD_NAMES_EXT : FIELD_NAMES_STD;
+        const parts = [];
+        for (let i=0; i<parsedFields.length; i++) {
+            const f = parsedFields[i];
+            if (f.type === 'all') parts.push(`every ${names[i]}`);
+            else if (f.type === 'step') parts.push(`every ${f.step} ${names[i]}s`);
+            else if (f.type === 'list') {
+                if (f.values.length <= 3) parts.push(`${names[i]} ${f.values.join(',')}`);
+                else parts.push(`${names[i]} in {${f.values.slice(0,3).join(',')}…}`);
+            }
+        }
+        return 'Runs ' + parts.join(', ') + '.';
+    }
+
+    /* ── Estimate yearly count ── */
+    function estimateYearly(parsedFields, extended) {
+        const minuteField = parsedFields[extended?1:0];
+        let perHour = 1;
+        if (minuteField.type === 'all') perHour = 60;
+        else if (minuteField.type === 'step') perHour = Math.floor(60 / minuteField.step);
+        else if (minuteField.type === 'list') perHour = minuteField.values.length;
+
+        const hourField = parsedFields[extended?2:1];
+        let hoursPerDay = 24;
+        if (hourField.type === 'list') hoursPerDay = hourField.values.length;
+        else if (hourField.type === 'step') hoursPerDay = Math.floor(24 / hourField.step);
+
+        const dayField = parsedFields[extended?3:2];
+        let daysPerMonth = 30;
+        if (dayField.type === 'list') daysPerMonth = dayField.values.length;
+        else if (dayField.type === 'step') daysPerMonth = Math.floor(31 / dayField.step);
+
+        const monthField = parsedFields[extended?4:3];
+        let monthsPerYear = 12;
+        if (monthField.type === 'list') monthsPerYear = monthField.values.length;
+
+        return perHour * hoursPerDay * daysPerMonth * monthsPerYear;
+    }
+
+    /* ── Render results ── */
+    const cronInput = document.getElementById('cronInput');
+    const validationMsg = document.getElementById('validationMsg');
+    const formatSelect = document.getElementById('formatSelect');
+    const resultsPanel = document.getElementById('resultsPanel');
+
+    function evaluate() {
+        const expr = cronInput.value.trim();
+        const extended = formatSelect.value === 'extended';
+        const parseResult = parseExpression(expr, extended);
+
+        if (parseResult.error) {
+            cronInput.classList.add('invalid'); cronInput.classList.remove('valid');
+            validationMsg.textContent = '❌ ' + parseResult.error;
+            resultsPanel.innerHTML = '';
+            return;
+        }
+
+        cronInput.classList.add('valid'); cronInput.classList.remove('invalid');
+        validationMsg.textContent = '✅ Valid expression';
+
+        const { parsed } = parseResult;
+        const occurrences = generateOccurrences(parsed, extended, 20);
+        const yearly = estimateYearly(parsed, extended);
+        const description = describeExpression(parsed, extended);
+
+        let html = '';
+        html += `<div class="natural-explanation">${description}</div>`;
+
+        html += `<div class="stat-grid">
+            <div class="stat-card"><div class="stat-value">${yearly}</div><div class="stat-label">Est. runs / year</div></div>
+            <div class="stat-card"><div class="stat-value">${occurrences.length}</div><div class="stat-label">Next shown</div></div>
+        </div>`;
+
+        html += `<div class="exec-list">`;
+        if (occurrences.length === 0) {
+            html += `<div class="exec-item"><span>No upcoming occurrences found</span></div>`;
+        } else {
+            occurrences.forEach((d, idx) => {
+                html += `<div class="exec-item">
+                    <span class="exec-number">#${idx+1}</span>
+                    <span class="exec-date">${d.toLocaleString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+                </div>`;
+            });
+        }
+        html += `</div>`;
+        resultsPanel.innerHTML = html;
+    }
+
+    cronInput.addEventListener('input', evaluate);
+    formatSelect.addEventListener('change', evaluate);
+    document.getElementById('evaluateBtn').addEventListener('click', evaluate);
+    document.getElementById('shareBtn').addEventListener('click', ()=>{
+        const expr = cronInput.value.trim();
+        const hash = btoa(encodeURIComponent(expr));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copied!'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const expr = decodeURIComponent(atob(window.location.hash.slice(1)));
+                if (expr) { cronInput.value = expr; evaluate(); }
+            } catch(e){}
+        }
+    }
+    loadFromHash();
+    evaluate();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,765 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python UUID to String Converter (Free Online Tool)</title>
+    <meta name="description" content="Convert Python UUID to string instantly. Supports str(uuid), hex, bytes and base64. Free, fast and 100% client-side.">
+    <meta name="keywords" content="python uuid to string, convert uuid to string python, uuid string conversion, uuid hex python, uuid str, python uuid example, uuid to string online, python uuid tutorial, uuid string format, uuid without hyphens, remove dashes uuid python">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/python-uuid-to-string/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/python-uuid-to-string/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/python-uuid-to-string/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/python-uuid-to-string/">
+
+    <meta property="og:title" content="Python UUID to String – Convert UUID Online">
+    <meta property="og:description" content="Convert any UUID to its Python string representations: str(uuid), .hex, .urn, .bytes. Live formatting, copy & paste.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/python-uuid-to-string/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Python UUID to String Converter">
+    <meta name="twitter:description" content="Instant UUID string conversion in Python formats. Free and private.">
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981;
+            --accent-green-bg: #d1fae5;
+            --text: #0f172a;
+            --text2: #374151;
+            --text3: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+            --python-blue: #306998;
+            --python-yellow: #ffd43b;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --surface: #151a28;
+            --surface2: #1d2333;
+            --primary: #a78bfa;
+            --primary-hover: #8b5cf6;
+            --primary-light: rgba(167,139,250,0.1);
+            --accent-green: #34d399;
+            --accent-green-bg: #064e3b;
+            --text: #f1f5f9;
+            --text2: #cbd5e1;
+            --text3: #94a3b8;
+            --border: #2d3548;
+            --code-bg: #0f172a;
+            --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --python-blue: #6baed6;
+            --python-yellow: #ffd43b;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:950px; margin:0 auto; }
+
+        /* Header */
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        /* Breadcrumb */
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        /* SEO hook */
+        .seo-hook {
+            background: var(--primary-light); border-left: 4px solid var(--primary);
+            padding: 10px 16px; border-radius: 8px; margin-bottom: 20px;
+            font-size: 0.92rem; color: var(--text2);
+        }
+
+        /* Tool card */
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        /* Input row */
+        .input-row { display:flex; gap:10px; margin-bottom:20px; align-items:center; flex-wrap:wrap; }
+        .uuid-input {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:0.92rem;
+            border:1.5px solid var(--border); border-radius:12px;
+            background:var(--bg); color:var(--text); outline:none;
+            transition:border 0.2s, box-shadow 0.2s;
+        }
+        .uuid-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-light); }
+        .uuid-input::placeholder { color:var(--text3); }
+        .uuid-input.valid { border-color:var(--accent-green); }
+        .uuid-input.invalid { border-color:#ef4444; }
+        .validation-msg { font-size:0.78rem; margin-top:4px; }
+
+        /* Buttons */
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Results table */
+        .results-table { width:100%; border-collapse:collapse; margin:16px 0; }
+        .results-table th, .results-table td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+        .results-table th { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text3); }
+        .results-table td { font-family:var(--mono); font-size:0.83rem; }
+        .results-table .method-col { color:var(--primary); font-weight:700; }
+        .results-table .copy-col { text-align:right; }
+        .python-badge {
+            display:inline-block; background:var(--python-blue); color:#fff;
+            padding:2px 8px; border-radius:4px; font-size:0.68rem; font-weight:700;
+            margin-right:6px; vertical-align:middle; letter-spacing:0.03em;
+        }
+
+        /* Article / FAQ */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code {
+            background:var(--code-bg); color:var(--code-color); padding:2px 6px;
+            border-radius:4px; font-family:var(--mono); font-size:0.88em;
+        }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        /* Code snippet */
+        .code-block {
+            background:var(--code-bg); color:var(--code-color); padding:16px 18px;
+            border-radius:12px; font-family:var(--mono); font-size:0.83rem;
+            overflow-x:auto; margin:12px 0; line-height:1.6; position:relative;
+        }
+        .code-block .comment { color:#6b7280; }
+        .code-block .keyword { color:#c084fc; }
+        .code-block .string { color:#34d399; }
+        .code-block .func { color:#60a5fa; }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .results-table { font-size:0.75rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/python-uuid-to-string/" class="lang-btn active" aria-current="page">EN</a>
+                <a href="/fr/outils/python-uuid-to-string/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/">Home</a> &rsaquo;
+        <a href="/tools/">Tools</a> &rsaquo;
+        <span>Python UUID to String</span>
+    </div>
+
+    <!-- SEO Hook -->
+    <div class="seo-hook">
+        Need to <strong>convert a UUID to a string in Python</strong>? Use our free online tool to instantly see all Python UUID string representations — <code>str(uuid)</code>, <code>.hex</code>, <code>.urn</code>, <code>.bytes</code>, and more. No data leaves your browser.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>Python UUID to String Converter</h1>
+            <div class="subhead">Paste or generate a UUID and instantly see all Python string representations — <code>str(uuid)</code>, <code>.hex</code>, <code>.urn</code>, <code>.bytes</code>, and more. 100% client‑side.</div>
+
+            <!-- Input -->
+            <div class="input-row">
+                <input
+                    type="text"
+                    class="uuid-input"
+                    id="uuidInput"
+                    placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
+                    value="550e8400-e29b-41d4-a716-446655440000"
+                    spellcheck="false"
+                    autocomplete="off"
+                    aria-label="UUID input"
+                >
+                <button class="btn btn-primary" id="generateBtn" aria-label="Generate random UUID v4">Generate v4</button>
+                <button class="btn btn-outline btn-sm" id="generateV1Btn" aria-label="Generate UUID v1">v1</button>
+                <button class="btn btn-outline btn-sm" id="generateV5Btn" aria-label="Generate UUID v5">v5 (DNS)</button>
+            </div>
+            <div class="validation-msg" id="validationMsg"></div>
+
+            <!-- Results table -->
+            <table class="results-table" aria-label="Python UUID string representations">
+                <thead>
+                    <tr>
+                        <th>Python method</th>
+                        <th>Result</th>
+                        <th style="width:50px"></th>
+                        <th style="width:90px">Length</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="method-col"><span class="python-badge">py</span> str(uuid)</td>
+                        <td id="strResult">—</td>
+                        <td class="copy-col"><button class="btn btn-sm" data-copy="strResult" aria-label="Copy str format">Copy</button></td>
+                        <td id="strLen">—</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col"><span class="python-badge">py</span> uuid.hex</td>
+                        <td id="hexResult">—</td>
+                        <td class="copy-col"><button class="btn btn-sm" data-copy="hexResult" aria-label="Copy hex format">Copy</button></td>
+                        <td id="hexLen">—</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col"><span class="python-badge">py</span> uuid.urn</td>
+                        <td id="urnResult">—</td>
+                        <td class="copy-col"><button class="btn btn-sm" data-copy="urnResult" aria-label="Copy urn format">Copy</button></td>
+                        <td id="urnLen">—</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col"><span class="python-badge">py</span> str(uuid).replace('-','')</td>
+                        <td id="compactResult">—</td>
+                        <td class="copy-col"><button class="btn btn-sm" data-copy="compactResult" aria-label="Copy compact format">Copy</button></td>
+                        <td id="compactLen">—</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col"><span class="python-badge">py</span> uuid.bytes (hexlify)</td>
+                        <td id="bytesResult">—</td>
+                        <td class="copy-col"><button class="btn btn-sm" data-copy="bytesResult" aria-label="Copy bytes hex format">Copy</button></td>
+                        <td id="bytesLen">—</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col"><span class="python-badge">py</span> base64 (url-safe)</td>
+                        <td id="b64Result">—</td>
+                        <td class="copy-col"><button class="btn btn-sm" data-copy="b64Result" aria-label="Copy base64 format">Copy</button></td>
+                        <td id="b64Len">—</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col"><span class="python-badge">py</span> uuid.int</td>
+                        <td id="intResult">—</td>
+                        <td class="copy-col"><button class="btn btn-sm" data-copy="intResult" aria-label="Copy int format">Copy</button></td>
+                        <td id="intLen">—</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-outline btn-sm" id="copyAllBtn">Copy all formats</button>
+                <button class="btn btn-outline btn-sm" id="copyCodeBtn">Copy Python code</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Share URL</button>
+            </div>
+        </div>
+
+        <!-- Article Section -->
+        <section class="article-section" aria-label="Documentation">
+            <h2>How to Convert UUID to String in Python</h2>
+            <p>
+                A <strong>UUID</strong> (Universally Unique Identifier) is a 128‑bit value used across
+                Python applications for database keys, session tokens, and distributed tracing.
+                In Python, the <code>uuid</code> module (part of the standard library) creates
+                <code>UUID</code> objects — but those aren't strings. To store, transmit, or display
+                a UUID, you must convert it to one of several string formats.
+            </p>
+            <p>
+                This tool shows every possible <strong>Python UUID to string</strong> conversion in
+                real time, along with the corresponding Python code. No data leaves your browser.
+            </p>
+
+            <h2>Python UUID to String Example</h2>
+            <p>Here’s a straightforward example that demonstrates the most common conversions:</p>
+            <div class="code-block">
+<span class="comment"># Creating a UUID object (from a known string)</span>
+<span class="keyword">import</span> uuid
+my_uuid = uuid.<span class="func">UUID</span>(<span class="string">'550e8400-e29b-41d4-a716-446655440000'</span>)
+
+<span class="comment"># 1. Canonical string (hyphens included)</span>
+uuid_str = <span class="func">str</span>(my_uuid)
+<span class="comment"># '550e8400-e29b-41d4-a716-446655440000'</span>
+
+<span class="comment"># 2. Plain hex string (no hyphens) – Python UUID to string without hyphens</span>
+uuid_hex = my_uuid.<span class="func">hex</span>
+<span class="comment"># '550e8400e29b41d4a716446655440000'</span>
+
+<span class="comment"># 3. Raw bytes → hex (alternative approach)</span>
+uuid_bytes_hex = my_uuid.<span class="func">bytes</span>.<span class="func">hex</span>()
+<span class="comment"># '550e8400e29b41d4a716446655440000'</span>
+
+<span class="comment"># 4. Compact representation (remove dashes manually)</span>
+compact = <span class="func">str</span>(my_uuid).<span class="func">replace</span>('-', '')
+<span class="comment"># '550e8400e29b41d4a716446655440000'</span>
+            </div>
+            <p>The code above covers the most frequently requested conversions. You can copy and paste it directly into your Python project – everything uses the standard library.</p>
+
+            <h3>The five main UUID string formats (and when to use each)</h3>
+            <ul>
+                <li><strong><code>str(uuid)</code></strong> — the canonical 36‑character hyphenated form
+                    (<code>550e8400-e29b-41d4-a716-446655440000</code>). Use for JSON, logs, and user‑facing output.</li>
+                <li><strong><code>uuid.hex</code></strong> — the 32‑character plain hexadecimal string (no hyphens).
+                    Compact, ideal for database <code>CHAR(32)</code> columns or URL fragments.</li>
+                <li><strong><code>uuid.urn</code></strong> — the URN representation
+                    (<code>urn:uuid:550e8400-e29b-41d4-a716-446655440000</code>). Useful in XML, RDF, and
+                    protocol‑oriented contexts.</li>
+                <li><strong><code>uuid.bytes</code></strong> — raw 16‑byte binary. Convert to hex with
+                    <code>binascii.hexlify()</code> when you need a compact, reversible encoding.</li>
+                <li><strong><code>uuid.int</code></strong> — the 128‑bit integer. Use for arithmetic
+                    comparisons or as a dictionary key when hashing matters.</li>
+            </ul>
+
+            <h3>UUID String Formats Comparison</h3>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                <thead>
+                    <tr>
+                        <th>Format</th>
+                        <th>Python code</th>
+                        <th>Example (same UUID)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Hyphenated string</td>
+                        <td><code>str(uuid)</code></td>
+                        <td><code>550e8400-e29b-41d4-a716-446655440000</code></td>
+                    </tr>
+                    <tr>
+                        <td>Hex (no hyphens)</td>
+                        <td><code>uuid.hex</code></td>
+                        <td><code>550e8400e29b41d4a716446655440000</code></td>
+                    </tr>
+                    <tr>
+                        <td>URN</td>
+                        <td><code>uuid.urn</code></td>
+                        <td><code>urn:uuid:550e8400-e29b-41d4-a716-446655440000</code></td>
+                    </tr>
+                    <tr>
+                        <td>Compact (replace)</td>
+                        <td><code>str(uuid).replace('-','')</code></td>
+                        <td><code>550e8400e29b41d4a716446655440000</code></td>
+                    </tr>
+                    <tr>
+                        <td>Raw bytes → hex</td>
+                        <td><code>uuid.bytes.hex()</code></td>
+                        <td><code>550e8400e29b41d4a716446655440000</code></td>
+                    </tr>
+                    <tr>
+                        <td>Base64 URL-safe</td>
+                        <td><code>base64.urlsafe_b64encode(uuid.bytes).decode().rstrip('=')</code></td>
+                        <td><code>VQ6EAOKbQdSnFkRmVVQAAA</code></td>
+                    </tr>
+                    <tr>
+                        <td>Integer</td>
+                        <td><code>str(uuid.int)</code></td>
+                        <td><code>113059749145936325402354257176981405696</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Python code snippet (live)</h3>
+            <div class="code-block" id="codeSnippet">
+<span class="comment"># Convert UUID to string — all common formats</span>
+<span class="keyword">import</span> uuid
+<span class="keyword">import</span> base64
+
+my_uuid = uuid.<span class="func">UUID</span>(<span class="string">'550e8400-e29b-41d4-a716-446655440000'</span>)
+
+<span class="comment"># Canonical hyphenated form</span>
+s1 = <span class="func">str</span>(my_uuid)              <span class="comment"># '550e8400-e29b-41d4-a716-446655440000'</span>
+
+<span class="comment"># Compact hex (no hyphens)</span>
+s2 = my_uuid.<span class="func">hex</span>                <span class="comment"># '550e8400e29b41d4a716446655440000'</span>
+
+<span class="comment"># URN format</span>
+s3 = my_uuid.<span class="func">urn</span>                <span class="comment"># 'urn:uuid:550e8400-...'</span>
+
+<span class="comment"># Raw bytes → hex</span>
+s4 = my_uuid.<span class="func">bytes</span>.<span class="func">hex</span>()        <span class="comment"># '550e8400e29b41d4a716446655440000'</span>
+
+<span class="comment"># URL‑safe Base64 (22 chars)</span>
+s5 = base64.<span class="func">urlsafe_b64encode</span>(my_uuid.<span class="func">bytes</span>).<span class="func">decode</span>().<span class="func">rstrip</span>(<span class="string">'='</span>)
+
+<span class="comment"># Integer representation</span>
+s6 = <span class="func">str</span>(my_uuid.<span class="func">int</span>)           <span class="comment"># '113059749145936325402354257176981405696'</span>
+            </div>
+
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">How do I convert a UUID object to a string in Python?</div>
+                <p>Simply call <code>str(my_uuid)</code>. The <code>UUID</code> class implements <code>__str__()</code> to return the canonical 36‑character hyphenated form.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How to remove dashes from UUID in Python?</div>
+                <p>You can obtain a UUID string without dashes either by using <code>my_uuid.hex</code> (recommended) or by replacing the dashes with an empty string: <code>str(my_uuid).replace('-', '')</code>. The <code>hex</code> attribute gives the exact same 32‑character representation.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Python UUID to string without hyphens – which method is best?</div>
+                <p><code>my_uuid.hex</code> is the most direct and Pythonic way to get a hyphen‑free string. It’s also slightly faster than calling <code>str()</code> and then replacing characters.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I convert a string back to a UUID object?</div>
+                <p>Yes, pass any valid format (hyphenated, hex, URN) to <code>uuid.UUID('your-string')</code>. It auto‑detects the format.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Which format should I use for database storage?</div>
+                <p><code>uuid.hex</code> for <code>CHAR(32)</code> columns, or the native <code>UUID</code> type in PostgreSQL. Avoid <code>VARCHAR(36)</code> — it's slower to index.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Is the generated code safe to copy into my project?</div>
+                <p>Yes. All code uses only the Python standard library. No external dependencies, no custom logic.</p>
+            </div>
+
+            <h3>Other tools you might find useful</h3>
+            <ul>
+                <li><a href="/tools/uuid-generator/">UUID / ULID Generator</a> — generate batches of identifiers</li>
+                <li><a href="/tools/jwt-decoder/">JWT Decoder</a> — inspect tokens that often contain UUID claims</li>
+                <li><a href="/tools/base64-encoder/">Base64 Encoder / Decoder</a> — encode UUID bytes for HTTP headers</li>
+                <li><a href="/tools/regex-tester/">Regex Tester</a> — validate UUID patterns in your code</li>
+                <li><a href="/tools/blog/python-uuid-to-string/"> python uuid to string guide </a> — validate UUID patterns in your code</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — 100% client‑side tools for developers.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Python UUID to String Converter",
+  "url": "https://www.devstoolsbox.dev/tools/python-uuid-to-string/",
+  "description": "Convert UUID to string in Python. Get str(uuid), .hex, .urn, .bytes, base64, and int formats instantly. 100% client‑side.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How do I convert a UUID object to a string in Python?", "acceptedAnswer": { "@type": "Answer", "text": "Call str(my_uuid). The UUID class implements __str__() to return the canonical 36-character hyphenated form." } },
+    { "@type": "Question", "name": "How to remove dashes from UUID in Python?", "acceptedAnswer": { "@type": "Answer", "text": "Use my_uuid.hex to get a 32-character hex string without hyphens, or call str(my_uuid).replace('-', '')." } },
+    { "@type": "Question", "name": "Python UUID to string without hyphens – which method is best?", "acceptedAnswer": { "@type": "Answer", "text": "my_uuid.hex is the most direct and Pythonic approach. It is cleaner and slightly faster than string replacement." } },
+    { "@type": "Question", "name": "Can I convert a string back to a UUID object?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, pass any valid format (hyphenated, hex, URN) to uuid.UUID('your-string'). It auto-detects the format." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://www.devstoolsbox.dev/tools/" },
+    { "@type": "ListItem", "position": 3, "name": "Python UUID to String", "item": "https://www.devstoolsbox.dev/tools/python-uuid-to-string/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Theme ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t === 'dark') { document.body.classList.add('dark'); themeIcon.textContent = '\u2600'; themeLabel.textContent = 'Light'; }
+        else if (t === 'light') { themeIcon.textContent = '\u263D'; themeLabel.textContent = 'Dark'; }
+        else { const d = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent = d ? '\u2600' : '\u263D'; themeLabel.textContent = d ? 'Light' : 'Dark'; }
+        localStorage.setItem('devtoolbox-theme', t); currentTheme = t;
+    }
+    themeToggle.addEventListener('click', () => applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.style.opacity = '1';
+        clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(() => t.style.opacity = '0', 2000);
+    }
+
+    /* ── UUID helpers ── */
+    function randomBytes(n) {
+        const arr = new Uint8Array(n);
+        crypto.getRandomValues(arr);
+        return arr;
+    }
+
+    function uuidV4() {
+        const bytes = randomBytes(16);
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        const hex = Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join('');
+        return hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);
+    }
+
+    function uuidV1() {
+        const bytes = randomBytes(16);
+        const now = Date.now() * 10000 + 122192928000000000;
+        const tl = (now & 0xffffffff).toString(16).padStart(8,'0');
+        const tm = ((now >> 32) & 0xffff).toString(16).padStart(4,'0');
+        const th = (((now >> 48) & 0x0fff) | 0x1000).toString(16).padStart(4,'0');
+        const cs = ((randomBytes(2)[0] & 0x3f) | 0x80).toString(16).padStart(4,'0');
+        const node = Array.from(randomBytes(6)).map(b => b.toString(16).padStart(2,'0')).join('');
+        return tl+'-'+tm+'-'+th+'-'+cs.slice(0,2)+cs.slice(2)+'-'+node;
+    }
+
+    async function uuidV5(name) {
+        const ns = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'; // DNS namespace
+        const nsBytes = new Uint8Array(ns.replace(/-/g,'').match(/.{2}/g).map(b => parseInt(b,16)));
+        const nameBytes = new TextEncoder().encode(name);
+        const data = new Uint8Array(nsBytes.length + nameBytes.length);
+        data.set(nsBytes); data.set(nameBytes, nsBytes.length);
+        const hash = new Uint8Array(await crypto.subtle.digest('SHA-1', data));
+        hash[6] = (hash[6] & 0x0f) | 0x50;
+        hash[8] = (hash[8] & 0x3f) | 0x80;
+        const hex = Array.from(hash.slice(0,16)).map(b => b.toString(16).padStart(2,'0')).join('');
+        return hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);
+    }
+
+    function isValidUUID(str) {
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str.trim());
+    }
+
+    function hexToBytes(hex) {
+        const h = hex.replace(/-/g,'');
+        const bytes = new Uint8Array(16);
+        for (let i = 0; i < 16; i++) bytes[i] = parseInt(h.substr(i*2,2), 16);
+        return bytes;
+    }
+
+    function base64UrlEncode(bytes) {
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    }
+
+    /* ── Update display ── */
+    const uuidInput = document.getElementById('uuidInput');
+    const validationMsg = document.getElementById('validationMsg');
+
+    function updateDisplay(uuidStr) {
+        uuidStr = uuidStr.trim();
+        const valid = isValidUUID(uuidStr);
+        uuidInput.classList.toggle('valid', valid && uuidStr.length > 0);
+        uuidInput.classList.toggle('invalid', !valid && uuidStr.length > 0);
+        validationMsg.textContent = uuidStr.length === 0 ? '' : (valid ? '✅ Valid UUID' : '❌ Invalid UUID format');
+
+        const clean = uuidStr.trim();
+        const hasHyphens = clean.includes('-');
+
+        if (hasHyphens && valid) {
+            const hex = clean.replace(/-/g,'');
+            setCell('strResult', clean, 'strLen', '36 chars');
+            setCell('hexResult', hex, 'hexLen', '32 chars');
+            setCell('urnResult', 'urn:uuid:'+clean, 'urnLen', '45 chars');
+            setCell('compactResult', hex, 'compactLen', '32 chars');
+
+            const bytes = hexToBytes(clean);
+            setCell('bytesResult', Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''), 'bytesLen', '32 chars');
+            setCell('b64Result', base64UrlEncode(bytes), 'b64Len', '22 chars');
+            setCell('intResult', BigInt('0x'+hex).toString(), 'intLen', BigInt('0x'+hex).toString().length + ' digits');
+
+            updateCodeSnippet(clean);
+        } else if (valid) {
+            const hex = clean;
+            const withHyphens = hex.slice(0,8)+'-'+hex.slice(8,12)+'-'+hex.slice(12,16)+'-'+hex.slice(16,20)+'-'+hex.slice(20);
+            setCell('strResult', withHyphens, 'strLen', '36 chars');
+            setCell('hexResult', hex, 'hexLen', '32 chars');
+            setCell('urnResult', 'urn:uuid:'+withHyphens, 'urnLen', '45 chars');
+            setCell('compactResult', hex, 'compactLen', '32 chars');
+
+            const bytes = hexToBytes(hex);
+            setCell('bytesResult', Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''), 'bytesLen', '32 chars');
+            setCell('b64Result', base64UrlEncode(bytes), 'b64Len', '22 chars');
+            setCell('intResult', BigInt('0x'+hex).toString(), 'intLen', BigInt('0x'+hex).toString().length + ' digits');
+
+            updateCodeSnippet(withHyphens);
+        } else if (uuidStr.length > 0) {
+            // Invalid, clear results
+            ['strResult','hexResult','urnResult','compactResult','bytesResult','b64Result','intResult'].forEach(id => setCell(id, '—', null, null));
+            ['strLen','hexLen','urnLen','compactLen','bytesLen','b64Len','intLen'].forEach(id => setCell(id, '—', null, null));
+            updateCodeSnippet('550e8400-e29b-41d4-a716-446655440000');
+        }
+    }
+
+    function setCell(cellId, value, lenId, lenValue) {
+        const cell = document.getElementById(cellId);
+        if (cell) cell.textContent = value;
+        if (lenId) {
+            const lenCell = document.getElementById(lenId);
+            if (lenCell) lenCell.textContent = lenValue || '';
+        }
+    }
+
+    function updateCodeSnippet(uuidStr) {
+        const code = document.getElementById('codeSnippet');
+        code.innerHTML =
+`<span class="comment"># Convert UUID to string — all common formats</span>
+<span class="keyword">import</span> uuid
+<span class="keyword">import</span> base64
+
+my_uuid = uuid.<span class="func">UUID</span>(<span class="string">'${uuidStr}'</span>)
+
+<span class="comment"># Canonical hyphenated form</span>
+s1 = <span class="func">str</span>(my_uuid)              <span class="comment"># '${uuidStr}'</span>
+
+<span class="comment"># Compact hex (no hyphens)</span>
+s2 = my_uuid.<span class="func">hex</span>                <span class="comment"># '${uuidStr.replace(/-/g,'')}'</span>
+
+<span class="comment"># URN format</span>
+s3 = my_uuid.<span class="func">urn</span>                <span class="comment"># 'urn:uuid:${uuidStr}'</span>
+
+<span class="comment"># Raw bytes → hex</span>
+s4 = my_uuid.<span class="func">bytes</span>.<span class="func">hex</span>()        <span class="comment"># '${uuidStr.replace(/-/g,'')}'</span>
+
+<span class="comment"># URL‑safe Base64 (22 chars)</span>
+s5 = base64.<span class="func">urlsafe_b64encode</span>(my_uuid.<span class="func">bytes</span>).<span class="func">decode</span>().<span class="func">rstrip</span>(<span class="string">'='</span>)
+
+<span class="comment"># Integer representation</span>
+s6 = <span class="func">str</span>(my_uuid.<span class="func">int</span>)           <span class="comment"># '${BigInt('0x'+uuidStr.replace(/-/g,'')).toString()}'</span>`;
+    }
+
+    /* ── Event listeners ── */
+    uuidInput.addEventListener('input', () => updateDisplay(uuidInput.value));
+
+    document.getElementById('generateBtn').addEventListener('click', () => {
+        uuidInput.value = uuidV4();
+        updateDisplay(uuidInput.value);
+    });
+
+    document.getElementById('generateV1Btn').addEventListener('click', () => {
+        uuidInput.value = uuidV1();
+        updateDisplay(uuidInput.value);
+    });
+
+    document.getElementById('generateV5Btn').addEventListener('click', async () => {
+        uuidInput.value = await uuidV5('www.devstoolsbox.dev');
+        updateDisplay(uuidInput.value);
+    });
+
+    // Copy buttons
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const cell = document.getElementById(targetId);
+            if (cell && cell.textContent !== '—') {
+                navigator.clipboard.writeText(cell.textContent).then(() => showToast('Copied!'));
+            }
+        });
+    });
+
+    document.getElementById('copyAllBtn').addEventListener('click', () => {
+        const lines = [];
+        const rows = [
+            ['str(uuid)', 'strResult'],
+            ['uuid.hex', 'hexResult'],
+            ['uuid.urn', 'urnResult'],
+            ['str(uuid).replace("-","")', 'compactResult'],
+            ['binascii.hexlify(uuid.bytes)', 'bytesResult'],
+            ['base64 urlsafe', 'b64Result'],
+            ['uuid.int', 'intResult']
+        ];
+        rows.forEach(([label, id]) => {
+            const val = document.getElementById(id).textContent;
+            if (val !== '—') lines.push(label + ': ' + val);
+        });
+        navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('All formats copied!'));
+    });
+
+    document.getElementById('copyCodeBtn').addEventListener('click', () => {
+        const code = document.getElementById('codeSnippet').textContent;
+        navigator.clipboard.writeText(code).then(() => showToast('Python code copied!'));
+    });
+
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const uuid = uuidInput.value.trim();
+        const hash = btoa(encodeURIComponent(uuid));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(() => showToast('URL copied!'));
+    });
+
+    // Load from hash
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const uuid = decodeURIComponent(atob(window.location.hash.slice(1)));
+                if (uuid) {
+                    uuidInput.value = uuid;
+                    updateDisplay(uuid);
+                }
+            } catch(e) {}
+        }
+    }
+
+    /* ── Init ── */
+    updateDisplay(uuidInput.value);
+    loadFromHash();
+})();
+</script>
+</body>
+</html>
