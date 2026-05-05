@@ -1,0 +1,648 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluateur d’expression Cron — Testez et validez vos planifications en ligne</title>
+    <meta name="description" content="Évaluez n’importe quelle expression cron instantanément : visualisez les prochaines exécutions, obtenez une explication en langage naturel, comptez les exécutions annuelles et validez la syntaxe. 100 % côté client.">
+    <meta name="keywords" content="évaluateur expression cron, cron évaluateur, tester expression cron, prévisualiser planning cron, analyseur cron, prochaines exécutions cron, vérificateur cron, débogueur cron">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/evaluateur-expression-cron/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/evaluateur-expression-cron/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/cron-expression-evaluator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/cron-expression-evaluator/">
+
+    <meta property="og:title" content="Évaluateur d’expression Cron – Testez et validez vos planifications">
+    <meta property="og:description" content="Prévisualisez les prochains lancements de vos tâches cron. Gratuit, instantané et privé.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/evaluateur-expression-cron/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Évaluateur d’expression Cron">
+    <meta name="twitter:description" content="Validez et prévisualisez vos expressions cron. 100 % côté client.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .input-row { display:flex; gap:10px; margin-bottom:20px; align-items:center; flex-wrap:wrap; }
+        .cron-input {
+            flex:1; min-width:240px; padding:12px 16px;
+            font-family:var(--mono); font-size:0.92rem;
+            border:1.5px solid var(--border); border-radius:12px;
+            background:var(--bg); color:var(--text); outline:none;
+            transition:border 0.2s, box-shadow 0.2s;
+        }
+        .cron-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-light); }
+        .cron-input.valid { border-color:var(--accent-green); }
+        .cron-input.invalid { border-color:#ef4444; }
+        .validation-msg { font-size:0.78rem; margin-top:4px; }
+
+        /* Buttons */
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Results */
+        .results-panel { margin-top:20px; }
+        .stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:16px; }
+        .stat-card {
+            background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+            padding:14px; text-align:center;
+        }
+        .stat-value { font-size:1.5rem; font-weight:700; color:var(--primary); }
+        .stat-label { font-size:0.72rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.05em; }
+
+        .exec-list {
+            max-height:300px; overflow-y:auto; border:1px solid var(--border); border-radius:12px;
+            background:var(--surface);
+        }
+        .exec-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:10px 14px; border-bottom:0.5px solid var(--border);
+            font-family:var(--mono); font-size:0.83rem;
+        }
+        .exec-item:last-child { border-bottom:none; }
+        .exec-number { color:var(--text3); margin-right:12px; }
+        .exec-date { color:var(--text); }
+        .natural-explanation {
+            background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+            padding:14px; margin:16px 0; font-weight:500;
+        }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/cron-expression-evaluator/" class="lang-btn">EN</a>
+                <a href="/fr/outils/evaluateur-expression-cron/" class="lang-btn active" aria-current="page">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/fr/">Accueil</a> &rsaquo;
+        <a href="/fr/outils/">Outils</a> &rsaquo;
+        <span>Évaluateur d'expression Cron</span>
+    </div>
+
+    <!-- SEO Hook -->
+    <div class="seo-hook">
+        <strong>Évaluez votre expression cron</strong> en quelques secondes et visualisez les prochaines exécutions. Notre <strong>évaluateur cron</strong> valide la syntaxe, fournit un résumé en français et estime le nombre d'exécutions par an. Aucune donnée ne quitte votre navigateur.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>Évaluateur d'expression Cron</h1>
+            <div class="subhead">Collez une expression cron (format standard à 5 champs ou étendu à 6 champs) pour prévisualiser ses prochains déclenchements, obtenir une explication en langage naturel et vérifier sa fréquence.</div>
+
+            <!-- Input row -->
+            <div class="input-row">
+                <input
+                    type="text"
+                    class="cron-input"
+                    id="cronInput"
+                    placeholder="ex: */15 8-17 * * 1-5"
+                    value="*/15 8-17 * * 1-5"
+                    spellcheck="false"
+                    autocomplete="off"
+                    aria-label="Expression cron"
+                >
+                <select id="formatSelect" aria-label="Format cron" style="padding:10px 14px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
+                    <option value="standard">Standard (5 champs)</option>
+                    <option value="extended">Étendu (6 champs – avec secondes)</option>
+                </select>
+                <button class="btn btn-primary" id="evaluateBtn">Évaluer</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Partager</button>
+            </div>
+            <div class="validation-msg" id="validationMsg"></div>
+
+            <!-- Results panel -->
+            <div class="results-panel" id="resultsPanel">
+                <!-- Rempli par JavaScript -->
+            </div>
+        </div>
+
+        <!-- Article & FAQ -->
+        <section class="article-section" aria-label="Documentation">
+            <h2>Comment fonctionne l'évaluateur d'expression cron</h2>
+            <p>Cet outil prend une expression cron (le format classique Linux à 5 champs ou la version à 6 champs utilisée par AWS, Quartz, etc.) et calcule les prochaines dates d'exécution à partir de l'heure actuelle. Il valide également la syntaxe, traduit l'expression en français et estime la fréquence annuelle de la tâche.</p>
+            <p>Tout s'exécute localement dans votre navigateur – l'expression n'est jamais envoyée à un serveur, vous pouvez donc tester des fragments de crontab issus d'environnements sensibles en toute sécurité.</p>
+
+            <!-- Nouvelle section : Exemple d'expression cron -->
+            <h2>Exemple d'expression cron</h2>
+            <p>Prenons un exemple concret : <code>*/15 8-17 * * 1-5</code>. Cette expression signifie « toutes les 15 minutes, entre 8 h et 17 h, du lundi au vendredi ». Collez‑la dans l'évaluateur et vous verrez les prochaines exécutions – par exemple à 08:00, 08:15, 08:30 … 17:45 – et l'outil estime qu'elle se déclenche environ 2 080 fois par an.</p>
+            <p>Vous pouvez essayer des motifs courants comme <code>0 0 * * *</code> (tous les jours à minuit), <code>0 9 * * 1</code> (chaque lundi à 9 h) ou <code>*/5 * * * *</code> (toutes les 5 minutes).</p>
+
+            <!-- Nouvelle section : Signification d'une expression cron -->
+            <h2>Signification d'une expression cron</h2>
+            <p>Une expression cron est une chaîne de cinq ou six champs qui définit quand une tâche s'exécute. Voici leur signification dans le format standard :</p>
+            <ul>
+                <li><strong>Minute</strong> (0–59) — le moment dans l'heure</li>
+                <li><strong>Heure</strong> (0–23) — l'heure de la journée</li>
+                <li><strong>Jour du mois</strong> (1–31) — le jour</li>
+                <li><strong>Mois</strong> (1–12) — le mois</li>
+                <li><strong>Jour de la semaine</strong> (0–7, où 0 et 7 représentent dimanche)</li>
+            </ul>
+            <p>Chaque champ peut contenir un astérisque (<code>*</code> signifiant « tous »), un nombre précis, une plage (<code>1-5</code>), un pas (<code>*/5</code>) ou une liste séparée par des virgules (<code>1,15,30</code>). Le format étendu ajoute un champ <strong>Seconde</strong> (0‑59) au début.</p>
+            <p>Notre évaluateur décode ces champs et vous montre exactement quand la tâche sera déclenchée, supprimant ainsi toute approximation.</p>
+
+            <!-- Nouvelle section : Exemples d'expressions cron courantes -->
+            <h2>Exemples d'expressions cron courantes</h2>
+            <p>Voici quelques expressions fréquemment utilisées et ce qu'elles signifient :</p>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                <thead>
+                    <tr>
+                        <th style="text-align:left; padding:8px; border-bottom:1px solid var(--border)">Expression</th>
+                        <th style="text-align:left; padding:8px; border-bottom:1px solid var(--border)">Signification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>0 0 * * *</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Tous les jours à minuit</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>*/5 * * * *</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Toutes les 5 minutes</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>0 9 * * 1-5</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">À 9 h, du lundi au vendredi</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>0 0 1 * *</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Le premier jour de chaque mois à minuit</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>0 0 * * 0</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Tous les dimanches à minuit</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)"><code>@daily</code></td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border-2)">Équivalent à <code>0 0 * * *</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Conseils d'utilisation</h3>
+            <ul>
+                <li>Le format <strong>Standard</strong> utilise cinq champs : minute, heure, jour du mois, mois, jour de la semaine.</li>
+                <li>Le format <strong>Étendu</strong> ajoute un champ initial pour les secondes (0‑59).</li>
+                <li>Vous pouvez utiliser les macros habituelles : <code>@hourly</code>, <code>@daily</code>, <code>@weekly</code>, <code>@monthly</code>, <code>@yearly</code> ainsi que <code>@annually</code>.</li>
+                <li>Les motifs supportés : <code>*</code>, <code>*/n</code>, <code>n-m</code>, <code>n,m</code> et les combinaisons.</li>
+            </ul>
+
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">À quoi sert un évaluateur d'expression cron ?</div>
+                <p>Il analyse une expression cron, vérifie sa validité et calcule les dates exactes des prochaines exécutions. C'est très utile pour déboguer, valider ou simplement comprendre un planning avant de le déployer.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Combien d'exécutions futures cet évaluateur affiche-t-il ?</div>
+                <p>Par défaut, il montre jusqu'à 20 prochaines occurrences. Vous pouvez modifier ce nombre si vous avez besoin de plus ou moins d'échantillons.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Gère-t-il le cron étendu avec les secondes ?</div>
+                <p>Oui, vous pouvez basculer entre le format standard à 5 champs et le format étendu à 6 champs qui inclut les secondes.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Les résultats sont-ils adaptés au fuseau horaire ?</div>
+                <p>Les prochaines exécutions sont calculées en temps universel (UTC) ; l'affichage s'adapte à votre fuseau horaire local. Pensez à vérifier le fuseau de votre serveur si nécessaire.</p>
+            </div>
+
+            <h3>Autres outils utiles</h3>
+            <ul>
+                <li><a href="/fr/outils/generateur-cron/">Générateur d'expressions Cron</a> — construisez des expressions visuellement</li>
+                <li><a href="/fr/outils/convertisseur-timestamp/">Convertisseur Unix Timestamp</a> — convertissez des timestamps en dates lisibles</li>
+                <li><a href="/fr/outils/decodeur-jwt/">Décodeur JWT</a> — inspectez les jetons utilisés dans les tâches planifiées</li>
+                <li><a href="/fr/outils/testeur-regex/">Testeur Regex</a> — validez des motifs dans vos scripts</li>
+                <li><a href="/fr/blog/generateur-cron/">genrer, valider, munifier des expression cron</a> — validez des motifs dans vos scripts</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100% côté client pour les développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Évaluateur d'expression Cron",
+  "url": "https://www.devstoolsbox.dev/fr/outils/evaluateur-expression-cron/",
+  "description": "Évaluez des expressions cron instantanément. Visualisez les prochaines exécutions, description en langage naturel et fréquence annuelle. 100 % côté client.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Nécessite JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "À quoi sert un évaluateur d'expression cron ?", "acceptedAnswer": { "@type": "Answer", "text": "Il analyse une expression cron, vérifie sa validité et calcule les dates exactes des prochaines exécutions afin de vous aider à déboguer et valider un planning." } },
+    { "@type": "Question", "name": "Combien d'exécutions futures cet évaluateur affiche-t-il ?", "acceptedAnswer": { "@type": "Answer", "text": "Par défaut, il montre jusqu'à 20 prochaines occurrences. Vous pouvez demander plus ou moins d'échantillons." } },
+    { "@type": "Question", "name": "Gère-t-il le cron étendu avec les secondes ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, vous pouvez basculer entre le format standard à 5 champs et le format étendu à 6 champs qui inclut les secondes." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Évaluateur d'expression Cron", "item": "https://www.devstoolsbox.dev/fr/outils/evaluateur-expression-cron/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Thème ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    /* ── Constantes & macros ── */
+    const MACROS = {
+        '@hourly':  '0 * * * *',
+        '@daily':   '0 0 * * *',
+        '@weekly':  '0 0 * * 0',
+        '@monthly': '0 0 1 * *',
+        '@yearly':  '0 0 1 1 *',
+        '@annually':'0 0 1 1 *'
+    };
+    const FIELD_NAMES_STD = ['minute','heure','jour du mois','mois','jour de la semaine'];
+    const FIELD_NAMES_EXT = ['seconde','minute','heure','jour du mois','mois','jour de la semaine'];
+    const RANGES_STD = [[0,59],[0,23],[1,31],[1,12],[0,7]];
+    const RANGES_EXT = [[0,59],[0,59],[0,23],[1,31],[1,12],[0,7]];
+
+    /* ── Analyse d'un token de champ ── */
+    function parseField(token, min, max, allowStar=true) {
+        if (token === '*') return { type:'tous' };
+        if (token.startsWith('*/')) {
+            const step = parseInt(token.slice(2));
+            // *** CORRECTION : la propriété doit s'appeler 'pas' pour correspondre au reste du code
+            if (!isNaN(step) && step>=1) return { type:'pas', pas: step, debut:min, fin:max };
+        }
+        // liste ou plage
+        const parts = token.split(',');
+        const valeurs = [];
+        for (let p of parts) {
+            if (p.includes('-')) {
+                const [a,b] = p.split('-');
+                const debut = parseInt(a); const fin = parseInt(b);
+                if (isNaN(debut)||isNaN(fin)) return null;
+                for (let v=debut; v<=fin; v++) {
+                    if (v>=min && v<=max) valeurs.push(v);
+                }
+            } else {
+                const v = parseInt(p);
+                if (isNaN(v)) return null;
+                if (v>=min && v<=max) valeurs.push(v);
+                else if (min===0 && max===7 && v===7) valeurs.push(7);
+            }
+        }
+        return { type:'liste', valeurs: [...new Set(valeurs)].sort((a,b)=>a-b) };
+    }
+
+    /* ── Validation et parsing ── */
+    function parseExpression(expr, extended) {
+        const raw = expr.trim();
+        if (MACROS[raw]) return parseExpression(MACROS[raw], false); // macros standard
+        const parts = raw.split(/\s+/);
+        const nbChamps = extended ? 6 : 5;
+        if (parts.length !== nbChamps) return { erreur: `Attendu ${nbChamps} champs, reçu ${parts.length}` };
+        const ranges = extended ? RANGES_EXT : RANGES_STD;
+        const parsed = [];
+        for (let i=0; i<nbChamps; i++) {
+            const token = parts[i];
+            const [min,max] = ranges[i];
+            const champ = parseField(token, min, max);
+            if (!champ) return { erreur: `Valeur invalide dans le champ ${i+1} : "${token}"` };
+            parsed.push(champ);
+        }
+        return { parsed, erreur: null };
+    }
+
+    /* ── Correspondance d'une valeur avec un champ ── */
+    function valeurCorrespond(valeur, champ) {
+        if (champ.type === 'tous') return true;
+        if (champ.type === 'pas') {
+            // maintenant champ.pas existe bien
+            return valeur >= champ.debut && valeur <= champ.fin && (valeur - champ.debut) % champ.pas === 0;
+        }
+        if (champ.type === 'liste') {
+            return champ.valeurs.includes(valeur);
+        }
+        return false;
+    }
+
+    /* ── Générer les N prochaines occurrences ── */
+    function genererOccurrences(champsParsés, extended, nb=20) {
+        const maintenant = new Date();
+        const resultats = [];
+        let courant = new Date(maintenant);
+        courant.setSeconds(0,0);
+        courant.setMinutes(courant.getMinutes()+1);
+
+        const fields = champsParsés;
+        const len = extended?6:5;
+        const idxDebut = extended?1:0;
+        const champMinute = fields[idxDebut];
+        const champHeure = fields[idxDebut+1];
+        const champJourMois = fields[idxDebut+2];
+        const champMois = fields[idxDebut+3];
+        const champJourSemaine = fields[idxDebut+4];
+
+        let boucles = 0;
+        const maxBoucles = nb * 1440;
+
+        while (resultats.length < nb && boucles < maxBoucles) {
+            const annee = courant.getFullYear();
+            const mois = courant.getMonth()+1;
+            const jour = courant.getDate();
+            const heure = courant.getHours();
+            const minute = courant.getMinutes();
+            const seconde = extended ? courant.getSeconds() : 0;
+            const jourSemaine = courant.getDay();
+
+            if (!valeurCorrespond(mois, champMois)) {
+                courant.setMonth(courant.getMonth()+1);
+                courant.setDate(1);
+                courant.setHours(0,0,0,0);
+                continue;
+            }
+
+            const jourMoisOK = valeurCorrespond(jour, champJourMois);
+            const jourSemaineOK = valeurCorrespond(jourSemaine, champJourSemaine);
+            const jourOK = jourMoisOK || jourSemaineOK;
+
+            if (!jourOK) {
+                courant.setDate(courant.getDate()+1);
+                courant.setHours(0,0,0,0);
+                continue;
+            }
+
+            if (!valeurCorrespond(heure, champHeure)) {
+                courant.setHours(courant.getHours()+1);
+                courant.setMinutes(0,0,0);
+                continue;
+            }
+
+            if (!valeurCorrespond(minute, champMinute)) {
+                courant.setMinutes(courant.getMinutes()+1);
+                courant.setSeconds(0,0);
+                continue;
+            }
+
+            if (extended) {
+                const champSeconde = fields[0];
+                if (!valeurCorrespond(seconde, champSeconde)) {
+                    courant.setSeconds(courant.getSeconds()+1,0);
+                    continue;
+                }
+            }
+
+            resultats.push(new Date(courant));
+            if (extended) courant.setSeconds(courant.getSeconds()+1);
+            else courant.setMinutes(courant.getMinutes()+1);
+            boucles++;
+        }
+        return resultats;
+    }
+
+    /* ── Description en langage naturel (français) ── */
+    function decrireExpression(champsParsés, extended) {
+        const noms = extended ? FIELD_NAMES_EXT : FIELD_NAMES_STD;
+        const parties = [];
+        for (let i=0; i<champsParsés.length; i++) {
+            const f = champsParsés[i];
+            if (f.type === 'tous') parties.push(`chaque ${noms[i]}`);
+            else if (f.type === 'pas') parties.push(`toutes les ${f.pas} ${noms[i]}s`);   // OK
+            else if (f.type === 'liste') {
+                if (f.valeurs.length <= 3) parties.push(`${noms[i]} ${f.valeurs.join(',')}`);
+                else parties.push(`${noms[i]} parmi {${f.valeurs.slice(0,3).join(',')}…}`);
+            }
+        }
+        return 'Exécution ' + parties.join(', ') + '.';
+    }
+
+    /* ── Estimation annuelle ── */
+    function estimerAnnee(champsParsés, extended) {
+        const champMinute = champsParsés[extended?1:0];
+        let parHeure = 1;
+        if (champMinute.type === 'tous') parHeure = 60;
+        else if (champMinute.type === 'pas') parHeure = Math.floor(60 / champMinute.pas);   // OK
+        else if (champMinute.type === 'liste') parHeure = champMinute.valeurs.length;
+
+        const champHeure = champsParsés[extended?2:1];
+        let heuresParJour = 24;
+        if (champHeure.type === 'liste') heuresParJour = champHeure.valeurs.length;
+        else if (champHeure.type === 'pas') heuresParJour = Math.floor(24 / champHeure.pas);   // OK
+
+        const champJour = champsParsés[extended?3:2];
+        let joursParMois = 30;
+        if (champJour.type === 'liste') joursParMois = champJour.valeurs.length;
+        else if (champJour.type === 'pas') joursParMois = Math.floor(31 / champJour.pas);   // OK
+
+        const champMois = champsParsés[extended?4:3];
+        let moisParAn = 12;
+        if (champMois.type === 'liste') moisParAn = champMois.valeurs.length;
+
+        return parHeure * heuresParJour * joursParMois * moisParAn;
+    }
+
+    /* ── Affichage des résultats ── */
+    const cronInput = document.getElementById('cronInput');
+    const validationMsg = document.getElementById('validationMsg');
+    const formatSelect = document.getElementById('formatSelect');
+    const resultsPanel = document.getElementById('resultsPanel');
+
+    function evaluer() {
+        const expr = cronInput.value.trim();
+        const extended = formatSelect.value === 'extended';
+        const resParse = parseExpression(expr, extended);
+
+        if (resParse.erreur) {
+            cronInput.classList.add('invalid'); cronInput.classList.remove('valid');
+            validationMsg.textContent = '❌ ' + resParse.erreur;
+            resultsPanel.innerHTML = '';
+            return;
+        }
+
+        cronInput.classList.add('valid'); cronInput.classList.remove('invalid');
+        validationMsg.textContent = '✅ Expression valide';
+
+        const { parsed } = resParse;
+        const occurrences = genererOccurrences(parsed, extended, 20);
+        const annuel = estimerAnnee(parsed, extended);
+        const description = decrireExpression(parsed, extended);
+
+        let html = '';
+        html += `<div class="natural-explanation">${description}</div>`;
+
+        html += `<div class="stat-grid">
+            <div class="stat-card"><div class="stat-value">${annuel}</div><div class="stat-label">Exécutions estimées / an</div></div>
+            <div class="stat-card"><div class="stat-value">${occurrences.length}</div><div class="stat-label">Prochaines affichées</div></div>
+        </div>`;
+
+        html += `<div class="exec-list">`;
+        if (occurrences.length === 0) {
+            html += `<div class="exec-item"><span>Aucune occurrence trouvée</span></div>`;
+        } else {
+            occurrences.forEach((d, idx) => {
+                html += `<div class="exec-item">
+                    <span class="exec-number">#${idx+1}</span>
+                    <span class="exec-date">${d.toLocaleString('fr-FR',{weekday:'short',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+                </div>`;
+            });
+        }
+        html += `</div>`;
+        resultsPanel.innerHTML = html;
+    }
+
+    cronInput.addEventListener('input', evaluer);
+    formatSelect.addEventListener('change', evaluer);
+    document.getElementById('evaluateBtn').addEventListener('click', evaluer);
+    document.getElementById('shareBtn').addEventListener('click', ()=>{
+        const expr = cronInput.value.trim();
+        const hash = btoa(encodeURIComponent(expr));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copiée !'));
+    });
+
+    function chargerDepuisHash() {
+        if (window.location.hash) {
+            try {
+                const expr = decodeURIComponent(atob(window.location.hash.slice(1)));
+                if (expr) { cronInput.value = expr; evaluer(); }
+            } catch(e){}
+        }
+    }
+    chargerDepuisHash();
+    evaluer();
+})();
+</script>
+</body>
+</html>
