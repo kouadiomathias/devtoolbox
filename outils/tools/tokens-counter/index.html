@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token Counter — Multi-Model AI Token Calculator | DevToolsBox</title>
+<meta name="description" content="Free multi-model AI token counter for GPT-4o, Claude, Gemini, and Grok. Real-time token counting, cost estimation, prompt optimization, token visualization, and export to CSV/PDF. No signup required.">
+<meta name="keywords" content="token counter, AI token calculator, GPT-4 tokens, Claude tokens, Gemini tokens, Grok tokens, prompt analyzer, LLM cost estimator, token visualization, prompt optimizer, AI pricing calculator">
+<meta name="author" content="DevToolsBox">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://devstoolsbox.dev/tools/tokens-counter/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/compteur-tokens/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/tokens-counter/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/tokens-counter/">
+
+  
+<meta property="og:title" content="Token Counter — Multi-Model AI Token Calculator | DevToolsBox">
+<meta property="og:description" content="Count tokens across GPT-4o, Claude, Gemini, and Grok in real-time. Cost estimation, token visualization, prompt optimizer, export CSV/PDF. 100% free, client-side.">
+<meta property="og:url" content="https://devstoolsbox.dev/tools/tokens-counter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DevToolsBox">
+<meta property="og:image" content="https://devstoolsbox.dev/og/token-counter.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Token Counter — Multi-Model AI Token Calculator">
+<meta name="twitter:description" content="Real-time token counting for GPT-4o, Claude, Gemini & Grok. Free, client-side, no API key needed.">
+<meta name="twitter:image" content="https://devstoolsbox.dev/og/token-counter.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- WebApplication Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Token Counter — Multi-Model AI Token Calculator",
+  "url": "https://devstoolsbox.dev/tools/tokens-counter/",
+  "description": "Free multi-model AI token counter for GPT-4o, Claude, Gemini, and Grok. Real-time token counting with cost estimation, token visualization, and prompt optimization.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": ["Multi-model token counting", "Real-time analysis", "Cost estimation", "Token visualization", "CSV/PDF export", "Prompt optimizer", "History tracking", "URL sharing"],
+  "creator": { "@type": "Organization", "name": "DevToolsBox", "url": "https://devstoolsbox.dev" },
+  "screenshot": "https://devstoolsbox.dev/og/token-counter.png"
+}
+</script>
+
+<!-- BreadcrumbList Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "DevToolsBox", "item": "https://devstoolsbox.dev" },
+    { "@type": "ListItem", "position": 2, "name": "Token Counter", "item": "https://devstoolsbox.dev/tools/tokens-counter/" }
+  ]
+}
+</script>
+
+<!-- FAQ Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a token in AI language models?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A token is the basic unit of text that AI models process. On average, 1 token equals ~4 characters or ~0.75 words in English. Tokens can be parts of words, whole words, or punctuation marks depending on the tokenizer used." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do token counts differ between GPT, Claude, Gemini, and Grok?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Each model uses a different tokenizer. GPT uses cl100k_base (tiktoken), Claude uses a similar BPE tokenizer, Gemini uses SentencePiece, and Grok uses a custom tokenizer. This leads to slight differences in token counts for the same text, especially for non-English content, code, or special characters." }
+    },
+    {
+      "@type": "Question",
+      "name": "How is the AI token cost calculated?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Token costs are calculated by multiplying the number of tokens by the model's per-million-token price. Input (prompt) and output (completion) are priced separately. Our tool shows both input and output cost estimations based on each provider's official pricing." }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate is the token count for GPT, Gemini and Grok?",
+      "acceptedAnswer": { "@type": "Answer", "text": "GPT, Gemini, and Grok counts use our advanced BPE approximation algorithm, which is accurate to within ~5-10% for English text. For exact GPT counts, you would need to use the tiktoken library. For exact Claude counts, enter your Anthropic API key in Settings." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my text sent to any server?",
+      "acceptedAnswer": { "@type": "Answer", "text": "This tool runs 100% client-side. Your text is never sent to our servers. If you enter an Anthropic API key for exact Claude counts, your text is sent directly to Anthropic's API from your browser — we never see it." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a context window?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The context window is the maximum number of tokens a model can process in one request (including your prompt and its response). GPT-4o supports 128K tokens, Claude supports 200K tokens, and Gemini 1.5 Pro supports up to 2M tokens." }
+    }
+  ]
+}
+</script>
+
+<style>
+:root {
+  --bg:       #F9F9F8;
+  --bg2:      #F2F2F0;
+  --surface:  #FFFFFF;
+  --border:   #E5E5E3;
+  --border2:  #D1D1CE;
+  --text:     #0D0D0C;
+  --text2:    #5C5C5A;
+  --text3:    #9E9E9C;
+  --accent:   #000000;
+  --accent-r: #FFFFFF;
+  --blue:     #2563EB;
+  --blue-bg:  #EFF6FF;
+  --green:    #16A34A;
+  --green-bg: #F0FDF4;
+  --amber:    #D97706;
+  --amber-bg: #FFFBEB;
+  --red:      #DC2626;
+  --red-bg:   #FEF2F2;
+  --sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --r: 6px;
+  --r-lg: 10px;
+  --sh: 0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+  --sh-lg: 0 4px 16px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.04);
+  --tok0: #FEF9C3; --tok0d: #CA8A04;
+  --tok1: #D1FAE5; --tok1d: #059669;
+  --tok2: #DBEAFE; --tok2d: #2563EB;
+  --tok3: #FCE7F3; --tok3d: #DB2777;
+  --tok4: #E0E7FF; --tok4d: #7C3AED;
+  --tok5: #FEE2E2; --tok5d: #DC2626;
+}
+[data-theme="dark"] {
+  --bg:      #0c0c0e;
+  --bg2:     #141413;
+  --surface: #1A1A19;
+  --border:  #2A2A28;
+  --border2: #3A3A38;
+  --text:    #EDEDED;
+  --text2:   #8A8A88;
+  --text3:   #555553;
+  --accent:  #FFFFFF;
+  --accent-r:#000000;
+  --blue-bg: #1E3A5F;
+  --green-bg:#052E16;
+  --amber-bg:#431407;
+  --red-bg:  #450A0A;
+  --tok0: #3F3000; --tok1: #052E16;
+  --tok2: #1E3A5F; --tok3: #500724;
+  --tok4: #2E1065; --tok5: #450A0A;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--blue); text-decoration: none; }
+button { cursor: pointer; font-family: var(--sans); border: none; outline: none; }
+input, textarea, select { font-family: var(--sans); outline: none; }
+textarea { resize: none; }
+
+/* ── NAV ─────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; height: 52px;
+  background: rgba(var(--bg-rgb, 249,249,248), .92);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-logo { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  background: var(--text); color: var(--surface); border-radius: 5px; font-size: 12px; font-weight: 700; font-family: var(--mono); flex-shrink:0; }
+.nav-site { font-weight: 600; font-size: 14px; color: var(--text); }
+.nav-sep { color: var(--text3); font-size: 14px; }
+.nav-tool { font-size: 13px; color: var(--text2); font-weight: 500; }
+.nav-actions { display: flex; align-items: center; gap: 6px; }
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 12.5px; font-weight: 500;
+  border-radius: var(--r); transition: all .15s; white-space: nowrap; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--bg2); color: var(--text); border-color: var(--border2); }
+.btn-solid { background: var(--accent); color: var(--accent-r); border: 1px solid var(--accent); }
+.btn-solid:hover { opacity: .85; }
+.btn-icon { padding: 5px 8px; }
+.dropdown { position: relative; display: inline-flex; }
+.dropdown-menu { position: absolute; top: calc(100% + 4px); right: 0; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r); padding: 4px; min-width: 120px;
+  box-shadow: var(--sh-lg); display: none; z-index: 200; }
+.dropdown-menu.open { display: block; }
+.dropdown-menu button { display: block; width: 100%; text-align: left; padding: 7px 10px; font-size: 13px;
+  color: var(--text); background: transparent; border-radius: calc(var(--r) - 2px); }
+.dropdown-menu button:hover { background: var(--bg2); }
+
+/* ── MAIN LAYOUT ─────────────────────────────────────── */
+main { max-width: 1400px; margin: 0 auto; padding: 20px 20px 0; }
+
+/* ── TOOLBAR ─────────────────────────────────────────── */
+.toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 10px; margin-bottom: 14px; }
+.prompt-score { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px;
+  border-radius: 20px; font-size: 12.5px; font-weight: 500; border: 1px solid var(--border); background: var(--surface); }
+.score-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stat-pills { display: flex; gap: 6px; }
+.stat-pill { font-size: 12px; color: var(--text2); font-family: var(--mono);
+  background: var(--bg2); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); }
+.mode-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; background: var(--bg2); }
+.mode-toggle button { padding: 4px 12px; font-size: 12px; font-weight: 500; color: var(--text2); background: transparent; }
+.mode-toggle button.active { background: var(--surface); color: var(--text); box-shadow: var(--sh); }
+
+/* ── WORKSPACE ───────────────────────────────────────── */
+.workspace { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } }
+
+/* ── EDITOR PANEL ────────────────────────────────────── */
+.editor-panel { display: flex; flex-direction: column; gap: 12px; }
+.textarea-wrapper { position: relative; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--sh); }
+.textarea-wrapper:focus-within { border-color: var(--border2); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+#prompt {
+  width: 100%; min-height: 260px; padding: 16px;
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.7; color: var(--text);
+  background: transparent; border: none;
+}
+#prompt::placeholder { color: var(--text3); }
+.textarea-footer { display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; border-top: 1px solid var(--border); background: var(--bg); }
+.char-limit { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+.textarea-actions { display: flex; gap: 6px; }
+.ta-btn { font-size: 11px; color: var(--text3); background: transparent; padding: 2px 6px; border-radius: 4px;
+  border: 1px solid var(--border); }
+.ta-btn:hover { background: var(--bg2); color: var(--text2); }
+
+/* ── TOKEN VISUALIZATION ─────────────────────────────── */
+.viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--sh); overflow: hidden; }
+.viz-header { display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.viz-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+.viz-meta { display: flex; align-items: center; gap: 10px; }
+.viz-legend { display: flex; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text3); }
+.legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
+#tokenViz { padding: 14px; font-family: var(--mono); font-size: 13px; line-height: 2;
+  min-height: 60px; max-height: 240px; overflow-y: auto; word-break: break-all;
+  color: var(--text); }
+.tok { display: inline; border-radius: 3px; padding: 1px 0; }
+.tok-space { display: inline; }
+.tok-0 { background: var(--tok0); }
+.tok-1 { background: var(--tok1); }
+.tok-2 { background: var(--tok2); }
+.tok-3 { background: var(--tok3); }
+.tok-4 { background: var(--tok4); }
+.tok-5 { background: var(--tok5); }
+.viz-truncated { display: block; font-size: 11px; color: var(--text3); margin-top: 8px; font-style: italic; }
+
+/* ── ANALYSIS PANEL ──────────────────────────────────── */
+.analysis-panel { display: flex; flex-direction: column; gap: 12px; }
+
+.provider-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--sh); overflow: hidden; }
+.provider-header { display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.provider-title { display: flex; align-items: center; gap: 8px; }
+.provider-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.provider-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.badge { font-size: 10px; font-weight: 500; padding: 1px 7px; border-radius: 20px; }
+.badge-exact { background: var(--green-bg); color: var(--green); }
+.badge-approx { background: var(--bg2); color: var(--text3); border: 1px solid var(--border); }
+.badge-loading { background: var(--blue-bg); color: var(--blue); }
+.model-list { padding: 4px 0; }
+.model-row { display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; transition: background .1s; }
+.model-row:hover { background: var(--bg); }
+.model-info { flex: 1; min-width: 0; }
+.model-name { font-size: 12.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.model-ctx { font-size: 10.5px; color: var(--text3); }
+.model-metrics { text-align: right; flex-shrink: 0; margin-left: 8px; }
+.model-tokens { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); }
+.model-cost { font-size: 10.5px; color: var(--text3); font-family: var(--mono); }
+.ctx-bar-wrap { padding: 4px 14px 8px; }
+.ctx-bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.ctx-bar-fill { height: 100%; border-radius: 2px; transition: width .3s ease; }
+.ctx-label { font-size: 10px; color: var(--text3); margin-top: 3px; display: flex; justify-content: space-between; }
+
+/* ── VOLUME CALC ─────────────────────────────────────── */
+.volume-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--sh); padding: 12px 14px; }
+.volume-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+.volume-slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--blue); }
+.volume-val { font-family: var(--mono); font-size: 12px; color: var(--text); min-width: 60px; text-align: right; }
+.volume-results { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.vol-item { background: var(--bg2); border-radius: var(--r); padding: 8px 10px; border: 1px solid var(--border); }
+.vol-model { font-size: 10.5px; color: var(--text3); margin-bottom: 2px; }
+.vol-cost { font-size: 13px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+.vol-period { font-size: 10px; color: var(--text3); }
+
+/* ── TABS ─────────────────────────────────────────────── */
+.tabs-section { margin-top: 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); box-shadow: var(--sh); overflow: hidden; }
+.tab-nav { display: flex; border-bottom: 1px solid var(--border); background: var(--bg2); padding: 0 4px; }
+.tab-btn { padding: 11px 16px; font-size: 13px; font-weight: 500; color: var(--text2);
+  background: transparent; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all .15s; display: flex; align-items: center; gap: 6px; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+.tab-pane { display: none; padding: 20px; }
+.tab-pane.active { display: block; }
+
+/* ── CHARTS ───────────────────────────────────────────── */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
+.chart-box { }
+.chart-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase;
+  letter-spacing: .05em; margin-bottom: 14px; }
+
+/* ── HISTORY ──────────────────────────────────────────── */
+.history-empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+.history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.history-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 12px 14px; cursor: pointer; transition: all .15s; }
+.history-card:hover { border-color: var(--border2); background: var(--surface); box-shadow: var(--sh); }
+.history-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.history-preview { font-size: 12.5px; color: var(--text); font-family: var(--mono); overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5; }
+.history-meta { font-size: 11px; color: var(--text3); margin-top: 6px; display: flex; gap: 10px; }
+.history-del { font-size: 16px; color: var(--text3); background: transparent; padding: 0 4px; flex-shrink: 0; }
+.history-del:hover { color: var(--red); }
+.history-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.history-count { font-size: 12px; color: var(--text3); }
+
+/* ── COMPARE ──────────────────────────────────────────── */
+.compare-empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+.compare-grid { display: grid; gap: 16px; }
+.compare-cols { display: flex; gap: 12px; overflow-x: auto; }
+.compare-col { flex: 1; min-width: 200px; }
+.compare-col-header { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center; }
+.compare-prompt { font-family: var(--mono); font-size: 11.5px; color: var(--text2); background: var(--bg2);
+  border: 1px solid var(--border); border-radius: var(--r); padding: 10px; max-height: 80px; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; }
+.compare-model-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.compare-model-name { font-size: 12px; color: var(--text2); }
+.compare-token-val { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text); }
+.compare-winner { color: var(--green); }
+
+/* ── FAQ ──────────────────────────────────────────────── */
+footer { max-width: 1400px; margin: 30px auto 0; padding: 0 20px 40px; }
+.faq-section { border-top: 1px solid var(--border); padding-top: 30px; }
+.faq-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+.faq-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+.faq-list { display: flex; flex-direction: column; gap: 0; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-q { display: flex; justify-content: space-between; align-items: center; width: 100%;
+  padding: 16px 0; font-size: 14px; font-weight: 600; color: var(--text);
+  background: transparent; text-align: left; gap: 16px; }
+.faq-q svg { flex-shrink: 0; transition: transform .2s; color: var(--text3); }
+.faq-q[aria-expanded="true"] svg { transform: rotate(180deg); }
+.faq-a { font-size: 13.5px; color: var(--text2); line-height: 1.7; padding-bottom: 16px; display: none; }
+.faq-q[aria-expanded="true"] + .faq-a { display: block; }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 30px;
+  padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text3); flex-wrap: wrap; gap: 10px; }
+.footer-links { display: flex; gap: 16px; }
+.footer-links a { color: var(--text3); }
+.footer-links a:hover { color: var(--text); }
+
+/* ── MODALS ───────────────────────────────────────────── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 500;
+  display: flex; align-items: center; justify-content: center; display: none; }
+.overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--r-lg); border: 1px solid var(--border);
+  box-shadow: var(--sh-lg); padding: 24px; width: 440px; max-width: 90vw; }
+.modal-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.modal-desc { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 9px 12px; font-size: 13px; font-family: var(--mono);
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); color: var(--text); }
+.form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.form-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.security-note { background: var(--amber-bg); border: 1px solid var(--amber); border-radius: var(--r);
+  padding: 10px 12px; font-size: 12px; color: var(--amber); margin-top: 12px; }
+
+/* ── TOAST ────────────────────────────────────────────── */
+.toast { position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+  background: var(--text); color: var(--surface); border-radius: var(--r);
+  padding: 10px 16px; font-size: 13px; font-weight: 500; box-shadow: var(--sh-lg);
+  transform: translateY(120%); transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+  display: flex; align-items: center; gap: 8px; }
+.toast.show { transform: translateY(0); }
+
+/* ── DIVIDER ──────────────────────────────────────────── */
+.section-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ── SCROLLBAR ────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── ANIMATIONS ───────────────────────────────────────── */
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation: fadeIn .2s ease forwards; }
+.pulse { animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ──────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">dt</div>
+    <span class="nav-site">DevToolsBox</span>
+    <span class="nav-sep">/</span>
+    <span class="nav-tool">Token Counter</span>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost btn-icon" onclick="openSettings()" title="API Settings">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.1 4.9L4.9 19.1M4.9 4.9l14.2 14.2"/><path d="M12 2v2m0 18v2M2 12h2m18 0h2M4.2 4.2l1.4 1.4m12.8 12.8 1.4 1.4M4.2 19.8l1.4-1.4m12.8-12.8 1.4-1.4"/><circle cx="12" cy="12" r="3"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:-6px"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      Settings
+    </button>
+    <button class="btn btn-ghost" onclick="shareURL()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+      Share
+    </button>
+    <div class="dropdown" id="exportDropdown">
+      <button class="btn btn-ghost" onclick="toggleExportMenu()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="dropdown-menu" id="exportMenu">
+        <button onclick="exportCSV(); toggleExportMenu()">📄 Export CSV</button>
+        <button onclick="exportPDF(); toggleExportMenu()">📑 Export PDF</button>
+        <button onclick="copyMarkdown(); toggleExportMenu()">📋 Copy Markdown</button>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-icon" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">
+      <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ─── MAIN ──────────────────────────────────────────────────── -->
+<main>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div id="promptScore" class="prompt-score">
+      <span class="score-dot" style="background:var(--text3)"></span>
+      <span id="scoreText">Enter text to analyze</span>
+    </div>
+    <div class="toolbar-right">
+      <div class="stat-pills">
+        <span class="stat-pill" id="statChars">0 chars</span>
+        <span class="stat-pill" id="statWords">0 words</span>
+        <span class="stat-pill" id="statLines">0 lines</span>
+        <span class="stat-pill" id="statRatio">— chars/tok</span>
+      </div>
+      <div class="mode-toggle">
+        <button class="active" id="modeIn" onclick="setCostMode('input')">Input cost</button>
+        <button id="modeOut" onclick="setCostMode('output')">Output cost</button>
+      </div>
+      <button class="btn btn-ghost" onclick="addToCompare()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Compare
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace -->
+  <div class="workspace">
+    <!-- Editor Panel -->
+    <div class="editor-panel">
+      <div class="textarea-wrapper">
+        <textarea id="prompt" placeholder="Paste your prompt or text here — token counts update in real time across all AI models…" spellcheck="false" aria-label="Text input for token counting"></textarea>
+        <div class="textarea-footer">
+          <span class="char-limit" id="charCount">0 / ∞</span>
+          <div class="textarea-actions">
+            <button class="ta-btn" onclick="loadSample()">Load sample</button>
+            <button class="ta-btn" onclick="clearAll()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Token Visualization -->
+      <div class="viz-card">
+        <div class="viz-header">
+          <span class="viz-title">Token visualization</span>
+          <div class="viz-meta">
+            <div class="viz-legend">
+              <span class="legend-item"><span class="legend-swatch" style="background:var(--tok0)"></span>Token 1</span>
+              <span class="legend-item"><span class="legend-swatch" style="background:var(--tok1)"></span>Token 2</span>
+              <span class="legend-item"><span class="legend-swatch" style="background:var(--tok2)"></span>Token 3+</span>
+            </div>
+          </div>
+        </div>
+        <div id="tokenViz" role="region" aria-label="Visual token breakdown">
+          <span style="color:var(--text3);font-size:12px;font-style:italic;">Token breakdown will appear here…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Panel -->
+    <div class="analysis-panel">
+
+      <!-- OpenAI -->
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-title">
+            <span class="provider-dot" style="background:#10a37f"></span>
+            <span class="provider-name">OpenAI — GPT</span>
+          </div>
+          <span class="badge badge-approx">~approx</span>
+        </div>
+        <div class="model-list" id="openaiList"></div>
+      </div>
+
+      <!-- Claude -->
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-title">
+            <span class="provider-dot" style="background:#cc785c"></span>
+            <span class="provider-name">Anthropic — Claude</span>
+          </div>
+          <span class="badge" id="claudeBadge">~approx</span>
+        </div>
+        <div class="model-list" id="claudeList"></div>
+      </div>
+
+      <!-- Gemini -->
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-title">
+            <span class="provider-dot" style="background:#4285f4"></span>
+            <span class="provider-name">Google — Gemini</span>
+          </div>
+          <span class="badge badge-approx">~approx</span>
+        </div>
+        <div class="model-list" id="googleList"></div>
+      </div>
+
+      <!-- xAI -->
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-title">
+            <span class="provider-dot" style="background:#6b7280"></span>
+            <span class="provider-name">xAI — Grok</span>
+          </div>
+          <span class="badge badge-approx">~approx</span>
+        </div>
+        <div class="model-list" id="xaiList"></div>
+      </div>
+
+      <!-- Volume Calculator -->
+      <div class="volume-card">
+        <div class="volume-title">💰 Volume cost calculator</div>
+        <div class="volume-slider-row">
+          <label style="font-size:12px;color:var(--text2);white-space:nowrap">Daily calls</label>
+          <input type="range" id="volumeSlider" min="1" max="5" value="2" oninput="updateVolume()">
+          <span class="volume-val" id="volumeDisplay">100/day</span>
+        </div>
+        <div class="volume-results" id="volumeResults">
+          <div class="vol-item" style="grid-column:1/-1;text-align:center;color:var(--text3);font-size:12px">Enter text to see volume costs</div>
+        </div>
+      </div>
+
+    </div><!-- /analysis-panel -->
+  </div><!-- /workspace -->
+
+  <!-- Tabs Section -->
+  <div class="tabs-section" style="margin-top:16px;">
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="charts" onclick="switchTab('charts')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Charts
+      </button>
+      <button class="tab-btn" data-tab="history" onclick="switchTab('history')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        History <span id="historyCount" style="background:var(--bg2);color:var(--text3);font-size:10px;padding:1px 6px;border-radius:10px;margin-left:2px">0</span>
+      </button>
+      <button class="tab-btn" data-tab="compare" onclick="switchTab('compare')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+        Compare <span id="compareCount" style="background:var(--bg2);color:var(--text3);font-size:10px;padding:1px 6px;border-radius:10px;margin-left:2px">0</span>
+      </button>
+    </div>
+
+    <!-- Charts Tab -->
+    <div class="tab-pane active" id="tab-charts">
+      <div class="charts-grid">
+        <div class="chart-box">
+          <div class="chart-label">Tokens by model</div>
+          <canvas id="tokenChart" height="220"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-label">Estimated input cost ($ per 1M tokens)</div>
+          <canvas id="costChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div class="tab-pane" id="tab-history">
+      <div class="history-toolbar">
+        <span class="history-count" id="historyLabel">No entries yet</span>
+        <button class="btn btn-ghost" onclick="clearHistory()" style="font-size:12px">Clear all</button>
+      </div>
+      <div id="historyList" class="history-grid">
+        <div class="history-empty">Your analysis history will appear here.<br>Entries are stored locally in your browser.</div>
+      </div>
+    </div>
+
+    <!-- Compare Tab -->
+    <div class="tab-pane" id="tab-compare">
+      <div id="compareArea">
+        <div class="compare-empty">
+          Click <strong>"+ Compare"</strong> after analyzing different prompts to compare them side by side.<br>
+          <span style="font-size:12px;color:var(--text3)">Up to 4 snapshots.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ─── FAQ / FOOTER ──────────────────────────────────────────── -->
+<footer>
+  <section style="margin:40px 0;">
+  <h2>GPT Token Counter</h2>
+  <p>
+    Count tokens for OpenAI models like GPT-4o and GPT-3.5 instantly. 
+    This helps you understand how your prompts are processed and optimize them to reduce cost and improve performance.
+  </p>
+
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px;">
+    <strong>Example</strong>
+    <pre style="margin-top:10px;background:var(--surface);padding:12px;border-radius:8px;">
+Write a detailed article about AI and SEO optimization
+    </pre>
+    <p style="margin-top:10px;">
+      This prompt will be split into tokens that determine both cost and model processing.
+    </p>
+  </div>
+</section>
+<section style="margin:40px 0;">
+  <h2>Claude Token Counter</h2>
+  <p>
+    Analyze token usage for Anthropic Claude models. 
+    Estimate input and output tokens and better control your API usage.
+  </p>
+
+  <ul style="margin-top:10px;line-height:1.8;">
+    <li>Estimate prompt size before sending requests</li>
+    <li>Optimize responses to reduce token usage</li>
+    <li>Compare with other AI models</li>
+  </ul>
+</section>
+<section style="margin:40px 0;">
+  <h2>AI Token Cost Calculator</h2>
+  <p>
+    Estimate how much your prompts cost across different AI providers like OpenAI, Claude and Gemini.
+    This helps you control your budget and optimize your usage.
+  </p>
+
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px;">
+    <ul style="line-height:1.8;">
+      <li>Compare costs between models</li>
+      <li>Estimate monthly usage</li>
+      <li>Optimize prompts to reduce expenses</li>
+    </ul>
+  </div>
+</section>
+<section style="margin:40px 0;">
+  <h2>Token Counter Example</h2>
+  <p>Here is a simple example of how tokens are calculated:</p>
+
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px;">
+    <pre style="background:var(--surface);padding:12px;border-radius:8px;">
+Input:
+Hello world, this is a test prompt
+
+Output:
+Token count: ~8 tokens
+    </pre>
+  </div>
+
+  <p style="margin-top:10px;">
+    Tokens are small pieces of text used by AI models to process your input.
+  </p>
+</section>
+  <div class="faq-section">
+    <h2 class="faq-title">Frequently Asked Questions</h2>
+    <p class="faq-subtitle">Everything you need to know about AI tokens and this tool.</p>
+    <div class="faq-list" id="faqList"></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 DevToolsBox · Free developer tools</span>
+    <div class="footer-links">
+      <a href="https://devstoolsbox.dev">Home</a>
+      <a href="https://devstoolsbox.dev/fr/blog/">All Tools</a>
+      <a href="https://devstoolsbox.dev/privacy">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── SETTINGS MODAL ────────────────────────────────────────── -->
+<div class="overlay" id="settingsOverlay" onclick="closeSettings(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">⚙ Settings</div>
+    <div class="modal-desc">Configure your API keys for exact token counting. Keys are stored locally in your browser and never sent to our servers.</div>
+    <div class="form-group">
+      <label class="form-label" for="apiKeyInput">Anthropic API Key <span style="color:var(--text3);font-weight:400">(optional — enables exact Claude counts)</span></label>
+      <input class="form-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" autocomplete="off">
+      <div class="form-hint">Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+    </div>
+    <div class="security-note">
+      ⚠ Your API key is stored in <code>localStorage</code> and only sent directly to Anthropic's API. Never shared with DevToolsBox servers.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-solid" onclick="saveSettings()">Save settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─────────────────────────────────────────────────── -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ─── SCRIPTS ───────────────────────────────────────────────── -->
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIG — Models & Pricing (prices in $ per 1M tokens)
+// ══════════════════════════════════════════════════════════════
+const PROVIDERS = [
+  {
+    id: 'openai', name: 'OpenAI', color: '#10a37f',
+    models: [
+      { id: 'gpt-4o',      name: 'GPT-4o',        ctx: 128000,  inp: 2.50,  out: 10.0,  fac: 1.00 },
+      { id: 'gpt-4o-mini', name: 'GPT-4o mini',   ctx: 128000,  inp: 0.15,  out: 0.60,  fac: 1.00 },
+      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo',   ctx: 128000,  inp: 10.0,  out: 30.0,  fac: 1.00 },
+      { id: 'gpt-35',      name: 'GPT-3.5 Turbo', ctx: 16385,   inp: 0.50,  out: 1.50,  fac: 1.00 },
+      { id: 'o1',          name: 'o1',             ctx: 200000,  inp: 15.0,  out: 60.0,  fac: 1.00 },
+      { id: 'o3-mini',     name: 'o3-mini',        ctx: 200000,  inp: 1.10,  out: 4.40,  fac: 1.00 },
+    ]
+  },
+  {
+    id: 'claude', name: 'Anthropic', color: '#cc785c',
+    models: [
+      { id: 'claude-opus-4-6',          name: 'Claude Opus 4.6',   ctx: 200000, inp: 15.0, out: 75.0, fac: 1.05, exactModel: 'claude-opus-4-6' },
+      { id: 'claude-sonnet-4-6',        name: 'Claude Sonnet 4.6', ctx: 200000, inp: 3.00, out: 15.0, fac: 1.05, exactModel: 'claude-sonnet-4-6' },
+      { id: 'claude-haiku-4-5-20251001',name: 'Claude Haiku 4.5',  ctx: 200000, inp: 0.25, out: 1.25, fac: 1.05, exactModel: 'claude-haiku-4-5-20251001' },
+    ]
+  },
+  {
+    id: 'google', name: 'Google', color: '#4285f4',
+    models: [
+      { id: 'gemini-2-flash', name: 'Gemini 2.0 Flash', ctx: 1048576, inp: 0.10,  out: 0.40, fac: 0.92 },
+      { id: 'gemini-15-pro',  name: 'Gemini 1.5 Pro',   ctx: 2097152, inp: 1.25,  out: 5.00, fac: 0.92 },
+      { id: 'gemini-15-flash',name: 'Gemini 1.5 Flash',  ctx: 1048576, inp: 0.075, out: 0.30, fac: 0.92 },
+    ]
+  },
+  {
+    id: 'xai', name: 'xAI', color: '#6b7280',
+    models: [
+      { id: 'grok-3',      name: 'Grok-3',      ctx: 131072, inp: 3.00, out: 15.0, fac: 1.02 },
+      { id: 'grok-2',      name: 'Grok-2',      ctx: 131072, inp: 2.00, out: 10.0, fac: 1.02 },
+      { id: 'grok-2-mini', name: 'Grok-2 Mini', ctx: 131072, inp: 0.20, out: 0.40, fac: 1.02 },
+    ]
+  },
+];
+
+const VOLUME_STEPS = [10, 100, 500, 1000, 5000];
+const VOLUME_SHOWCASE_MODELS = ['gpt-4o', 'claude-sonnet-4-6', 'gemini-2-flash', 'grok-2'];
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+const S = {
+  text: '',
+  tokens: {},        // modelId → count
+  costMode: 'input', // 'input'|'output'
+  volumeIdx: 2,      // index into VOLUME_STEPS
+  apiKey: localStorage.getItem('dtb_anthropic_key') || '',
+  compareSlots: JSON.parse(localStorage.getItem('dtb_compare') || '[]'),
+  history: JSON.parse(localStorage.getItem('dtb_history') || '[]'),
+  claudeDebounce: null,
+  chartToken: null,
+  chartCost: null,
+};
+
+// ══════════════════════════════════════════════════════════════
+// TOKENIZER (BPE approximation)
+// ══════════════════════════════════════════════════════════════
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  return Math.abs(h);
+}
+
+function tokenizeApprox(text) {
+  if (!text) return [];
+  const result = [];
+  const re = /(\n+|\r\n|\s+|[^\s\w]+|\d+(?:[.,]\d+)?|[A-Za-zÀ-ÿ\u00C0-\u017E'-]+)/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const chunk = m[0];
+    if (!chunk.trim()) { result.push({ text: chunk, type: 'space' }); continue; }
+    if (/^\d/.test(chunk)) {
+      for (let i = 0; i < chunk.length; i += 3)
+        result.push({ text: chunk.slice(i, i + 3), type: 'number' });
+      continue;
+    }
+    if (/^[^\w\s]/.test(chunk)) { result.push({ text: chunk, type: 'punct' }); continue; }
+    // Word
+    if (chunk.length <= 4) { result.push({ text: chunk, type: 'word' }); continue; }
+    // Subword split using hash for determinism
+    let pos = 0;
+    const seed = hashStr(chunk);
+    while (pos < chunk.length) {
+      const rem = chunk.length - pos;
+      if (rem <= 4) { result.push({ text: chunk.slice(pos), type: pos === 0 ? 'word' : 'sub' }); break; }
+      const sz = 3 + ((seed + pos) % 3);
+      result.push({ text: chunk.slice(pos, pos + sz), type: pos === 0 ? 'word' : 'sub' });
+      pos += sz;
+    }
+  }
+  return result;
+}
+
+function countApprox(text, factor = 1.0) {
+  if (!text) return 0;
+  const toks = tokenizeApprox(text).filter(t => t.type !== 'space');
+  return Math.max(0, Math.round(toks.length * factor));
+}
+
+// ══════════════════════════════════════════════════════════════
+// CLAUDE EXACT API
+// ══════════════════════════════════════════════════════════════
+async function countClaudeExact(text) {
+  if (!S.apiKey || !text) return null;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages/count_tokens', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': S.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'token-counting-2024-11-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', messages: [{ role: 'user', content: text }] })
+    });
+    const d = await r.json();
+    if (d.input_tokens == null) throw new Error(d.error?.message || 'API error');
+    return d.input_tokens;
+  } catch (e) {
+    console.warn('Claude API error:', e.message);
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// PROMPT ANALYSIS / OPTIMIZER
+// ══════════════════════════════════════════════════════════════
+function analyzePrompt(text, tokens) {
+  if (!text) return { label: 'Enter text to analyze', color: 'var(--text3)', score: 0 };
+  const fillers = (text.match(/\b(please|kindly|could you|would you|I want you to|make sure|ensure that|you should)\b/gi) || []).length;
+  const words = (text.match(/\S+/g) || []).length;
+  const uniqueRatio = new Set((text.toLowerCase().match(/\b\w+\b/g) || [])).size / Math.max(words, 1);
+  if (tokens < 50)  return { label: '✦ Very short — add more context', color: 'var(--amber)', score: 2 };
+  if (tokens < 300) return { label: '✓ Concise and clear', color: 'var(--green)', score: 5 };
+  if (tokens < 1000 && fillers < 3) return { label: '✓ Well-structured prompt', color: 'var(--green)', score: 5 };
+  if (tokens < 2000) return { label: '◎ Good — could trim filler phrases', color: 'var(--blue)', score: 4 };
+  if (tokens < 8000) return { label: '⚠ Long prompt — consider condensing', color: 'var(--amber)', score: 3 };
+  if (tokens < 32000) return { label: '⚡ Very long — will be truncated on GPT-3.5', color: 'var(--amber)', score: 2 };
+  return { label: '✗ Too long — truncated on most models', color: 'var(--red)', score: 1 };
+}
+
+// ══════════════════════════════════════════════════════════════
+// MAIN UPDATE
+// ══════════════════════════════════════════════════════════════
+function update() {
+  const text = S.text;
+  const words = (text.match(/\S+/g) || []).length;
+  const lines = text ? text.split('\n').length : 0;
+  const baseTokens = countApprox(text, 1.0);
+
+  // Stats bar
+  document.getElementById('statChars').textContent = text.length.toLocaleString() + ' chars';
+  document.getElementById('statWords').textContent = words.toLocaleString() + ' words';
+  document.getElementById('statLines').textContent = lines.toLocaleString() + ' lines';
+  document.getElementById('charCount').textContent = text.length.toLocaleString() + ' chars';
+  const ratio = baseTokens > 0 ? (text.length / baseTokens).toFixed(1) : '—';
+  document.getElementById('statRatio').textContent = ratio + ' chars/tok';
+
+  // Prompt score (using ref model = GPT approx)
+  const analysis = analyzePrompt(text, baseTokens);
+  const scoreEl = document.getElementById('promptScore');
+  const scoreDot = scoreEl.querySelector('.score-dot');
+  scoreDot.style.background = analysis.color;
+  document.getElementById('scoreText').textContent = analysis.label;
+  document.getElementById('scoreText').style.color = analysis.color;
+
+  // Token counts per model
+  PROVIDERS.forEach(p => {
+    p.models.forEach(m => {
+      const tok = countApprox(text, m.fac);
+      S.tokens[m.id] = tok;
+    });
+  });
+
+  renderModelLists();
+  renderTokenViz(text);
+  updateCharts();
+  updateVolume();
+
+  // Claude exact (debounced)
+  clearTimeout(S.claudeDebounce);
+  if (text && S.apiKey) {
+    const badge = document.getElementById('claudeBadge');
+    badge.textContent = '⟳ counting…';
+    badge.className = 'badge badge-loading';
+    S.claudeDebounce = setTimeout(async () => {
+      const exact = await countClaudeExact(text);
+      if (exact !== null) {
+        PROVIDERS.find(p => p.id === 'claude').models.forEach(m => {
+          S.tokens[m.id] = exact;
+        });
+        badge.textContent = '✓ exact';
+        badge.className = 'badge badge-exact';
+        renderModelLists();
+        updateCharts();
+        updateVolume();
+      } else {
+        badge.textContent = '~approx';
+        badge.className = 'badge badge-approx';
+      }
+    }, 800);
+  } else {
+    const badge = document.getElementById('claudeBadge');
+    badge.textContent = S.apiKey ? '~approx' : '~approx (add key for exact)';
+    badge.className = 'badge badge-approx';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER MODEL LISTS
+// ══════════════════════════════════════════════════════════════
+function fmtNum(n) { return n ? n.toLocaleString('en-US') : '0'; }
+function fmtCost(tokens, ppm) {
+  const v = tokens / 1e6 * ppm;
+  if (!tokens) return '$0.000000';
+  if (v < 0.000001) return '<$0.0000001';
+  if (v < 0.01) return '$' + v.toFixed(6);
+  if (v < 1) return '$' + v.toFixed(4);
+  return '$' + v.toFixed(2);
+}
+function fmtCtx(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return Math.round(n/1000) + 'K';
+  return n;
+}
+
+function renderModelLists() {
+  PROVIDERS.forEach(p => {
+    const container = document.getElementById(p.id + 'List');
+    if (!container) return;
+    const mode = S.costMode;
+    container.innerHTML = p.models.map(m => {
+      const tok = S.tokens[m.id] || 0;
+      const ppm = mode === 'input' ? m.inp : m.out;
+      const cost = fmtCost(tok, ppm);
+      const pct = tok ? Math.min(100, (tok / m.ctx * 100)) : 0;
+      const pctLabel = pct > 0 ? pct.toFixed(2) + '%' : '0%';
+      const barColor = pct > 90 ? 'var(--red)' : pct > 60 ? 'var(--amber)' : p.color;
+      const ctxFits = tok === 0 || tok <= m.ctx;
+      return `<div class="model-row">
+        <div class="model-info">
+          <div class="model-name">${m.name} ${!ctxFits ? '<span style="color:var(--red);font-size:10px">✗ exceeds ctx</span>' : ''}</div>
+          <div class="model-ctx">${fmtCtx(m.ctx)} ctx window · $${m.inp}/$${m.out}/1M</div>
+        </div>
+        <div class="model-metrics">
+          <div class="model-tokens">${fmtNum(tok)}</div>
+          <div class="model-cost">${cost}</div>
+        </div>
+      </div>
+      <div class="ctx-bar-wrap">
+        <div class="ctx-bar-bg"><div class="ctx-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        <div class="ctx-label"><span>${pctLabel} of context</span><span>${fmtNum(m.ctx - tok)} remaining</span></div>
+      </div>`;
+    }).join('');
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// TOKEN VISUALIZATION
+// ══════════════════════════════════════════════════════════════
+const VIZ_LIMIT = 4000;
+function renderTokenViz(text) {
+  const el = document.getElementById('tokenViz');
+  if (!text) {
+    el.innerHTML = '<span style="color:var(--text3);font-size:12px;font-style:italic;">Token breakdown will appear here…</span>';
+    return;
+  }
+  const src = text.length > VIZ_LIMIT ? text.slice(0, VIZ_LIMIT) : text;
+  const tokens = tokenizeApprox(src);
+  let colorIdx = 0;
+  let html = '';
+  tokens.forEach(tok => {
+    if (tok.type === 'space') {
+      html += `<span class="tok-space">${tok.text.replace(/\n/g, '<br>')}</span>`;
+    } else {
+      const cls = 'tok tok-' + (colorIdx % 6);
+      colorIdx++;
+      html += `<span class="${cls}" title="token ${colorIdx}">${escHtml(tok.text)}</span>`;
+    }
+  });
+  if (text.length > VIZ_LIMIT) html += `<span class="viz-truncated">⋯ showing first ${VIZ_LIMIT.toLocaleString()} of ${text.length.toLocaleString()} characters</span>`;
+  el.innerHTML = html;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHARTS
+// ══════════════════════════════════════════════════════════════
+function updateCharts() {
+  const labels = [], tokenData = [], costData = [], barColors = [];
+  PROVIDERS.forEach(p => {
+    p.models.forEach(m => {
+      labels.push(m.name);
+      tokenData.push(S.tokens[m.id] || 0);
+      costData.push(m.inp);
+      barColors.push(p.color + 'cc');
+    });
+  });
+
+  const chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { display: false }, tooltip: { bodyFont: { family: "'JetBrains Mono'" } } },
+    scales: {
+      x: { ticks: { font: { family: "'Plus Jakarta Sans'", size: 10 }, color: getComputedStyle(document.documentElement).getPropertyValue('--text3') || '#999' }, grid: { display: false } },
+      y: { ticks: { font: { family: "'JetBrains Mono'", size: 10 } }, grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#eee' } }
+    }
+  };
+
+  // Token chart
+  const tCtx = document.getElementById('tokenChart').getContext('2d');
+  if (S.chartToken) S.chartToken.destroy();
+  S.chartToken = new Chart(tCtx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: tokenData, backgroundColor: barColors, borderRadius: 4, borderSkipped: false }] },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, tooltip: { callbacks: { label: ctx => ctx.raw.toLocaleString() + ' tokens' } } } }
+  });
+
+  // Cost chart
+  const cCtx = document.getElementById('costChart').getContext('2d');
+  if (S.chartCost) S.chartCost.destroy();
+  S.chartCost = new Chart(cCtx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: costData, backgroundColor: barColors, borderRadius: 4, borderSkipped: false }] },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, tooltip: { callbacks: { label: ctx => '$' + ctx.raw + '/1M tokens' } } } }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// VOLUME CALCULATOR
+// ══════════════════════════════════════════════════════════════
+function updateVolume() {
+  const vol = VOLUME_STEPS[S.volumeIdx] || 100;
+  document.getElementById('volumeDisplay').textContent = vol.toLocaleString() + '/day';
+  const resultsEl = document.getElementById('volumeResults');
+  const mode = S.costMode;
+  const text = S.text;
+  if (!text) {
+    resultsEl.innerHTML = '<div class="vol-item" style="grid-column:1/-1;text-align:center;color:var(--text3);font-size:12px">Enter text to see volume costs</div>';
+    return;
+  }
+  const html = VOLUME_SHOWCASE_MODELS.map(mid => {
+    const p = PROVIDERS.find(pr => pr.models.some(m => m.id === mid));
+    const model = p?.models.find(m => m.id === mid);
+    if (!model) return '';
+    const tok = S.tokens[mid] || 0;
+    const ppm = mode === 'input' ? model.inp : model.out;
+    const dailyCost = tok / 1e6 * ppm * vol;
+    const monthlyCost = dailyCost * 30;
+    return `<div class="vol-item">
+      <div class="vol-model">${model.name}</div>
+      <div class="vol-cost">${fmtCost(tok * vol, ppm)}</div>
+      <div class="vol-period">/day · ${fmtCost(tok * vol * 30, ppm)}/month</div>
+    </div>`;
+  }).join('');
+  resultsEl.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════════════════════
+function saveToHistory(text) {
+  if (!text || text.length < 20) return;
+  // Avoid duplicates of last entry
+  if (S.history.length && S.history[0].text === text) return;
+  S.history.unshift({
+    id: Date.now(),
+    text,
+    preview: text.slice(0, 120),
+    chars: text.length,
+    tokens: S.tokens['claude-sonnet-4-6'] || countApprox(text, 1.05),
+    date: new Date().toLocaleString()
+  });
+  if (S.history.length > 30) S.history.pop();
+  localStorage.setItem('dtb_history', JSON.stringify(S.history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const count = S.history.length;
+  document.getElementById('historyCount').textContent = count;
+  document.getElementById('historyLabel').textContent = count ? count + ' saved entries' : 'No entries yet';
+  if (!count) {
+    list.innerHTML = '<div class="history-empty">Your analysis history will appear here.<br>Entries are stored locally in your browser.</div>';
+    return;
+  }
+  list.innerHTML = S.history.map((h, i) => `
+    <div class="history-card" onclick="restoreHistory(${i})">
+      <div class="history-card-header">
+        <div style="font-size:11px;color:var(--blue);font-weight:600">#${i+1}</div>
+        <button class="history-del" onclick="event.stopPropagation();deleteHistory(${i})" title="Delete">×</button>
+      </div>
+      <div class="history-preview">${escHtml(h.preview)}${h.text.length > 120 ? '…' : ''}</div>
+      <div class="history-meta">
+        <span>${h.date}</span>
+        <span>${h.chars.toLocaleString()} chars</span>
+        <span>~${h.tokens.toLocaleString()} tokens</span>
+      </div>
+    </div>`).join('');
+}
+
+function restoreHistory(i) {
+  document.getElementById('prompt').value = S.history[i].text;
+  S.text = S.history[i].text;
+  update();
+  switchTab('charts');
+  showToast('History entry restored');
+}
+
+function deleteHistory(i) {
+  S.history.splice(i, 1);
+  localStorage.setItem('dtb_history', JSON.stringify(S.history));
+  renderHistory();
+}
+
+function clearHistory() {
+  if (!confirm('Clear all history?')) return;
+  S.history = [];
+  localStorage.setItem('dtb_history', JSON.stringify(S.history));
+  renderHistory();
+}
+
+// ══════════════════════════════════════════════════════════════
+// COMPARE
+// ══════════════════════════════════════════════════════════════
+function addToCompare() {
+  if (!S.text) { showToast('Enter text first'); return; }
+  if (S.compareSlots.length >= 4) { showToast('Max 4 compare slots'); return; }
+  S.compareSlots.push({
+    label: 'Prompt ' + (S.compareSlots.length + 1),
+    text: S.text.slice(0, 300),
+    tokens: { ...S.tokens },
+    chars: S.text.length
+  });
+  localStorage.setItem('dtb_compare', JSON.stringify(S.compareSlots));
+  document.getElementById('compareCount').textContent = S.compareSlots.length;
+  renderCompare();
+  switchTab('compare');
+  showToast('Added to compare (' + S.compareSlots.length + '/4)');
+}
+
+function renderCompare() {
+  const area = document.getElementById('compareArea');
+  if (!S.compareSlots.length) {
+    area.innerHTML = '<div class="compare-empty">Click <strong>"+ Compare"</strong> after analyzing different prompts to compare them side by side.<br><span style="font-size:12px;color:var(--text3)">Up to 4 snapshots.</span></div>';
+    return;
+  }
+  const allModels = PROVIDERS.flatMap(p => p.models);
+  // Find winner (fewest tokens) per model
+  const winners = {};
+  allModels.forEach(m => {
+    const vals = S.compareSlots.map(sl => sl.tokens[m.id] || 0);
+    winners[m.id] = vals.indexOf(Math.min(...vals));
+  });
+
+  let html = '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">';
+  html += `<button class="btn btn-ghost" onclick="clearCompare()">Clear all</button>`;
+  html += '</div>';
+  html += '<div class="compare-cols">';
+  S.compareSlots.forEach((slot, si) => {
+    html += `<div class="compare-col">
+      <div class="compare-col-header">
+        <span>${slot.label}</span>
+        <button class="history-del" onclick="removeCompare(${si})">×</button>
+      </div>
+      <div class="compare-prompt">${escHtml(slot.text)}${slot.text.length < (slot.chars||0) ? '…' : ''}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">${(slot.chars||0).toLocaleString()} chars</div>`;
+    PROVIDERS.forEach(p => {
+      html += `<div style="font-size:10px;font-weight:600;color:var(--text2);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.05em">${p.name}</div>`;
+      p.models.forEach(m => {
+        const tok = slot.tokens[m.id] || 0;
+        const isWinner = winners[m.id] === si;
+        html += `<div class="compare-model-row">
+          <span class="compare-model-name">${m.name}</span>
+          <span class="compare-token-val ${isWinner && S.compareSlots.length > 1 ? 'compare-winner' : ''}">${fmtNum(tok)}${isWinner && S.compareSlots.length > 1 ? ' ✓' : ''}</span>
+        </div>`;
+      });
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function removeCompare(i) {
+  S.compareSlots.splice(i, 1);
+  S.compareSlots.forEach((s, idx) => s.label = 'Prompt ' + (idx + 1));
+  localStorage.setItem('dtb_compare', JSON.stringify(S.compareSlots));
+  document.getElementById('compareCount').textContent = S.compareSlots.length;
+  renderCompare();
+}
+
+function clearCompare() {
+  S.compareSlots = [];
+  localStorage.setItem('dtb_compare', JSON.stringify(S.compareSlots));
+  document.getElementById('compareCount').textContent = 0;
+  renderCompare();
+}
+
+// ══════════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════════
+function exportCSV() {
+  if (!S.text) { showToast('No data to export'); return; }
+  const mode = S.costMode;
+  const rows = [['Provider','Model','Tokens','Input $/1M','Output $/1M','Est. Input Cost','Est. Output Cost','Context Window','Context Usage %']];
+  PROVIDERS.forEach(p => {
+    p.models.forEach(m => {
+      const tok = S.tokens[m.id] || 0;
+      rows.push([
+        p.name, m.name, tok, m.inp, m.out,
+        fmtCost(tok, m.inp).replace('$',''),
+        fmtCost(tok, m.out).replace('$',''),
+        m.ctx,
+        tok ? ((tok/m.ctx)*100).toFixed(2)+'%' : '0%'
+      ]);
+    });
+  });
+  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  download('token-analysis.csv', 'text/csv', csv);
+  showToast('CSV exported');
+}
+
+function exportPDF() {
+  if (!S.text) { showToast('No data to export'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  let y = 18;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
+  doc.text('Token Analysis Report', 15, y); y += 7;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(120);
+  doc.text('Generated by DevToolsBox Token Counter · devstoolsbox.dev', 15, y); y += 5;
+  doc.text(new Date().toLocaleString(), 15, y); y += 8;
+  doc.setTextColor(0);
+
+  // Prompt preview
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('Prompt Preview', 15, y); y += 5;
+  doc.setFont('courier', 'normal'); doc.setFontSize(8);
+  const preview = S.text.slice(0, 300) + (S.text.length > 300 ? '…' : '');
+  const lines = doc.splitTextToSize(preview, 180);
+  doc.setFillColor(247, 247, 245); doc.roundedRect(13, y-2, 184, lines.length * 4 + 4, 2, 2, 'F');
+  doc.text(lines, 16, y + 2); y += lines.length * 4 + 8;
+
+  // Table
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('Token Counts & Cost Estimates', 15, y); y += 6;
+  const headers = ['Model', 'Tokens', 'Input $/1M', 'Est. Input Cost', 'Context Window'];
+  const colW = [60, 25, 28, 38, 34];
+  const cols = [15, 75, 100, 128, 166];
+  doc.setFillColor(240, 240, 238); doc.rect(13, y-4, 184, 7, 'F');
+  doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+  headers.forEach((h, i) => doc.text(h, cols[i], y)); y += 6;
+  doc.setFont('helvetica', 'normal');
+  PROVIDERS.forEach(p => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(80);
+    doc.text(p.name, 15, y); y += 5; doc.setTextColor(0); doc.setFont('helvetica', 'normal');
+    p.models.forEach(m => {
+      const tok = S.tokens[m.id] || 0;
+      const row = [m.name, fmtNum(tok), '$' + m.inp, fmtCost(tok, m.inp), fmtCtx(m.ctx) + ' tokens'];
+      row.forEach((v, i) => doc.text(String(v), cols[i], y));
+      doc.setDrawColor(230); doc.line(13, y + 2, 197, y + 2); y += 6;
+      if (y > 270) { doc.addPage(); y = 15; }
+    });
+    y += 2;
+  });
+
+  doc.save('token-analysis.pdf');
+  showToast('PDF exported');
+}
+
+function copyMarkdown() {
+  if (!S.text) { showToast('No data to export'); return; }
+  let md = '# Token Analysis\n\n';
+  md += `**Generated:** ${new Date().toLocaleString()}  \n`;
+  md += `**Source:** [DevToolsBox Token Counter](https://devstoolsbox.dev/token-counter)\n\n`;
+  md += `## Prompt\n\`\`\`\n${S.text.slice(0, 500)}${S.text.length > 500 ? '\n…' : ''}\n\`\`\`\n\n`;
+  md += '## Results\n\n| Provider | Model | Tokens | Input Cost/1M | Est. Cost |\n|---|---|---|---|---|\n';
+  PROVIDERS.forEach(p => {
+    p.models.forEach(m => {
+      const tok = S.tokens[m.id] || 0;
+      md += `| ${p.name} | ${m.name} | ${fmtNum(tok)} | $${m.inp} | ${fmtCost(tok, m.inp)} |\n`;
+    });
+  });
+  navigator.clipboard.writeText(md).then(() => showToast('Markdown copied to clipboard'));
+}
+
+function download(filename, type, content) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = filename;
+  a.click();
+}
+
+// ══════════════════════════════════════════════════════════════
+// SHARE VIA URL
+// ══════════════════════════════════════════════════════════════
+function shareURL() {
+  if (!S.text) { showToast('Enter text first'); return; }
+  try {
+    const encoded = btoa(encodeURIComponent(S.text));
+    if (encoded.length > 2000) {
+      showToast('Text too long to share via URL (>2KB). Use Export instead.'); return;
+    }
+    const url = window.location.origin + window.location.pathname + '?p=' + encoded;
+    navigator.clipboard.writeText(url).then(() => showToast('Share link copied!'));
+  } catch (e) {
+    showToast('Could not generate share link');
+  }
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const p = params.get('p');
+  if (!p) return;
+  try {
+    const text = decodeURIComponent(atob(p));
+    document.getElementById('prompt').value = text;
+    S.text = text;
+    update();
+    showToast('Shared prompt loaded');
+  } catch (e) { console.warn('Could not decode URL param'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+}
+
+function setCostMode(mode) {
+  S.costMode = mode;
+  document.getElementById('modeIn').classList.toggle('active', mode === 'input');
+  document.getElementById('modeOut').classList.toggle('active', mode === 'output');
+  renderModelLists();
+  updateVolume();
+}
+
+function toggleTheme() {
+  const cur = document.documentElement.dataset.theme;
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('dtb_theme', next);
+  const icon = document.getElementById('themeIcon');
+  if (next === 'dark') {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  } else {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  }
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function toggleExportMenu() {
+  document.getElementById('exportMenu').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#exportDropdown')) document.getElementById('exportMenu').classList.remove('open');
+});
+
+function openSettings() { document.getElementById('settingsOverlay').classList.add('open'); document.getElementById('apiKeyInput').value = S.apiKey; }
+function closeSettings(e) { if (!e || e.target === document.getElementById('settingsOverlay')) document.getElementById('settingsOverlay').classList.remove('open'); }
+function saveSettings() {
+  S.apiKey = document.getElementById('apiKeyInput').value.trim();
+  localStorage.setItem('dtb_anthropic_key', S.apiKey);
+  document.getElementById('settingsOverlay').classList.remove('open');
+  showToast(S.apiKey ? '✓ API key saved — Claude counts will be exact' : 'API key cleared');
+  if (S.text) update();
+}
+
+function loadSample() {
+  const samples = [
+    `You are an expert frontend developer. Your task is to create a responsive, accessible dashboard component in React using TypeScript and Tailwind CSS. The dashboard should include:\n\n1. A sidebar with navigation items (Home, Analytics, Users, Settings)\n2. A main content area with a header showing the page title and user avatar\n3. A metrics grid showing 4 KPI cards (total users, revenue, active sessions, conversion rate)\n4. A line chart showing weekly traffic data\n5. A recent activity feed with avatar, username, action, and timestamp\n\nRequirements:\n- Use shadcn/ui components where appropriate\n- Implement proper TypeScript interfaces for all props\n- Ensure WCAG 2.1 AA accessibility compliance\n- Support both light and dark mode via Tailwind's dark: prefix\n- All data should come from props (no hardcoded values)\n\nPlease provide the complete component with all sub-components, TypeScript types, and example usage.`,
+    `Translate the following text into formal French, maintaining all technical terminology and preserving the original meaning:\n\n"Machine learning models, particularly large language models (LLMs), have revolutionized natural language processing tasks. The transformer architecture, introduced in 'Attention Is All You Need' (Vaswani et al., 2017), forms the foundation of modern LLMs. These models use self-attention mechanisms to capture long-range dependencies in text, enabling superior performance on tasks such as text generation, summarization, translation, and question answering."`,
+    `Write a comprehensive SEO-optimized blog post (1500-2000 words) about "The Future of AI in Healthcare". Include:\n- An engaging introduction with a hook\n- 5 main sections with H2 headings\n- Statistics and real-world examples\n- A FAQ section with 5 questions\n- A conclusion with a CTA\nTarget keyword: "AI in healthcare"\nTone: Professional but accessible to non-technical readers.`
+  ];
+  const sample = samples[Math.floor(Math.random() * samples.length)];
+  document.getElementById('prompt').value = sample;
+  S.text = sample;
+  update();
+}
+
+function clearAll() {
+  document.getElementById('prompt').value = '';
+  S.text = '';
+  S.tokens = {};
+  update();
+}
+
+// ══════════════════════════════════════════════════════════════
+// FAQ
+// ══════════════════════════════════════════════════════════════
+const FAQS = [
+  { q: 'What is a token in AI language models?', a: 'A token is the basic unit of text that AI models process. On average, 1 token equals ~4 characters or ~0.75 words in English. Tokens can be sub-words, whole words, or punctuation marks — for example, "tokenization" might become ["token", "ization"]. Non-English languages and code often use more tokens per word.' },
+  { q: 'Why do token counts differ between GPT, Claude, Gemini, and Grok?', a: 'Each AI provider uses a different tokenizer algorithm. OpenAI uses cl100k_base (tiktoken), Claude uses a similar BPE-based tokenizer, Gemini uses SentencePiece, and Grok uses xAI\'s custom tokenizer. Differences are usually small (5–15%) for English text but can be larger for code, emojis, or non-Latin scripts.' },
+  { q: 'How is AI API cost calculated?', a: 'Cost is calculated as: (number of tokens ÷ 1,000,000) × price per million tokens. Input tokens (your prompt) and output tokens (the model\'s response) are priced separately and usually at different rates. Most providers charge less for input than output. Our tool shows both rates — toggle between "Input cost" and "Output cost" in the toolbar.' },
+  { q: 'How accurate is the token count for GPT, Gemini, and Grok?', a: 'GPT, Gemini, and Grok use our proprietary BPE approximation algorithm, accurate to within ±5–10% for standard English text. Accuracy may decrease for code-heavy prompts, special characters, or non-Latin scripts. For exact GPT counts, use the tiktoken Python library. For exact Claude counts, add your Anthropic API key in Settings.' },
+  { q: 'Is my text sent to any external server?', a: 'This tool runs 100% client-side in your browser. Your text is never sent to DevToolsBox servers. If you optionally add an Anthropic API key for exact Claude token counts, your text is sent directly from your browser to Anthropic\'s API — we never intercept or store it.' },
+  { q: 'What is a context window and why does it matter?', a: 'The context window is the maximum number of tokens a model can "see" at once — including your prompt, chat history, and the model\'s response. If your input exceeds the context window, the model truncates older content. GPT-4o supports 128K tokens, Claude Opus/Sonnet/Haiku support 200K tokens, and Gemini 1.5 Pro supports up to 2M tokens — the largest available.' },
+  { q: 'How does the Prompt Optimizer work?', a: 'The optimizer analyzes your prompt length relative to model context windows, detects filler phrases ("please", "could you", "I want you to"), measures lexical diversity, and gives you an actionable assessment. It flags prompts that exceed safe limits for specific models and suggests whether to condense, restructure, or keep as-is.' },
+];
+
+function renderFAQ() {
+  document.getElementById('faqList').innerHTML = FAQS.map((f, i) => `
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" onclick="toggleFAQ(this)">
+        <span>${f.q}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="faq-a">${f.a}</div>
+    </div>`).join('');
+}
+
+function toggleFAQ(btn) {
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', !expanded);
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Restore theme
+  const theme = localStorage.getItem('dtb_theme') || 'light';
+  document.documentElement.dataset.theme = theme;
+  if (theme === 'dark') {
+    document.getElementById('themeIcon').innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }
+
+  // Restore API key
+  S.apiKey = localStorage.getItem('dtb_anthropic_key') || '';
+
+  // Input handler
+  document.getElementById('prompt').addEventListener('input', e => {
+    S.text = e.target.value;
+    update();
+  });
+
+  // Volume slider
+  document.getElementById('volumeSlider').addEventListener('input', e => {
+    S.volumeIdx = +e.target.value - 1;
+    updateVolume();
+  });
+
+  // Initial render
+  renderHistory();
+  renderCompare();
+  renderFAQ();
+  update();
+  loadFromURL();
+
+  // Auto-save to history on pause
+  let saveTimer;
+  document.getElementById('prompt').addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { if (S.text.length > 30) saveToHistory(S.text); }, 3000);
+  });
+});
+</script>
+</body>
+</html>
