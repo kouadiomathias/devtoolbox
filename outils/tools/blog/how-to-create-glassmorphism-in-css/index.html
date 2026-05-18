@@ -1,23 +1,24 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>How to Create Glassmorphism in CSS – Complete Guide with Real Examples</title>
-    <meta name="description" content="Learn how to create the frosted glass effect in CSS using backdrop-filter, transparency, and subtle borders. Includes variants, code snippets, and our free visual generator.">
-    <meta name="keywords" content="glassmorphism css, frosted glass effect css, how to create glassmorphism, backdrop-filter blur, css glass card, glassmorphism tutorial">
+    <meta name="description" content="Master the frosted glass effect in CSS with backdrop-filter, transparency, and subtle borders. In-depth tutorial, variants, code snippets, performance tips, and our free visual generator.">
+    <meta name="keywords" content="glassmorphism css, frosted glass effect css, how to create glassmorphism, backdrop-filter blur, css glass card, glassmorphism tutorial, backdrop-filter vs filter, glassmorphism tailwind, glassmorphism react, glassmorphism performance, glassmorphism accessibility">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="DevToolbox">
+    <meta name="author" content="Devstoolsbox">
     <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/how-to-create-glassmorphism-in-css/">
     <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/how-to-create-glassmorphism-in-css/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/glassmorphism-css-comment-faire/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/comment-creer-glassmorphism-en-css/">
     <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/how-to-create-glassmorphism-in-css/">
 
     <meta property="og:title" content="How to Create Glassmorphism in CSS – Complete Guide">
     <meta property="og:description" content="Step-by-step tutorial to create frosted glass effects with CSS. Includes backdrop-filter, transparency, variants, and code examples.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/how-to-create-glassmorphism-in-css/">
-    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:site_name" content="Devstoolsbox">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Create Glassmorphism in CSS">
@@ -28,11 +29,11 @@
             "@context": "https://schema.org",
             "@type": "Article",
             "headline": "How to Create Glassmorphism in CSS – Complete Guide with Real Examples",
-            "author": { "@type": "Person", "name": "DevToolbox Team" },
+            "author": { "@type": "Person", "name": "Devstoolsbox Team" },
             "datePublished": "2026-04-28",
-            "dateModified": "2026-04-28",
+            "dateModified": "2026-05-18",
             "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/how-to-create-glassmorphism-in-css/",
-            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+            "publisher": { "@type": "Organization", "name": "Devstoolsbox", "url": "https://www.devstoolsbox.dev/" }
         }
     </script>
     <script type="application/ld+json">
@@ -40,8 +41,9 @@
             "@context": "https://schema.org",
             "@type": "FAQPage",
             "mainEntity": [
-                { "@type": "Question", "name": "How do I create a glassmorphism effect in CSS?", "acceptedAnswer": { "@type": "Answer", "text": "Use background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); on a container to get the frosted glass look." } },
-                { "@type": "Question", "name": "What browser support does backdrop-filter have?", "acceptedAnswer": { "@type": "Answer", "text": "backdrop-filter is supported in all modern browsers: Chrome 76+, Firefox 103+, Safari 9+ (with -webkit- prefix). Provide a fallback background for older browsers." } }
+                { "@type": "Question", "name": "Why does my glassmorphism effect break when I use z-index: -1?", "acceptedAnswer": { "@type": "Answer", "text": "backdrop-filter creates a new stacking context, which means elements with negative z-index behind the glass card can get hidden. To fix it, place the background inside a wrapper with a positive z-index or restructure the HTML." } },
+                { "@type": "Question", "name": "Is backdrop-filter performance heavy on mobile?", "acceptedAnswer": { "@type": "Answer", "text": "It can be. backdrop-filter forces the browser to create a new composite layer, which may cause frame drops on low-end devices or with large blur values. For animated elements, keep blur under 12px, use will-change: backdrop-filter sparingly, and always test on real devices." } },
+                { "@type": "Question", "name": "How can I make glassmorphism accessible?", "acceptedAnswer": { "@type": "Answer", "text": "Since backdrop-filter makes contrast dynamic, you can't rely on a single static test. Ensure text remains readable over the lightest possible background by increasing background opacity or adding a subtle text-shadow. Always test with a real background." } }
             ]
         }
     </script>
@@ -65,38 +67,21 @@
     </script>
     <style>
         :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --surface2: #f1f5f9;
-            --primary: #7c3aed;
-            --primary-hover: #6d28d9;
-            --primary-light: rgba(124,58,237,0.08);
-            --text: #0f172a;
-            --text2: #374151;
-            --text3: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --radius: 16px;
-            --code-bg: #1e293b;
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08); --text: #0f172a;
+            --text2: #374151; --text3: #64748b; --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06); --radius: 16px; --code-bg: #1e293b;
             --code-color: #e2e8f0;
         }
         body.dark {
-            --bg: #0b0f19;
-            --surface: #151a28;
-            --surface2: #1d2333;
-            --primary: #a78bfa;
-            --primary-hover: #8b5cf6;
-            --text: #f1f5f9;
-            --text2: #cbd5e1;
-            --text3: #94a3b8;
-            --border: #2d3548;
-            --code-bg: #0f172a;
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg); color: var(--text);
-            line-height:1.7; padding:20px;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px;
             transition: background 0.3s, color 0.3s;
         }
         .container { max-width:900px; margin:0 auto; }
@@ -144,12 +129,19 @@
             h1 { font-size:1.6rem; }
             .article-card { padding:20px; }
         }
+        table {
+            width:100%; border-collapse: collapse; margin: 20px 0; font-size:0.9rem;
+        }
+        th, td {
+            border: 1px solid var(--border); padding: 10px 14px; text-align: left;
+        }
+        th { background: var(--surface2); font-weight: 600; }
     </style>
 </head>
 <body>
 <div class="container">
     <header class="header">
-        <a href="/" class="logo">DevToolbox</a>
+        <a href="/" class="logo">Devstoolsbox</a>
         <div class="header-right">
             <div class="theme-toggle">
                 <button class="theme-btn active" data-theme="light"> Light</button>
@@ -157,7 +149,7 @@
             </div>
             <div class="lang-switch">
                 <a href="/tools/blog/how-to-create-glassmorphism-in-css/" class="lang-btn active">EN</a>
-                <a href="/fr/blog/glassmorphism-css-comment/" class="lang-btn">FR</a>
+                <a href="/fr/blog/comment-creer-glassmorphism-en-css/" class="lang-btn">FR</a>
             </div>
         </div>
     </header>
@@ -165,166 +157,207 @@
     <main>
         <article class="article-card">
             <h1>How to Create Glassmorphism in CSS – Real‑World Examples and Pro Tips</h1>
-            <div class="meta">Published on April 28, 2026 by the DevToolbox Team — 7 min read</div>
+            <div class="meta">Published on April 28, 2026 · Updated May 18, 2026 — 10 min read</div>
 
             <p>
-                Glassmorphism is everywhere right now: dashboards, landing pages, mobile apps. 
-                You’ve seen those frosted glass panels that blur whatever sits behind them, 
-                giving depth without hiding the background completely. 
-                The good news is you don’t need Photoshop or complex SVG filters — 
-                you can achieve this look with a handful of CSS properties. 
-                In this article I’ll show you exactly how to build a glassmorphism card from scratch, 
-                explore variations, and point you to a free visual generator that speeds up the entire process.
+                Glassmorphism has taken over dashboards, landing pages, and mobile interfaces. Those frosted glass panels that blur the background just enough to create depth — they're built with pure CSS, no extra plugins. In this guide, we’ll build a glass card step by step, then dig into the details that trip up most developers: the difference between <code>backdrop-filter</code> and <code>filter</code>, performance on mobile, stacking context surprises, and how to keep the effect accessible. Along the way, you’ll find ready‑to‑use code snippets and a link to our free visual generator that does the heavy lifting for you.
             </p>
 
-            <h2>What is glassmorphism?</h2>
+            <h2>The three ingredients of glassmorphism</h2>
             <p>
-                Glassmorphism relies on three ingredients:
+                A convincing glass effect always relies on:
             </p>
             <ul>
-                <li>A <strong>semi‑transparent background</strong> (usually white or a very light tint).</li>
-                <li>A <strong>backdrop‑filter blur</strong> that freezes whatever is behind the element.</li>
-                <li>A <strong>subtle border</strong> that reinforces the glass edge.</li>
+                <li>A <strong>semi‑transparent background</strong>, usually white or a very light tint.</li>
+                <li>A <strong>backdrop‑filter blur</strong> that freezes the content behind the element.</li>
+                <li>A <strong>subtle border</strong> that defines the edge of the glass.</li>
             </ul>
-            <p>
-                The result feels like a piece of frosted glass hovering over a colorful surface. 
-                It works especially well on top of gradient backgrounds, images, or busy illustrations.
-            </p>
 
-            <h2>The essential CSS properties</h2>
+            <h2>The basic glass card CSS</h2>
             <p>
-                Here is the simplest glass card you can create:
+                Here’s the shortest version that works across modern browsers:
             </p>
             <pre><code>.glass-card {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); /* for Safari */
+  -webkit-backdrop-filter: blur(12px); /* Safari */
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 28px;
   color: #fff;
 }</code></pre>
             <p>
-                Let’s break that down:
+                Let’s break down each property. <code>background: rgba(255,255,255,0.2)</code> gives you that almost‑invisible white layer. The alpha value controls how much the background peeks through. <code>backdrop-filter: blur(12px)</code> does the actual blurring — it’s a Gaussian blur applied to everything <strong>behind</strong> the element. The <code>-webkit-</code> prefix is still needed for Safari. Finally, the border adds a faint glassy rim; without it, the card can melt into the background.
+            </p>
+
+            <h2>backdrop-filter vs filter: a crucial distinction</h2>
+            <p>
+                Many newcomers confuse <code>backdrop-filter</code> with <code>filter</code>. They’re fundamentally different, and using the wrong one breaks the glass effect entirely.
             </p>
             <ul>
-                <li><code>background: rgba(255,255,255,0.2)</code> — a nearly transparent white layer. Adjust the alpha (0.2) to increase or decrease opacity.</li>
-                <li><code>backdrop-filter: blur(12px)</code> — the magic. It applies a Gaussian blur to everything behind the element.</li>
-                <li><code>-webkit-backdrop-filter</code> — Safari still requires the vendor prefix, so keep both lines.</li>
-                <li><code>border</code> — a very faint white border; without it, the glass edge can disappear on light backgrounds.</li>
+                <li><strong>filter</strong> applies to the element itself and all its children. If you write <code>filter: blur(5px)</code>, the card and the text inside it will look like smudged glass — not what you want.</li>
+                <li><strong>backdrop-filter</strong> only affects what lies behind the element. The card itself stays sharp; only the background gets the frost treatment.</li>
             </ul>
+            <p>A side‑by‑side comparison makes it clear:</p>
+            <pre><code>/* ❌ wrong for glass: the whole card becomes blurry */
+.card-blurry {
+  filter: blur(8px);
+}
 
-            <h2>Building your first glass card step by step</h2>
-            <p>
-                Assume you have a hero section with a vibrant gradient. You want a white card in the middle 
-                that lets the gradient show through.
-            </p>
-
-            <h3>1. The background layer</h3>
-            <p>Set up a full‑screen container with a linear gradient:</p>
-            <pre><code>body {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
+/* ✅ correct: only the background is blurred */
+.card-glass {
+  backdrop-filter: blur(12px);
 }</code></pre>
-
-            <h3>2. The glass card HTML</h3>
-            <pre><code>&lt;div class="glass-card"&gt;
-  &lt;h2&gt;Hello Glassmorphism&lt;/h2&gt;
-  &lt;p&gt;This card uses pure CSS.&lt;/p&gt;
-&lt;/div&gt;</code></pre>
-
-            <h3>3. Combine and refine</h3>
             <p>
-                Place the card inside the gradient background. 
-                You’ll immediately see the blur effect. 
-                If the text is hard to read, increase the background opacity slightly (to 0.3 or 0.4) 
-                or add a subtle <code>text-shadow</code>.
+                So remember: <strong>backdrop-filter</strong> for glass, <strong>filter</strong> for manipulating the element itself (like grayscale or opacity changes).
             </p>
 
-            <h2>Variants and fine‑tuning</h2>
+            <h2>Performance: when blur hurts frame rate</h2>
             <p>
-                Once you master the basic recipe, you can tweak it for different moods:
+                <code>backdrop-filter</code> forces the browser to create a new composite layer. That layer gets redrawn every time the background changes, which can be costly on mobile devices or when animated. A heavy blur (20px+) on a large card can drop frames, especially on budget phones.
             </p>
+            <p>Practical rules for smooth glass effects:</p>
             <ul>
-                <li><strong>Dark glass</strong>: use <code>rgba(0,0,0,0.3)</code> instead of white, with a dark border.</li>
-                <li><strong>Colored glass</strong>: replace white with a tinted <code>rgba(100, 150, 255, 0.2)</code> to match your brand.</li>
-                <li><strong>Extra blur</strong>: push <code>blur()</code> to 20px or more for a dreamy, out‑of‑focus feel.</li>
-                <li><strong>Gradient border</strong>: swap the solid border with a gradient using <code>border-image</code> or a pseudo‑element.</li>
-                <li><strong>Animated background</strong>: apply a slow <code>hue-rotate</code> animation to the background and watch the glass reflect the changing colors.</li>
+                <li>Keep blur under 12-15px for elements that animate or scroll. Static cards can go higher.</li>
+                <li>Use <code>will-change: backdrop-filter</code> sparingly — it tells the browser to prepare a separate layer, but overusing it wastes GPU memory.</li>
+                <li>Always test on a real device, not just Chrome DevTools. Open the Performance tab and look for composite layer repaints.</li>
             </ul>
 
-            <h2>Common pitfalls and how to avoid them</h2>
+            <h2>The stacking context trap (and why z-index: -1 breaks)</h2>
             <p>
-                The biggest mistake is poor text readability. 
-                White text on a 20% white background can be illegible over a light image. 
-                Always test with a real background. Our 
-                <a href="https://www.devstoolsbox.dev/tools/visual-effects-generator/">Visual Effects Generator</a> 
-                includes a built‑in contrast checker that tells you if your text meets WCAG AA standards.
+                A subtle but common bug: <code>backdrop-filter</code> creates a <strong>stacking context</strong>. That means any element behind the glass card with a negative z-index might get hidden, even if you expect it to stay visible. This happens because the glass element and the negative‑z background now belong to different stacking layers.
             </p>
             <p>
-                Another gotcha: <code>backdrop-filter</code> is not supported in Internet Explorer. 
-                For those rare cases, fall back to a solid <code>background: rgba(255,255,255,0.7)</code> 
-                so the content remains readable.
+                For example, if you place a gradient background with <code>z-index: -1</code> and then a glass card on top, the background might disappear behind the card — not because of the blur, but because of the stacking context. The fix? Avoid negative z‑indexes on backgrounds; instead, place the background in a wrapper with a positive z‑index or rely on natural DOM order.
             </p>
 
-            <h2>Using the free DevToolbox glassmorphism generator</h2>
+            <h2>Glassmorphism vs neumorphism vs skeuomorphism</h2>
             <p>
-                Manually adjusting blur, opacity, border, and shadow can feel like guesswork. 
-                Our visual generator lets you drag sliders and see the result live on a sample card, 
-                button, or navbar. Once you’re happy, copy the CSS (or Tailwind class, or React JSX) 
-                with one click. No data is sent to a server — everything runs in your browser.
+                Glassmorphism is often mentioned alongside neumorphism and skeuomorphism. They all create depth, but each has a different philosophy.
+            </p>
+            <table>
+                <thead>
+                    <tr><th>Aspect</th><th>Glassmorphism</th><th>Neumorphism</th><th>Skeuomorphism</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Visual style</td><td>Frosted glass, transparency</td><td>Soft extruded shapes, monochrome shadows</td><td>Realistic textures (leather, wood, metal)</td></tr>
+                    <tr><td>Key technique</td><td>backdrop-filter</td><td>Multiple box‑shadows</td><td>Gradients, textures, complex images</td></tr>
+                    <tr><td>Readability</td><td>Good if contrast is checked</td><td>Often poor; low contrast</td><td>Variable</td></tr>
+                    <tr><td>Performance</td><td>Moderate (composite layer)</td><td>Light</td><td>Heavy (images, large CSS)</td></tr>
+                    <tr><td>Best for</td><td>Dashboards, modals, overlays</td><td>Minimalist controls, toggles</td><td>Legacy apps, retro UIs</td></tr>
+                </tbody>
+            </table>
+            <p>
+                Use glassmorphism when you want depth but still need to show the background content. Neumorphism suits simple, static controls. Skeuomorphism is mostly historical now.
+            </p>
+
+            <h2>Tailwind CSS glass card</h2>
+            <p>
+                If you’re working with Tailwind, you can achieve the same effect with utility classes. Here’s a glass card in pure Tailwind:
+            </p>
+            <pre><code>&lt;div class="backdrop-blur-md bg-white/20 border border-white/30 rounded-2xl p-7"&gt;
+  &lt;h2 class="text-white text-xl font-semibold"&gt;Glass Card&lt;/h2&gt;
+  &lt;p class="text-white/80"&gt;Built with Tailwind.&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+            <p>
+                <code>backdrop-blur-md</code> corresponds to a medium blur (12px by default). You can use <code>backdrop-blur-sm</code> or <code>backdrop-blur-lg</code> as needed.
+            </p>
+
+            <h2>React component with styled‑components</h2>
+            <p>
+                To make a reusable glass card in a React project, you can create a styled component with adjustable opacity and blur:
+            </p>
+            <pre><code>import styled from 'styled-components';
+
+const GlassCard = styled.div`
+  background: rgba(255, 255, 255, ${props => props.opacity || 0.2});
+  backdrop-filter: blur(${props => props.blur || 12}px);
+  -webkit-backdrop-filter: blur(${props => props.blur || 12}px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 28px;
+  color: white;
+`;
+
+// Usage
+&lt;GlassCard opacity={0.25} blur={16}&gt;
+  &lt;h2&gt;Dashboard&lt;/h2&gt;
+&lt;/GlassCard&gt;</code></pre>
+
+            <h2>Browser support: the full picture</h2>
+            <table>
+                <thead>
+                    <tr><th>Browser</th><th>Supported</th><th>Minimum version</th><th>Notes</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Chrome</td><td>✅</td><td>76+</td><td>No prefix needed</td></tr>
+                    <tr><td>Firefox</td><td>✅</td><td>103+</td><td>Enabled by default</td></tr>
+                    <tr><td>Safari</td><td>✅</td><td>9+</td><td>Requires <code>-webkit-</code> prefix</td></tr>
+                    <tr><td>Edge</td><td>✅</td><td>79+</td><td>Chromium‑based, same as Chrome</td></tr>
+                    <tr><td>Samsung Internet</td><td>✅</td><td>10+</td><td></td></tr>
+                    <tr><td>Internet Explorer 11</td><td>❌</td><td>—</td><td>Fallback necessary</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Progressive fallback for unsupported browsers</h2>
+            <p>
+                Instead of leaving IE11 users with a completely broken layout, provide a solid semi‑opaque background as a fallback. The <code>@supports</code> at‑rule lets you write clean, progressive enhancement:
+            </p>
+            <pre><code>.glass-card {
+  /* Fallback: solid but translucent */
+  background: rgba(255, 255, 255, 0.7);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}</code></pre>
+            <p>
+                This way, every browser gets a usable design. IE11 sees a solid white card; modern browsers get the frosted glass.
+            </p>
+
+            <h2>Accessibility: making glass readable for everyone</h2>
+            <p>
+                <code>backdrop-filter</code> creates a dynamic contrast problem. The text sits on a background whose brightness depends on what’s behind the glass — a dark image might give enough contrast, while a light gradient might not. Static contrast checkers can’t capture this.
+            </p>
+            <p>Here’s how to keep your glass panels accessible:</p>
+            <ul>
+                <li>Test the card against the <strong>lightest possible background</strong> it will ever have. If the text passes WCAG AA contrast in that worst‑case scenario, it’s safe.</li>
+                <li>Increase the background opacity slightly (to 0.3–0.4) if readability is weak.</li>
+                <li>Add a <strong>subtle text‑shadow</strong> to improve legibility, e.g., <code>text-shadow: 0 1px 3px rgba(0,0,0,0.5);</code></li>
+            </ul>
+            <p>
+                Our <a href="https://www.devstoolsbox.dev/tools/visual-effects-generator/">Visual Effects Generator</a> includes a real‑time preview of how the card looks over different background types, so you can verify readability before copying the code.
+            </p>
+
+            <h2>Use the free Devstoolsbox glassmorphism generator</h2>
+            <p>
+                Tuning blur, opacity, border, and shadow by hand can be tedious. Our generator gives you live sliders and instant previews. Once you’re satisfied, export the CSS (or Tailwind, or React JSX) with one click. Everything runs in your browser — no uploads, no server.
             </p>
             <p>
                 <a href="https://www.devstoolsbox.dev/tools/visual-effects-generator/" class="btn-tool">🔧 Open the Glassmorphism Generator</a>
             </p>
 
-            <h2>Combining with other DevToolbox tools</h2>
-            <p>
-                Once you have your glass panel, you can complement it with other free utilities:
-            </p>
-            <ul>
-                <li><a href="https://www.devstoolsbox.dev/tools/background-generator/">Background Generator</a> — create the perfect gradient or mesh background to place behind your glass element.</li>
-                <li><a href="https://www.devstoolsbox.dev/tools/css-shape-generator/">CSS Shape Generator</a> — clip your glass card into a polygon or blob for a more organic look.</li>
-                <li><a href="https://www.devstoolsbox.dev/tools/json-formatter/">JSON Formatter</a> — handy if you’re configuring design tokens or theme files.</li>
-                <li><a href="https://www.devstoolsbox.dev/tools/password-hash-generator/">Password & Hash Generator</a> — secure any authentication forms you overlay on glass panels.</li>
-            </ul>
-
             <h2>Real‑world examples</h2>
             <p>
-                <strong>Dashboard widgets</strong>: a semi‑transparent stat card with blur sits on top of a data map. 
-                <strong>Login modals</strong>: a frosted modal over a blurred screenshot of the app behind it. 
-                <strong>Product cards</strong>: e‑commerce cards that reveal the background hero image through the card body.
+                <strong>Dashboard widgets</strong>: a semi‑transparent stat card with blur sits on top of a data map, making the map visible but the numbers crisp. <strong>Login modals</strong>: a frosted modal over a blurred screenshot of the app behind it gives a premium, layered feel. <strong>Product cards</strong>: e‑commerce cards that reveal the background hero image through the card body, linking the product to the overall brand imagery.
             </p>
 
             <h2>Frequently Asked Questions</h2>
-            <h3>How do I create a frosted glass effect in CSS?</h3>
+            <h3>Why does my glassmorphism effect break when I use z-index: -1?</h3>
             <p>
-                Set <code>background: rgba(255,255,255,0.2)</code>, <code>backdrop-filter: blur(10px)</code>, 
-                and a subtle <code>border: 1px solid rgba(255,255,255,0.3)</code> on any container.
+                <code>backdrop-filter</code> creates a new stacking context. Elements with negative z‑index behind the glass card may get hidden. Instead of negative z‑index, restructure the HTML so the background is naturally behind the card.
             </p>
-
-            <h3>Does backdrop-filter work on all browsers?</h3>
+            <h3>Is backdrop-filter heavy on mobile?</h3>
             <p>
-                It works in Chrome 76+, Firefox 103+, Safari 9+ (with <code>-webkit-</code> prefix), and Edge. 
-                Provide a fallback solid background for older browsers.
+                It can be. On low‑end devices, a large blur can drop frames. Keep blur under 12px for animated elements, use <code>will-change</code> only when needed, and test on real hardware.
             </p>
-
-            <h3>Can I animate a glassmorphism card?</h3>
-            <h2>Popular Uses of Glassmorphism in UI Design</h2>
-            <ul>
-            <li>Glassmorphism login forms</li>
-            <li>Frosted glass navigation bars</li>
-            <li>Glass effect dashboard cards</li>
-            <li>Modern SaaS landing pages</li>
-            <li>Mobile app UI design</li>
-            </ul>
+            <h3>How can I make glassmorphism accessible?</h3>
             <p>
-                Yes. You can animate the <code>backdrop-filter</code> or the background opacity on hover 
-                for a subtle interactive effect.
+                Since contrast is dynamic, test against the lightest background. If needed, increase background opacity or add a subtle text shadow. Always preview on real background images.
             </p>
 
             <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/tools/visual-effects-generator/" class="btn-tool"> Try the Free Visual Effects Generator</a></p>
@@ -332,7 +365,7 @@
     </main>
 
     <footer class="footer">
-        <p>&copy; 2025 <a href="/">DevToolbox</a> — Free tools for developers and designers. <a href="https://www.devstoolsbox.dev/tools/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
+        <p>&copy; 2025 <a href="/">Devstoolsbox</a> — Free tools for developers and designers. <a href="https://www.devstoolsbox.dev/tools/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
     </footer>
 </div>
 
