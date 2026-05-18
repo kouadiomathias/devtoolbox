@@ -41,10 +41,8 @@
             "@context": "https://schema.org",
             "@type": "FAQPage",
             "mainEntity": [
-                { "@type": "Question", "name": "Comment écrire une expression cron toutes les 5 minutes ?", "acceptedAnswer": { "@type": "Answer", "text": "*/5 * * * * en cron standard. Les cinq champs : minute, heure, jour du mois, mois, jour de la semaine." } },
-                { "@type": "Question", "name": "Quelle est la différence entre cron Linux et cron AWS ?", "acceptedAnswer": { "@type": "Answer", "text": "Linux utilise 5 champs, AWS CloudWatch (et Quartz) peut utiliser 6 champs avec les secondes. Notre générateur gère les deux." } },
-                { "@type": "Question", "name": "Pourquoi ma tâche cron ne s'exécute pas ?", "acceptedAnswer": { "@type": "Answer", "text": "Vérifiez le PATH, les permissions, redirigez la sortie vers un fichier et consultez /var/log/syslog. Utilisez MAILTO pour recevoir les erreurs." } },
-                { "@type": "Question", "name": "Comment éviter qu'une tâche cron se lance en double si elle prend plus de temps que l'intervalle ?", "acceptedAnswer": { "@type": "Answer", "text": "Utilisez flock, run-one ou la propriété concurrencyPolicy: Forbid dans Kubernetes." } }
+                { "@type": "Question", "name": "Pourquoi ma tâche cron ne s'exécute-t-elle pas alors que l'expression semble correcte ?", "acceptedAnswer": { "@type": "Answer", "text": "Dans la majorité des cas, le coupable n'est pas l'expression — c'est l'environnement. Le PATH dans cron est réduit à /usr/bin:/bin, sans les chemins personnalisés de votre shell interactif. Un script qui appelle python3 ou node sans chemin absolu échoue silencieusement parce que cron ne trouve pas la commande. Ajoutez PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin en tête de crontab, redirigez les sorties avec >> /var/log/mon_job.log 2>&1, et consultez grep CRON /var/log/syslog pour voir ce que cron a réellement tenté d'exécuter." } },
+                { "@type": "Question", "name": "Comment éviter qu'une tâche cron se lance deux fois en parallèle si son exécution dépasse l'intervalle ?", "acceptedAnswer": { "@type": "Answer", "text": "Cron standard ne vérifie pas si une instance précédente tourne encore — il en lance une nouvelle à chaque déclenchement. Pour une tâche planifiée toutes les 5 minutes qui peut prendre 8 minutes, vous vous retrouvez rapidement avec plusieurs processus qui se marchent dessus. La solution la plus simple sur Linux est flock -n /tmp/mon_job.lock /chemin/script.sh : si le verrou est déjà pris, la nouvelle instance abandonne immédiatement. Sous Kubernetes, le paramètre .spec.concurrencyPolicy: Forbid dans le CronJob fait exactement la même chose sans aucune modification du script." } }
             ]
         }
     </script>
@@ -180,10 +178,10 @@
             <div class="meta">Publié le 17 mai 2026 par l'équipe DevToolbox — 15 min de lecture</div>
 
             <p>
-                Une expression cron semble simple : cinq champs et quelques étoiles. Pourtant, derrière cette simplicité se cachent des subtilités qui transforment une tâche planifiée en cauchemar silencieux. Ce guide vous donne <strong>toutes les clés</strong> pour maîtriser le format cron, que vous soyez sur Linux, Quartz, AWS ou Kubernetes. Vous y trouverez des tableaux d’opérateurs, les pièges du jour du mois, la gestion avancée des fuseaux horaires, une checklist de débugging et bien plus.
+                Vendredi soir, 23h47. Une sauvegarde critique ne s'est pas déclenchée. Vous ouvrez la crontab, l'expression semble correcte — 0 0 1 * 1 — et pourtant la tâche ne s'est jamais exécutée le premier lundi du mois comme prévu. Elle tournait le 1er de chaque mois et chaque lundi. Deux comportements pour une seule expression, parce que cron applique un OR silencieux quand les deux champs de jour sont spécifiés.
             </p>
             <p>
-                Pour tester chaque exemple en direct, utilisez notre <a href="https://www.devstoolsbox.dev/fr/outils/generateur-cron/">générateur d’expressions cron</a> gratuit, qui valide la syntaxe et affiche les prochaines exécutions.
+             Ce genre de surprise, on la rencontre une fois. Après, on vérifie toujours. Ce guide couvre les points que la documentation officielle effleure : le comportement OR du jour du mois, les opérateurs L, W et # de Quartz, la gestion des fuseaux horaires quand l'heure d'été bascule, pourquoi votre script marche en manuel mais jamais en cron, et quand il vaut mieux passer à systemd. Pour tester chaque exemple en direct, le générateur d'expressions cron valide la syntaxe et affiche les prochaines exécutions.   
             </p>
 
             <h2>1. Structure de base et opérateurs par champ</h2>
