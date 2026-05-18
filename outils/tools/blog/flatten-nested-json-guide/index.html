@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>How to Flatten Nested JSON — Convert to CSV / Excel Easily Online</title>
     <meta name="description" content="Learn how to flatten nested JSON objects into flat CSV columns or formatted JSON. Use our free online converter to turn complex API responses into Excel‑ready tables. No server upload, instant results.">
-    <meta name="keywords" content="flatten nested json online, json array to csv, json to excel online, convert api json to csv, nested json csv converter, json csv excel utf8, csv to formatted json">
+    <meta name="keywords" content="flatten nested json online, json array to csv, json to excel online, convert api json to csv, nested json csv converter, json csv excel utf8, csv to formatted json, flatten json algorithm, flatten vs normalize">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="DevToolbox">
+    <meta name="author" content="Devstoolsbox">
     <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
     <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
     <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
@@ -17,7 +18,7 @@
     <meta property="og:description" content="Flatten complex JSON structures into CSV, Excel, or formatted JSON with our free online tool. Step‑by‑step guide with examples.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
-    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:site_name" content="Devstoolsbox">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Flatten Nested JSON Online">
@@ -28,11 +29,11 @@
             "@context": "https://schema.org",
             "@type": "Article",
             "headline": "How to Flatten Nested JSON — Convert to CSV / Excel Easily Online",
-            "author": { "@type": "Person", "name": "DevToolbox Team" },
+            "author": { "@type": "Person", "name": "Devstoolsbox Team" },
             "datePublished": "2026-04-28",
-            "dateModified": "2026-04-28",
+            "dateModified": "2026-05-18",
             "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/",
-            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+            "publisher": { "@type": "Organization", "name": "Devstoolsbox", "url": "https://www.devstoolsbox.dev/" }
         }
     </script>
     <script type="application/ld+json">
@@ -40,9 +41,11 @@
             "@context": "https://schema.org",
             "@type": "FAQPage",
             "mainEntity": [
-                { "@type": "Question", "name": "How do I flatten nested JSON to CSV online without uploading my data?", "acceptedAnswer": { "@type": "Answer", "text": "Use our free JSON to CSV converter. It runs entirely in your browser — paste your JSON, check 'Flatten objects', and download the CSV. No data is sent to any server." } },
-                { "@type": "Question", "name": "Can I convert an API JSON response with nested objects into Excel?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Paste the API response into the JSON panel, specify the array path if needed, enable flattening, then download as CSV with UTF‑8 BOM for perfect Excel compatibility." } },
-                { "@type": "Question", "name": "What if my JSON array is buried inside data.users? Can I target it?", "acceptedAnswer": { "@type": "Answer", "text": "Absolutely. Use the 'Array path' field to enter data.users (or any dot‑notation path), and the converter will extract and flatten only that array." } }
+                { "@type": "Question", "name": "Why does my flattened CSV contain repeated rows for the same user?", "acceptedAnswer": { "@type": "Answer", "text": "That happens when you flatten a JSON object that contains an array (like orders). Each element of the array creates a new row with the parent columns repeated. If you want to avoid duplication, you can either export multiple CSV files (normalize) or decide how you want arrays to be represented (as JSON string, only first element, etc.)." } },
+                { "@type": "Question", "name": "What is the difference between flattening and normalizing JSON?", "acceptedAnswer": { "@type": "Answer", "text": "Flattening creates a single wide table where nested objects become dot‑notation columns and arrays produce multiple rows with repeated parent data. Normalizing splits the data into several tables linked by foreign keys, like users.csv and orders.csv. Use flattening for quick export, normalizing for database imports." } },
+                { "@type": "Question", "name": "Can I flatten JSON that has dots in the key names?", "acceptedAnswer": { "@type": "Answer", "text": "It's risky because dots are used as separators in flattened column names. Our tool detects dots in original keys and warns you. You can choose a different separator (like __) or rename the keys before flattening." } },
+                { "@type": "Question", "name": "What happens to null values when I flatten JSON?", "acceptedAnswer": { "@type": "Answer", "text": "In our tool, null values become empty cells in the CSV. That's usually what you want. If you need explicit 'null' strings or zeros, you can adjust the empty cell handling in the converter." } },
+                { "@type": "Question", "name": "How can I flatten extremely large JSON files (gigabytes)?", "acceptedAnswer": { "@type": "Answer", "text": "For huge files, use command‑line tools like jq or Python with pandas. We show examples in the article. Our online tool works best up to a few megabytes of JSON, completely in your browser." } }
             ]
         }
     </script>
@@ -150,7 +153,7 @@
 <body>
 <div class="container">
     <header class="header">
-        <a href="/" class="logo">DevToolbox</a>
+        <a href="/" class="logo">Devstoolsbox</a>
         <div class="header-right">
             <div class="theme-toggle">
                 <button class="theme-btn active" data-theme="light"> Light</button>
@@ -164,31 +167,28 @@
     </header>
 
     <main>
-        <article class="article-card">
+        <article class="article-card" itemscope itemtype="https://schema.org/Article">
             <h1>How to Flatten Nested JSON — Convert Complex API Data into Clean CSV / Excel in Seconds</h1>
-            <div class="meta">Published on April 28, 2026 by the DevToolbox Team — 7 min read</div>
+            <div class="meta">Published on April 28, 2026 · Updated May 18, 2026 — 8 min read</div>
 
             <p>
-                Almost every API returns nested JSON. You request a list of users, and inside each user there’s an 
-                <code>address</code> object with street, city, zip; maybe a <code>preferences</code> object, 
-                or an array of orders. Spreadsheets and databases, on the other hand, expect flat tables. 
-                The gap between the two is where <strong>flattening nested JSON</strong> becomes essential.
+                You ran JSON.parse() on the API response, opened it in your converter, and got [object Object] in the address column. That's the flattening problem. It's not just about clicking a button — knowing what happens under the hood, what breaks, and when to normalize instead of flatten will save you hours of debugging.
             </p>
             <p>
-                Whether you need to <strong>convert a JSON array to CSV</strong>, export <strong>json to excel online</strong>, 
+                Whether you need to <strong>convert a JSON array to CSV</strong>, export <strong>JSON to Excel online</strong>, 
                 or turn a raw API response into a formatted CSV that Excel can read with proper accents, 
                 this guide will show you the fastest, most private way to do it — without writing a single line of code.
             </p>
                 <figure style="margin: 28px 0; text-align: center;">
   <img
     src="/convertisseur-json-csv.webp"
-    alt="Interface du convertisseur JSON ↔ CSV de DevToolbox montrant l'aperçu du tableau et les options d'aplatissement"
+    alt="Devstoolsbox JSON ↔ CSV converter interface showing the table preview and flattening options"
     loading="lazy"
     decoding="async"
     style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
   >
   <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
-    Conversion JSON → CSV avec aplatissement automatique des objets imbriqués et chemin de tableau personnalisable.
+   JSON → CSV conversion with automatic flattening of nested objects and customizable array path.
   </figcaption>
 </figure>
             <h2>What does “flatten nested JSON” actually mean?</h2>
@@ -211,7 +211,7 @@
 Alice,Paris,75001</code></pre>
             <p>
                 The <code>address</code> sub‑object disappears; its fields become new columns with dot‑notation headers. 
-                That’s <strong>json to excel online</strong> 101, and it’s exactly what our 
+                That’s <strong>JSON to Excel online</strong> 101, and it’s exactly what our 
                 <a href="https://www.devstoolsbox.dev/tools/json-csv-converter/">JSON to CSV Converter</a> does automatically 
                 when you check the <strong>Flatten objects</strong> option.
             </p>
@@ -224,19 +224,111 @@ Alice,Paris,75001</code></pre>
                 You can <a href="https://www.devstoolsbox.dev/tools/jwt-decoder/">decode the JWT</a>, then flatten its payload into CSV for analysis.</li>
                 <li><strong>Share with non‑tech colleagues</strong>. They know Excel, not JSON paths.</li>
             </ul>
-            <h2>Common Uses for Flattening JSON</h2>
 
-                <ul>
-                <li>Export API responses to Excel</li>
-                <li>Import JSON into SQL databases</li>
-                <li>Analyze JSON data in spreadsheets</li>
-                <li>Create CSV reports from APIs</li>
-                <li>Prepare JSON for BI tools</li>
-                </ul>
-
-            <h2>Flatten nested JSON online — step by step with our free converter</h2>
+            <h2>How flattening works under the hood</h2>
             <p>
-                Our <strong>nested JSON csv converter</strong> requires no upload, no login, and no server communication. 
+                Flattening a JSON object is a recursive process. Starting from the top level, we walk through every key. 
+                If the value is another object (and not an array), we go deeper and prepend the parent key to the child keys, 
+                separating them with a dot. If the value is a simple type (string, number, boolean, null), we store it as a column. 
+            </p>
+            <p>
+                Here's the core algorithm in Python — just a few lines:
+            </p>
+            <pre><code>def flatten(obj, prefix='', sep='.'):
+    items = {}
+    for key, val in obj.items():
+        new_key = f"{prefix}{sep}{key}" if prefix else key
+        if isinstance(val, dict):
+            items.update(flatten(val, new_key, sep))
+        else:
+            items[new_key] = val
+    return items</code></pre>
+            <p>
+                And the same logic in JavaScript, ready to run in your browser:
+            </p>
+            <pre><code>function flatten(obj, prefix = '', sep = '.') {
+  return Object.keys(obj).reduce((acc, key) => {
+    const newKey = prefix ? `${prefix}${sep}${key}` : key;
+    if (typeof obj[key] === 'object' && !Array.isArray(obj[key]) && obj[key] !== null) {
+      Object.assign(acc, flatten(obj[key], newKey, sep));
+    } else {
+      acc[newKey] = obj[key];
+    }
+    return acc;
+  }, {});
+}</code></pre>
+            <p>
+                When you apply this to an array of objects (like an API response), you first flatten each element, then combine all 
+                keys into the CSV header. That's exactly what the Devstoolsbox converter does in real‑time.
+            </p>
+
+            <h2>Edge cases that surprise developers</h2>
+            <p>
+                Flattening is simple until you hit one of these real‑world scenarios:
+            </p>
+            <h3>Arrays of objects</h3>
+            <p>
+                If a field contains an array of objects — say <code>orders: [{id: 1}, {id: 2}]</code> — the basic flatten 
+                function can't turn that into a single column. Our tool outputs each array element as a new row, duplicating 
+                the parent fields. That's often what you want for a flat table, but it can lead to many rows. If you'd rather 
+                keep the array as a JSON string inside the cell, you can adjust the flattening options in the converter.
+            </p>
+            <h3>Null values</h3>
+            <p>
+                What happens when a field is <code>null</code>? In Devstoolsbox, null becomes an empty cell. 
+                This is clean for Excel; other tools might drop the column entirely. You can also choose to represent 
+                nulls as the string "null" or as 0 via the empty‑cell handling settings.
+            </p>
+            <h3>Dots in original key names</h3>
+            <p>
+                If your JSON already has keys like <code>"first.name"</code>, flattening with a dot separator will create 
+                a collision. Our tool warns you when it detects dots inside keys. You can switch the separator to <code>__</code> 
+                or rename those keys before flattening.
+            </p>
+            <h3>Maximum depth</h3>
+            <p>
+                While there's no hard limit, extremely deep nesting (10+ levels) can produce hundreds of columns. 
+                In such cases, you might want to flatten only the first few levels and keep the rest as a serialized JSON string. 
+                The converter lets you set a maximum flatten depth.
+            </p>
+
+            <h2>Flatten vs. normalize: which one do you really need?</h2>
+            <p>
+                People often confuse flattening with normalization. They serve different purposes.
+            </p>
+            <p>
+                <strong>Flattening</strong> produces a single wide table. Every nested object becomes extra columns; 
+                every array element becomes an extra row with parent data repeated. This is great for quick exports, 
+                Excel analysis, and reports.
+            </p>
+            <p>
+                <strong>Normalizing</strong> splits the data into multiple related tables — for example, a <code>users.csv</code> 
+                and an <code>orders.csv</code> linked by a <code>user_id</code>. This is the clean approach for relational databases.
+            </p>
+            <p>
+                When you flatten a user with orders, you get:
+            </p>
+            <pre><code>name,order.id,order.amount
+Alice,1,50
+Alice,2,30</code></pre>
+            <p>
+                If you normalize, you'd export two CSVs:
+            </p>
+            <pre><code># users.csv
+id,name
+1,Alice
+
+# orders.csv
+user_id,id,amount
+1,1,50
+1,2,30</code></pre>
+            <p>
+                Which one you pick depends on the downstream tool. Excel users love a flat table; database administrators prefer normalized tables.
+            </p>
+
+            <h2>Using the Devstoolsbox converter: a step‑by‑step guide</h2>
+            <p>
+                Our <strong>nested JSON CSV converter</strong> requires no upload, no login, and no server communication. 
                 Everything stays in your browser. Here’s the workflow:
             </p>
 
@@ -272,73 +364,92 @@ Alice,Paris,75001</code></pre>
             <h3>4. Convert and download</h3>
             <p>
                 Click <strong>Convert to CSV →</strong>. The generated CSV appears in the right panel. 
-                For <strong>json csv excel utf8</strong> compatibility, hit <strong>Download CSV (UTF‑8 BOM)</strong> — 
+                For <strong>JSON CSV Excel UTF‑8</strong> compatibility, hit <strong>Download CSV (UTF‑8 BOM)</strong> — 
                 this adds the invisible marker that tells Excel to display French accents, umlauts, and any special characters correctly.
             </p>
 
-            <h2>Going the other way: CSV to formatted JSON</h2>
+            <h2>For large files: pandas and jq</h2>
             <p>
-                If you have a flat CSV and want to reconstruct a nicely indented <strong>formatted JSON</strong>, 
-                the reverse path is just as simple:
+                The online tool shines for quick, interactive flattening. But when you're dealing with a multi‑gigabyte JSON export, 
+                you'll want a command‑line approach. Here are two proven methods.
             </p>
-            <ol>
-                <li>Paste your CSV into the right panel.</li>
-                <li>Choose the delimiter (comma, semicolon, tab, pipe) — the tool auto‑detects if you’re unsure.</li>
-                <li>Specify whether the first row contains column headers.</li>
-                <li>Handle empty cells: treat them as empty strings, <code>null</code>, or <code>0</code>.</li>
-                <li>Click <strong>← Convert to JSON</strong>. The result is a beautified JSON array, ready to be used in your code.</li>
-            </ol>
-
-            <h2>Why use our tool over writing a script?</h2>
+            <h3>Python with pandas</h3>
             <p>
-                Sure, you could write a Python or JavaScript function to flatten JSON. But every time the schema changes, 
-                you have to update the code. A visual converter with a live preview lets you adjust on the fly: 
-                toggle flattening, change the array path, or switch the delimiter without touching any code. 
-                Plus, it runs locally — no sensitive data ever leaves your machine.
+                Data analysts love <code>pd.json_normalize</code>. It does exactly what our tool does, but in a scriptable way. 
+                This snippet reads a JSON file, flattens the array at <code>data.users</code>, and writes a CSV with proper 
+                UTF‑8 BOM for Excel:
+            </p>
+            <pre><code>import pandas as pd
+import json
+
+with open('data.json') as f:
+    data = json.load(f)
+
+df = pd.json_normalize(data['data']['users'], sep='.')
+df.to_csv('output.csv', index=False, encoding='utf-8-sig')</code></pre>
+            <p>
+                <code>utf-8-sig</code> is Python's way of adding the UTF‑8 BOM. That little detail saves hours when colleagues open the file in Excel.
+            </p>
+            <h3>jq for the terminal</h3>
+            <p>
+                <code>jq</code> is a lightweight and incredibly fast JSON processor. To extract and flatten a subset of fields 
+                from a large nested array, you can run:
+            </p>
+            <pre><code>jq -r '.data.users[] | [.name, .address.city, .address.zip] | @csv' data.json</code></pre>
+            <p>
+                This pipes the flattened rows directly to stdout, which you can redirect to a CSV file. It's ideal for 
+                automated pipelines.
             </p>
 
-            <h2>Integrating with the rest of DevToolbox</h2>
+            <h2>Integrating with the rest of Devstoolsbox</h2>
             <p>
                 Once you’ve flattened your JSON into CSV, you might need:
             </p>
             <ul>
-                <li><a href="https://www.devstoolsbox.devstoolsbox.dev/tools/json-formatter/">JSON Formatter</a> — validate and pretty‑print your original JSON before flattening.</li>
+                <li><a href="https://www.devstoolsbox.dev/tools/json-formatter/">JSON Formatter</a> — validate and pretty‑print your original JSON before flattening.</li>
                 <li><a href="https://www.devstoolsbox.dev/tools/jwt-decoder/">JWT Decoder</a> — if your JSON contains a JWT token, decode it first to expose nested claims.</li>
                 <li><a href="https://www.devstoolsbox.dev/tools/password-hash-generator/">Password & Hash Generator</a> — secure any credentials you extract from the JSON.</li>
                 <li><a href="https://www.devstoolsbox.dev/tools/regex-tester/">Regex Tester</a> — clean up data fields before or after conversion.</li>
             </ul>
 
             <h2>Frequently Asked Questions</h2>
-            <h3>How can I flatten nested JSON online without uploading my data?</h3>
+            <h3>Why does my flattened CSV contain repeated rows for the same user?</h3>
             <p>
-                Use our free JSON to CSV converter. It runs entirely in your browser — paste your JSON, 
-                check “Flatten objects”, and download the CSV. No data is sent to any server.
+                That happens when you flatten a JSON object that contains an array (like orders). Each element of the array 
+                creates a new row with the parent columns repeated. If you want to avoid duplication, you can either export 
+                multiple CSV files (normalize) or decide how you want arrays to be represented (as JSON string, only first element, etc.).
             </p>
 
-            <h3>Can I convert an API JSON response with nested objects into Excel?</h3>
+            <h3>What is the difference between flattening and normalizing JSON?</h3>
             <p>
-                Yes. Paste the API response, specify the array path if needed, enable flattening, 
-                then download as CSV with UTF‑8 BOM for perfect Excel compatibility.
+                Flattening creates a single wide table; normalizing splits the data into several related tables. Use flattening 
+                for quick export, normalizing for database imports.
             </p>
 
-            <h3>What if my JSON array is buried inside <code>data.users</code>?</h3>
+            <h3>Can I flatten JSON that has dots in the key names?</h3>
             <p>
-                Use the <strong>Array path</strong> field to enter <code>data.users</code> (or any dot‑notation path), 
-                and the converter will extract and flatten only that array.
+                It's risky because dots are used as separators. Our tool detects dots in original keys and warns you. 
+                You can choose a different separator (like <code>__</code>) or rename the keys before flattening.
             </p>
 
-            <h3>Does flattening work for deeply nested objects (3+ levels)?</h3>
+            <h3>What happens to null values when I flatten JSON?</h3>
             <p>
-                Yes, the flattener recursively descends into sub‑objects and concatenates keys with a dot. 
-                There’s no limit on depth.
+                In our tool, null values become empty cells. That's usually what you want. If you need explicit 'null' 
+                strings or zeros, adjust the empty cell handling in the converter settings.
             </p>
 
-            <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/tools/json-csv-converter/" class="btn-tool">🔧 Try the Free JSON to CSV Converter</a></p>
+            <h3>How can I flatten extremely large JSON files (gigabytes)?</h3>
+            <p>
+                Use command‑line tools like <code>jq</code> or Python with <code>pandas</code>. We show examples in the 
+                article. Our online tool works best up to a few megabytes of JSON, completely in your browser.
+            </p>
+
+            <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/tools/json-csv-converter/" class="btn-tool">Flatten Your JSON Now — Free Browser-Based Converter</a></p>
         </article>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2025 <a href="/">DevToolbox</a> — Free online tools for developers and designers. <a href="https://www.devstoolsbox.dev/tools/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
+        <p>&copy; 2025 <a href="/">Devstoolsbox</a> — Free online tools for developers and designers. <a href="https://www.devstoolsbox.dev/tools/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
     </footer>
 </div>
 
