@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comment aplatir un JSON imbriqué — Convertir en CSV / Excel facilement en ligne</title>
     <meta name="description" content="Apprenez à aplatir des objets JSON imbriqués en colonnes CSV plates ou en JSON formaté. Utilisez notre convertisseur en ligne gratuit pour transformer des réponses API complexes en tableaux prêts pour Excel. Sans téléversement, résultat instantané.">
-    <meta name="keywords" content="aplatir json imbriqué en ligne, json array to csv, json to excel online, convertir api json en csv, nested json csv converter, json csv excel utf8, csv to formatted json">
+    <meta name="keywords" content="aplatir json imbriqué en ligne, json array to csv, json to excel online, convertir api json en csv, nested json csv converter, json csv excel utf8, csv to formatted json, algorithme aplatissement json, flatten vs normalize">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="DevToolbox">
+    <meta name="author" content="Devstoolsbox">
     <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
     <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
     <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
@@ -18,22 +18,22 @@
     <meta property="og:description" content="Aplatissez des structures JSON complexes en CSV, Excel ou JSON formaté avec notre outil en ligne gratuit. Guide étape par étape avec exemples.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
-    <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:site_name" content="Devstoolsbox">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Aplatir un JSON imbriqué en ligne">
-    <meta name="twitter:description" content="Convertissez du JSON d’API avec des objets imbriqués en CSV / Excel plat. Gratuit, sécurisé, sans téléversement.">
+    <meta name="twitter:description" content="Convertissez du JSON d'API avec des objets imbriqués en CSV / Excel plat. Gratuit, sécurisé, sans téléversement.">
 
     <script type="application/ld+json">
         {
             "@context": "https://schema.org",
             "@type": "Article",
             "headline": "Comment aplatir un JSON imbriqué — Convertir en CSV / Excel facilement en ligne",
-            "author": { "@type": "Person", "name": "L'équipe DevToolbox" },
+            "author": { "@type": "Person", "name": "L'équipe Devstoolsbox" },
             "datePublished": "2026-04-28",
-            "dateModified": "2026-04-28",
+            "dateModified": "2026-05-18",
             "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/",
-            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+            "publisher": { "@type": "Organization", "name": "Devstoolsbox", "url": "https://www.devstoolsbox.dev/" }
         }
     </script>
     <script type="application/ld+json">
@@ -41,9 +41,11 @@
             "@context": "https://schema.org",
             "@type": "FAQPage",
             "mainEntity": [
-                { "@type": "Question", "name": "Comment aplatir un JSON imbriqué en CSV en ligne sans télverser mes données ?", "acceptedAnswer": { "@type": "Answer", "text": "Utilisez notre convertisseur JSON vers CSV gratuit. Il fonctionne entièrement dans votre navigateur — collez votre JSON, cochez 'Aplatir les objets', et téléchargez le CSV. Aucune donnée n'est envoyée à un serveur." } },
-                { "@type": "Question", "name": "Puis-je convertir une réponse d'API JSON avec des objets imbriqués en Excel ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui. Collez la réponse de l'API, spécifiez le chemin du tableau si nécessaire, activez l'aplatissement, puis téléchargez au format CSV avec BOM UTF‑8 pour une compatibilité parfaite avec Excel." } },
-                { "@type": "Question", "name": "Et si mon tableau JSON est imbriqué sous data.users ? Puis-je le cibler ?", "acceptedAnswer": { "@type": "Answer", "text": "Absolument. Utilisez le champ 'Chemin du tableau' pour saisir data.users (ou n'importe quel chemin en notation par points), et le convertisseur extraira et aplatira uniquement ce tableau." } }
+                { "@type": "Question", "name": "Pourquoi mon CSV aplati contient-il des lignes répétées pour le même utilisateur ?", "acceptedAnswer": { "@type": "Answer", "text": "Cela se produit quand vous aplatissez un objet JSON qui contient un tableau (comme des commandes). Chaque élément du tableau crée une nouvelle ligne où les colonnes parentes sont répétées. Si vous voulez éviter cette duplication, vous pouvez soit exporter plusieurs fichiers CSV (normalisation), soit choisir comment les tableaux sont représentés (chaîne JSON, premier élément uniquement…)." } },
+                { "@type": "Question", "name": "Quelle est la différence entre aplatir et normaliser du JSON ?", "acceptedAnswer": { "@type": "Answer", "text": "L'aplatissement crée une seule table large où les objets imbriqués deviennent des colonnes en notation par points et les tableaux produisent plusieurs lignes avec les données parentes répétées. La normalisation divise les données en plusieurs tables liées par des clés étrangères, comme utilisateurs.csv et commandes.csv. Utilisez l'aplatissement pour un export rapide, la normalisation pour un import en base de données." } },
+                { "@type": "Question", "name": "Puis-je aplatir un JSON qui contient des points dans les noms de clés ?", "acceptedAnswer": { "@type": "Answer", "text": "C'est risqué car les points servent de séparateurs dans les noms de colonnes aplaties. Notre outil détecte les points dans les clés d'origine et vous avertit. Vous pouvez choisir un autre séparateur (comme __) ou renommer les clés avant l'aplatissement." } },
+                { "@type": "Question", "name": "Que deviennent les valeurs null quand j'aplatis du JSON ?", "acceptedAnswer": { "@type": "Answer", "text": "Dans notre outil, les valeurs null deviennent des cellules vides. C'est généralement ce que l'on souhaite. Si vous avez besoin de chaînes 'null' explicites ou de zéros, vous pouvez ajuster la gestion des cellules vides dans les paramètres du convertisseur." } },
+                { "@type": "Question", "name": "Comment aplatir des fichiers JSON très volumineux (plusieurs gigaoctets) ?", "acceptedAnswer": { "@type": "Answer", "text": "Pour les fichiers volumineux, utilisez des outils en ligne de commande comme jq ou Python avec pandas. Nous montrons des exemples dans l'article. Notre outil en ligne fonctionne idéalement jusqu'à quelques mégaoctets de JSON, entièrement dans votre navigateur." } }
             ]
         }
     </script>
@@ -151,7 +153,7 @@
 <body>
 <div class="container">
     <header class="header">
-        <a href="/fr/" class="logo">DevToolbox</a>
+        <a href="/fr/" class="logo">Devstoolsbox</a>
         <div class="header-right">
             <div class="theme-toggle">
                 <button class="theme-btn active" data-theme="light"> Clair</button>
@@ -165,27 +167,29 @@
     </header>
 
     <main>
-        <article class="article-card">
+        <article class="article-card" itemscope itemtype="https://schema.org/Article">
             <h1>Comment aplatir un JSON imbriqué — Transformer des données API complexes en CSV / Excel propre en quelques secondes</h1>
-            <div class="meta">Publié le 28 avril 2026 par l'équipe DevToolbox — 7 min de lecture</div>
-                <figure style="margin: 28px 0; text-align: center;">
-  <img
-    src="/convertisseur-json-csv.webp"
-    alt="Interface du convertisseur JSON ↔ CSV de DevToolbox montrant l'aperçu du tableau et les options d'aplatissement"
-    loading="lazy"
-    decoding="async"
-    style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
-  >
-  <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
-    Conversion JSON → CSV avec aplatissement automatique des objets imbriqués et chemin de tableau personnalisable.
-  </figcaption>
-</figure>
+            <div class="meta">Publié le 28 avril 2026 · Mis à jour le 18 mai 2026 — 8 min de lecture</div>
+
             <p>
                 Presque chaque API renvoie du JSON imbriqué. Vous demandez une liste d'utilisateurs, et dans chaque utilisateur se trouve un objet <code>adresse</code> avec rue, ville, code postal ; peut-être un objet <code>préférences</code>, ou un tableau de commandes. Les tableurs et bases de données, eux, attendent des tables plates. C'est là que l'<strong>aplatissement du JSON imbriqué</strong> devient essentiel.
             </p>
             <p>
-                Que vous ayez besoin de <strong>convertir un tableau JSON en CSV</strong>, d'exporter du <strong>json to excel online</strong>, ou de transformer une réponse d'API brute en un CSV formaté qu'Excel peut lire avec les accents corrects, ce guide vous montrera la méthode la plus rapide et la plus privée — sans écrire une seule ligne de code.
+                Que vous ayez besoin de <strong>convertir un tableau JSON en CSV</strong>, d'exporter du <strong>JSON vers Excel en ligne</strong>, ou de transformer une réponse d'API brute en un CSV formaté qu'Excel peut lire avec les accents corrects, ce guide vous montrera la méthode la plus rapide et la plus privée — sans écrire une seule ligne de code.
             </p>
+
+            <figure style="margin: 28px 0; text-align: center;">
+                <img
+                    src="/convertisseur-json-csv.webp"
+                    alt="Interface du convertisseur JSON ↔ CSV de Devstoolsbox montrant l'aperçu du tableau et les options d'aplatissement"
+                    loading="lazy"
+                    decoding="async"
+                    style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
+                >
+                <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
+                    Conversion JSON → CSV avec aplatissement automatique des objets imbriqués et chemin de tableau personnalisable.
+                </figcaption>
+            </figure>
 
             <h2>Que signifie réellement « aplatir un JSON imbriqué » ?</h2>
             <p>
@@ -206,7 +210,7 @@
             <pre><code>nom,adresse.ville,adresse.code_postal
 Alice,Paris,75001</code></pre>
             <p>
-                Le sous‑objet <code>adresse</code> disparaît ; ses champs deviennent de nouvelles colonnes avec des en‑têtes en notation par points. C'est la base du <strong>json to excel online</strong>, et c'est exactement ce que fait notre <a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">Convertisseur JSON en CSV</a> automatiquement lorsque vous cochez l'option <strong>Aplatir les objets</strong>.
+                Le sous‑objet <code>adresse</code> disparaît ; ses champs deviennent de nouvelles colonnes avec des en‑têtes en notation par points. C'est la base du <strong>JSON vers Excel en ligne</strong>, et c'est exactement ce que fait notre <a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">Convertisseur JSON en CSV</a> automatiquement lorsque vous cochez l'option <strong>Aplatir les objets</strong>.
             </p>
 
             <h2>Pourquoi aplatir du JSON ? Raisons concrètes</h2>
@@ -216,6 +220,7 @@ Alice,Paris,75001</code></pre>
                 <li><strong>Déboguer des jetons JWT</strong>. Souvent, la charge utile d'un JWT contient des claims imbriqués. Vous pouvez <a href="https://www.devstoolsbox.dev/fr/outils/decodeur-jwt/">décoder le JWT</a>, puis aplatir sa charge utile en CSV pour analyse.</li>
                 <li><strong>Partager avec des collègues non techniques</strong>. Ils connaissent Excel, pas les chemins JSON.</li>
             </ul>
+
             <h2>Utilisations courantes de l'aplatissement JSON</h2>
             <ul>
                 <li>Exporter des réponses d'API vers Excel</li>
@@ -225,7 +230,93 @@ Alice,Paris,75001</code></pre>
                 <li>Préparer du JSON pour des outils de BI</li>
             </ul>
 
-            <h2>Aplatir du JSON imbriqué en ligne — pas à pas avec notre convertisseur gratuit</h2>
+            <h2>Comment fonctionne l'aplatissement en coulisses</h2>
+            <p>
+                Aplatir un objet JSON est un processus récursif. En partant du niveau supérieur, on parcourt chaque clé. Si la valeur est un autre objet (et pas un tableau), on descend plus profondément et on préfixe la clé enfant avec la clé parente, en les séparant par un point. Si la valeur est d'un type simple (chaîne, nombre, booléen, null), on la stocke comme colonne.
+            </p>
+            <p>
+                Voici l'algorithme en Python — quelques lignes seulement :
+            </p>
+            <pre><code>def aplatir(obj, prefixe='', sep='.'):
+    items = {}
+    for cle, val in obj.items():
+        nouvelle_cle = f"{prefixe}{sep}{cle}" if prefixe else cle
+        if isinstance(val, dict):
+            items.update(aplatir(val, nouvelle_cle, sep))
+        else:
+            items[nouvelle_cle] = val
+    return items</code></pre>
+            <p>
+                Et la même logique en JavaScript, prête à tourner dans votre navigateur :
+            </p>
+            <pre><code>function aplatir(obj, prefixe = '', sep = '.') {
+  return Object.keys(obj).reduce((acc, cle) => {
+    const nouvelleCle = prefixe ? `${prefixe}${sep}${cle}` : cle;
+    if (typeof obj[cle] === 'object' && !Array.isArray(obj[cle]) && obj[cle] !== null) {
+      Object.assign(acc, aplatir(obj[cle], nouvelleCle, sep));
+    } else {
+      acc[nouvelleCle] = obj[cle];
+    }
+    return acc;
+  }, {});
+}</code></pre>
+            <p>
+                Quand vous appliquez cela à un tableau d'objets (comme une réponse d'API), on aplatit d'abord chaque élément, puis on combine toutes les clés pour former l'en‑tête du CSV. C'est exactement ce que le convertisseur Devstoolsbox fait en temps réel.
+            </p>
+
+            <h2>Cas limites qui surprennent les développeurs</h2>
+            <p>
+                L'aplatissement est simple jusqu'à ce que vous rencontriez l'un de ces scénarios réels :
+            </p>
+            <h3>Tableaux d'objets</h3>
+            <p>
+                Si un champ contient un tableau d'objets — disons <code>commandes: [{id: 1}, {id: 2}]</code> — la fonction d'aplatissement de base ne peut pas transformer cela en une seule colonne. Notre outil produit chaque élément du tableau comme une nouvelle ligne, en dupliquant les champs parents. C'est souvent ce que l'on veut pour un tableau plat, mais cela peut générer beaucoup de lignes. Si vous préférez conserver le tableau sous forme de chaîne JSON dans la cellule, vous pouvez ajuster les options d'aplatissement dans le convertisseur.
+            </p>
+            <h3>Valeurs nulles</h3>
+            <p>
+                Que se passe-t-il quand un champ est <code>null</code> ? Dans Devstoolsbox, null devient une cellule vide. C'est propre pour Excel ; d'autres outils pourraient supprimer complètement la colonne. Vous pouvez aussi choisir de représenter les nulls par la chaîne "null" ou par 0 via les paramètres de gestion des cellules vides.
+            </p>
+            <h3>Points dans les noms de clés d'origine</h3>
+            <p>
+                Si votre JSON contient déjà des clés comme <code>"prenom.nom"</code>, l'aplatissement avec un séparateur point créera une collision. Notre outil vous avertit quand il détecte des points dans les clés. Vous pouvez passer le séparateur à <code>__</code> ou renommer ces clés avant l'aplatissement.
+            </p>
+            <h3>Profondeur maximale</h3>
+            <p>
+                Bien qu'il n'y ait pas de limite stricte, une imbrication extrêmement profonde (plus de 10 niveaux) peut produire des centaines de colonnes. Dans ce cas, vous pouvez choisir d'aplatir seulement les premiers niveaux et de conserver le reste sous forme de chaîne JSON sérialisée. Le convertisseur vous permet de définir une profondeur d'aplatissement maximale.
+            </p>
+
+            <h2>Aplatir ou normaliser : de quoi avez-vous vraiment besoin ?</h2>
+            <p>
+                On confond souvent aplatissement et normalisation. Ils servent des objectifs différents.
+            </p>
+            <p>
+                <strong>L'aplatissement</strong> produit une seule table large. Chaque objet imbriqué devient des colonnes supplémentaires ; chaque élément de tableau devient une ligne supplémentaire avec les données parentes répétées. C'est idéal pour des exports rapides, des analyses Excel et des rapports.
+            </p>
+            <p>
+                <strong>La normalisation</strong> divise les données en plusieurs tables liées — par exemple, un <code>utilisateurs.csv</code> et un <code>commandes.csv</code> reliés par un <code>utilisateur_id</code>. C'est l'approche propre pour les bases de données relationnelles.
+            </p>
+            <p>
+                Quand vous aplatissez un utilisateur avec ses commandes, vous obtenez :
+            </p>
+            <pre><code>nom,commande.id,commande.montant
+Alice,1,50
+Alice,2,30</code></pre>
+            <p>
+                Si vous normalisez, vous exportez deux CSVs :
+            </p>
+            <pre><code># utilisateurs.csv
+id,nom
+1,Alice
+
+# commandes.csv
+utilisateur_id,id,montant
+1,1,50
+1,2,30</code></pre>
+            <p>
+                Le choix dépend de l'outil cible. Les utilisateurs d'Excel adorent une table plate ; les administrateurs de bases de données préfèrent des tables normalisées.
+            </p>
+
+            <h2>Avec le convertisseur Devstoolsbox : un guide pas à pas</h2>
             <p>
                 Notre <strong>convertisseur CSV pour JSON imbriqué</strong> ne nécessite aucun téléversement, aucune connexion, ni aucune communication avec un serveur. Tout reste dans votre navigateur. Voici la procédure :
             </p>
@@ -256,27 +347,38 @@ Alice,Paris,75001</code></pre>
 
             <h3>4. Convertissez et téléchargez</h3>
             <p>
-                Cliquez sur <strong>Convertir en CSV →</strong>. Le CSV généré apparaît dans le panneau de droite. Pour une compatibilité <strong>json csv excel utf8</strong>, cliquez sur <strong>Télécharger CSV (UTF‑8 BOM)</strong> — cela ajoute le marqueur invisible qui indique à Excel d'afficher correctement les accents, les umlauts et tous les caractères spéciaux.
+                Cliquez sur <strong>Convertir en CSV →</strong>. Le CSV généré apparaît dans le panneau de droite. Pour une compatibilité <strong>JSON CSV Excel UTF‑8</strong>, cliquez sur <strong>Télécharger CSV (UTF‑8 BOM)</strong> — cela ajoute le marqueur invisible qui indique à Excel d'afficher correctement les accents, les umlauts et tous les caractères spéciaux.
             </p>
 
-            <h2>Dans l'autre sens : CSV vers JSON formaté</h2>
+            <h2>Pour les gros fichiers : pandas et jq</h2>
             <p>
-                Si vous avez un CSV plat et souhaitez reconstruire un <strong>JSON formaté</strong> bien indenté, le chemin inverse est tout aussi simple :
+                L'outil en ligne brille pour un aplatissement rapide et interactif. Mais quand vous avez affaire à un export JSON de plusieurs gigaoctets, vous voudrez une approche en ligne de commande. Voici deux méthodes éprouvées.
             </p>
-            <ol>
-                <li>Collez votre CSV dans le panneau de droite.</li>
-                <li>Choisissez le délimiteur (virgule, point‑virgule, tabulation, pipe) — l'outil le détecte automatiquement si vous avez un doute.</li>
-                <li>Indiquez si la première ligne contient les en‑têtes de colonnes.</li>
-                <li>Traitez les cellules vides : considérez‑les comme des chaînes vides, <code>null</code>, ou <code>0</code>.</li>
-                <li>Cliquez sur <strong>← Convertir en JSON</strong>. Le résultat est un tableau JSON bien formaté, prêt à être utilisé dans votre code.</li>
-            </ol>
-
-            <h2>Pourquoi utiliser notre outil plutôt qu'écrire un script ?</h2>
+            <h3>Python avec pandas</h3>
             <p>
-                Bien sûr, vous pourriez écrire une fonction Python ou JavaScript pour aplatir du JSON. Mais à chaque changement de schéma, vous devez mettre à jour le code. Un convertisseur visuel avec un aperçu en direct vous permet d'ajuster à la volée : activer l'aplatissement, changer le chemin du tableau, ou modifier le délimiteur sans toucher au code. De plus, il fonctionne en local — aucune donnée sensible ne quitte votre machine.
+                Les analystes de données adorent <code>pd.json_normalize</code>. Cela fait exactement ce que notre outil fait, mais de manière scriptable. Ce bout de code lit un fichier JSON, aplatit le tableau à <code>data.users</code>, et écrit un CSV avec le BOM UTF‑8 pour Excel :
+            </p>
+            <pre><code>import pandas as pd
+import json
+
+with open('data.json') as f:
+    data = json.load(f)
+
+df = pd.json_normalize(data['data']['users'], sep='.')
+df.to_csv('output.csv', index=False, encoding='utf-8-sig')</code></pre>
+            <p>
+                <code>utf-8-sig</code> est la façon dont Python ajoute le BOM UTF‑8. Ce petit détail fait gagner des heures quand les collègues ouvrent le fichier dans Excel.
+            </p>
+            <h3>jq pour le terminal</h3>
+            <p>
+                <code>jq</code> est un processeur JSON léger et incroyablement rapide. Pour extraire et aplatir un sous‑ensemble de champs d'un grand tableau imbriqué, vous pouvez lancer :
+            </p>
+            <pre><code>jq -r '.data.users[] | [.nom, .adresse.ville, .adresse.code_postal] | @csv' data.json</code></pre>
+            <p>
+                Cela envoie les lignes aplaties directement vers stdout, que vous pouvez rediriger vers un fichier CSV. Idéal pour les pipelines automatisés.
             </p>
 
-            <h2>Intégration avec le reste de DevToolbox</h2>
+            <h2>Intégration avec le reste de Devstoolsbox</h2>
             <p>
                 Une fois votre JSON aplati en CSV, vous pourriez avoir besoin de :
             </p>
@@ -288,24 +390,29 @@ Alice,Paris,75001</code></pre>
             </ul>
 
             <h2>Foire Aux Questions</h2>
-            <h3>Comment puis‑je aplatir un JSON imbriqué en ligne sans téléverser mes données ?</h3>
+            <h3>Pourquoi mon CSV aplati contient-il des lignes répétées pour le même utilisateur ?</h3>
             <p>
-                Utilisez notre convertisseur JSON vers CSV gratuit. Il fonctionne entièrement dans votre navigateur — collez votre JSON, cochez « Aplatir les objets », et téléchargez le CSV. Aucune donnée n'est envoyée à un serveur.
+                Cela se produit quand vous aplatissez un objet JSON qui contient un tableau (comme des commandes). Chaque élément du tableau crée une nouvelle ligne où les colonnes parentes sont répétées. Si vous voulez éviter cette duplication, vous pouvez soit exporter plusieurs fichiers CSV (normalisation), soit choisir comment les tableaux sont représentés (chaîne JSON, premier élément uniquement…).
             </p>
 
-            <h3>Puis‑je convertir une réponse d'API JSON avec des objets imbriqués en Excel ?</h3>
+            <h3>Quelle est la différence entre aplatir et normaliser du JSON ?</h3>
             <p>
-                Oui. Collez la réponse de l'API, spécifiez le chemin du tableau si nécessaire, activez l'aplatissement, puis téléchargez au format CSV avec BOM UTF‑8 pour une compatibilité parfaite avec Excel.
+                L'aplatissement crée une seule table large ; la normalisation divise les données en plusieurs tables liées. Utilisez l'aplatissement pour un export rapide, la normalisation pour un import en base de données.
             </p>
 
-            <h3>Et si mon tableau JSON est imbriqué sous <code>data.users</code> ?</h3>
+            <h3>Puis-je aplatir un JSON qui contient des points dans les noms de clés ?</h3>
             <p>
-                Utilisez le champ <strong>Chemin du tableau</strong> pour saisir <code>data.users</code> (ou n'importe quel chemin en notation par points), et le convertisseur extraira et aplatira uniquement ce tableau.
+                C'est risqué car les points servent de séparateurs. Notre outil détecte les points dans les clés d'origine et vous avertit. Vous pouvez choisir un autre séparateur (comme <code>__</code>) ou renommer les clés avant l'aplatissement.
             </p>
 
-            <h3>L'aplatissement fonctionne‑t‑il pour des objets profondément imbriqués (3 niveaux ou plus) ?</h3>
+            <h3>Que deviennent les valeurs null quand j'aplatis du JSON ?</h3>
             <p>
-                Oui, l'aplatisseur descend récursivement dans les sous‑objets et concatène les clés avec un point. Il n'y a pas de limite de profondeur.
+                Dans notre outil, les valeurs null deviennent des cellules vides. C'est généralement ce que l'on souhaite. Si vous avez besoin de chaînes 'null' explicites ou de zéros, ajustez la gestion des cellules vides dans les paramètres du convertisseur.
+            </p>
+
+            <h3>Comment aplatir des fichiers JSON très volumineux (plusieurs gigaoctets) ?</h3>
+            <p>
+                Utilisez des outils en ligne de commande comme <code>jq</code> ou Python avec <code>pandas</code>. Nous montrons des exemples dans l'article. Notre outil en ligne fonctionne idéalement jusqu'à quelques mégaoctets de JSON, entièrement dans votre navigateur.
             </p>
 
             <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/" class="btn-tool">🔧 Essayer le Convertisseur JSON en CSV gratuit</a></p>
@@ -313,7 +420,7 @@ Alice,Paris,75001</code></pre>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2025 <a href="/">DevToolbox</a> — Outils en ligne gratuits pour développeurs et designers. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
+        <p>&copy; 2025 <a href="/">Devstoolsbox</a> — Outils en ligne gratuits pour développeurs et designers. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
     </footer>
 </div>
 
