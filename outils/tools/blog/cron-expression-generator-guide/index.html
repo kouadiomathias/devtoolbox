@@ -41,10 +41,8 @@
             "@context": "https://schema.org",
             "@type": "FAQPage",
             "mainEntity": [
-                { "@type": "Question", "name": "How do I write a cron expression for every 5 minutes?", "acceptedAnswer": { "@type": "Answer", "text": "Use */5 * * * * in standard cron. The five fields: minute, hour, day of month, month, day of week." } },
-                { "@type": "Question", "name": "What is the difference between Linux cron and AWS cron?", "acceptedAnswer": { "@type": "Answer", "text": "Linux uses 5 fields, AWS CloudWatch (and Quartz) can use 6 fields with seconds. Our generator handles both." } },
-                { "@type": "Question", "name": "Why is my cron job not running?", "acceptedAnswer": { "@type": "Answer", "text": "Check PATH, permissions, redirect output to a file and look at /var/log/syslog. Use MAILTO to receive errors." } },
-                { "@type": "Question", "name": "How to prevent a cron job from overlapping if it takes longer than the interval?", "acceptedAnswer": { "@type": "Answer", "text": "Use flock, run-one or the concurrencyPolicy: Forbid property in Kubernetes." } }
+                { "@type": "Question", "name": "Why isn't my cron job running even though the expression looks correct?", "acceptedAnswer": { "@type": "Answer", "text": "In most cases the culprit isn't the expression — it's the environment. Cron runs with a stripped-down PATH limited to /usr/bin:/bin, with none of the custom paths from your interactive shell. A script that calls python3 or node without an absolute path fails silently because cron simply can't find the command. Add PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin at the top of your crontab, redirect output with >> /var/log/my_job.log 2>&1, and check grep CRON /var/log/syslog to see what cron actually attempted to run." } },
+                { "@type": "Question", "name": "How do I prevent a cron job from running twice in parallel when execution time exceeds the interval", "acceptedAnswer": { "@type": "Answer", "text": "Standard cron doesn't check whether a previous instance is still running — it fires a new one at every trigger. For a job scheduled every 5 minutes that can take 8, you quickly end up with overlapping processes stepping on each other. The simplest fix on Linux is flock -n /tmp/my_job.lock /path/to/script.sh: if the lock is already held, the new instance exits immediately without doing anything. On Kubernetes, setting .spec.concurrencyPolicy: Forbid on the CronJob achieves exactly the same result without touching the script itself." } }
             ]
         }
     </script>
@@ -180,10 +178,10 @@
             <div class="meta">Published on May 17, 2026 by the DevToolbox Team — 15 min read</div>
 
             <p>
-                A cron expression looks simple: five fields and a few asterisks. Yet, behind that simplicity lie subtleties that turn a scheduled task into a silent nightmare. This guide gives you <strong>all the keys</strong> to master the cron format, whether you're on Linux, Quartz, AWS or Kubernetes. You'll find operator tables, the day-of-month OR trap, advanced timezone handling, a debugging checklist and much more.
+               Friday night, 11:47 PM. A critical backup never ran. You open the crontab, the expression looks right — 0 0 1 * 1 — yet the job never fired on the first Monday of the month as intended. It ran on the 1st of every month and every Monday. Two behaviors from a single expression, because cron silently applies an OR when both day fields are specified.
             </p>
             <p>
-                To test every example live, use our free <a href="https://www.devstoolsbox.dev/tools/cron-generator/">cron expression generator</a>, which validates syntax and shows upcoming executions.
+                That kind of surprise happens once. After that, you always double-check. This guide covers what the official documentation glosses over: the OR behavior of day fields, Quartz operators L, W and #, timezone handling when daylight saving kicks in, why your script works manually but never in cron, and when switching to systemd timers actually makes sense. To test every example live, the cron expression generator validates syntax and shows the next scheduled runs.
             </p>
 
             <h2>1. Basic Structure and Operators per Field</h2>
