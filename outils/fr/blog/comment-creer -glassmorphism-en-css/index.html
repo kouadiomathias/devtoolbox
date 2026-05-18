@@ -1,0 +1,387 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment créer un effet Glassmorphism en CSS – Guide complet avec exemples réels</title>
+    <meta name="description" content="Maîtrisez l'effet verre dépoli en CSS avec backdrop-filter, transparence et bordures subtiles. Tutoriel détaillé, variantes, code, performance et générateur visuel gratuit.">
+    <meta name="keywords" content="glassmorphism css, effet verre dépoli css, comment créer glassmorphism, backdrop-filter blur, css glass card, glassmorphism tutoriel, backdrop-filter vs filter, glassmorphism tailwind, glassmorphism react, glassmorphism performance, accessibilité glassmorphism">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Devstoolsbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/comment-creer-glassmorphism-en-css/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/comment-creer-glassmorphism-en-css/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/how-to-create-glassmorphism-in-css/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/how-to-create-glassmorphism-in-css/">
+
+    <meta property="og:title" content="Comment créer un effet Glassmorphism en CSS – Guide complet">
+    <meta property="og:description" content="Tutoriel pas à pas pour créer des effets verre dépoli en CSS. Inclut backdrop-filter, transparence, variantes et exemples de code.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/comment-creer-glassmorphism-en-css/">
+    <meta property="og:site_name" content="Devstoolsbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Créer un effet Glassmorphism en CSS">
+    <meta name="twitter:description" content="Effet verre dépoli avec backdrop-filter, transparence et plus.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Comment créer un effet Glassmorphism en CSS – Guide complet avec exemples réels",
+            "author": { "@type": "Person", "name": "L'équipe Devstoolsbox" },
+            "datePublished": "2026-04-28",
+            "dateModified": "2026-05-18",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/comment-creer-glassmorphism-en-css/",
+            "publisher": { "@type": "Organization", "name": "Devstoolsbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "Pourquoi mon effet glassmorphism se casse-t-il quand j'utilise z-index: -1 ?", "acceptedAnswer": { "@type": "Answer", "text": "backdrop-filter crée un nouveau contexte d'empilement, ce qui peut cacher les éléments avec un z-index négatif derrière la carte. Évitez les z-index négatifs et placez l'arrière-plan dans un conteneur avec un z-index positif." } },
+                { "@type": "Question", "name": "Est-ce que backdrop-filter est lourd sur mobile ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, il peut provoquer des chutes de framerate sur les appareils peu puissants. Limitez le flou à 12px sur les éléments animés, utilisez will-change avec parcimonie et testez sur de vrais appareils." } },
+                { "@type": "Question", "name": "Comment rendre le glassmorphism accessible ?", "acceptedAnswer": { "@type": "Answer", "text": "Comme le contraste est dynamique, testez avec le fond le plus clair possible. Augmentez l'opacité du fond ou ajoutez une ombre de texte pour garantir la lisibilité." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Guide Glassmorphism CSS", "item": "https://www.devstoolsbox.dev/fr/blog/comment-creer-glassmorphism-en-css/" }
+            ]
+        }
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-JRBW78KE29');
+    </script>
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08); --text: #0f172a;
+            --text2: #374151; --text3: #64748b; --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06); --radius: 16px; --code-bg: #1e293b;
+            --code-color: #e2e8f0;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color);
+            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color);
+            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
+            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
+        }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+        table {
+            width:100%; border-collapse: collapse; margin: 20px 0; font-size:0.9rem;
+        }
+        th, td {
+            border: 1px solid var(--border); padding: 10px 14px; text-align: left;
+        }
+        th { background: var(--surface2); font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">Devstoolsbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Clair</button>
+                <button class="theme-btn" data-theme="dark"> Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/fr/blog/comment-creer-glassmorphism-en-css/" class="lang-btn active">FR</a>
+                <a href="/tools/blog/how-to-create-glassmorphism-in-css/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article class="article-card">
+            <h1>Comment créer un effet Glassmorphism en CSS – Exemples concrets et astuces de pro</h1>
+            <div class="meta">Publié le 28 avril 2026 · Mis à jour le 18 mai 2026 — 10 min de lecture</div>
+
+            <p>
+                Le glassmorphism s'est invité partout : tableaux de bord, pages d'atterrissage, applications mobiles. Ces panneaux en verre dépoli qui floutent l'arrière-plan juste ce qu'il faut pour donner de la profondeur se construisent avec du CSS pur, sans plugin. Dans ce guide, nous allons monter une carte glass étape par étape, puis creuser les détails qui piègent la plupart des développeurs : la différence entre <code>backdrop-filter</code> et <code>filter</code>, les performances sur mobile, les pièges du contexte d'empilement, et comment garder l'effet accessible. Vous trouverez des extraits de code prêts à l'emploi et un lien vers notre générateur visuel gratuit qui fait tout le travail à votre place.
+            </p>
+
+            <h2>Les trois ingrédients du glassmorphism</h2>
+            <p>
+                Un effet verre convaincant repose toujours sur :
+            </p>
+            <ul>
+                <li>Un <strong>fond semi‑transparent</strong>, généralement blanc ou d'une teinte très claire.</li>
+                <li>Un <strong>flou backdrop-filter</strong> qui gèle le contenu derrière l'élément.</li>
+                <li>Une <strong>bordure subtile</strong> qui définit le bord du verre.</li>
+            </ul>
+
+            <h2>La carte glass CSS de base</h2>
+            <p>
+                Voici la version la plus courte qui fonctionne sur tous les navigateurs modernes :
+            </p>
+            <pre><code>.carte-verre {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px); /* Safari */
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 28px;
+  color: #fff;
+}</code></pre>
+            <p>
+                Décortiquons chaque propriété. <code>background: rgba(255,255,255,0.2)</code> donne cette couche blanche presque invisible. La valeur alpha contrôle la transparence. <code>backdrop-filter: blur(12px)</code> applique un flou gaussien à tout ce qui se trouve <strong>derrière</strong> l'élément. Le préfixe <code>-webkit-</code> reste nécessaire pour Safari. Enfin, la bordure ajoute un léger liseré vitreux ; sans elle, la carte peut se fondre dans le fond.
+            </p>
+
+            <h2>backdrop-filter vs filter : une distinction cruciale</h2>
+            <p>
+                Beaucoup de débutants confondent <code>backdrop-filter</code> et <code>filter</code>. Ils sont fondamentalement différents, et utiliser le mauvais casse complètement l'effet verre.
+            </p>
+            <ul>
+                <li><strong>filter</strong> s'applique à l'élément lui-même et à tous ses enfants. Si vous écrivez <code>filter: blur(5px)</code>, la carte et le texte à l'intérieur deviendront flous — ce n'est pas ce que vous voulez.</li>
+                <li><strong>backdrop-filter</strong> n'affecte que ce qui se trouve derrière l'élément. La carte elle-même reste nette ; seul l'arrière-plan reçoit l'effet givré.</li>
+            </ul>
+            <p>Une comparaison côte à côte rend la chose évidente :</p>
+            <pre><code>/* ❌ mauvais pour le verre : toute la carte devient floue */
+.carte-floue {
+  filter: blur(8px);
+}
+
+/* ✅ correct : seul l'arrière-plan est flouté */
+.carte-verre {
+  backdrop-filter: blur(12px);
+}</code></pre>
+            <p>
+                Retenez donc : <strong>backdrop-filter</strong> pour le verre, <strong>filter</strong> pour manipuler l'élément lui-même (comme le niveau de gris ou l'opacité).
+            </p>
+
+            <h2>Performance : quand le flou fait chuter le framerate</h2>
+            <p>
+                <code>backdrop-filter</code> force le navigateur à créer un nouveau calque composite. Ce calque est redessiné chaque fois que l'arrière-plan change, ce qui peut être coûteux sur mobile ou lors d'animations. Un flou important (20px+) sur une grande carte peut faire chuter les images, surtout sur les téléphones d'entrée de gamme.
+            </p>
+            <p>Règles pratiques pour des effets verre fluides :</p>
+            <ul>
+                <li>Limitez le flou à 12-15px pour les éléments animés ou qui défilent. Les cartes statiques peuvent aller plus haut.</li>
+                <li>Utilisez <code>will-change: backdrop-filter</code> avec parcimonie — cela indique au navigateur de préparer un calque séparé, mais en abuser gaspille la mémoire GPU.</li>
+                <li>Testez toujours sur un appareil réel, pas seulement dans Chrome DevTools. Ouvrez l'onglet Performance et surveillez les repaints des calques composites.</li>
+            </ul>
+
+            <h2>Le piège du contexte d'empilement (et pourquoi z-index: -1 casse tout)</h2>
+            <p>
+                Un bug subtil mais courant : <code>backdrop-filter</code> crée un <strong>contexte d'empilement</strong>. Cela signifie que tout élément derrière la carte glass avec un z-index négatif risque d'être masqué, même si vous vous attendiez à ce qu'il reste visible. Cela arrive parce que l'élément glass et l'arrière-plan en z-index négatif appartiennent désormais à des couches d'empilement différentes.
+            </p>
+            <p>
+                Par exemple, si vous placez un fond en dégradé avec <code>z-index: -1</code> puis une carte glass par-dessus, l'arrière-plan peut disparaître derrière la carte — non pas à cause du flou, mais à cause du contexte d'empilement. La solution ? Évitez les z-index négatifs sur les arrière-plans ; placez plutôt le fond dans un conteneur avec un z-index positif ou fiez-vous à l'ordre naturel du DOM.
+            </p>
+
+            <h2>Glassmorphism vs neumorphism vs skeuomorphisme</h2>
+            <p>
+                Le glassmorphism est souvent cité aux côtés du neumorphism et du skeuomorphisme. Tous trois créent de la profondeur, mais avec des philosophies différentes.
+            </p>
+            <table>
+                <thead>
+                    <tr><th>Aspect</th><th>Glassmorphism</th><th>Neumorphism</th><th>Skeuomorphisme</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Style visuel</td><td>Verre dépoli, transparence</td><td>Formes extrudées douces, ombres monochromes</td><td>Textures réalistes (cuir, bois, métal)</td></tr>
+                    <tr><td>Technique clé</td><td>backdrop-filter</td><td>Multiples box‑shadows</td><td>Dégradés, textures, images complexes</td></tr>
+                    <tr><td>Lisibilité</td><td>Bonne si le contraste est vérifié</td><td>Souvent faible ; faible contraste</td><td>Variable</td></tr>
+                    <tr><td>Performance</td><td>Modérée (calque composite)</td><td>Légère</td><td>Lourde (images, CSS volumineux)</td></tr>
+                    <tr><td>Idéal pour</td><td>Tableaux de bord, modales, superpositions</td><td>Contrôles minimalistes, boutons</td><td>Apps rétro, interfaces nostalgiques</td></tr>
+                </tbody>
+            </table>
+            <p>
+                Utilisez le glassmorphism lorsque vous voulez de la profondeur tout en montrant le contenu d'arrière-plan. Le neumorphism convient aux contrôles simples et statiques. Le skeuomorphisme est surtout historique aujourd'hui.
+            </p>
+
+            <h2>Carte glass en Tailwind CSS</h2>
+            <p>
+                Si vous travaillez avec Tailwind, vous pouvez obtenir le même effet avec des classes utilitaires. Voici une carte glass en Tailwind pur :
+            </p>
+            <pre><code>&lt;div class="backdrop-blur-md bg-white/20 border border-white/30 rounded-2xl p-7"&gt;
+  &lt;h2 class="text-white text-xl font-semibold"&gt;Carte Glass&lt;/h2&gt;
+  &lt;p class="text-white/80"&gt;Construite avec Tailwind.&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+            <p>
+                <code>backdrop-blur-md</code> correspond à un flou moyen (12px par défaut). Vous pouvez utiliser <code>backdrop-blur-sm</code> ou <code>backdrop-blur-lg</code> selon vos besoins.
+            </p>
+
+            <h2>Composant React avec styled‑components</h2>
+            <p>
+                Pour créer une carte glass réutilisable dans un projet React, vous pouvez définir un composant stylisé avec une opacité et un flou ajustables :
+            </p>
+            <pre><code>import styled from 'styled-components';
+
+const CarteVerre = styled.div`
+  background: rgba(255, 255, 255, ${props => props.opacite || 0.2});
+  backdrop-filter: blur(${props => props.flou || 12}px);
+  -webkit-backdrop-filter: blur(${props => props.flou || 12}px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 28px;
+  color: white;
+`;
+
+// Utilisation
+&lt;CarteVerre opacite={0.25} flou={16}&gt;
+  &lt;h2&gt;Tableau de bord&lt;/h2&gt;
+&lt;/CarteVerre&gt;</code></pre>
+
+            <h2>Support navigateur : le tableau complet</h2>
+            <table>
+                <thead>
+                    <tr><th>Navigateur</th><th>Supporté</th><th>Version minimale</th><th>Notes</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Chrome</td><td>✅</td><td>76+</td><td>Pas de préfixe nécessaire</td></tr>
+                    <tr><td>Firefox</td><td>✅</td><td>103+</td><td>Activé par défaut</td></tr>
+                    <tr><td>Safari</td><td>✅</td><td>9+</td><td>Nécessite le préfixe <code>-webkit-</code></td></tr>
+                    <tr><td>Edge</td><td>✅</td><td>79+</td><td>Basé sur Chromium, comme Chrome</td></tr>
+                    <tr><td>Samsung Internet</td><td>✅</td><td>10+</td><td></td></tr>
+                    <tr><td>Internet Explorer 11</td><td>❌</td><td>—</td><td>Fallback nécessaire</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Fallback progressif pour les navigateurs sans support</h2>
+            <p>
+                Plutôt que de laisser les utilisateurs d'IE11 avec une mise en page cassée, fournissez un fond solide semi‑opaque comme solution de repli. La règle <code>@supports</code> permet d'écrire une amélioration progressive propre :
+            </p>
+            <pre><code>.carte-verre {
+  /* Fallback : solide mais translucide */
+  background: rgba(255, 255, 255, 0.7);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .carte-verre {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}</code></pre>
+            <p>
+                Ainsi, chaque navigateur reçoit un design utilisable. IE11 voit une carte blanche solide ; les navigateurs modernes profitent du verre dépoli.
+            </p>
+
+            <h2>Accessibilité : rendre le verre lisible pour tous</h2>
+            <p>
+                <code>backdrop-filter</code> crée un problème de contraste dynamique. Le texte repose sur un fond dont la luminosité dépend de ce qui se trouve derrière le verre — une image sombre peut offrir un contraste suffisant, tandis qu'un dégradé clair peut ne pas le faire. Les vérificateurs de contraste statiques ne peuvent pas capturer cela.
+            </p>
+            <p>Voici comment garder vos panneaux glass accessibles :</p>
+            <ul>
+                <li>Testez la carte avec le <strong>fond le plus clair possible</strong> qu'elle pourra rencontrer. Si le texte passe le contraste WCAG AA dans ce pire scénario, c'est bon.</li>
+                <li>Augmentez légèrement l'opacité du fond (0.3–0.4) si la lisibilité est faible.</li>
+                <li>Ajoutez une <strong>ombre de texte subtile</strong> pour améliorer la lisibilité, par ex. <code>text-shadow: 0 1px 3px rgba(0,0,0,0.5);</code></li>
+            </ul>
+            <p>
+                Notre <a href="https://www.devstoolsbox.dev/fr/outils/generateur-effets-visuels/">générateur d'effets visuels</a> inclut un aperçu en temps réel de la carte sur différents types de fonds, pour que vous puissiez vérifier la lisibilité avant de copier le code.
+            </p>
+
+            <h2>Utilisez le générateur glassmorphism gratuit de Devstoolsbox</h2>
+            <p>
+                Ajuster le flou, l'opacité, la bordure et l'ombre à la main peut être fastidieux. Notre générateur vous offre des curseurs en direct et un aperçu instantané. Une fois satisfait, exportez le CSS (ou Tailwind, ou React JSX) en un clic. Tout fonctionne dans votre navigateur — aucun téléversement, aucun serveur.
+            </p>
+            <p>
+                <a href="https://www.devstoolsbox.dev/fr/outils/generateur-effets-visuels/" class="btn-tool">🔧 Ouvrir le générateur Glassmorphism</a>
+            </p>
+
+            <h2>Exemples concrets</h2>
+            <p>
+                <strong>Widgets de tableau de bord</strong> : une carte de statistiques semi‑transparente avec flou posée sur une carte de données, rendant la carte visible mais les chiffres nets. <strong>Modales de connexion</strong> : une modale givrée au‑dessus d'une capture d'écran floutée de l'application donne une sensation premium et stratifiée. <strong>Fiches produits</strong> : des fiches e‑commerce qui laissent entrevoir l'image de fond à travers le corps de la carte, liant le produit à l'imagerie de marque.
+            </p>
+
+            <h2>Foire Aux Questions</h2>
+            <h3>Pourquoi mon effet glassmorphism se casse-t-il quand j'utilise z-index: -1 ?</h3>
+            <p>
+                <code>backdrop-filter</code> crée un nouveau contexte d'empilement. Les éléments avec un z-index négatif derrière la carte glass peuvent être masqués. Plutôt que d'utiliser un z-index négatif, restructurez le HTML pour que l'arrière-plan soit naturellement derrière la carte.
+            </p>
+            <h3>Est-ce que backdrop-filter est lourd sur mobile ?</h3>
+            <p>
+                Il peut l'être. Sur les appareils peu puissants, un flou important peut faire chuter les images. Limitez le flou à 12px pour les éléments animés, utilisez <code>will-change</code> uniquement quand c'est nécessaire, et testez sur du matériel réel.
+            </p>
+            <h3>Comment rendre le glassmorphism accessible ?</h3>
+            <p>
+                Comme le contraste est dynamique, testez avec le fond le plus clair possible. Si besoin, augmentez l'opacité du fond ou ajoutez une ombre de texte subtile. Prévisualisez toujours sur de vrais fonds.
+            </p>
+
+            <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/fr/outils/generateur-effets-visuels/" class="btn-tool"> Essayer le générateur d'effets visuels gratuit</a></p>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">Devstoolsbox</a> — Outils gratuits pour développeurs et designers. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
