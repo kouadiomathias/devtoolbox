@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB ObjectID vs UUID — Structure, Portability, and Practical Migration</title>
+    <meta name="description" content="Understand the internal structure of a MongoDB ObjectID, its limitations in hybrid environments, and how to smoothly migrate to UUID v7. Decision table, real code, and production pitfalls.">
+    <meta name="keywords" content="objectid vs uuid, mongodb objectid, uuid v7 mongodb, objectid uuid migration, objectid structure, objectid portability, objectid collision">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Kouame Kouadio Mathias">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/objectid-vs-uuid/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/objectid-vs-uuid/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/objectid-vs-uuid/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/objectid-vs-uuid/">
+
+    <meta property="og:title" content="MongoDB ObjectID vs UUID — The Complete Guide">
+    <meta property="og:description" content="Internal structure, portability limits, collisions, and migration to UUID v7.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/objectid-vs-uuid/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ObjectID vs UUID — Structure and Migration">
+    <meta name="twitter:description" content="Why and how to move from ObjectID to UUID v7 in MongoDB.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "MongoDB ObjectID vs UUID — Structure, Portability, and Practical Migration",
+            "author": { "@type": "Person", "name": "Kouame Kouadio Mathias" },
+            "datePublished": "2026-05-23",
+            "dateModified": "2026-05-23",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/objectid-vs-uuid/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "What is the structure of a MongoDB ObjectID?", "acceptedAnswer": { "@type": "Answer", "text": "An ObjectID is a 12‑byte identifier composed of a 4‑byte Unix timestamp, a 5‑byte machine and process identifier, and a 3‑byte incremental counter." } },
+                { "@type": "Question", "name": "Why migrate from ObjectID to UUID in MongoDB?", "acceptedAnswer": { "@type": "Answer", "text": "ObjectID is MongoDB‑specific and difficult to port to other databases. UUID is a universal standard, compatible with PostgreSQL, MySQL, and REST APIs." } },
+                { "@type": "Question", "name": "Can ObjectID generate collisions?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, in high‑concurrency scenarios with unsynchronized clocks or when the counter overflows within the same second. UUID v7 eliminates this risk." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "ObjectID vs UUID", "item": "https://www.devstoolsbox.dev/tools/blog/objectid-vs-uuid/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+            --decision-bg: #f0fdf4; --decision-border: #10b981;
+            --objectid-timestamp: #ec4899; --objectid-machine: #3b82f6; --objectid-counter: #f59e0b;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --decision-bg: #064e3b; --decision-border: #34d399;
+            --objectid-timestamp: #f472b6; --objectid-machine: #60a5fa; --objectid-counter: #fbbf24;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:8px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:36px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:28px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color); padding:2px 6px;
+            border-radius:4px; font-family:var(--mono); font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color); padding:16px; border-radius:12px;
+            overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.5;
+        }
+        .decision-table {
+            width:100%; border-collapse:collapse; margin:24px 0;
+            background:var(--decision-bg); border:2px solid var(--decision-border); border-radius:12px;
+            overflow:hidden;
+        }
+        .decision-table th, .decision-table td {
+            padding:12px 16px; text-align:left; border-bottom:1px solid var(--border);
+        }
+        .decision-table th {
+            background:var(--decision-border); color:#fff; font-weight:700;
+            font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;
+        }
+        .decision-table tr:last-child td { border-bottom:none; }
+        .benchmark-table {
+            width:100%; border-collapse:collapse; margin:20px 0;
+        }
+        .benchmark-table th, .benchmark-table td {
+            border:1px solid var(--border); padding:10px 14px; text-align:left;
+        }
+        .benchmark-table th { background:var(--surface2); font-weight:600; }
+        .objectid-structure {
+            background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+            padding:18px; margin:20px 0; font-family:var(--mono); font-size:0.95rem;
+        }
+        .objectid-segment { padding:4px 8px; border-radius:6px; font-weight:700; letter-spacing:0.05em; }
+        .objectid-timestamp { background:var(--objectid-timestamp); color:#fff; }
+        .objectid-machine { background:var(--objectid-machine); color:#fff; }
+        .objectid-counter { background:var(--objectid-counter); color:#000; }
+        .ai-summary {
+            background:var(--primary-light); padding:14px 18px; border-radius:12px;
+            margin-bottom:24px; font-size:0.95rem; color:var(--text2);
+            border-left:4px solid var(--primary);
+        }
+        .note-box {
+            background:var(--surface2); border-left:4px solid var(--primary);
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0;
+            font-size:0.9rem; color:var(--text2);
+        }
+        .warning-box {
+            background:#fef3c7; border-left:4px solid #f59e0b;
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0;
+            font-size:0.9rem;
+        }
+        body.dark .warning-box { background:#422006; color:#fde68a; }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light">☀️ Light</button>
+                <button class="theme-btn" data-theme="dark">🌙 Dark</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/blog/objectid-vs-uuid/" class="lang-btn active">EN</a>
+                <a href="/fr/blog/objectid-vs-uuid/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-05-23">
+            <meta itemprop="author" content="Kouame Kouadio Mathias">
+
+            <h1 itemprop="headline">MongoDB ObjectID vs UUID — Structure, Portability, and Practical Migration</h1>
+            <div class="meta">Published on May 23, 2026 by Kouame Kouadio Mathias — 9 min read</div>
+
+            <div class="ai-summary">
+                <strong>Quick summary:</strong> MongoDB's ObjectID encodes a timestamp, machine, and counter in 12 bytes. It's ultra‑compact but hard to port outside the MongoDB ecosystem. We explain its structure, the real collision risk, and how to gradually migrate to UUID v7 with executable code examples.
+            </div>
+
+            <div itemprop="articleBody">
+                <h2>Decision Table — ObjectID or UUID for Your Project?</h2>
+                <table class="decision-table">
+                    <thead>
+                        <tr><th>Context</th><th>Recommended Identifier</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>You stay 100% inside the MongoDB ecosystem without exposing IDs</td><td>ObjectID (default)</td></tr>
+                        <tr><td>You plan to migrate or coexist with PostgreSQL / MySQL</td><td>UUID v7 (maximum portability)</td></tr>
+                        <tr><td>You expose identifiers in a public REST API</td><td>UUID v7 (non‑enumerable, standard)</td></tr>
+                        <tr><td>You need built‑in chronological ordering</td><td>ObjectID or UUID v7 (both contain a timestamp)</td></tr>
+                        <tr><td>You run a MongoDB cluster under high concurrency</td><td>UUID v7 (no counter‑based collision risk)</td></tr>
+                    </tbody>
+                </table>
+
+                <h2>ObjectID Internal Structure — What 12 Bytes Really Contain</h2>
+                <p>Contrary to what many believe, an ObjectID is not a random value. Its structure is deterministic:</p>
+                <div class="objectid-structure">
+                    <span>ObjectID: 507f1f77bcf86cd799439011</span><br>
+                    <span class="objectid-segment objectid-timestamp">507f1f77</span>
+                    <span class="objectid-segment objectid-machine">bcf86cd799</span>
+                    <span class="objectid-segment objectid-counter">439011</span><br>
+                    <span style="font-size:0.8rem; margin-left:8px;">├─ Timestamp ─┤</span>
+                    <span style="font-size:0.8rem; margin-left:16px;">├── Machine+PID ──┤</span>
+                    <span style="font-size:0.8rem; margin-left:16px;">├─ Counter ─┤</span><br>
+                    <span style="font-size:0.8rem; margin-left:8px;">4 bytes</span>
+                    <span style="font-size:0.8rem; margin-left:50px;">5 bytes</span>
+                    <span style="font-size:0.8rem; margin-left:58px;">3 bytes</span>
+                </div>
+                <p>The 4‑byte timestamp is a Unix timestamp in seconds (not milliseconds). The next 5 bytes identify the machine and process that generated the ID. Finally, a 3‑byte incremental counter differentiates multiple ObjectIDs created within the same second by the same process.</p>
+                <p>This structure is reminiscent of UUID v1 (timestamp + node) but in a more compact 12‑byte format instead of 16.</p>
+
+                <h2>Portability — ObjectID's Weak Spot</h2>
+                <p>ObjectID integrates perfectly with MongoDB: it's lightweight, sortable by creation date, and guaranteed unique within a collection. But as soon as you need to expose this ID in a REST API, store it in PostgreSQL, or use it as a global identifier across multiple services, problems arise.</p>
+                <ul>
+                    <li><strong>No native type:</strong> PostgreSQL, MySQL, and other databases have no ObjectID type. You have to store it as <code>VARCHAR(24)</code> or binary, losing automatic validation.</li>
+                    <li><strong>Non‑standard format:</strong> JSON Schema validators, ORMs, and client libraries recognize <code>format: uuid</code>, not <code>format: objectid</code>.</li>
+                    <li><strong>Hexadecimal encoding:</strong> The 24‑character text representation is less dense than a UUID's 36 characters, but the lack of hyphens can surprise developers used to UUIDs.</li>
+                </ul>
+                <p>In short, ObjectID is a great local identifier that becomes a burden as soon as you step outside MongoDB.</p>
+
+                <h2>The Incremental Counter Trap</h2>
+                <p>In very high concurrency scenarios (thousands of inserts per second on the same machine), the 3‑byte counter (16.7 million values) can overflow within a single second. If the timestamp hasn't advanced yet, two documents can receive the same ObjectID, causing duplicate key errors.</p>
+                <div class="warning-box">
+                    <strong>Documented issue:</strong> On MongoDB clusters with unsynchronized clocks or under extreme load spikes, the timestamp + counter combination is no longer sufficient to guarantee uniqueness. UUID v7, with 74 bits of randomness, eliminates this risk.
+                </div>
+
+                <h2>What We Changed Our Mind About — The Evolution of Our Recommendations</h2>
+                <p>In 2022, we recommended ObjectID for every MongoDB project, and ULID for multi‑database projects. In 2024, with the publication of RFC 9562 and the availability of stable UUID v7 libraries in most languages, our recommendation evolved:</p>
+                <ul>
+                    <li><strong>ObjectID</strong> remains acceptable for pure MongoDB projects that never expose their identifiers externally.</li>
+                    <li><strong>UUID v7</strong> has become our default recommendation for any new project, including on MongoDB, because of its portability, standardization, and chronological sorting.</li>
+                </ul>
+                <p>This section documents this change so you can understand the context of our current choices.</p>
+
+                <h2>Practical Migration from ObjectID to UUID v7 in MongoDB</h2>
+                <p>If you already have a collection with ObjectIDs, you can gradually introduce UUID v7 without service interruption. Here is a proven approach:</p>
+                <ol>
+                    <li><strong>Add a <code>uuid_v7</code> field</strong> to your existing documents. You can generate a UUID v7 based on the ObjectID's timestamp to preserve approximate chronological order.</li>
+                    <li><strong>Modify your application code</strong> to generate a UUID v7 for each new document at creation.</li>
+                    <li><strong>Double‑index during the transition:</strong> keep the index on <code>_id</code> and add an index on <code>uuid_v7</code>.</li>
+                    <li><strong>When all old documents are migrated or purged</strong>, replace <code>_id</code> with the value of the <code>uuid_v7</code> field and remove the old index.</li>
+                </ol>
+                <pre><code>// Example: partial migration adding a uuid_v7 field
+db.collection('users').aggregate([
+  {
+    $addFields: {
+      uuid_v7: { $function: {
+        body: function(oid) {
+          // Use a UUID v7 library server‑side
+          // Below is a simplified example that extracts the timestamp and combines it with randomness
+          const ts = Math.floor(oid.getTimestamp().getTime() / 1000);
+          // ... UUID v7 generation (not shown for brevity)
+          return generateUUIDv7(ts);
+        },
+        args: ["$_id"],
+        lang: "js"
+      }}
+    }
+  }
+]);</code></pre>
+                <p>For a zero‑downtime migration, use our <a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> to create the identifiers and insert them into your migration pipelines.</p>
+
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-item">
+                    <div class="faq-question">Is ObjectID faster than UUID for MongoDB indexes?</div>
+                    <p>ObjectID is slightly more compact (12 bytes vs. 16), but the index performance difference is negligible in practice. The real win is portability, not speed.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Can I decode an ObjectID without MongoDB?</div>
+                    <p>Yes, the first 4 bytes give you the Unix timestamp. You can extract the creation date without querying the database.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Is it safe to change the <code>_id</code> type on an existing collection?</div>
+                    <p>No, do not change the <code>_id</code> type in place. Instead, add a new field (like <code>uuid_v7</code>) and migrate gradually, as described above.</p>
+                </div>
+
+                <h3 style="margin-top:32px;">Complementary Tools</h3>
+                <ul>
+                    <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> — create sortable identifiers</li>
+                    <li><a href="/tools/uuid-collision-calculator/">UUID Collision Calculator</a> — check probabilities</li>
+                    <li><a href="/tools/uuid-comparison/">UUID Comparison by Language</a> — all implementations</li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — Free tools for developers. <a href="/tools/blog/">Blog</a> | <a href="/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
