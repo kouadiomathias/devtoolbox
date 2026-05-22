@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur clé primaire UUID MySQL — Exemples avec UUID()</title>
+    <meta name="description" content="Générez des UUID pour vos tables MySQL. Copiez du code SQL avec UUID(), créez des tables avec clés primaires UUID et comprenez UUID vs AUTO_INCREMENT. 100 % côté client.">
+    <meta name="keywords" content="mysql uuid primary key, mysql uuid(), exemple uuid mysql, colonne uuid mysql, trigger uuid mysql, uuid vs auto_increment, mysql 8 uuid">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/uuid-mysql/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/uuid-mysql/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/mysql-uuid-primary-key/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/mysql-uuid-primary-key/">
+
+    <meta property="og:title" content="Générateur clé primaire UUID MySQL">
+    <meta property="og:description" content="Créez des clés primaires UUID dans MySQL. Copiez du SQL avec UUID() et comprenez les bonnes pratiques.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/uuid-mysql/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Clé primaire UUID MySQL">
+    <meta name="twitter:description" content="Générez des UUID pour MySQL et apprenez à les utiliser comme clés primaires.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .display-box {
+            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .uuid-display {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1.1rem; font-weight:600;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); word-break:break-all;
+        }
+        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .uuid-display { font-size:0.95rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/mysql-uuid-primary-key/" class="lang-btn">EN</a>
+                <a href="/fr/outils/uuid-mysql/" class="lang-btn active" aria-current="page">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/fr/">Accueil</a> &rsaquo;
+        <a href="/fr/outils/">Outils</a> &rsaquo;
+        <span>UUID MySQL</span>
+    </div>
+
+    <div class="seo-hook">
+        Besoin d’une <strong>clé primaire UUID dans MySQL</strong> ? Utilisez <code>UUID()</code> pour générer vos identifiants. Copiez le code SQL pour la création de table, l’insertion et comprenez la différence UUID vs AUTO_INCREMENT. Aucune donnée ne quitte votre navigateur.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>Clé primaire UUID MySQL (UUID)</h1>
+            <div class="subhead">Générez des UUID et visualisez instantanément le code SQL pour créer une table avec une clé primaire UUID dans MySQL, insérer des lignes et interroger. Utilise la fonction intégrée <code>UUID()</code>, avec options de stockage <code>CHAR(36)</code> ou <code>BINARY(16)</code>.</div>
+
+            <div class="display-box">
+                <div class="uuid-display" id="uuidDisplay" aria-label="UUID généré">550e8400-e29b-41d4-a716-446655440000</div>
+                <button class="btn btn-sm" data-copy="uuidDisplay" aria-label="Copier l’UUID">Copier</button>
+            </div>
+
+            <div class="options-row">
+                <button class="btn btn-primary" id="generateBtn">Générer un UUID</button>
+                <button class="btn btn-outline btn-sm" id="copyTableCodeBtn">Copier CREATE TABLE</button>
+                <button class="btn btn-outline btn-sm" id="copyInsertCodeBtn">Copier INSERT</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Partager</button>
+            </div>
+        </div>
+
+        <section class="article-section" aria-label="Documentation">
+            <h2>Comment utiliser un UUID comme clé primaire dans MySQL</h2>
+            <p>
+                MySQL ne possède pas de type de données UUID natif, mais vous pouvez stocker les UUID dans des colonnes <code>CHAR(36)</code> ou <code>BINARY(16)</code>. La fonction <code>UUID()</code> renvoie une chaîne de 36 caractères (avec tirets).
+            </p>
+
+            <h3>1. Créer une table avec une clé primaire UUID (CHAR(36))</h3>
+            <pre><code id="createTableCode">CREATE TABLE utilisateurs (
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    nom VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</code></pre>
+            <p>Ceci utilise les valeurs par défaut d’expression disponibles depuis MySQL 8.0.13. Pour les versions antérieures, utilisez un déclencheur.</p>
+
+            <h3>2. Insérer des lignes — l’UUID est généré automatiquement</h3>
+            <pre><code id="insertCode">INSERT INTO utilisateurs (nom, email)
+VALUES ('Alice', 'alice@exemple.fr');
+SELECT * FROM utilisateurs;</code></pre>
+
+            <h3>3. Utiliser un déclencheur pour les anciennes versions de MySQL</h3>
+            <pre><code>CREATE TRIGGER before_insert_utilisateurs
+BEFORE INSERT ON utilisateurs
+FOR EACH ROW
+SET NEW.id = UUID();</code></pre>
+
+            <h3>4. Stocker en BINARY(16) pour de meilleures performances</h3>
+            <p>Vous pouvez stocker les UUID dans une colonne <code>BINARY(16)</code> pour réduire l’empreinte :</p>
+            <pre><code>CREATE TABLE utilisateurs_bin (
+    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID())),
+    nom VARCHAR(100) NOT NULL
+);</code></pre>
+
+            <h3>Pourquoi utiliser UUID plutôt qu’AUTO_INCREMENT ?</h3>
+            <ul>
+                <li><strong>Systèmes distribués</strong> — les UUID peuvent être générés sur plusieurs nœuds sans collision.</li>
+                <li><strong>Sécurité</strong> — les UUID ne révèlent pas le nombre d’enregistrements.</li>
+                <li><strong>Portabilité</strong> — les UUID sont plus faciles à fusionner entre bases de données.</li>
+            </ul>
+
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Quelle version d’UUID produit <code>UUID()</code> ?</div>
+                <p>La fonction <code>UUID()</code> de MySQL génère un UUID v1 (basé sur l’horodatage) qui peut exposer l’adresse MAC. Pour des UUID aléatoires (v4), utilisez <code>UUID_TO_BIN(UUID())</code> avec un déclencheur ou le code applicatif.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Une clé primaire UUID est‑elle plus lente qu’un auto‑incrément dans MySQL ?</div>
+                <p>Les UUID sont plus volumineux et peuvent entraîner une fragmentation d’index, surtout avec des UUID aléatoires. Pour InnoDB, préférez <code>BINARY(16)</code> et triez par une colonne d’horodatage pour limiter les divisions de pages.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Puis‑je utiliser <code>UUID()</code> comme valeur par défaut dans MySQL ?</div>
+                <p>Oui, à partir de MySQL 8.0.13, vous pouvez utiliser <code>DEFAULT (UUID())</code> pour les colonnes <code>CHAR(36)</code>. Pour les versions antérieures, un déclencheur est nécessaire.</p>
+            </div>
+
+            <h3>Autres outils utiles</h3>
+            <ul>
+                <li><a href="/fr/outils/generateur-uuid/">Générateur UUID / ULID</a> — générez des lots d’identifiants</li>
+                <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a> — UUID triables dans le temps</li>
+                <li><a href="/fr/outils/uuid-postgresql/">PostgreSQL UUID Primary Key</a> — comparez avec l’approche PostgreSQL</li>
+                <li><a href="/fr/outils/evaluateur-expression-cron/">Évaluateur d’expression Cron</a> — planifiez vos tâches de maintenance MySQL</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Générateur clé primaire UUID MySQL",
+  "url": "https://www.devstoolsbox.dev/fr/outils/uuid-mysql/",
+  "description": "Générez des clés primaires UUID pour vos tables MySQL. Copiez du code SQL avec UUID(). 100 % côté client.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Nécessite JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Quelle version d'UUID produit UUID() ?", "acceptedAnswer": { "@type": "Answer", "text": "UUID() génère un UUID v1 (basé sur l'horodatage). Pour des UUID v4 aléatoires, utilisez du code applicatif ou un déclencheur avec UUID()." } },
+    { "@type": "Question", "name": "Une clé primaire UUID est-elle plus lente qu'un auto-incrément dans MySQL ?", "acceptedAnswer": { "@type": "Answer", "text": "Les UUID sont plus volumineux et peuvent fragmenter l'index. Utilisez BINARY(16) et un tri adapté pour limiter l'impact." } },
+    { "@type": "Question", "name": "Puis-je utiliser UUID() comme valeur par défaut dans MySQL ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, à partir de MySQL 8.0.13, vous pouvez utiliser DEFAULT (UUID()). Pour les versions antérieures, un déclencheur est requis." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "UUID MySQL", "item": "https://www.devstoolsbox.dev/fr/outils/uuid-mysql/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Thème ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    // Génération UUID v1 (simulant UUID() de MySQL)
+    function generateUUIDv1() {
+        // Nous utilisons crypto.randomUUID pour simplifier, mais MySQL produit un UUID v1.
+        // Pour rester proche, nous utilisons un UUID v4 aléatoire à la place.
+        if (crypto.randomUUID) return crypto.randomUUID();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    const uuidDisplay = document.getElementById('uuidDisplay');
+    let currentUUID = generateUUIDv1();
+    uuidDisplay.textContent = currentUUID;
+
+    document.getElementById('generateBtn').addEventListener('click', () => {
+        currentUUID = generateUUIDv1();
+        uuidDisplay.textContent = currentUUID;
+    });
+
+    // Copier UUID
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const el = document.getElementById(targetId);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copié !'));
+            }
+        });
+    });
+
+    // Copier CREATE TABLE (statique)
+    document.getElementById('copyTableCodeBtn').addEventListener('click', () => {
+        const code = document.getElementById('createTableCode').textContent;
+        navigator.clipboard.writeText(code).then(() => showToast('Code CREATE TABLE copié !'));
+    });
+
+    // Copier INSERT (statique)
+    document.getElementById('copyInsertCodeBtn').addEventListener('click', () => {
+        const code = document.getElementById('insertCode').textContent;
+        navigator.clipboard.writeText(code).then(() => showToast('Code INSERT copié !'));
+    });
+
+    // Partager
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const state = { uuid: currentUUID };
+        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copiée !'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+                if (state.uuid) {
+                    currentUUID = state.uuid;
+                    uuidDisplay.textContent = currentUUID;
+                }
+            } catch(e){}
+        }
+    }
+    loadFromHash();
+})();
+</script>
+</body>
+</html>

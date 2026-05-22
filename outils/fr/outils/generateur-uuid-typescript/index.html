@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur UUID TypeScript — Créez des UUID typés avec crypto.randomUUID() et uuid npm</title>
+    <meta name="description" content="Générez des UUID en TypeScript avec crypto.randomUUID() ou le paquet uuid typé. Copiez les extraits de code TypeScript et apprenez les bonnes pratiques. 100 % côté client.">
+    <meta name="keywords" content="typescript uuid, uuid typescript, générateur uuid typescript, uuid npm typescript, crypto.randomUUID typescript, exemple uuid ts">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-typescript/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-typescript/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/typescript-uuid-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/typescript-uuid-generator/">
+
+    <meta property="og:title" content="Générateur UUID TypeScript — crypto.randomUUID() &amp; uuid npm">
+    <meta property="og:description" content="Générez des UUID en TypeScript avec les méthodes natives ou la bibliothèque uuid typée. Copiez le code instantanément. 100 % côté client.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-typescript/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Générateur UUID TypeScript">
+    <meta name="twitter:description" content="Générez des UUID en TS. Copiez le code pour crypto.randomUUID() et uuid npm.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #3178c6; /* bleu TypeScript */
+            --primary-hover: #235a97; --primary-light: rgba(49,120,198,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #4da8f0;
+            --primary-hover: #3178c6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .display-box {
+            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .uuid-display {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1.1rem; font-weight:600;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); word-break:break-all;
+        }
+        .method-selector { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+        .method-btn {
+            padding:8px 16px; border-radius:30px; font-weight:600; font-size:0.85rem;
+            border:1px solid var(--border); background:var(--surface); color:var(--text);
+            cursor:pointer; transition:all 0.2s; font-family:inherit;
+        }
+        .method-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .uuid-display { font-size:0.95rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/typescript-uuid-generator/" class="lang-btn">EN</a>
+                <a href="/fr/outils/generateur-uuid-typescript/" class="lang-btn active" aria-current="page">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/fr/">Accueil</a> &rsaquo;
+        <a href="/fr/outils/">Outils</a> &rsaquo;
+        <span>Générateur UUID TypeScript</span>
+    </div>
+
+    <div class="seo-hook">
+        Besoin d’un <strong>générateur UUID en TypeScript</strong> ? Utilisez <code>crypto.randomUUID()</code> ou le paquet <strong>uuid</strong> avec les types. Cet outil vous montre les deux méthodes avec du code TypeScript prêt à copier. Aucune donnée ne quitte votre navigateur.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>Générateur UUID TypeScript</h1>
+            <div class="subhead">Générez des UUID directement dans votre navigateur en utilisant les mêmes API disponibles dans les environnements TypeScript modernes. Basculez entre <code>crypto.randomUUID()</code> et l’approche <strong>uuid npm</strong>, puis copiez l’extrait de code TypeScript pour votre projet.</div>
+
+            <div class="display-box">
+                <div class="uuid-display" id="uuidDisplay" aria-label="UUID généré">550e8400-e29b-41d4-a716-446655440000</div>
+                <button class="btn btn-sm" data-copy="uuidDisplay" aria-label="Copier l’UUID">Copier</button>
+            </div>
+
+            <div class="method-selector">
+                <button class="method-btn active" data-method="crypto">crypto.randomUUID()</button>
+                <button class="method-btn" data-method="npm">uuid npm (v4)</button>
+            </div>
+
+            <div class="options-row">
+                <button class="btn btn-primary" id="generateBtn">Générer un UUID</button>
+                <button class="btn btn-outline btn-sm" id="copyCodeBtn">Copier le code TS</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Partager</button>
+            </div>
+        </div>
+
+        <section class="article-section" aria-label="Documentation">
+            <h2>Comment générer un UUID en TypeScript</h2>
+            <p>
+                TypeScript, en tant que sur-ensemble typé de JavaScript, bénéficie des mêmes API que JavaScript pour générer des UUID. Deux approches principales s’offrent à vous :
+            </p>
+            <ul>
+                <li><strong><code>crypto.randomUUID()</code></strong> – disponible dans les navigateurs modernes, Node.js (≥19) et Deno. Elle renvoie une <code>string</code> représentant un UUID v4. Aucun typage supplémentaire n’est nécessaire, car le type <code>string</code> est natif.</li>
+                <li><strong>le paquet npm <code>uuid</code></strong> – fournit des fonctions typées pour générer des UUID v1, v3, v4, v5 (et v7 via des modules complémentaires). Les définitions de types sont incluses ou disponibles via <code>@types/uuid</code>.</li>
+            </ul>
+            <p>
+                Notre outil illustre les deux méthodes et fournit le code TypeScript exact que vous pouvez coller dans votre projet.
+            </p>
+
+            <h3>Exemple avec <code>crypto.randomUUID()</code> en TypeScript</h3>
+            <pre><code>// TypeScript (navigateurs modernes, Node.js ≥19, Deno)
+const id: string = crypto.randomUUID();
+console.log(id); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
+            <p>Le typage est implicite : <code>crypto.randomUUID()</code> retourne une <code>string</code>. Vous pouvez annoter explicitement avec <code>: string</code> pour plus de clarté.</p>
+
+            <h3>Exemple avec le paquet npm <code>uuid</code> en TypeScript</h3>
+            <pre><code>// Installez : npm install uuid
+// Les types sont inclus dans le paquet (uuid >= 8)
+import { v4 as uuidv4 } from 'uuid';
+const id: string = uuidv4();
+console.log(id); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
+            <p>Si vous utilisez une version plus ancienne, installez également <code>@types/uuid</code>. Le paquet <code>uuid</code> exporte ses propres définitions de type depuis la version 8.</p>
+
+            <h3>Quelle méthode choisir en TypeScript ?</h3>
+            <ul>
+                <li><strong><code>crypto.randomUUID()</code></strong> : zéro dépendance, typage natif, idéal pour les projets modernes.</li>
+                <li><strong>Paquet <code>uuid</code></strong> : nécessaire si vous avez besoin d’UUID autres que v4, ou si vous ciblez des environnements plus anciens. Les types sont bien maintenus.</li>
+            </ul>
+
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Les types pour <code>uuid</code> sont-ils inclus dans le paquet npm ?</div>
+                <p>Oui, depuis la version 8 du paquet <code>uuid</code>, les définitions TypeScript sont incluses. Pour les versions antérieures, installez <code>@types/uuid</code>.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Puis-je utiliser <code>crypto.randomUUID()</code> dans un environnement Node.js TypeScript ?</div>
+                <p>Oui, à partir de Node.js 19. Assurez-vous que votre fichier <code>tsconfig.json</code> cible une version de librairie récente (par ex. <code>"lib": ["ES2022"]</code>) pour que les types soient reconnus.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Comment générer un UUID v5 typé en TypeScript ?</div>
+                <p>Utilisez le paquet <code>uuid</code> : <code>import { v5 as uuidv5 } from 'uuid';</code>. La fonction attend un namespace (de type <code>string</code> ou <code>Uint8Array</code>) et un nom (<code>string</code>), et retourne une <code>string</code>.</p>
+            </div>
+
+            <h3>Autres outils utiles</h3>
+            <ul>
+                <li><a href="/fr/outils/generateur-uuid/">Générateur UUID / ULID</a> — toutes les versions d’UUID et ULID en lot</li>
+                <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a> — UUID triables dans le temps</li>
+                <li><a href="/fr/outils/generateur-uuid-javascript/">Générateur UUID JavaScript</a> — la version pour JavaScript pur</li>
+                <li><a href="/fr/outils/generateur-nanoid/">Générateur NanoID</a> — identifiants courts et compatibles URL</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Générateur UUID TypeScript",
+  "url": "https://www.devstoolsbox.dev/fr/outils/generateur-uuid-typescript/",
+  "description": "Générez des UUID en TypeScript avec crypto.randomUUID() ou le paquet uuid typé. 100 % côté client.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Nécessite JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Les types pour uuid sont-ils inclus dans le paquet npm ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, depuis la version 8 du paquet uuid, les définitions TypeScript sont incluses." } },
+    { "@type": "Question", "name": "Puis-je utiliser crypto.randomUUID() dans un environnement Node.js TypeScript ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, à partir de Node.js 19. Vérifiez votre tsconfig.json pour cibler une librairie récente." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Générateur UUID TypeScript", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-uuid-typescript/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Thème ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    // Génération UUID v4
+    function generateUUIDv4() {
+        if (crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        // Fallback
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // Simule uuid npm v4
+    function generateUUIDnpm() {
+        return generateUUIDv4();
+    }
+
+    const uuidDisplay = document.getElementById('uuidDisplay');
+    const methodBtns = document.querySelectorAll('.method-btn');
+    let currentMethod = 'crypto';
+
+    methodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            methodBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMethod = btn.dataset.method;
+            updateDisplay();
+        });
+    });
+
+    function updateDisplay() {
+        let uuid;
+        if (currentMethod === 'crypto') {
+            uuid = generateUUIDv4();
+        } else {
+            uuid = generateUUIDnpm();
+        }
+        uuidDisplay.textContent = uuid;
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', updateDisplay);
+
+    // Copier UUID
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const el = document.getElementById(targetId);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copié !'));
+            }
+        });
+    });
+
+    // Copier le code TypeScript
+    document.getElementById('copyCodeBtn').addEventListener('click', () => {
+        let code;
+        if (currentMethod === 'crypto') {
+            code = `const id: string = crypto.randomUUID();\nconsole.log(id); // "${uuidDisplay.textContent}"`;
+        } else {
+            code = `import { v4 as uuidv4 } from 'uuid';\nconst id: string = uuidv4();\nconsole.log(id); // "${uuidDisplay.textContent}"`;
+        }
+        navigator.clipboard.writeText(code).then(() => showToast('Code TypeScript copié !'));
+    });
+
+    // Partager
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const state = {
+            method: currentMethod,
+            uuid: uuidDisplay.textContent
+        };
+        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copiée !'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+                if (state.method) {
+                    currentMethod = state.method;
+                    document.querySelector(`.method-btn[data-method="${state.method}"]`)?.classList.add('active');
+                }
+                updateDisplay();
+            } catch(e){}
+        }
+    }
+
+    // Génération initiale
+    updateDisplay();
+    loadFromHash();
+})();
+</script>
+</body>
+</html>

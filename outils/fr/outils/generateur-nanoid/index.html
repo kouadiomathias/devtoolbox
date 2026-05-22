@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur NanoID en ligne — Créez des identifiants courts, uniques et compatibles URL</title>
+    <meta name="description" content="Générez des NanoIDs en ligne instantanément. Identifiants courts, uniques, sûrs pour les URL. Personnalisez la longueur et l'alphabet. 100 % côté client – aucune donnée envoyée.">
+    <meta name="keywords" content="nanoid generator, nanoid en ligne, générateur nanoid, outil nanoid, identifiant court unique, id compatible url, nanoid javascript, nanoid python">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-nanoid/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-nanoid/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/nanoid-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/nanoid-generator/">
+
+    <meta property="og:title" content="Générateur NanoID en ligne">
+    <meta property="og:description" content="Créez des identifiants courts, uniques et compatibles URL en un clic. 100 % côté client, sans envoi de données.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-nanoid/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Générateur NanoID">
+    <meta name="twitter:description" content="Générez des NanoIDs instantanément – courts, uniques, compatibles URL.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .display-box {
+            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .nanoid-display {
+            flex:1; min-width:220px; padding:12px 16px;
+            font-family:var(--mono); font-size:1.1rem; font-weight:600;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); word-break:break-all; letter-spacing:0.03em;
+        }
+        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .option-group { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text2); }
+        .option-group input[type="number"] {
+            width:70px; padding:6px 10px; border-radius:8px; border:1.5px solid var(--border);
+            background:var(--surface); color:var(--text); font-family:inherit;
+        }
+        .option-group select {
+            padding:6px 10px; border-radius:8px; border:1.5px solid var(--border);
+            background:var(--surface); color:var(--text); font-family:inherit; font-size:0.85rem;
+        }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        .batch-output {
+            margin-top:20px; border:1px solid var(--border); border-radius:12px;
+            padding:14px; font-family:var(--mono); font-size:0.83rem;
+            max-height:200px; overflow-y:auto; background:var(--surface);
+            line-height:1.8; white-space:pre-wrap;
+        }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .nanoid-display { font-size:0.95rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/nanoid-generator/" class="lang-btn">EN</a>
+                <a href="/fr/outils/generateur-nanoid/" class="lang-btn active" aria-current="page">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/fr/">Accueil</a> &rsaquo;
+        <a href="/fr/outils/">Outils</a> &rsaquo;
+        <span>Générateur NanoID</span>
+    </div>
+
+    <div class="seo-hook">
+        <strong>Générez des NanoIDs</strong> – courts, uniques et compatibles URL – en un clic. Notre <strong>générateur NanoID</strong> crée des identifiants compacts parfaits pour les bases de données, les clés et les URLs. Tout est calculé localement, rien n’est envoyé à un serveur.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>Générateur NanoID</h1>
+            <div class="subhead">Créez un ou plusieurs NanoIDs – des identifiants uniques, courts, rapides et compatibles URL. Personnalisez la longueur et l’alphabet, puis copiez en un clic. Inspiré de la célèbre bibliothèque <code>nanoid</code> pour JavaScript.</div>
+
+            <div class="display-box">
+                <div class="nanoid-display" id="nanoidDisplay" aria-label="NanoID généré">V1StGXR8_Z5jdHi6B-myT</div>
+                <button class="btn btn-sm" data-copy="nanoidDisplay" aria-label="Copier le NanoID">Copier</button>
+            </div>
+
+            <div class="options-row">
+                <button class="btn btn-primary" id="generateBtn">Générer un NanoID</button>
+                <div class="option-group">
+                    <label for="countInput">Nombre :</label>
+                    <input type="number" id="countInput" value="1" min="1" max="50" step="1">
+                </div>
+                <div class="option-group">
+                    <label for="lengthInput">Longueur :</label>
+                    <input type="number" id="lengthInput" value="21" min="1" max="100" step="1">
+                </div>
+                <div class="option-group">
+                    <label for="alphabetSelect">Alphabet :</label>
+                    <select id="alphabetSelect">
+                        <option value="default">Défaut (A-Za-z0-9_-)</option>
+                        <option value="url">Compatible URL (A-Za-z0-9~_\-)</option>
+                        <option value="lowercase">Minuscules (a-z0-9)</option>
+                        <option value="uppercase">Majuscules (A-Z0-9)</option>
+                        <option value="numbers">Chiffres seulement (0-9)</option>
+                        <option value="nolookalike">Sans caractères ambigus (pas de 1,l,0,O,…)</option>
+                    </select>
+                </div>
+                <button class="btn btn-outline btn-sm" id="copyAllBtn" style="display:none;">Copier tout</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Partager</button>
+            </div>
+
+            <div class="batch-output" id="batchOutput" style="display:none;"></div>
+        </div>
+
+        <section class="article-section" aria-label="Documentation">
+            <h2>Qu’est‑ce que NanoID et pourquoi l’utiliser ?</h2>
+            <p>
+                <strong>NanoID</strong> est un générateur d’identifiants uniques, compact et très rapide. Il produit des chaînes comme <code>V1StGXR8_Z5jdHi6B-myT</code>, idéales pour les clés primaires, les sessions ou tout autre contexte où des identifiants courts et résistants aux collisions sont nécessaires. Comparé à un UUID, un NanoID est plus court (21 caractères contre 36) et utilise un alphabet plus large, donc plus lisible.
+            </p>
+            <p>
+                Notre générateur utilise la même source de hasard cryptographique que la bibliothèque NanoID d’origine, mais il fonctionne entièrement dans votre navigateur – sans serveur, sans traçage, sans collecte de données.
+            </p>
+
+            <h3>Comment utiliser le générateur de NanoID</h3>
+            <ol>
+                <li>Cliquez sur <strong>Générer un NanoID</strong> pour obtenir un identifiant avec les réglages par défaut (21 caractères, alphabet compatible URL).</li>
+                <li>Ajustez la <strong>longueur</strong> (1 à 100) pour raccourcir ou allonger l’ID.</li>
+                <li>Choisissez un <strong>alphabet</strong> prédéfini ou créez votre propre ensemble personnalisé.</li>
+                <li>Pour générer plusieurs identifiants à la fois, réglez le <strong>nombre</strong> (jusqu’à 50).</li>
+                <li>Copiez l’ID avec le bouton dédié, ou copiez l’ensemble de la liste depuis le panneau de résultats.</li>
+                <li>Utilisez le bouton <strong>Partager</strong> pour envoyer la configuration actuelle à un collègue – l’URL encode tous les paramètres.</li>
+            </ol>
+
+            <h3>Les alphabets disponibles</h3>
+            <p>Plusieurs alphabets prêts à l’emploi sont proposés :</p>
+            <ul>
+                <li><strong>Défaut</strong> – compatible URL (<code>A-Za-z0-9_-</code>), l’alphabet standard de NanoID.</li>
+                <li><strong>Compatible URL</strong> – inclut le tilde pour une compatibilité maximale avec les systèmes de fichiers.</li>
+                <li><strong>Minuscules</strong> – uniquement des lettres minuscules et des chiffres, pour des représentations compactes.</li>
+                <li><strong>Majuscules</strong> – uniquement des majuscules, pratique pour des codes lisibles.</li>
+                <li><strong>Chiffres seulement</strong> – uniquement des chiffres, pour des identifiants de type code PIN.</li>
+                <li><strong>Sans caractères ambigus</strong> – évite les caractères source d’erreurs comme 1, l, 0, O, etc.</li>
+            </ul>
+
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Comment NanoID se compare‑t‑il à un UUID ?</div>
+                <p>NanoID est plus court (21 caractères contre 36 pour l’UUID), utilise un alphabet plus large (64 symboles contre 16 hexadécimaux) et atteint une résistance aux collisions équivalente avec une chaîne plus petite. Il est également compatible URL par défaut, alors qu’un UUID nécessite des tirets ou un encodage pour les URLs.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Puis‑je utiliser NanoID comme clé primaire ?</div>
+                <p>Oui, NanoID est un excellent choix pour les clés primaires. Il génère des identifiants uniques et aléatoires qui évitent la fragmentation d’index mieux qu’un UUID v4, surtout avec des index clusterisés.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Comment générer un NanoID en Python ou JavaScript ?</div>
+                <p>Pour JavaScript, utilisez le paquet <code>nanoid</code> (npm) ou l’API native <code>crypto.getRandomValues</code>. Pour Python, la bibliothèque <code>nanoid</code> sur PyPI offre les mêmes fonctionnalités. Notre générateur affiche également l’entropie en bits pour chaque identifiant produit.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Quelle est l’entropie d’un NanoID ?</div>
+                <p>Elle dépend de la longueur et de la taille de l’alphabet. Pour un NanoID de 21 caractères avec 64 symboles, on obtient <code>log2(64) × 21 = 126 bits</code> d’entropie, comparable à un UUID v4.</p>
+            </div>
+
+            <h3>Autres outils utiles</h3>
+            <ul>
+                <li><a href="/fr/outils/generateur-uuid/">Générateur UUID / ULID</a> — toutes les versions d’UUID et d’ULID en lot</li>
+                <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a> — UUID triables dans le temps</li>
+                <li><a href="/fr/outils/python-uuid-to-string/">Python UUID to String</a> — convertisseur de formats pour développeurs Python</li>
+                <li><a href="/fr/outils/encodeur-base64/">Encodeur/Décodeur Base64</a> — encodez vos NanoIDs pour les en‑têtes HTTP</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Générateur NanoID",
+  "url": "https://www.devstoolsbox.dev/fr/outils/generateur-nanoid/",
+  "description": "Générez des NanoIDs courts et compatibles URL en ligne. Personnalisez la longueur et l'alphabet. 100 % côté client.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Nécessite JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Comment NanoID se compare-t-il à un UUID ?", "acceptedAnswer": { "@type": "Answer", "text": "NanoID est plus court, utilise un alphabet plus large et atteint une résistance aux collisions équivalente. Il est compatible URL par défaut." } },
+    { "@type": "Question", "name": "Puis-je utiliser NanoID comme clé primaire ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, NanoID est excellent pour les clés primaires, évitant la fragmentation d'index mieux qu'UUID v4." } },
+    { "@type": "Question", "name": "Comment générer un NanoID en Python ou JavaScript ?", "acceptedAnswer": { "@type": "Answer", "text": "Utilisez le paquet nanoid (npm) en JavaScript ou la bibliothèque nanoid sur PyPI pour Python." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Générateur NanoID", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-nanoid/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Thème ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    /* ── Alphabets ── */
+    const ALPHABETS = {
+        default: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-',
+        url: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~_-',
+        lowercase: 'abcdefghijklmnopqrstuvwxyz0123456789',
+        uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+        numbers: '0123456789',
+        nolookalike: 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+    };
+
+    function generateNanoID(length=21, alphabetKey='default') {
+        const alphabet = ALPHABETS[alphabetKey] || ALPHABETS.default;
+        const mask = (2 << (Math.log(alphabet.length - 1) / Math.LN2)) - 1;
+        const step = Math.ceil(1.6 * mask * length / alphabet.length);
+        let id = '';
+        while (id.length < length) {
+            const bytes = new Uint8Array(step);
+            crypto.getRandomValues(bytes);
+            for (let i = 0; i < step && id.length < length; i++) {
+                const byte = bytes[i] & mask;
+                if (byte < alphabet.length) {
+                    id += alphabet[byte];
+                }
+            }
+        }
+        return id;
+    }
+
+    function generateBatch(count, length, alphabet) {
+        const ids = [];
+        for (let i=0; i<count; i++) {
+            ids.push(generateNanoID(length, alphabet));
+        }
+        return ids;
+    }
+
+    const nanoidDisplay = document.getElementById('nanoidDisplay');
+    const countInput = document.getElementById('countInput');
+    const lengthInput = document.getElementById('lengthInput');
+    const alphabetSelect = document.getElementById('alphabetSelect');
+    const batchOutput = document.getElementById('batchOutput');
+    const copyAllBtn = document.getElementById('copyAllBtn');
+    const shareBtn = document.getElementById('shareBtn');
+
+    let currentIDs = [];
+
+    function updateDisplay() {
+        const count = parseInt(countInput.value,10) || 1;
+        const length = parseInt(lengthInput.value,10) || 21;
+        const alphabet = alphabetSelect.value;
+        currentIDs = generateBatch(count, length, alphabet);
+
+        nanoidDisplay.textContent = currentIDs[0];
+        if (count > 1) {
+            batchOutput.style.display = 'block';
+            batchOutput.textContent = currentIDs.join('\n');
+            copyAllBtn.style.display = 'inline-flex';
+        } else {
+            batchOutput.style.display = 'none';
+            copyAllBtn.style.display = 'none';
+        }
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', updateDisplay);
+    lengthInput.addEventListener('input', updateDisplay);
+    alphabetSelect.addEventListener('change', updateDisplay);
+
+    // Copy buttons
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const el = document.getElementById(targetId);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copié !'));
+            }
+        });
+    });
+
+    copyAllBtn.addEventListener('click', () => {
+        if (currentIDs.length > 1) {
+            navigator.clipboard.writeText(currentIDs.join('\n')).then(()=>showToast('Tous les NanoIDs copiés !'));
+        }
+    });
+
+    shareBtn.addEventListener('click', () => {
+        const state = {
+            count: parseInt(countInput.value,10),
+            length: parseInt(lengthInput.value,10),
+            alphabet: alphabetSelect.value,
+            lastID: currentIDs[0]
+        };
+        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copiée !'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+                if (state.count) countInput.value = state.count;
+                if (state.length) lengthInput.value = state.length;
+                if (state.alphabet) alphabetSelect.value = state.alphabet;
+                updateDisplay();
+            } catch(e){}
+        }
+    }
+
+    // Initial generation on page load
+    updateDisplay();
+    loadFromHash();
+})();
+</script>
+</body>
+</html>

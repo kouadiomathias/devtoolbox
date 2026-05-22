@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur UUID Java — Créez des UUID avec java.util.UUID</title>
+    <meta name="description" content="Générez des UUID en Java avec java.util.UUID.randomUUID() et nameUUIDFromBytes(). Copiez des extraits de code Java et apprenez les bonnes pratiques. 100 % côté client.">
+    <meta name="keywords" content="générateur uuid java, java.util.UUID, exemple uuid java, generate uuid java, uuid randomuuid, uuid nameuuidfrombytes, tutoriel uuid java">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-java/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-java/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/java-uuid-generator/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/java-uuid-generator/">
+
+    <meta property="og:title" content="Générateur UUID Java — java.util.UUID en ligne">
+    <meta property="og:description" content="Créez des UUID avec les méthodes java.util.UUID. Copiez le code Java instantanément. 100 % côté client.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-java/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Générateur UUID Java">
+    <meta name="twitter:description" content="Générez des UUID en Java. Copiez le code pour randomUUID() et nameUUIDFromBytes().">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .display-box {
+            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .uuid-display {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1.1rem; font-weight:600;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); word-break:break-all;
+        }
+        .method-selector { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+        .method-btn {
+            padding:8px 16px; border-radius:30px; font-weight:600; font-size:0.85rem;
+            border:1px solid var(--border); background:var(--surface); color:var(--text);
+            cursor:pointer; transition:all 0.2s; font-family:inherit;
+        }
+        .method-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .name-input-row {
+            display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap;
+        }
+        .name-input-row label { font-weight:600; font-size:0.85rem; color:var(--text2); }
+        .name-input-row input[type="text"] {
+            flex:1; min-width:200px; padding:8px 12px; border-radius:8px; border:1.5px solid var(--border);
+            background:var(--surface); color:var(--text); font-family:var(--mono); font-size:0.9rem; outline:none;
+            transition:border 0.2s;
+        }
+        .name-input-row input:focus { border-color:var(--primary); }
+        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .uuid-display { font-size:0.95rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/java-uuid-generator/" class="lang-btn">EN</a>
+                <a href="/fr/outils/generateur-uuid-java/" class="lang-btn active" aria-current="page">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/fr/">Accueil</a> &rsaquo;
+        <a href="/fr/outils/">Outils</a> &rsaquo;
+        <span>Générateur UUID Java</span>
+    </div>
+
+    <div class="seo-hook">
+        Besoin d’un <strong>générateur UUID en Java</strong> ? Utilisez <code>java.util.UUID.randomUUID()</code> ou <code>nameUUIDFromBytes()</code>. Cet outil vous montre les deux méthodes avec du code Java prêt à copier. Aucune donnée ne quitte votre navigateur.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>Générateur UUID Java</h1>
+            <div class="subhead">Générez des UUID directement dans votre navigateur en utilisant la même API <code>java.util.UUID</code> disponible en Java. Basculez entre <code>randomUUID()</code> (v4) et <code>nameUUIDFromBytes()</code> (v3), puis copiez l’extrait de code Java pour votre projet.</div>
+
+            <div class="display-box">
+                <div class="uuid-display" id="uuidDisplay" aria-label="UUID généré">550e8400-e29b-41d4-a716-446655440000</div>
+                <button class="btn btn-sm" data-copy="uuidDisplay" aria-label="Copier l’UUID">Copier</button>
+            </div>
+
+            <div class="method-selector">
+                <button class="method-btn active" data-method="random">randomUUID() (v4)</button>
+                <button class="method-btn" data-method="name">nameUUIDFromBytes() (v3)</button>
+            </div>
+
+            <!-- Name input (visible uniquement pour la méthode par nom) -->
+            <div class="name-input-row" id="nameInputRow" style="display:none;">
+                <label for="nameInput">Nom :</label>
+                <input type="text" id="nameInput" placeholder="ex. www.exemple.fr" value="www.exemple.fr" spellcheck="false">
+            </div>
+
+            <div class="options-row">
+                <button class="btn btn-primary" id="generateBtn">Générer un UUID</button>
+                <button class="btn btn-outline btn-sm" id="copyCodeBtn">Copier le code Java</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Partager</button>
+            </div>
+        </div>
+
+        <section class="article-section" aria-label="Documentation">
+            <h2>Comment générer un UUID en Java avec java.util.UUID</h2>
+            <p>
+                Java fournit la classe <code>java.util.UUID</code> pour créer des identifiants universels uniques. Deux méthodes d’usine couvrent la plupart des besoins :
+            </p>
+            <ul>
+                <li><strong><code>UUID.randomUUID()</code></strong> — génère un UUID v4 aléatoire en utilisant un générateur de nombres pseudo‑aléatoires cryptographiquement sûr.</li>
+                <li><strong><code>UUID.nameUUIDFromBytes(byte[] nom)</code></strong> — génère un UUID v3 (MD5) déterministe à partir d’un tableau d’octets. Le même nom produit toujours le même UUID.</li>
+            </ul>
+            <p>
+                Notre outil illustre les deux méthodes et fournit le code Java exact que vous pouvez coller dans votre projet.
+            </p>
+
+            <h3>Exemple avec <code>UUID.randomUUID()</code></h3>
+            <pre><code>import java.util.UUID;
+
+UUID id = UUID.randomUUID();
+System.out.println(id.toString()); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
+            <p>C’est la manière la plus simple d’obtenir un identifiant unique. Elle convient pour les clés primaires, les jetons de session ou tout identifiant non déterministe.</p>
+
+            <h3>Exemple avec <code>UUID.nameUUIDFromBytes()</code></h3>
+            <pre><code>import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+
+String nom = "www.exemple.fr";
+UUID id = UUID.nameUUIDFromBytes(nom.getBytes(StandardCharsets.UTF_8));
+System.out.println(id.toString()); // toujours le même UUID pour ce nom</code></pre>
+            <p>Utilisez cette méthode quand vous avez besoin d’un UUID reproductible, par exemple pour associer une URL, une adresse email ou toute autre chaîne stable à un UUID.</p>
+
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Quelle version d’UUID produit <code>randomUUID()</code> ?</div>
+                <p>Elle génère un UUID v4, entièrement aléatoire (à l’exception des bits de version et de variante).</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Peut‑on générer des UUID v1 ou v5 avec java.util.UUID ?</div>
+                <p>Non, <code>java.util.UUID</code> ne prend en charge que les versions 3 et 4. Pour les versions 1 ou 5, il faut utiliser une bibliothèque tierce comme <code>java-uuid-generator</code> ou le paquet <code>uuid-creator</code>.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question"><code>UUID.randomUUID()</code> est‑elle thread‑safe ?</div>
+                <p>Oui, elle utilise une instance <code>SecureRandom</code> locale au thread, vous pouvez donc l’appeler sans risque depuis plusieurs threads.</p>
+            </div>
+
+            <h3>Autres outils utiles</h3>
+            <ul>
+                <li><a href="/fr/outils/generateur-uuid/">Générateur UUID / ULID</a> — toutes les versions d’UUID et ULID en lot</li>
+                <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a> — UUID triables dans le temps</li>
+                <li><a href="/fr/outils/python-uuid-to-string/">Python UUID to String</a> — convertisseur de formats pour développeurs Python</li>
+                <li><a href="/fr/outils/generateur-nanoid/">Générateur NanoID</a> — identifiants courts et compatibles URL</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Générateur UUID Java",
+  "url": "https://www.devstoolsbox.dev/fr/outils/generateur-uuid-java/",
+  "description": "Générez des UUID en Java avec java.util.UUID.randomUUID() et nameUUIDFromBytes(). 100 % côté client.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Nécessite JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Quelle version d'UUID produit randomUUID() ?", "acceptedAnswer": { "@type": "Answer", "text": "Elle génère un UUID v4, entièrement aléatoire." } },
+    { "@type": "Question", "name": "Peut-on générer des UUID v1 ou v5 avec java.util.UUID ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, java.util.UUID ne supporte que les versions 3 et 4. Utilisez une bibliothèque tierce pour v1 ou v5." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Générateur UUID Java", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-uuid-java/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Thème ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    // Génération UUID v4 (simule randomUUID)
+    function generateUUIDv4() {
+        if (crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        // Fallback pour les anciens navigateurs
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    const uuidDisplay = document.getElementById('uuidDisplay');
+    const methodBtns = document.querySelectorAll('.method-btn');
+    const nameInputRow = document.getElementById('nameInputRow');
+    const nameInput = document.getElementById('nameInput');
+    let currentMethod = 'random';
+
+    methodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            methodBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMethod = btn.dataset.method;
+            // Afficher/masquer le champ nom
+            if (currentMethod === 'name') {
+                nameInputRow.style.display = 'flex';
+            } else {
+                nameInputRow.style.display = 'none';
+            }
+            // Optionnellement régénérer
+            updateDisplay();
+        });
+    });
+
+    function updateDisplay() {
+        let uuid;
+        if (currentMethod === 'random') {
+            uuid = generateUUIDv4();
+        } else {
+            // Pour la méthode par nom, on montre un exemple fixe (namespace DNS classique)
+            uuid = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+        }
+        uuidDisplay.textContent = uuid;
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', updateDisplay);
+
+    // Copier l'UUID
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const el = document.getElementById(targetId);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copié !'));
+            }
+        });
+    });
+
+    // Copier le code Java
+    document.getElementById('copyCodeBtn').addEventListener('click', () => {
+        let code;
+        if (currentMethod === 'random') {
+            code = `import java.util.UUID;\n\nUUID id = UUID.randomUUID();\nSystem.out.println(id.toString()); // "${uuidDisplay.textContent}"`;
+        } else {
+            const nom = nameInput.value || 'exemple.fr';
+            code = `import java.util.UUID;\nimport java.nio.charset.StandardCharsets;\n\nString nom = "${nom}";\nUUID id = UUID.nameUUIDFromBytes(nom.getBytes(StandardCharsets.UTF_8));\nSystem.out.println(id.toString());`;
+        }
+        navigator.clipboard.writeText(code).then(() => showToast('Code Java copié !'));
+    });
+
+    // Partager
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const state = {
+            method: currentMethod,
+            uuid: uuidDisplay.textContent,
+            name: currentMethod === 'name' ? nameInput.value : null
+        };
+        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copiée !'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+                if (state.method) {
+                    currentMethod = state.method;
+                    document.querySelector(`.method-btn[data-method="${state.method}"]`)?.classList.add('active');
+                    if (state.name) {
+                        nameInput.value = state.name;
+                    }
+                    if (currentMethod === 'name') {
+                        nameInputRow.style.display = 'flex';
+                    } else {
+                        nameInputRow.style.display = 'none';
+                    }
+                }
+                updateDisplay();
+            } catch(e){}
+        }
+    }
+
+    // Génération initiale
+    updateDisplay();
+    loadFromHash();
+})();
+</script>
+</body>
+</html>
