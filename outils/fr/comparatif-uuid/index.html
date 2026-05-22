@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparatif des générateurs UUID par langage — Choisissez le meilleur outil</title>
+    <meta name="description" content="Tableau comparatif de tous nos générateurs UUID et GUID par langage : JavaScript, TypeScript, Java, C#, Python, PostgreSQL, MySQL, NanoID, UUID v7. Trouvez l'outil adapté à votre projet.">
+    <meta name="keywords" content="comparatif uuid, uuid javascript, typescript uuid, java uuid, c# guid, python uuid, postgresql uuid, mysql uuid, uuid v7, nanoid, generateur uuid par langage, articles uuid">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/comparatif-uuid/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/comparatif-uuid/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/uuid-comparison/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/uuid-comparison/">
+
+    <meta property="og:title" content="Comparatif des générateurs UUID par langage">
+    <meta property="og:description" content="Découvrez notre tableau comparatif des outils UUID pour JavaScript, TypeScript, Java, C#, Python, PostgreSQL, MySQL, et plus.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/comparatif-uuid/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Comparatif UUID par langage">
+    <meta name="twitter:description" content="Comparaison complète des générateurs UUID par environnement.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:1000px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .page-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        /* Table responsive */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+        table {
+            width:100%; border-collapse: collapse; min-width: 600px; /* largeur minimale pour éviter la compression excessive */
+        }
+        th, td {
+            border: 1px solid var(--border); padding: 10px 14px; text-align: left;
+            font-size:0.9rem;
+        }
+        th {
+            background: var(--surface2); font-weight: 600; white-space: nowrap;
+        }
+        td a {
+            color: var(--primary); text-decoration: none; font-weight:600;
+        }
+        td a:hover { text-decoration:underline; }
+
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+
+        /* Toast */
+        .toast-msg {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 20px;
+            font-size: 0.9rem; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000; white-space: nowrap;
+        }
+        .toast-msg.show { opacity: 1; visibility: visible; }
+
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            h1 { font-size: 1.5rem; }
+            .page-card, .article-section { padding: 18px; }
+            .header { gap: 8px; }
+            .header-right { gap: 4px; }
+            .lang-btn, .theme-btn { padding: 5px 10px; font-size: 0.72rem; }
+            th, td { padding: 8px 10px; font-size: 0.8rem; }
+            .subhead { font-size: 0.88rem; }
+            .breadcrumb { font-size: 0.8rem; }
+        }
+        @media (max-width: 400px) {
+            .header { flex-direction: column; align-items: flex-start; }
+            .header-right { width: 100%; justify-content: flex-end; }
+            .lang-btn, .theme-btn { padding: 4px 8px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/fr/comparatif-uuid/" class="lang-btn active" aria-current="page">FR</a>
+                <a href="/tools/uuid-comparison/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/fr/">Accueil</a> &rsaquo;
+        <a href="/fr/outils/">Outils</a> &rsaquo;
+        <span>Comparatif UUID</span>
+    </div>
+
+    <main>
+        <div class="page-card">
+            <h1>Comparatif des générateurs UUID par langage</h1>
+            <div class="subhead">Nous avons créé des outils de génération d'identifiants uniques pour plusieurs environnements. Ce tableau vous aide à choisir celui qui correspond à votre langage ou cas d'usage.</div>
+
+            <div class="table-responsive">
+                <table aria-label="Tableau comparatif des outils UUID par langage">
+                    <thead>
+                        <tr>
+                            <th>Langage / Environnement</th>
+                            <th>Méthode ou bibliothèque</th>
+                            <th>Versions d'UUID</th>
+                            <th>Formats de sortie</th>
+                            <th>Particularités</th>
+                            <th>Outil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>JavaScript</td>
+                            <td><code>crypto.randomUUID()</code> / <code>uuid</code> npm</td>
+                            <td>v4 (intégré), v1, v3, v5 (via npm)</td>
+                            <td>Chaîne standard (tirets)</td>
+                            <td>Méthode native navigateur récent, extrait de code prêt à copier</td>
+                            <td><a href="/fr/outils/generateur-uuid-javascript/">JavaScript UUID</a></td>
+                        </tr>
+                        <tr>
+                            <td>TypeScript</td>
+                            <td><code>crypto.randomUUID()</code> / <code>uuid</code> npm typé</td>
+                            <td>v4 (intégré), v1, v3, v5 (npm)</td>
+                            <td>Chaîne avec typage explicite</td>
+                            <td>Code TypeScript avec typage natif, explications sur les définitions de types</td>
+                            <td><a href="/fr/outils/generateur-uuid-typescript/">TypeScript UUID</a></td>
+                        </tr>
+                        <tr>
+                            <td>Java</td>
+                            <td><code>java.util.UUID.randomUUID()</code><br/><code>nameUUIDFromBytes()</code></td>
+                            <td>v4, v3</td>
+                            <td>Chaîne standard, via toString()</td>
+                            <td>Bibliothèque standard, thread‑safe, méthode déterministe (v3)</td>
+                            <td><a href="/fr/outils/generateur-uuid-java/">Java UUID</a></td>
+                        </tr>
+                        <tr>
+                            <td>C# (.NET)</td>
+                            <td><code>System.Guid.NewGuid()</code></td>
+                            <td>v4</td>
+                            <td>D, N, B, P, X (formats Microsoft)</td>
+                            <td>Appelé GUID, compatible UUID, cinq formats d'affichage</td>
+                            <td><a href="/fr/outils/generateur-guid-csharp/">C# GUID</a></td>
+                        </tr>
+                        <tr>
+                            <td>Python</td>
+                            <td><code>uuid.uuid4()</code>, <code>str(uuid)</code>, <code>.hex</code></td>
+                            <td>v4, v3, v5</td>
+                            <td>Standard, hex, URN, Base64</td>
+                            <td>Convertisseur de formats et aperçu de code en direct</td>
+                            <td><a href="/fr/outils/python-uuid-to-string/">Python UUID to String</a></td>
+                        </tr>
+                        <tr>
+                            <td>PostgreSQL</td>
+                            <td><code>gen_random_uuid()</code></td>
+                            <td>v4</td>
+                            <td>Colonne UUID native</td>
+                            <td>Exemples CREATE TABLE et INSERT, bonnes pratiques</td>
+                            <td><a href="/fr/outils/uuid-postgresql/">PostgreSQL UUID Primary Key</a></td>
+                        </tr>
+                        <tr>
+                            <td>MySQL</td>
+                            <td><code>UUID()</code></td>
+                            <td>v1 (basé sur l'horodatage)</td>
+                            <td>CHAR(36) ou BINARY(16)</td>
+                            <td>Exemples de déclencheurs, comparaison de stockage</td>
+                            <td><a href="/fr/outils/uuid-mysql/">MySQL UUID Primary Key</a></td>
+                        </tr>
+                        <tr>
+                            <td>Général / tout langage</td>
+                            <td>UUID v7 (triable par le temps)</td>
+                            <td>v7</td>
+                            <td>Avec ou sans tirets</td>
+                            <td>Horodatage intégré, idéal pour bases de données</td>
+                            <td><a href="/fr/outils/generateur-uuid-v7/">UUID v7</a></td>
+                        </tr>
+                        <tr>
+                            <td>Général / tout langage</td>
+                            <td>NanoID (identifiants courts, URL‑safe)</td>
+                            <td>Non UUID, mais alternative</td>
+                            <td>Chaîne courte personnalisable (longueur, alphabet)</td>
+                            <td>Plus compact, compatible URL, haute entropie</td>
+                            <td><a href="/fr/outils/generateur-nanoid/">NanoID</a></td>
+                        </tr>
+                        <tr>
+                            <td>Général / tout langage</td>
+                            <td>Calculateur de collision UUID</td>
+                            <td>v4, v7, NanoID, ULID</td>
+                            <td>Pourcentage de probabilité</td>
+                            <td>Formule du paradoxe des anniversaires, comparer les types d'ID</td>
+                            <td><a href="/fr/outils/calculateur-collision-uuid/">Calculateur de collision</a></td>
+                        </tr>
+                        <tr>
+                            <td>Général / tout langage</td>
+                            <td>Générateur UUID/ULID complet</td>
+                            <td>v1, v4, v5, ULID</td>
+                            <td>Standard, hex, URN, Base64</td>
+                            <td>Décodeur, validateur, comparateur, snippets</td>
+                            <td><a href="/fr/outils/generateur-uuid/">UUID / ULID</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <section class="article-section">
+            <h2>Pourquoi plusieurs générateurs UUID ?</h2>
+            <p>Chaque langage possède sa propre syntaxe et ses propres bibliothèques pour créer des UUID. En centralisant ces outils, nous permettons aux développeurs d'obtenir immédiatement le code adapté à leur environnement, qu'il s'agisse de JavaScript, TypeScript, Java, C#, Python, PostgreSQL, MySQL ou d'un besoin spécifique comme un UUID triable (v7) ou un identifiant court (NanoID).</p>
+            <p>Chaque outil est 100 % côté client, aucune donnée n'est envoyée à un serveur. Vous pouvez générer des identifiants en toute sécurité et copier le code en un clic.</p>
+
+            <h3>Foire Aux Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Quel générateur UUID choisir pour mon projet ?</div>
+                <p>Si vous développez en JavaScript ou TypeScript, utilisez notre <a href="/fr/outils/generateur-uuid-javascript/">générateur JavaScript</a> ou <a href="/fr/outils/generateur-uuid-typescript/">TypeScript</a>. Pour Java, le <a href="/fr/outils/generateur-uuid-java/">générateur Java</a> vous donne le code exact. Pour C#, tournez-vous vers le <a href="/fr/outils/generateur-guid-csharp/">GUID C#</a>. Pour Python, notre <a href="/fr/outils/python-uuid-to-string/">convertisseur Python</a> vous montre tous les formats. Pour les bases de données, voyez <a href="/fr/outils/uuid-postgresql/">PostgreSQL</a> ou <a href="/fr/outils/uuid-mysql/">MySQL</a>. Si vous avez besoin d'UUID triables, essayez l'<a href="/fr/outils/generateur-uuid-v7/">UUID v7</a>. Pour des identifiants courts et URL‑safe, optez pour <a href="/fr/outils/generateur-nanoid/">NanoID</a>.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Quelle est la différence entre UUID et GUID ?</div>
+                <p>GUID est le terme utilisé par Microsoft pour désigner un UUID. Techniquement, ils sont identiques et suivent la RFC 4122.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Puis-je utiliser ces outils hors ligne ?</div>
+                <p>Oui, tous nos générateurs fonctionnent dans le navigateur sans connexion internet. Les données restent sur votre machine.</p>
+            </div>
+
+            <h3 style="margin-top:28px;">Articles approfondis sur les identifiants</h3>
+            <p>Approfondissez les compromis et les considérations pratiques avec nos guides dédiés :</p>
+            <ul>
+                <li><a href="/fr/blog/uuid-vs-guid/">UUID vs GUID — Les vraies différences qui comptent en production</a></li>
+                <li><a href="/fr/blog/ulid-vs-uuid/">ULID vs UUID v4 — Pourquoi les identifiants triables changent tout</a></li>
+                <li><a href="/fr/blog/uuid-v7-vs-v4/">UUID v7 vs UUID v4 — Performance, structure et guide de migration</a></li>
+                <li><a href="/fr/blog/uuid-vs-auto-increment/">UUID vs Auto‑Incrément — Choisir la bonne clé primaire</a></li>
+                <li><a href="/fr/blog/nanoid-vs-uuid/">NanoID vs UUID v4 — Taille, probabilité de collision et compromis</a></li>
+                <li><a href="/fr/blog/objectid-vs-uuid/">ObjectID MongoDB vs UUID — Structure, portabilité et migration pratique</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<script>
+    // Script de thème
+    (function() {
+        const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+        let currentTheme = savedTheme;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon   = document.getElementById('themeIcon');
+        const themeLabel  = document.getElementById('themeLabel');
+        function applyTheme(t) {
+            document.body.classList.remove('dark');
+            if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
+            else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
+            else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
+            localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+        }
+        themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+        applyTheme(savedTheme);
+    })();
+</script>
+</body>
+</html>
