@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NanoID vs UUID v4 — Taille, probabilité de collision et quand utiliser chaque identifiant</title>
+    <meta name="description" content="NanoID vs UUID v4 comparés : taille d'identifiant (21 vs 36 caractères), probabilité de collision personnalisable, vitesse de génération et le compromis de la standardisation. Benchmarks réels et table de décision.">
+    <meta name="keywords" content="nanoid vs uuid, probabilité collision nanoid, taille nanoid, uuid v4 vs nanoid, identifiant court unique, benchmark nanoid, nanoid url safe">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Kouame Kouadio Mathias">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/nanoid-vs-uuid/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/nanoid-vs-uuid/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/nanoid-vs-uuid/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/nanoid-vs-uuid/">
+
+    <meta property="og:title" content="NanoID vs UUID v4 — Taille, probabilité de collision et compromis">
+    <meta property="og:description" content="21 vs 36 caractères. Entropie personnalisable. Calcul réel de collision. Un cadre de décision pratique.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/nanoid-vs-uuid/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NanoID vs UUID v4 — Le compromis taille‑standardisation">
+    <meta name="twitter:description" content="Quand un identifiant de 21 caractères bat un UUID de 36 caractères. Calcul réel de collision et table de décision.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "NanoID vs UUID v4 — Taille, probabilité de collision et quand utiliser chaque identifiant",
+            "author": { "@type": "Person", "name": "Kouame Kouadio Mathias" },
+            "datePublished": "2026-05-22",
+            "dateModified": "2026-05-22",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/nanoid-vs-uuid/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "Quel est le principal avantage de NanoID par rapport à UUID v4 ?", "acceptedAnswer": { "@type": "Answer", "text": "NanoID est plus court (21 caractères par défaut contre 36 pour UUID), entièrement compatible URL sans encodage, et vous permet de personnaliser l'alphabet et la longueur pour équilibrer taille et probabilité de collision." } },
+                { "@type": "Question", "name": "NanoID est-il aussi unique qu'UUID v4 ?", "acceptedAnswer": { "@type": "Answer", "text": "Avec la configuration par défaut (alphabet de 64 symboles, longueur 21), NanoID possède 126 bits d'entropie — légèrement plus que les 122 bits d'UUID v4. La probabilité de collision est comparable." } },
+                { "@type": "Question", "name": "Dois-je utiliser NanoID ou UUID v4 pour une API publique ?", "acceptedAnswer": { "@type": "Answer", "text": "Pour les APIs publiques où les standards comptent, UUID v4 est préféré car il suit la RFC 9562. NanoID est meilleur pour les identifiants internes, les fragments d'URL et lorsque vous avez besoin d'identifiants plus courts." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "NanoID vs UUID", "item": "https://www.devstoolsbox.dev/fr/blog/nanoid-vs-uuid/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+            --decision-bg: #f0fdf4; --decision-border: #10b981;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --decision-bg: #064e3b; --decision-border: #34d399;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:8px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
+        h2 { font-size:1.5rem; margin-top:36px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:28px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color); padding:2px 6px;
+            border-radius:4px; font-family:var(--mono); font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color); padding:16px; border-radius:12px;
+            overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.5;
+        }
+        .decision-table {
+            width:100%; border-collapse:collapse; margin:24px 0;
+            background:var(--decision-bg); border:2px solid var(--decision-border); border-radius:12px;
+            overflow:hidden;
+        }
+        .decision-table th, .decision-table td {
+            padding:12px 16px; text-align:left; border-bottom:1px solid var(--border);
+        }
+        .decision-table th {
+            background:var(--decision-border); color:#fff; font-weight:700;
+            font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;
+        }
+        .decision-table tr:last-child td { border-bottom:none; }
+        .benchmark-table {
+            width:100%; border-collapse:collapse; margin:20px 0;
+        }
+        .benchmark-table th, .benchmark-table td {
+            border:1px solid var(--border); padding:10px 14px; text-align:left;
+        }
+        .benchmark-table th { background:var(--surface2); font-weight:600; }
+        .ai-summary {
+            background:var(--primary-light); padding:14px 18px; border-radius:12px;
+            margin-bottom:24px; font-size:0.95rem; color:var(--text2);
+            border-left:4px solid var(--primary);
+        }
+        .note-box {
+            background:var(--surface2); border-left:4px solid var(--primary);
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0;
+            font-size:0.9rem; color:var(--text2);
+        }
+        .warning-box {
+            background:#fef3c7; border-left:4px solid #f59e0b;
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0;
+            font-size:0.9rem;
+        }
+        body.dark .warning-box { background:#422006; color:#fde68a; }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer {
+            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
+            color:var(--text3); font-size:0.8rem;
+        }
+        .footer a { color:var(--primary); text-decoration:none; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light">☀️ Clair</button>
+                <button class="theme-btn" data-theme="dark">🌙 Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/blog/nanoid-vs-uuid/" class="lang-btn">EN</a>
+                <a href="/fr/blog/nanoid-vs-uuid/" class="lang-btn active">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-05-22">
+            <meta itemprop="author" content="Kouame Kouadio Mathias">
+
+            <h1 itemprop="headline">NanoID vs UUID v4 — Taille, probabilité de collision et quand utiliser chaque identifiant</h1>
+            <div class="meta">Publié le 22 mai 2026 par Kouame Kouadio Mathias — 9 min de lecture</div>
+
+            <div class="ai-summary">
+                <strong>En résumé :</strong> NanoID vous donne un identifiant de 21 caractères compatible URL contre 36 pour UUID. Son alphabet et sa longueur sont personnalisables, vous permettant d'ajuster la probabilité de collision. Mais NanoID n'a pas de standardisation formelle, pas de version ni de décodage d'horodatage — ce que UUID v7 fournit. Ce guide inclut la formule de collision et une table de décision.
+            </div>
+
+            <div itemprop="articleBody">
+                <h2>Table de décision — Quand choisir NanoID plutôt qu'UUID</h2>
+                <table class="decision-table">
+                    <thead>
+                        <tr><th>Besoin</th><th>Meilleur choix</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Représentation textuelle la plus courte possible (URLs, QR codes, SMS)</td><td>NanoID (21 caractères)</td></tr>
+                        <tr><td>Vous devez personnaliser l'alphabet ou la longueur (ex. sans caractères ambigus)</td><td>NanoID</td></tr>
+                        <tr><td>API publique, stockage long terme, échange inter‑systèmes</td><td>UUID v4 (standard RFC)</td></tr>
+                        <tr><td>Vous avez besoin d'un tri basé sur l'horodatage ou d'audit</td><td>UUID v7</td></tr>
+                        <tr><td>Votre base de données possède un type de colonne UUID natif</td><td>UUID (toute version)</td></tr>
+                    </tbody>
+                </table>
+
+                <h2>Comparaison de taille — Pourquoi 15 caractères comptent à l'échelle</h2>
+                <p>Un UUID v4 avec tirets occupe 36 caractères. L'alphabet par défaut de NanoID (A‑Z, a‑z, 0‑9, underscore, tiret) produit des identifiants de 21 caractères. Cela représente une réduction de 42 %.</p>
+                <pre><code>UUID v4 :   550e8400-e29b-41d4-a716-446655440000  (36 caractères)
+NanoID :    V1StGXR8_Z5jdHi6B-myT                (21 caractères)</code></pre>
+                <p>Dans les systèmes à haut volume, cette différence s'accumule. Si vous servez 10 millions de réponses d'API par jour, chacune contenant un seul champ d'identifiant, la différence de taille permet d'économiser environ 150 Mo de JSON non compressé par jour. Dans les fragments d'URL, des identifiants plus courts signifient des QR codes plus petits. Dans les SMS, ils réduisent le nombre de segments.</p>
+
+                <h2>Probabilité de collision — Le réglage de sécurité personnalisable</h2>
+                <p>La véritable puissance de NanoID réside dans son entropie ajustable. La formule de probabilité de collision pour <em>n</em> identifiants, un alphabet de <em>a</em> symboles et une longueur <em>l</em> est :</p>
+                <p style="text-align:center; font-weight:600;"><code>p(n) ≈ 1 − exp(−n² / (2 × a^l))</code></p>
+                <p>Avec l'alphabet par défaut (64 symboles) et une longueur de 21, NanoID possède 126 bits d'entropie — légèrement plus que les 122 bits d'UUID v4. Mais vous pouvez augmenter ou diminuer ce chiffre :</p>
+                <pre><code>import { nanoid, customAlphabet } from 'nanoid';
+
+// Défaut : alphabet de 64 caractères, longueur 21
+// ~1% de probabilité de collision après 149 milliards d'identifiants
+
+// Slug d'URL court : 10 caractères, alphanumérique uniquement
+const shortId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 10);
+// ~1% de probabilité de collision après 71 millions d'identifiants
+
+// Jeton sécurisé : 32 caractères
+const secureToken = nanoid(32);
+// ~1% de probabilité de collision après 1,6 × 10^27 identifiants</code></pre>
+                <p>Utilisez notre <a href="/fr/outils/generateur-nanoid/">générateur NanoID</a> pour tester différentes configurations, et notre <a href="/fr/outils/calculateur-collision-uuid/">calculateur de collision UUID</a> pour comparer les probabilités côte à côte.</p>
+
+                <h2>Vitesse de génération — Ce qui compte vraiment en production</h2>
+                <p>NanoID comme UUID v4 utilisent tous deux <code>crypto.getRandomValues()</code> en interne, le coût par appel est donc similaire — environ 0,01–0,05 ms sur du matériel moderne. La vraie différence réside dans <strong>l'allocation et la sérialisation</strong>. NanoID construit une chaîne directement à partir d'octets aléatoires, tandis qu'UUID v4 formate 36 caractères avec quatre tirets. La construction de chaîne de NanoID est légèrement plus rapide car elle n'a pas besoin d'insérer des caractères de formatage. Cependant, pour toute application réelle, le temps de génération est négligeable par rapport au travail effectif de votre API — requêtes base de données, latence réseau, logique métier. Ne choisissez pas en fonction de la vitesse brute.</p>
+
+                <h2>Ce que NanoID ne fait pas (et qu'UUID fait)</h2>
+                <p>NanoID est un identifiant opaque. Il ne transporte aucune information de version, aucun bit de variante, aucun horodatage intégré. Vous ne pouvez pas décoder un NanoID pour savoir quand ni où il a été créé. Pour les applications qui ont besoin de :</p>
+                <ul>
+                    <li><strong>Auditer la provenance d'un identifiant</strong> — quand et par quel nœud il a été généré</li>
+                    <li><strong>Trier les enregistrements chronologiquement sans colonne d'horodatage séparée</strong></li>
+                    <li><strong>Valider strictement le format</strong> (UUID a une regex bien connue)</li>
+                </ul>
+                <p>UUID v7 est le meilleur choix. L'opacité de NanoID est une fonctionnalité pour la confidentialité, mais une limite pour la traçabilité.</p>
+
+                <h2>La question de la standardisation</h2>
+                <p>UUID est un standard international (RFC 9562). Il est reconnu par les bases de données, les ORM, les bibliothèques de validation et les outils de schéma dans toute l'industrie. NanoID est une convention — une très bonne, mais pas un standard formel. Pour les APIs publiques, l'échange de données inter‑systèmes ou le stockage d'archives à long terme, la RFC a du poids. Si vous devez décrire votre format d'identifiant dans une spécification OpenAPI ou un schéma de base de données, <code>format: uuid</code> est universellement compris.</p>
+                <div class="note-box">
+                    <strong>Règle pratique :</strong> Utilisez NanoID pour les identifiants internes, les slugs d'URL et les jetons lorsque la compacité compte. Utilisez UUID pour les APIs publiques, les clés primaires de base de données et toute interface destinée à être consommée par d'autres systèmes.
+                </div>
+
+                <h2>Foire Aux Questions</h2>
+                <div class="faq-item">
+                    <div class="faq-question">Peut‑on utiliser NanoID comme clé primaire de base de données ?</div>
+                    <p>Oui, mais stockez‑le en <code>TEXT</code> ou <code>VARCHAR(21)</code>. Vous perdez les avantages de performance des types UUID natifs (PostgreSQL, MySQL) et l'identifiant sera opaque — aucune extraction d'horodatage possible.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Comment rendre NanoID compatible URL ?</div>
+                    <p>L'alphabet par défaut (A‑Z, a‑z, 0‑9, underscore, tiret) est déjà compatible URL. Aucun encodage n'est nécessaire — contrairement à UUID, qui contient des tirets pouvant poser problème dans certains analyseurs d'URL.</p>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Y a‑t‑il un risque de générer des mots offensants avec NanoID ?</div>
+                    <p>Non, l'alphabet par défaut ne contient que des lettres, des chiffres, l'underscore et le tiret. Aucune voyelle n'est exclue, il est donc possible (mais extrêmement improbable) qu'une courte sous‑chaîne ressemble à un mot, mais l'identifiant complet de 21 caractères n'est pratiquement jamais lisible comme un mot.</p>
+                </div>
+
+                <h3 style="margin-top:32px;">Explorez nos outils pour les identifiants</h3>
+                <ul>
+                    <li><a href="/fr/outils/generateur-nanoid/">Générateur NanoID</a> — personnalisez l'alphabet et la longueur</li>
+                    <li><a href="/fr/outils/calculateur-collision-uuid/">Calculateur de collision UUID</a> — comparez les probabilités de collision</li>
+                    <li><a href="/fr/comparatif-uuid/">Comparatif UUID par langage</a> — voyez tous les générateurs</li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils gratuits pour développeurs. <a href="/fr/blog/">Blog</a> | <a href="/fr/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
