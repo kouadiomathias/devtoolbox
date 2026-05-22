@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL UUID Primary Key Generator — gen_random_uuid() Examples</title>
+    <meta name="description" content="Generate UUID primary keys for PostgreSQL tables. Copy SQL code using gen_random_uuid(), create tables with UUID columns, and understand UUID vs serial. 100% client‑side.">
+    <meta name="keywords" content="postgresql uuid primary key, gen_random_uuid, postgres uuid, uuid column postgres, pgcrypto uuid, postgresql uuid example, uuid vs serial">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/postgresql-uuid-primary-key/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/postgresql-uuid-primary-key/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/uuid-postgresql/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/postgresql-uuid-primary-key/">
+
+    <meta property="og:title" content="PostgreSQL UUID Primary Key Generator">
+    <meta property="og:description" content="Create UUID primary keys in PostgreSQL. Copy SQL with gen_random_uuid() and understand best practices.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/postgresql-uuid-primary-key/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="PostgreSQL UUID Primary Key">
+    <meta name="twitter:description" content="Generate UUIDs for PostgreSQL and learn how to use them as primary keys.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .display-box {
+            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .uuid-display {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1.1rem; font-weight:600;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); word-break:break-all;
+        }
+        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .uuid-display { font-size:0.95rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/postgresql-uuid-primary-key/" class="lang-btn active" aria-current="page">EN</a>
+                <a href="/fr/outils/uuid-postgresql/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/">Home</a> &rsaquo;
+        <a href="/tools/">Tools</a> &rsaquo;
+        <span>PostgreSQL UUID Primary Key</span>
+    </div>
+
+    <div class="seo-hook">
+        Need a <strong>PostgreSQL UUID primary key</strong>? Use <code>gen_random_uuid()</code> to generate UUID values. Copy SQL code for table creation, insert, and understand UUID vs serial. No data leaves your browser.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>PostgreSQL UUID Primary Key (gen_random_uuid)</h1>
+            <div class="subhead">Generate UUIDs and instantly see the SQL code to create a table with a UUID primary key, insert rows, and query. Uses the native <code>gen_random_uuid()</code> function (available in PostgreSQL 13+ without extensions).</div>
+
+            <div class="display-box">
+                <div class="uuid-display" id="uuidDisplay" aria-label="Generated UUID">550e8400-e29b-41d4-a716-446655440000</div>
+                <button class="btn btn-sm" data-copy="uuidDisplay" aria-label="Copy UUID">Copy</button>
+            </div>
+
+            <div class="options-row">
+                <button class="btn btn-primary" id="generateBtn">Generate UUID</button>
+                <button class="btn btn-outline btn-sm" id="copyTableCodeBtn">Copy CREATE TABLE</button>
+                <button class="btn btn-outline btn-sm" id="copyInsertCodeBtn">Copy INSERT</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Share</button>
+            </div>
+        </div>
+
+        <section class="article-section" aria-label="Documentation">
+            <h2>How to use UUID as a primary key in PostgreSQL</h2>
+            <p>
+                PostgreSQL supports the <code>uuid</code> data type natively. You can generate UUID values with the built‑in <code>gen_random_uuid()</code> function (available since PostgreSQL 13) or via the <code>pgcrypto</code> extension for older versions.
+            </p>
+
+            <h3>1. Enable the function (if needed)</h3>
+            <p>For PostgreSQL 13+, <code>gen_random_uuid()</code> is available by default. For earlier versions, enable the <code>pgcrypto</code> extension:</p>
+            <pre><code>CREATE EXTENSION IF NOT EXISTS pgcrypto;</code></pre>
+            <p>After that, <code>gen_random_uuid()</code> will be available.</p>
+
+            <h3>2. Create a table with a UUID primary key</h3>
+            <pre><code id="createTableCode">CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre>
+
+            <h3>3. Insert rows — the UUID is generated automatically</h3>
+            <pre><code id="insertCode">INSERT INTO users (name, email)
+VALUES ('Alice', 'alice@example.com')
+RETURNING id;</code></pre>
+
+            <h3>Why use UUID instead of serial?</h3>
+            <ul>
+                <li><strong>Distributed systems</strong> — each node can generate UUIDs independently without collisions.</li>
+                <li><strong>Security</strong> — UUIDs don't reveal the number of records.</li>
+                <li><strong>No sequential bottlenecks</strong> — unlike auto‑increment, UUIDs don't create a hot spot on the last page of the index.</li>
+                <li><strong>Sorting</strong> — use UUID v7 if you need time‑ordered identifiers (see our <a href="/tools/uuid-v7-generator/">UUID v7 generator</a>).</li>
+            </ul>
+
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Which UUID version does <code>gen_random_uuid()</code> produce?</div>
+                <p>It generates UUID v4 (random). If you need time‑sortable UUIDs, use our <a href="/tools/uuid-v7-generator/">UUID v7 generator</a> and store the value manually.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Is a UUID primary key slower than a serial?</div>
+                <p>UUIDs are larger (16 bytes vs 4/8 bytes) and may lead to index fragmentation if you use random UUID v4. Using UUID v7 or a sequential UUID can mitigate this.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I use <code>gen_random_uuid()</code> in a default value?</div>
+                <p>Yes, as shown above. The function is stable and can be used directly in column default expressions.</p>
+            </div>
+
+            <h3>Other useful tools</h3>
+            <ul>
+                <li><a href="/tools/uuid-generator/">UUID / ULID Generator</a> — generate batches of identifiers</li>
+                <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> — time‑sortable UUIDs</li>
+                <li><a href="/tools/cron-expression-evaluator/">Cron Expression Evaluator</a> — schedule your PostgreSQL maintenance tasks</li>
+                <li><a href="/tools/json-csv-converter/">JSON to CSV Converter</a> — export your query results</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — 100% client‑side tools for developers.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "PostgreSQL UUID Primary Key Generator",
+  "url": "https://www.devstoolsbox.dev/tools/postgresql-uuid-primary-key/",
+  "description": "Generate UUID primary keys for PostgreSQL tables. Copy SQL code using gen_random_uuid(). 100% client‑side.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Which UUID version does gen_random_uuid() produce?", "acceptedAnswer": { "@type": "Answer", "text": "It generates UUID v4 (random)." } },
+    { "@type": "Question", "name": "Is a UUID primary key slower than a serial?", "acceptedAnswer": { "@type": "Answer", "text": "UUIDs are larger and may cause index fragmentation; using UUID v7 helps." } },
+    { "@type": "Question", "name": "Can I use gen_random_uuid() in a default value?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, the function is stable and can be used in column default expressions." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://www.devstoolsbox.dev/tools/" },
+    { "@type": "ListItem", "position": 3, "name": "PostgreSQL UUID Primary Key", "item": "https://www.devstoolsbox.dev/tools/postgresql-uuid-primary-key/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Theme ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Light'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Dark'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Light':'Dark'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    // Generate UUID v4 (simulates gen_random_uuid)
+    function generateUUIDv4() {
+        if (crypto.randomUUID) return crypto.randomUUID();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    const uuidDisplay = document.getElementById('uuidDisplay');
+    let currentUUID = generateUUIDv4();
+    uuidDisplay.textContent = currentUUID;
+
+    document.getElementById('generateBtn').addEventListener('click', () => {
+        currentUUID = generateUUIDv4();
+        uuidDisplay.textContent = currentUUID;
+    });
+
+    // Copy UUID
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const el = document.getElementById(targetId);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copied!'));
+            }
+        });
+    });
+
+    // Copy CREATE TABLE code (static)
+    document.getElementById('copyTableCodeBtn').addEventListener('click', () => {
+        const code = document.getElementById('createTableCode').textContent;
+        navigator.clipboard.writeText(code).then(() => showToast('CREATE TABLE code copied!'));
+    });
+
+    // Copy INSERT code (static)
+    document.getElementById('copyInsertCodeBtn').addEventListener('click', () => {
+        const code = document.getElementById('insertCode').textContent;
+        navigator.clipboard.writeText(code).then(() => showToast('INSERT code copied!'));
+    });
+
+    // Share
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const state = { uuid: currentUUID };
+        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copied!'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+                if (state.uuid) {
+                    currentUUID = state.uuid;
+                    uuidDisplay.textContent = currentUUID;
+                }
+            } catch(e){}
+        }
+    }
+    loadFromHash();
+})();
+</script>
+</body>
+</html>

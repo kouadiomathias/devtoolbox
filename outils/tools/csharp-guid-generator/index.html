@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C# GUID Generator — Create GUIDs with System.Guid.NewGuid()</title>
+    <meta name="description" content="Generate GUIDs (UUIDs) in C# using System.Guid.NewGuid(). Understand GUID vs UUID, format options, and copy C# code snippets. 100% client‑side.">
+    <meta name="keywords" content="c# guid generator, guid vs uuid, .net uuid, system.guid, guid newguid, csharp uuid, generate guid c#, guid to string">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/csharp-guid-generator/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/csharp-guid-generator/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/csharp-guid-generator/">
+
+    <meta property="og:title" content="C# GUID Generator — System.Guid.NewGuid()">
+    <meta property="og:description" content="Create GUIDs in C# with System.Guid. Copy C# code and learn the difference between GUID and UUID.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/csharp-guid-generator/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="C# GUID Generator">
+    <meta name="twitter:description" content="Generate GUIDs in C# with NewGuid(). Copy code and learn GUID vs UUID.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .display-box {
+            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .guid-display {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1.1rem; font-weight:600;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); word-break:break-all;
+        }
+        .format-selector { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+        .format-btn {
+            padding:8px 16px; border-radius:30px; font-weight:600; font-size:0.85rem;
+            border:1px solid var(--border); background:var(--surface); color:var(--text);
+            cursor:pointer; transition:all 0.2s; font-family:inherit;
+        }
+        .format-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .guid-display { font-size:0.95rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/csharp-guid-generator/" class="lang-btn active" aria-current="page">EN</a>
+                <a href="/fr/outils/generateur-guid-csharp/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/">Home</a> &rsaquo;
+        <a href="/tools/">Tools</a> &rsaquo;
+        <span>C# GUID Generator</span>
+    </div>
+
+    <div class="seo-hook">
+        Need a <strong>C# GUID generator</strong>? Use <code>System.Guid.NewGuid()</code> to create UUIDs. Learn <strong>GUID vs UUID</strong> and copy ready‑to‑use C# code. No data leaves your browser.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>C# GUID Generator (System.Guid)</h1>
+            <div class="subhead">Generate GUIDs right in your browser using <code>System.Guid.NewGuid()</code>. Switch between formats (hyphenated, uppercase, brace‑enclosed) and copy the C# code for your project.</div>
+
+            <div class="display-box">
+                <div class="guid-display" id="guidDisplay" aria-label="Generated GUID">550e8400-e29b-41d4-a716-446655440000</div>
+                <button class="btn btn-sm" data-copy="guidDisplay" aria-label="Copy GUID">Copy</button>
+            </div>
+
+            <div class="format-selector">
+                <button class="format-btn active" data-format="D">D (default)</button>
+                <button class="format-btn" data-format="N">N (no hyphens)</button>
+                <button class="format-btn" data-format="B">B (braces)</button>
+                <button class="format-btn" data-format="P">P (parentheses)</button>
+                <button class="format-btn" data-format="X">X (hex)</button>
+            </div>
+
+            <div class="options-row">
+                <button class="btn btn-primary" id="generateBtn">Generate GUID</button>
+                <button class="btn btn-outline btn-sm" id="copyCodeBtn">Copy C# code</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Share</button>
+            </div>
+        </div>
+
+        <section class="article-section" aria-label="Documentation">
+            <h2>How to generate a GUID in C# with System.Guid</h2>
+            <p>
+                In .NET, a <strong>GUID</strong> (Globally Unique Identifier) is Microsoft's implementation of the UUID standard. The <code>System.Guid</code> structure provides several methods to create unique identifiers.
+            </p>
+            <ul>
+                <li><strong><code>Guid.NewGuid()</code></strong> — generates a random UUID v4 using a cryptographically strong random number generator.</li>
+                <li><strong><code>Guid.Parse(string)</code></strong> — parses a string representation of a GUID.</li>
+                <li><strong><code>Guid.Empty</code></strong> — a read‑only instance of the GUID structure with all zeros.</li>
+            </ul>
+            <p>
+                Our tool demonstrates the most common usage: <code>Guid.NewGuid()</code>. You can also explore different output formats that correspond to the <code>ToString()</code> format specifiers.
+            </p>
+
+            <h3>Example: creating a new GUID</h3>
+            <pre><code>using System;
+
+Guid id = Guid.NewGuid();
+Console.WriteLine(id.ToString()); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
+
+            <h3>GUID format specifiers</h3>
+            <p>The <code>ToString()</code> method accepts a format character:</p>
+            <ul>
+                <li><strong>D</strong> (default) — 32 hex digits separated by hyphens: <code>00000000-0000-0000-0000-000000000000</code></li>
+                <li><strong>N</strong> — 32 hex digits: <code>00000000000000000000000000000000</code></li>
+                <li><strong>B</strong> — braces: <code>{00000000-0000-0000-0000-000000000000}</code></li>
+                <li><strong>P</strong> — parentheses: <code>(00000000-0000-0000-0000-000000000000)</code></li>
+                <li><strong>X</strong> — four hex values enclosed in braces: <code>{0x00000000,0x0000,0x0000,{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}}</code></li>
+            </ul>
+
+            <h3>GUID vs UUID — what's the difference?</h3>
+            <p>
+                <strong>GUID</strong> and <strong>UUID</strong> are essentially the same thing: a 128‑bit identifier standardized by RFC 4122. Microsoft uses the term GUID, while the rest of the industry says UUID. They are interchangeable. A GUID generated by <code>System.Guid.NewGuid()</code> is a UUID v4.
+            </p>
+
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">Is a GUID the same as a UUID?</div>
+                <p>Yes, they refer to the same standard. GUID is Microsoft's term for UUID. Both are 128‑bit identifiers following RFC 4122.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Which version of UUID does <code>Guid.NewGuid()</code> produce?</div>
+                <p>It generates UUID v4, which is purely random (except for the version and variant bits).</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I convert a GUID to a string without hyphens?</div>
+                <p>Yes, use <code>id.ToString("N")</code> to get a 32‑character hex string without hyphens.</p>
+            </div>
+
+            <h3>Other useful tools</h3>
+            <ul>
+                <li><a href="/tools/uuid-generator/">UUID / ULID Generator</a> — all UUID versions and ULID in batch</li>
+                <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> — time‑sortable UUIDs</li>
+                <li><a href="/tools/python-uuid-to-string/">Python UUID to String</a> — convert UUIDs between formats</li>
+                <li><a href="/tools/nanoid-generator/">NanoID Generator</a> — short, URL‑safe unique IDs</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — 100% client‑side tools for developers.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "C# GUID Generator",
+  "url": "https://www.devstoolsbox.dev/tools/csharp-guid-generator/",
+  "description": "Generate GUIDs (UUIDs) in C# using System.Guid.NewGuid(). 100% client‑side.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is a GUID the same as a UUID?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, they refer to the same standard. GUID is Microsoft's term for UUID." } },
+    { "@type": "Question", "name": "Which version of UUID does Guid.NewGuid() produce?", "acceptedAnswer": { "@type": "Answer", "text": "It generates UUID v4, purely random." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://www.devstoolsbox.dev/tools/" },
+    { "@type": "ListItem", "position": 3, "name": "C# GUID Generator", "item": "https://www.devstoolsbox.dev/tools/csharp-guid-generator/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Theme ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Light'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Dark'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Light':'Dark'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    // Generate UUID v4 (same as Guid.NewGuid)
+    function generateUUIDv4() {
+        if (crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        // Fallback for older browsers
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    const guidDisplay = document.getElementById('guidDisplay');
+    const formatBtns = document.querySelectorAll('.format-btn');
+    let currentFormat = 'D';
+    let currentUUID = generateUUIDv4();
+
+    function formatUUID(uuid, format) {
+        const hex = uuid.replace(/-/g,'');
+        switch(format) {
+            case 'D': return uuid.toLowerCase();
+            case 'N': return hex;
+            case 'B': return '{' + uuid.toLowerCase() + '}';
+            case 'P': return '(' + uuid.toLowerCase() + ')';
+            case 'X': {
+                const a = hex.substring(0,8);
+                const b = hex.substring(8,12);
+                const c = hex.substring(12,16);
+                const d1 = hex.substring(16,18);
+                const d2 = hex.substring(18,20);
+                const d3 = hex.substring(20,22);
+                const d4 = hex.substring(22,24);
+                const d5 = hex.substring(24,26);
+                const d6 = hex.substring(26,28);
+                const d7 = hex.substring(28,30);
+                const d8 = hex.substring(30,32);
+                return `{0x${a},0x${b},0x${c},{0x${d1},0x${d2},0x${d3},0x${d4},0x${d5},0x${d6},0x${d7},0x${d8}}}`;
+            }
+            default: return uuid.toLowerCase();
+        }
+    }
+
+    function updateDisplay() {
+        guidDisplay.textContent = formatUUID(currentUUID, currentFormat);
+    }
+
+    formatBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            formatBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFormat = btn.dataset.format;
+            updateDisplay();
+        });
+    });
+
+    document.getElementById('generateBtn').addEventListener('click', () => {
+        currentUUID = generateUUIDv4();
+        updateDisplay();
+    });
+
+    // Copy GUID
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const el = document.getElementById(targetId);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copied!'));
+            }
+        });
+    });
+
+    // Copy C# code
+    document.getElementById('copyCodeBtn').addEventListener('click', () => {
+        const code = `using System;\n\nGuid id = Guid.NewGuid();\nConsole.WriteLine(id.ToString("${currentFormat}")); // "${guidDisplay.textContent}"`;
+        navigator.clipboard.writeText(code).then(() => showToast('C# code copied!'));
+    });
+
+    // Share
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const state = {
+            format: currentFormat,
+            uuid: currentUUID
+        };
+        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copied!'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+                if (state.format) {
+                    currentFormat = state.format;
+                    document.querySelector(`.format-btn[data-format="${state.format}"]`)?.classList.add('active');
+                }
+                if (state.uuid) currentUUID = state.uuid;
+                updateDisplay();
+            } catch(e){}
+        }
+    }
+
+    // Initial display
+    updateDisplay();
+    loadFromHash();
+})();
+</script>
+</body>
+</html>

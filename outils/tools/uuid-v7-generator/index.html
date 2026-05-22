@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUID v7 Generator Online — Create Sortable, Time‑Ordered Unique Identifiers</title>
+    <meta name="description" content="Generate UUID v7 (time‑ordered) right in your browser. Unique, sortable, timestamp‑based identifiers. Copy, export, and learn how UUID v7 works. 100% client‑side.">
+    <meta name="keywords" content="uuid v7 generator, uuid v7 online, uuid v7 tool, sortable uuid, time ordered uuid, rfc 9562, uuid v7 python, uuid v7 javascript">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/uuid-v7-generator/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/uuid-v7-generator/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-v7/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/uuid-v7-generator/">
+
+    <meta property="og:title" content="UUID v7 Generator Online">
+    <meta property="og:description" content="Create sortable, unique identifiers in one click. 100% client‑side, no data sent.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/uuid-v7-generator/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="UUID v7 Generator">
+    <meta name="twitter:description" content="UUID v7: time‑ordered, sortable identifiers. Generate and copy in one click.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .display-box {
+            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .uuid-display {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1.1rem; font-weight:600;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); word-break:break-all;
+        }
+        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .option-group { display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text2); }
+        .option-group input[type="number"] {
+            width:70px; padding:6px 10px; border-radius:8px; border:1.5px solid var(--border);
+            background:var(--surface); color:var(--text); font-family:inherit;
+        }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        .batch-output {
+            margin-top:20px; border:1px solid var(--border); border-radius:12px;
+            padding:14px; font-family:var(--mono); font-size:0.83rem;
+            max-height:200px; overflow-y:auto; background:var(--surface);
+            line-height:1.8; white-space:pre-wrap;
+        }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .uuid-display { font-size:0.95rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/uuid-v7-generator/" class="lang-btn active" aria-current="page">EN</a>
+                <a href="/fr/outils/generateur-uuid-v7/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/">Home</a> &rsaquo;
+        <a href="/tools/">Tools</a> &rsaquo;
+        <span>UUID v7 Generator</span>
+    </div>
+
+    <div class="seo-hook">
+        <strong>Generate UUID v7</strong> — sortable, time‑ordered, and unique — with a single click. Our <strong>UUID v7 generator</strong> creates timestamp‑based identifiers, ideal for modern databases. Everything is computed locally; nothing is sent to a server.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>UUID v7 Generator</h1>
+            <div class="subhead">Create one or many UUID v7 (universally unique time‑sortable identifiers) according to RFC 9562. Each UUID embeds a millisecond timestamp, making it naturally sortable and perfect for primary keys.</div>
+
+            <div class="display-box">
+                <div class="uuid-display" id="uuidDisplay" aria-label="Generated UUID v7">550e8400-e29b-41d4-a716-446655440000</div>
+                <button class="btn btn-sm" data-copy="uuidDisplay" aria-label="Copy UUID">Copy</button>
+            </div>
+
+            <div class="options-row">
+                <button class="btn btn-primary" id="generateBtn">Generate UUID v7</button>
+                <div class="option-group">
+                    <label for="countInput">Count:</label>
+                    <input type="number" id="countInput" value="1" min="1" max="50" step="1">
+                </div>
+                <div class="option-group">
+                    <input type="checkbox" id="noHyphens" aria-label="No hyphens">
+                    <label for="noHyphens">No hyphens</label>
+                </div>
+                <div class="option-group">
+                    <input type="checkbox" id="uppercase" aria-label="Uppercase">
+                    <label for="uppercase">Uppercase</label>
+                </div>
+                <button class="btn btn-outline btn-sm" id="copyAllBtn" style="display:none;">Copy all</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Share</button>
+            </div>
+
+            <div class="batch-output" id="batchOutput" style="display:none;"></div>
+        </div>
+
+        <section class="article-section" aria-label="Documentation">
+            <h2>What is UUID v7 and why use it?</h2>
+            <p>
+                A <strong>UUID v7</strong> (Universally Unique Identifier version 7) is a 128‑bit identifier designed to be <strong>time‑sortable</strong>. Unlike UUID v4 (random), it embeds a Unix timestamp in milliseconds in the first 48 bits. The remaining bits are filled with randomness, ensuring uniqueness even when many IDs are generated within the same millisecond.
+            </p>
+            <p>
+                This sorting property is critical for modern databases: an index on a UUID v7 column remains compact and fast, because new rows always land at the end of the index. With UUID v4, the random order causes fragmentation and slows down writes.
+            </p>
+
+            <h3>How UUID v7 works</h3>
+            <p>The specification (RFC 9562) defines the following layout:</p>
+            <ul>
+                <li><strong>48 bits</strong> : Unix timestamp in milliseconds (bits 0‑47).</li>
+                <li><strong>4 bits</strong> : version (fixed to <code>0111</code>, i.e. 7).</li>
+                <li><strong>12 bits</strong> : random (bits 48‑59).</li>
+                <li><strong>2 bits</strong> : variant (<code>10</code>), indicating standard UUID format.</li>
+                <li><strong>62 bits</strong> : random (bits 62‑127).</li>
+            </ul>
+            <p>Result: every UUID v7 contains the exact date and time of its creation, down to the millisecond, allowing you to sort identifiers chronologically while maintaining excellent uniqueness.</p>
+
+            <h3>Example of a decoded UUID v7</h3>
+            <p>Take a freshly generated UUID v7: <code id="exampleUuid">018f3c72-…</code>. The timestamp portion (48 bits) can be converted to a human‑readable date. Our tool also displays the embedded time if you use the <a href="/tools/uuid-generator/">full UUID generator</a> which offers decoding.</p>
+
+            <h3>How to use the generator</h3>
+            <ol>
+                <li>Click <strong>Generate UUID v7</strong> – a unique identifier appears instantly.</li>
+                <li>To produce several (up to 50), set the desired count before generating.</li>
+                <li>Choose the format: without hyphens or in uppercase, depending on your needs.</li>
+                <li>Copy the UUID to the clipboard with the dedicated button, or copy the whole list if you generated multiple.</li>
+                <li>Share the page URL with a colleague: the tool automatically reloads the last parameters.</li>
+            </ol>
+
+            <h3>Typical use cases</h3>
+            <ul>
+                <li><strong>Database primary keys</strong> (PostgreSQL, MySQL) — avoids index fragmentation.</li>
+                <li><strong>Order identifiers</strong> — sortable by creation date.</li>
+                <li><strong>Log events</strong> — timestamp directly embedded in the ID.</li>
+                <li><strong>Distributed applications</strong> — each node can generate unique identifiers without coordination.</li>
+            </ul>
+
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">What is the difference between UUID v4 and UUID v7?</div>
+                <p>UUID v4 is entirely random and cannot be sorted by time. UUID v7 starts with a timestamp, enabling natural chronological ordering and improving database index performance.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Is UUID v7 truly unique?</div>
+                <p>Yes. The 74‑bit random part (62 after the variant) provides enough combinations to avoid collisions, even under high‑volume generation. The collision probability is negligible.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I generate UUID v7 in Python?</div>
+                <p>Absolutely. The standard library <code>uuid</code> does not natively support UUID v7 (before Python 3.14), but you can use the <code>uuid7</code> third‑party module or implement the logic yourself by combining <code>time.time_ns()</code> and random bytes.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">What is the advantage over ULID?</div>
+                <p>ULID also offers time‑based sorting, but its representation is base32 (26 characters). UUID v7 remains a standard 36‑character UUID, fully compatible with all existing UUID libraries.</p>
+            </div>
+
+            <h3>Other useful tools</h3>
+            <ul>
+                <li><a href="/tools/uuid-generator/">UUID / ULID Generator</a> — all UUID versions and ULID in batch</li>
+                <li><a href="/tools/python-uuid-to-string/">Python UUID to String</a> — format converter for Python developers</li>
+                <li><a href="/tools/jwt-decoder/">JWT Decoder</a> — inspect tokens that often contain UUIDs</li>
+                <li><a href="/tools/json-formatter/">JSON Formatter</a> — structure your data with UUIDs</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — 100% client‑side tools for developers.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "UUID v7 Generator",
+  "url": "https://www.devstoolsbox.dev/tools/uuid-v7-generator/",
+  "description": "Generate sortable UUID v7 online. Embedded timestamp, ideal for databases. 100% client‑side.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is the difference between UUID v4 and UUID v7?", "acceptedAnswer": { "@type": "Answer", "text": "UUID v4 is entirely random, while UUID v7 embeds a timestamp, making it time‑sortable and more performant for database indexes." } },
+    { "@type": "Question", "name": "Is UUID v7 truly unique?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, thanks to a 74‑bit random part, collisions are extremely unlikely." } },
+    { "@type": "Question", "name": "Can I generate UUID v7 in Python?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, either via the third‑party uuid7 module or by implementing it yourself using time.time_ns() and os.urandom()." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://www.devstoolsbox.dev/tools/" },
+    { "@type": "ListItem", "position": 3, "name": "UUID v7 Generator", "item": "https://www.devstoolsbox.dev/tools/uuid-v7-generator/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Theme ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Light'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Dark'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Light':'Dark'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    /* ── UUID v7 generation ── */
+    function generateUUIDv7() {
+        const timestamp = Date.now(); // milliseconds
+        // 48-bit timestamp -> 6 bytes (big-endian)
+        const tsBytes = new Uint8Array(6);
+        let t = timestamp;
+        for (let i = 5; i >= 0; i--) {
+            tsBytes[i] = t & 0xff;
+            t = Math.floor(t / 256);
+        }
+        // 10 random bytes
+        const random = new Uint8Array(10);
+        crypto.getRandomValues(random);
+        const uuid = new Uint8Array(16);
+        uuid.set(tsBytes, 0);            // bytes 0-5 = timestamp
+        // byte 6 = time_high_and_version: 4 MSB = version 7, 4 LSB = random
+        uuid[6] = (random[0] & 0x0f) | 0x70;   // version 7 (0x70)
+        uuid[7] = random[1];            // clock_seq_low, random
+        // byte 8 = clock_seq_hi_and_reserved: 2 MSB = variant 10, 6 LSB random
+        uuid[8] = (random[2] & 0x3f) | 0x80;   // variant 10xx (0x80)
+        // bytes 9-15 = node (random)
+        uuid.set(random.slice(3,10), 9);
+        return uuid;
+    }
+
+    function bytesToUUID(bytes, noHyphens, uppercase) {
+        const hex = Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join('');
+        let formatted;
+        if (noHyphens) {
+            formatted = hex;
+        } else {
+            formatted = `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+        }
+        return uppercase ? formatted.toUpperCase() : formatted.toLowerCase();
+    }
+
+    function generateBatch(count, noHyphens, uppercase) {
+        const uuids = [];
+        for (let i=0; i<count; i++) {
+            const uuid = generateUUIDv7();
+            uuids.push(bytesToUUID(uuid, noHyphens, uppercase));
+        }
+        return uuids;
+    }
+
+    const uuidDisplay = document.getElementById('uuidDisplay');
+    const countInput = document.getElementById('countInput');
+    const noHyphensCheck = document.getElementById('noHyphens');
+    const uppercaseCheck = document.getElementById('uppercase');
+    const batchOutput = document.getElementById('batchOutput');
+    const copyAllBtn = document.getElementById('copyAllBtn');
+    const shareBtn = document.getElementById('shareBtn');
+
+    let currentUUIDs = [];
+
+    function updateDisplay() {
+        const count = parseInt(countInput.value,10) || 1;
+        const noHyphens = noHyphensCheck.checked;
+        const uppercase = uppercaseCheck.checked;
+        currentUUIDs = generateBatch(count, noHyphens, uppercase);
+
+        uuidDisplay.textContent = currentUUIDs[0];
+        if (count > 1) {
+            batchOutput.style.display = 'block';
+            batchOutput.textContent = currentUUIDs.join('\n');
+            copyAllBtn.style.display = 'inline-flex';
+        } else {
+            batchOutput.style.display = 'none';
+            copyAllBtn.style.display = 'none';
+        }
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', updateDisplay);
+    noHyphensCheck.addEventListener('change', updateDisplay);
+    uppercaseCheck.addEventListener('change', updateDisplay);
+
+    // Copy buttons
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const el = document.getElementById(targetId);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copied!'));
+            }
+        });
+    });
+
+    copyAllBtn.addEventListener('click', () => {
+        if (currentUUIDs.length > 1) {
+            navigator.clipboard.writeText(currentUUIDs.join('\n')).then(()=>showToast('All UUIDs copied!'));
+        }
+    });
+
+    shareBtn.addEventListener('click', () => {
+        const state = {
+            count: parseInt(countInput.value,10),
+            noHyphens: noHyphensCheck.checked,
+            uppercase: uppercaseCheck.checked,
+            lastUUID: currentUUIDs[0]
+        };
+        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copied!'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+                if (state.count) countInput.value = state.count;
+                if (typeof state.noHyphens === 'boolean') noHyphensCheck.checked = state.noHyphens;
+                if (typeof state.uppercase === 'boolean') uppercaseCheck.checked = state.uppercase;
+                updateDisplay();
+            } catch(e){}
+        }
+    }
+
+    // Initial generation on page load
+    updateDisplay();
+    loadFromHash();
+})();
+</script>
+</body>
+</html>

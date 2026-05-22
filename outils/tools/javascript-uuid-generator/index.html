@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript UUID Generator — Create UUIDs with crypto.randomUUID() &amp; uuid npm</title>
+    <meta name="description" content="Generate UUIDs in JavaScript using crypto.randomUUID() or the uuid npm package. Copy code snippets and learn best practices. 100% client‑side.">
+    <meta name="keywords" content="javascript uuid generator, uuid npm, crypto.randomUUID, generate uuid javascript, js uuid example, uuid v4 javascript">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/javascript-uuid-generator/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/javascript-uuid-generator/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/javascript-uuid-generator/">
+
+    <meta property="og:title" content="JavaScript UUID Generator — crypto.randomUUID() &amp; uuid npm">
+    <meta property="og:description" content="Generate UUIDs in JavaScript with built‑in methods or the uuid library. Copy code instantly. 100% client‑side.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/javascript-uuid-generator/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="JavaScript UUID Generator">
+    <meta name="twitter:description" content="Generate UUIDs in JS. Copy code for crypto.randomUUID() and uuid npm.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .seo-hook {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:10px 16px; border-radius:8px; margin-bottom:20px;
+            font-size:0.92rem; color:var(--text2);
+        }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .display-box {
+            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .uuid-display {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1.1rem; font-weight:600;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); word-break:break-all;
+        }
+        .method-selector { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+        .method-btn {
+            padding:8px 16px; border-radius:30px; font-weight:600; font-size:0.85rem;
+            border:1px solid var(--border); background:var(--surface); color:var(--text);
+            cursor:pointer; transition:all 0.2s; font-family:inherit;
+        }
+        .method-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        /* Article section */
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .uuid-display { font-size:0.95rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/javascript-uuid-generator/" class="lang-btn active" aria-current="page">EN</a>
+                <a href="/fr/outils/generateur-uuid-javascript/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/">Home</a> &rsaquo;
+        <a href="/tools/">Tools</a> &rsaquo;
+        <span>JavaScript UUID Generator</span>
+    </div>
+
+    <div class="seo-hook">
+        Need a <strong>JavaScript UUID generator</strong>? Use <code>crypto.randomUUID()</code> or the <strong>uuid npm</strong> package. This tool shows you both methods with ready‑to‑copy code. No data leaves your browser.
+    </div>
+
+    <main>
+        <div class="tool-card">
+            <h1>JavaScript UUID Generator</h1>
+            <div class="subhead">Generate UUIDs directly in your browser using the same APIs available in Node.js and modern browsers. Switch between <code>crypto.randomUUID()</code> and the <strong>uuid npm</strong> approach, then copy the code snippet for your project.</div>
+
+            <div class="display-box">
+                <div class="uuid-display" id="uuidDisplay" aria-label="Generated UUID">550e8400-e29b-41d4-a716-446655440000</div>
+                <button class="btn btn-sm" data-copy="uuidDisplay" aria-label="Copy UUID">Copy</button>
+            </div>
+
+            <div class="method-selector">
+                <button class="method-btn active" data-method="crypto">crypto.randomUUID()</button>
+                <button class="method-btn" data-method="npm">uuid npm (v4)</button>
+            </div>
+
+            <div class="options-row">
+                <button class="btn btn-primary" id="generateBtn">Generate UUID</button>
+                <button class="btn btn-outline btn-sm" id="copyCodeBtn">Copy code</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Share</button>
+            </div>
+        </div>
+
+        <section class="article-section" aria-label="Documentation">
+            <h2>How to generate a UUID in JavaScript</h2>
+            <p>
+                There are two main ways to create UUIDs in modern JavaScript applications:
+            </p>
+            <ul>
+                <li><strong><code>crypto.randomUUID()</code></strong> – built into browsers and Node.js (≥19). It returns a UUID v4 string instantly.</li>
+                <li><strong><code>uuid</code> npm package</strong> – the most popular library for generating UUIDs in Node.js. It supports v1, v3, v4, v5, and v7.</li>
+            </ul>
+            <p>
+                Our tool demonstrates both methods and provides the exact code you can paste into your project.
+            </p>
+
+            <h3>Example using <code>crypto.randomUUID()</code></h3>
+            <pre><code>// Modern browsers and Node.js (v19+)
+const id = crypto.randomUUID();
+console.log(id); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
+            <p>This is the simplest and fastest method. It's available in all evergreen browsers and requires no extra dependencies.</p>
+
+            <h3>Example using the <code>uuid</code> npm package</h3>
+            <pre><code>// Install with: npm install uuid
+import { v4 as uuidv4 } from 'uuid';
+const id = uuidv4();
+console.log(id); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
+            <p>The <code>uuid</code> package is the go‑to library for Node.js projects, offering a consistent API across all UUID versions. It's maintained by the OpenJS Foundation and widely trusted.</p>
+
+            <h3>Which method should you choose?</h3>
+            <ul>
+                <li>Use <code>crypto.randomUUID()</code> if you only need v4 and you're targeting modern environments (browsers, Node.js ≥19).</li>
+                <li>Use the <code>uuid</code> npm package if you need other UUID versions (v1, v3, v5, v7) or if you must support older Node.js versions.</li>
+            </ul>
+
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="faq-question">What is the difference between <code>crypto.randomUUID()</code> and the <code>uuid</code> npm package?</div>
+                <p><code>crypto.randomUUID()</code> is built into the JavaScript runtime and generates only UUID v4. The <code>uuid</code> npm package is an external library that supports all UUID versions and works across older environments.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I use <code>crypto.randomUUID()</code> in Node.js?</div>
+                <p>Yes, starting from Node.js 19. It's available both in the <code>crypto</code> module and as a global function in modern Node.js versions.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How do I generate a UUID v1 or v5 in JavaScript?</div>
+                <p>The built‑in <code>crypto.randomUUID()</code> only does v4. To generate v1 or v5, use the <code>uuid</code> npm package: <code>import { v1, v5 } from 'uuid'</code>.</p>
+            </div>
+
+            <h3>Other useful tools</h3>
+            <ul>
+                <li><a href="/tools/uuid-generator/">UUID / ULID Generator</a> — all UUID versions and ULID in batch</li>
+                <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> — time‑sortable UUIDs</li>
+                <li><a href="/tools/python-uuid-to-string/">Python UUID to String</a> — convert UUIDs between formats</li>
+                <li><a href="/tools/nanoid-generator/">NanoID Generator</a> — short, URL‑safe unique IDs</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — 100% client‑side tools for developers.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "JavaScript UUID Generator",
+  "url": "https://www.devstoolsbox.dev/tools/javascript-uuid-generator/",
+  "description": "Generate UUIDs in JavaScript using crypto.randomUUID() or the uuid npm package. 100% client‑side.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is the difference between crypto.randomUUID() and the uuid npm package?", "acceptedAnswer": { "@type": "Answer", "text": "crypto.randomUUID() is built-in and generates UUID v4 only. The uuid npm package supports all UUID versions." } },
+    { "@type": "Question", "name": "Can I use crypto.randomUUID() in Node.js?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, starting from Node.js 19. It is available in the crypto module and as a global function." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://www.devstoolsbox.dev/tools/" },
+    { "@type": "ListItem", "position": 3, "name": "JavaScript UUID Generator", "item": "https://www.devstoolsbox.dev/tools/javascript-uuid-generator/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Theme ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Light'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Dark'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Light':'Dark'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    // Generate UUID v4 (same as crypto.randomUUID)
+    function generateUUIDv4() {
+        // Use crypto.randomUUID if available, else fallback
+        if (crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        // Fallback implementation for older browsers
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // Simulate uuid npm v4 (same output)
+    function generateUUIDnpm() {
+        // Actually identical to v4 for demo purposes; in real uuid lib, it's the same.
+        return generateUUIDv4();
+    }
+
+    const uuidDisplay = document.getElementById('uuidDisplay');
+    const methodBtns = document.querySelectorAll('.method-btn');
+    let currentMethod = 'crypto'; // crypto or npm
+
+    methodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            methodBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMethod = btn.dataset.method;
+            // Optionally regenerate
+            updateDisplay();
+        });
+    });
+
+    function updateDisplay() {
+        let uuid;
+        if (currentMethod === 'crypto') {
+            uuid = generateUUIDv4();
+        } else {
+            uuid = generateUUIDnpm();
+        }
+        uuidDisplay.textContent = uuid;
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', updateDisplay);
+
+    // Copy UUID
+    document.querySelectorAll('[data-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.copy;
+            const el = document.getElementById(targetId);
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copied!'));
+            }
+        });
+    });
+
+    // Copy code button
+    document.getElementById('copyCodeBtn').addEventListener('click', () => {
+        let code;
+        if (currentMethod === 'crypto') {
+            code = `const id = crypto.randomUUID();\nconsole.log(id); // "${uuidDisplay.textContent}"`;
+        } else {
+            code = `import { v4 as uuidv4 } from 'uuid';\nconst id = uuidv4();\nconsole.log(id); // "${uuidDisplay.textContent}"`;
+        }
+        navigator.clipboard.writeText(code).then(() => showToast('Code copied!'));
+    });
+
+    // Share button
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const state = {
+            method: currentMethod,
+            uuid: uuidDisplay.textContent
+        };
+        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.location.hash = hash;
+        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copied!'));
+    });
+
+    function loadFromHash() {
+        if (window.location.hash) {
+            try {
+                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+                if (state.method) {
+                    currentMethod = state.method;
+                    document.querySelector(`.method-btn[data-method="${state.method}"]`)?.classList.add('active');
+                }
+                updateDisplay();
+            } catch(e){}
+        }
+    }
+
+    // Initial generation
+    updateDisplay();
+    loadFromHash();
+})();
+</script>
+</body>
+</html>
