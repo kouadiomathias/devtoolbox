@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérificateur d'entropie UUID — Détectez la faiblesse aléatoire avant qu'elle ne devienne une CVE</title>
+    <meta name="description" content="Vérifiez si vos UUID sont vraiment aléatoires. Entropie de Shannon, bits fixes, test du chi‑carré et détection de faiblesse PRNG. Contexte réel de l'incident V8/Node.js. 100 % côté client.">
+    <meta name="keywords" content="vérificateur entropie uuid, test aléatoire uuid, entropie shannon uuid, prng faible uuid, vulnérabilité Math.random uuid, entropie uuid v4, chi carré uuid, analyse par lot uuid">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/verificateur-entropie-uuid/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/verificateur-entropie-uuid/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/uuid-entropy-checker/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/uuid-entropy-checker/">
+
+    <meta property="og:title" content="Vérificateur d'entropie UUID — Détectez la faiblesse aléatoire">
+    <meta property="og:description" content="Entropie de Shannon, bits fixes, chi‑carré et détection de faiblesse PRNG pour les UUID. Contexte d'incident réel.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/verificateur-entropie-uuid/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Vérificateur d'entropie UUID">
+    <meta name="twitter:description" content="Votre générateur d'UUID est-il cryptographiquement sûr ? Vérifiez maintenant.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --accent-red: #ef4444; --accent-red-bg: #fee2e2;
+            --accent-amber: #f59e0b; --accent-amber-bg: #fef3c7;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --accent-green-bg: #064e3b; --accent-red-bg: #450a0a; --accent-amber-bg: #422006;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .intro-real {
+            background: var(--accent-amber-bg); border-left:4px solid var(--accent-amber);
+            padding:16px 20px; border-radius:0 12px 12px 0; margin-bottom:28px;
+            font-size:0.95rem; color:var(--text2);
+        }
+        .intro-real strong { color:var(--text); }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .input-group {
+            display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;
+        }
+        .uuid-input {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1rem;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); outline:none; transition: border-color 0.2s;
+        }
+        .uuid-input:focus { border-color: var(--primary); }
+        textarea.uuid-input {
+            resize: vertical; min-height: 100px;
+        }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+        .mode-toggle {
+            display:flex; gap:8px; align-items:center; font-size:0.85rem; color:var(--text2);
+        }
+        .mode-toggle input[type="radio"] { accent-color: var(--primary); }
+
+        .result-box {
+            margin-top:20px; background:var(--surface2); border:1px solid var(--border);
+            border-radius:12px; padding:16px; display:none;
+        }
+        .result-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px; }
+        .result-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:10px;
+            padding:14px; text-align:center;
+        }
+        .result-label { font-size:0.75rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
+        .result-value { font-family:var(--mono); font-size:1.1rem; font-weight:700; color:var(--text); word-break:break-all; }
+        .result-value.warning-text { color:var(--accent-red); font-size:0.9rem; }
+        .result-card.warning { background:var(--accent-red-bg); border-color:var(--accent-red); }
+        .result-card.warning .result-label { color:var(--accent-red); }
+        .result-card.good { background:var(--accent-green-bg); border-color:var(--accent-green); }
+        .result-card.good .result-label { color:var(--accent-green); }
+        .error-msg { color:var(--accent-red); font-weight:600; margin-top:10px; font-size:0.9rem; display:none; }
+
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); margin-top:36px; }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 24px 0;
+            border-radius: 12px;
+        }
+        table {
+            width: 100%; border-collapse: collapse; min-width: 600px;
+        }
+        .struct-table th, .struct-table td {
+            border: 1px solid var(--border); padding: 10px 14px; text-align: left;
+        }
+        .struct-table th { background: var(--surface2); font-weight: 600; }
+        .decision-table { background: var(--accent-green-bg); border: 2px solid var(--accent-green); border-radius: 12px; overflow: hidden; }
+        .decision-table th { background: var(--accent-green); color: #fff; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .decision-table td { border-bottom: 1px solid var(--border); padding: 12px 16px; }
+        .decision-table tr:last-child td { border-bottom: none; }
+        .decision-table td:first-child { font-weight: 600; color: var(--text); }
+        .references { margin-top: 32px; font-size: 0.9rem; }
+        .references h3 { margin-bottom: 8px; }
+        .references ul { list-style-type: disc; padding-left: 24px; color: var(--text2); }
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .uuid-input { font-size:0.9rem; }
+            .result-grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/fr/outils/verificateur-entropie-uuid/" class="lang-btn active" aria-current="page">FR</a>
+                <a href="/tools/uuid-entropy-checker/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/fr/">Accueil</a> &rsaquo;
+        <a href="/fr/outils/">Outils</a> &rsaquo;
+        <span>Vérificateur d'entropie UUID</span>
+    </div>
+
+    <div class="intro-real">
+        <strong>vous vous Souvenez? </strong> En 2012, un bug dans le moteur JavaScript V8 (utilisé par Node.js et Chrome) rendait <code>Math.random()</code> prévisible. Les développeurs qui généraient des UUID avec <code>Math.random()</code> créaient sans le savoir des identifiants qu'on pouvait deviner en quelques tentatives. Ce vérificateur vous permet d'auditer vos UUID — collez‑en un ou un lot, et nous mesurerons l'entropie de Shannon, signalerons les bits fixes et exécuterons un test du chi‑carré par rapport à une distribution vraiment aléatoire.
+    </div>
+
+    <main>
+        <!-- OUTIL EMBARQUÉ -->
+        <div class="tool-card" id="toolSection">
+            <h1>Vérificateur d'entropie UUID</h1>
+            <div class="subhead">Collez un seul UUID ou un lot (un par ligne) pour mesurer la qualité de l'aléatoire. Détecte les PRNG faibles, les bits fixes et les distributions non uniformes.</div>
+
+            <div class="mode-toggle">
+                <span>Mode :</span>
+                <label><input type="radio" name="analysisMode" value="single" checked> UUID unique</label>
+                <label><input type="radio" name="analysisMode" value="batch"> Analyse par lot</label>
+            </div>
+
+            <div class="input-group" id="singleInputGroup">
+                <input type="text" class="uuid-input" id="singleUuidInput" placeholder="ex. : 550e8400-e29b-41d4-a716-446655440000" aria-label="UUID unique">
+            </div>
+            <div class="input-group" id="batchInputGroup" style="display:none;">
+                <textarea class="uuid-input" id="batchUuidInput" placeholder="Collez les UUID ici, un par ligne&#10;550e8400-e29b-41d4-a716-446655440000&#10;6ba7b810-9dad-11d1-80b4-00c04fd430c8" aria-label="Lot d'UUIDs"></textarea>
+            </div>
+
+            <div class="input-group">
+                <button class="btn btn-primary" id="analyzeBtn">Analyser l'entropie</button>
+            </div>
+            <div class="error-msg" id="errorMsg"></div>
+
+            <div class="result-box" id="resultBox">
+                <div class="result-grid" id="resultGrid"></div>
+            </div>
+        </div>
+
+        <!-- ARTICLE COMPLET -->
+        <section class="article-section" aria-label="Documentation sur l'analyse d'entropie">
+            <h2>Table de décision — Ce que signifie votre score d'entropie</h2>
+            <div class="table-responsive">
+                <table class="decision-table">
+                    <thead>
+                        <tr><th>Entropie (bits/car)</th><th>Signification</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>&gt; 3,9</td><td>UUID correctement aléatoire</td><td>Aucune action nécessaire</td></tr>
+                        <tr><td>3,5 – 3,9</td><td>Légèrement suspect — peut indiquer un PRNG faible mais pas cassé</td><td>Analyser la source de génération</td></tr>
+                        <tr><td>&lt; 3,5</td><td>Probablement séquentiel ou PRNG faible (ex. <code>Math.random()</code> dans l'ancien V8)</td><td>Audit immédiat du générateur</td></tr>
+                        <tr><td>Bits fixes &gt; 10 % du total</td><td>UUID v1 ou PRNG déterministe — motifs détectés</td><td>Identifier et remplacer la source</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Ce que l'entropie de Shannon mesure dans un UUID</h2>
+            <p>
+                L'<strong>entropie de Shannon</strong> quantifie la quantité d'information — ou d'aléatoire — dans une chaîne. Pour un UUID v4 parfaitement aléatoire, chaque caractère hexadécimal (0‑f) devrait être équiprobable, ce qui donne une entropie attendue de <strong>log₂(16) = 4 bits par caractère</strong>. En pratique, un UUID v4 sain produit environ <strong>3,95 bits/car</strong> parce que les bits de version et de variante biaisent légèrement deux quartets.
+            </p>
+            <p>
+                Lorsque l'entropie descend en dessous de 3,9, les bits ne sont plus uniformément répartis. C'est la signature d'un générateur de nombres pseudo‑aléatoires (PRNG) faible — exactement ce qui s'est produit avec le bug de <code>Math.random()</code> de V8 en 2012, où l'état interne pouvait être reconstitué après avoir observé seulement quelques sorties.
+            </p>
+
+            <h2>Analyse par lot — Comment auditer un ensemble d'UUID</h2>
+            <p>Le vérificateur ci‑dessus accepte de coller plusieurs UUID (un par ligne). En mode lot, il calcule :</p>
+            <ul>
+                <li><strong>Entropie par position :</strong> entropie de chacune des 32 positions hexadécimales sur l'ensemble des UUID. Les positions fixes de version/variante doivent montrer une entropie proche de zéro.</li>
+                <li><strong>Statistique du chi‑carré :</strong> teste si la distribution globale des quartets correspond à une distribution uniforme. Une valeur élevée du chi‑carré indique un biais.</li>
+            </ul>
+            <p>L'analyse s'inspire du code Python ci‑dessous, que vous pouvez utiliser sur vos propres données.</p>
+
+            <h3>Implémentation en Python</h3>
+            <pre><code>import math
+from collections import Counter
+
+def analyse_entropie_uuid(uuids: list[str]) -> dict:
+    propres = [u.replace('-', '').lower() for u in uuids]
+    
+    # 1. Entropie de Shannon par position
+    entropie_position = []
+    for pos in range(32):
+        caracteres_pos = [u[pos] for u in propres if len(u) == 32]
+        compteurs = Counter(caracteres_pos)
+        total = len(caracteres_pos)
+        entropie = -sum((c/total) * math.log2(c/total) for c in compteurs.values())
+        entropie_position.append(round(entropie, 3))
+    
+    # 2. Positions fixes (entropie < 0,5 -> constante)
+    positions_fixes = [i for i, e in enumerate(entropie_position) if e < 0.5]
+    
+    # 3. Entropie globale
+    tous_caracteres = ''.join(propres)
+    compteurs = Counter(tous_caracteres)
+    total = len(tous_caracteres)
+    entropie_globale = -sum((c/total) * math.log2(c/total) for c in compteurs.values())
+    
+    # 4. Test du chi‑carré (distribution uniforme attendue)
+    freq_attendue = total / 16
+    chi_carre = sum((compteurs.get(c, 0) - freq_attendue)**2 / freq_attendue 
+                     for c in '0123456789abcdef')
+    
+    return {
+        "entropie_globale_bits": round(entropie_globale, 3),
+        "attendu_pour_v4": 3.95,
+        "entropie_position": entropie_position,
+        "positions_fixes": positions_fixes,
+        "chi_carre": round(chi_carre, 2),
+        "verdict": "OK" if entropie_globale > 3.8 else "SUSPECT",
+        "taille_echantillon": len(uuids)
+    }</code></pre>
+
+            <h2>Sources d'aléatoire comparées</h2>
+            <div class="table-responsive">
+                <table class="struct-table">
+                    <thead>
+                        <tr><th>Source</th><th>Entropie effective</th><th>Sécurisée</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>crypto.getRandomValues()</code> (navigateur)</td><td>~122 bits</td><td>✅ Oui</td></tr>
+                        <tr><td><code>crypto.randomBytes()</code> (Node.js)</td><td>~122 bits</td><td>✅ Oui</td></tr>
+                        <tr><td><code>java.security.SecureRandom</code></td><td>~122 bits</td><td>✅ Oui</td></tr>
+                        <tr><td><code>os.urandom()</code> (Python)</td><td>~122 bits</td><td>✅ Oui</td></tr>
+                        <tr><td><code>Math.random()</code> (JS legacy)</td><td>~32–48 bits</td><td>❌ Non</td></tr>
+                        <tr><td><code>rand()</code> (C sans graine)</td><td>Prévisible</td><td>❌ Non</td></tr>
+                        <tr><td>UUID v1 (MAC non aléatoire)</td><td>~60 bits horodatage + 14 bits séquence</td><td>⚠️ Risque vie privée</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Détecter un PRNG faible à partir d'un lot d'UUID</h2>
+            <p>
+                Si vous disposez d'un ensemble d'UUID supposés être en v4 et que certaines positions présentent une entropie anormalement basse, vous êtes probablement face à un PRNG faible ou à une graine réutilisée. Un exemple concret : les premières versions du framework <strong>PHP Laravel</strong> (avant la v5.5) utilisaient <code>mt_rand()</code> ensemencé avec l'horodatage courant, rendant la génération d'UUID prévisible dans une fenêtre de temps étroite.
+            </p>
+            <p>
+                Passez votre lot dans le vérificateur ci‑dessus — si la valeur du chi‑carré dépasse <strong>30</strong> pour un échantillon de plus de 100 UUID, ou si plusieurs positions affichent une entropie inférieure à 3,5, votre générateur doit être remplacé. Passez à une source cryptographiquement sûre comme <code>random_bytes()</code> en PHP ou <code>crypto.randomUUID()</code> en JavaScript moderne.
+            </p>
+
+            <h2>Foire Aux Questions</h2>
+            <div class="faq-item">
+                <div class="faq-question">De combien d'UUID ai‑je besoin pour une analyse par lot fiable ?</div>
+                <p>Un minimum de 50 UUID est recommandé. Le test du chi‑carré devient statistiquement significatif avec des échantillons plus grands (plus de 100).</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Cet outil peut‑il détecter un PRNG faible à partir d'un seul UUID ?</div>
+                <p>Avec un seul UUID, nous pouvons mesurer l'entropie de Shannon de la chaîne et signaler des valeurs anormalement basses. Cependant, l'analyse par lot est bien plus fiable pour détecter des distributions non uniformes.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Pourquoi mon entropie est‑elle légèrement inférieure à 4 bits/car ?</div>
+                <p>L'UUID v4 réserve 6 bits pour les marqueurs de version et de variante. Ces bits sont fixes, donc deux caractères hexadécimaux ne peuvent pas être entièrement aléatoires. Le maximum théorique est d'environ 3,98 bits/car.</p>
+            </div>
+
+            <section class="references">
+                <h3>Sources et références</h3>
+                <ul>
+                    <li><a href="https://dl.acm.org/doi/10.1145/2660267.2660348" target="_blank" rel="noopener noreferrer">La vulnérabilité V8 Math.random() de 2012</a> — analyse académique du PRNG prévisible.</li>
+                    <li><a href="https://datatracker.ietf.org/doc/html/rfc9562" target="_blank" rel="noopener noreferrer">RFC 9562</a> — Universally Unique IDentifiers (UUIDs).</li>
+                    <li><a href="https://fr.wikipedia.org/wiki/Entropie_de_Shannon" target="_blank" rel="noopener noreferrer">Entropie de Shannon</a> — définition et formule.</li>
+                    <li><a href="/fr/outils/verificateur-entropie-previsibilite-uuid/">Vérificateur d'entropie et de prévisibilité UUID</a> — notre outil compagnon avec détection de version et score de prévisibilité.</li>
+                </ul>
+            </section>
+
+            <h3>Autres outils utiles</h3>
+            <ul>
+                <li><a href="/fr/outils/generateur-uuid/">Générateur UUID / ULID</a> — générer et décoder toutes les versions d'UUID</li>
+                <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a> — triable dans le temps, adapté aux bases de données</li>
+                <li><a href="/fr/outils/calculateur-collision-uuid/">Calculateur de collision UUID</a> — probabilité de collision pour différents types d'ID</li>
+                <li><a href="/fr/outils/extracteur-mac-uuid-v1/">Extracteur MAC UUID v1</a> — décoder l'adresse MAC cachée</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Vérificateur d'entropie UUID",
+  "url": "https://www.devstoolsbox.dev/fr/outils/verificateur-entropie-uuid/",
+  "description": "Vérifiez si vos UUID sont vraiment aléatoires en utilisant l'entropie de Shannon, le test du chi‑carré et la détection des bits fixes. Côté client, respectueux de la vie privée.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "De combien d'UUID ai‑je besoin pour une analyse par lot fiable ?", "acceptedAnswer": { "@type": "Answer", "text": "Un minimum de 50 UUID est recommandé. Le test du chi‑carré devient statistiquement significatif avec des échantillons plus grands (plus de 100)." } },
+    { "@type": "Question", "name": "Cet outil peut‑il détecter un PRNG faible à partir d'un seul UUID ?", "acceptedAnswer": { "@type": "Answer", "text": "Avec un seul UUID, nous pouvons mesurer l'entropie de Shannon de la chaîne et signaler des valeurs anormalement basses. Cependant, l'analyse par lot est bien plus fiable pour détecter des distributions non uniformes." } },
+    { "@type": "Question", "name": "Pourquoi mon entropie est‑elle légèrement inférieure à 4 bits/car ?", "acceptedAnswer": { "@type": "Answer", "text": "L'UUID v4 réserve 6 bits pour les marqueurs de version et de variante. Ces bits sont fixes, donc deux caractères hexadécimaux ne peuvent pas être entièrement aléatoires. Le maximum théorique est d'environ 3,98 bits/car." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 3, "name": "Vérificateur d'entropie UUID", "item": "https://www.devstoolsbox.dev/fr/outils/verificateur-entropie-uuid/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Thème ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    /* ── Basculement de mode ── */
+    const modeRadios = document.getElementsByName('analysisMode');
+    const singleGroup = document.getElementById('singleInputGroup');
+    const batchGroup = document.getElementById('batchInputGroup');
+    const singleInput = document.getElementById('singleUuidInput');
+    const batchInput = document.getElementById('batchUuidInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const resultBox = document.getElementById('resultBox');
+    const resultGrid = document.getElementById('resultGrid');
+
+    modeRadios.forEach(r => {
+        r.addEventListener('change', () => {
+            if (r.value === 'single') {
+                singleGroup.style.display = 'flex';
+                batchGroup.style.display = 'none';
+            } else {
+                singleGroup.style.display = 'none';
+                batchGroup.style.display = 'flex';
+            }
+            errorMsg.style.display = 'none';
+            resultBox.style.display = 'none';
+        });
+    });
+
+    function estHexValide(str) {
+        return /^[0-9a-fA-F]+$/.test(str);
+    }
+
+    function analyserUUID(uuid) {
+        const hex = uuid.replace(/-/g, '').replace(/ /g, '').toLowerCase();
+        if (hex.length !== 32 || !estHexValide(hex)) return null;
+        return hex;
+    }
+
+    function entropieShannon(str) {
+        const compteurs = {};
+        for (const ch of str) compteurs[ch] = (compteurs[ch] || 0) + 1;
+        const len = str.length;
+        return -Object.values(compteurs).reduce((somme, c) => somme + (c/len) * Math.log2(c/len), 0);
+    }
+
+    function chiCarre(observe, attendu) {
+        return Object.keys(attendu).reduce((somme, cle) => {
+            const o = observe[cle] || 0;
+            const e = attendu[cle];
+            return somme + ((o - e) ** 2) / e;
+        }, 0);
+    }
+
+    function analyserUnique(hex) {
+        const entropie = entropieShannon(hex);
+        const quartetVersion = hex[12];
+        const version = parseInt(quartetVersion, 16);
+        let statut = 'good';
+        let texteVerdict = 'Aléatoire fort';
+        if (entropie < 3.5) { statut = 'warning'; texteVerdict = '⚠️ Entropie faible — possible PRNG faible'; }
+        else if (entropie < 3.9) { statut = 'warning'; texteVerdict = '⚠️ Légèrement suspect'; }
+
+        let infoVersion = `v${version}`;
+        if (version === 4) infoVersion += ' (aléatoire)';
+        else if (version === 7) infoVersion += ' (temps + aléatoire)';
+        else if (version === 1) infoVersion += ' (temps + MAC)';
+
+        resultGrid.innerHTML = `
+            <div class="result-card ${statut}"><div class="result-label">Verdict</div><div class="result-value ${statut === 'warning' ? 'warning-text' : ''}">${texteVerdict}</div></div>
+            <div class="result-card"><div class="result-label">Entropie de Shannon</div><div class="result-value">${entropie.toFixed(3)} bits/car</div></div>
+            <div class="result-card"><div class="result-label">Attendu pour v4</div><div class="result-value">~3,95 bits/car</div></div>
+            <div class="result-card"><div class="result-label">Version</div><div class="result-value">${infoVersion}</div></div>
+        `;
+    }
+
+    function analyserLot(listeUUIDs) {
+        const propres = listeUUIDs.map(u => analyserUUID(u)).filter(h => h !== null);
+        if (propres.length < 2) {
+            errorMsg.textContent = 'Il faut au moins 2 UUID valides pour l\'analyse par lot.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        // Entropie par position
+        const entropiePos = [];
+        for (let pos = 0; pos < 32; pos++) {
+            const caracteres = propres.map(h => h[pos]);
+            const compteurs = {};
+            caracteres.forEach(c => compteurs[c] = (compteurs[c] || 0) + 1);
+            const len = caracteres.length;
+            const ent = -Object.values(compteurs).reduce((s, c) => s + (c/len) * Math.log2(c/len), 0);
+            entropiePos.push(ent);
+        }
+        const positionsFixes = entropiePos.map((e, i) => e < 0.5 ? i : -1).filter(i => i >= 0);
+
+        // Entropie globale
+        const tousCaracteres = propres.join('');
+        const entropieGlobale = entropieShannon(tousCaracteres);
+
+        // Chi‑carré
+        const totalCaracteres = tousCaracteres.length;
+        const freqAttendue = totalCaracteres / 16;
+        const attendu = {};
+        for (const c of '0123456789abcdef') attendu[c] = freqAttendue;
+        const observe = {};
+        for (const c of tousCaracteres) observe[c] = (observe[c] || 0) + 1;
+        const chi2 = chiCarre(observe, attendu);
+
+        let statut = 'good';
+        let verdict = 'Distribution aléatoire';
+        if (entropieGlobale < 3.5 || chi2 > 30) { statut = 'warning'; verdict = '⚠️ Non uniforme — PRNG faible probable'; }
+        else if (entropieGlobale < 3.8 || positionsFixes.length > 6) { statut = 'warning'; verdict = '⚠️ Suspect — audit recommandé'; }
+
+        resultGrid.innerHTML = `
+            <div class="result-card ${statut}"><div class="result-label">Verdict</div><div class="result-value ${statut === 'warning' ? 'warning-text' : ''}">${verdict}</div></div>
+            <div class="result-card"><div class="result-label">Entropie globale</div><div class="result-value">${entropieGlobale.toFixed(3)} bits/car</div></div>
+            <div class="result-card"><div class="result-label">Chi‑carré</div><div class="result-value">${chi2.toFixed(2)}</div></div>
+            <div class="result-card"><div class="result-label">Positions fixes</div><div class="result-value">${positionsFixes.length > 0 ? positionsFixes.join(', ') : 'Aucune'}</div></div>
+            <div class="result-card"><div class="result-label">Taille de l'échantillon</div><div class="result-value">${propres.length} UUID</div></div>
+        `;
+    }
+
+    analyzeBtn.addEventListener('click', () => {
+        errorMsg.style.display = 'none';
+        resultBox.style.display = 'none';
+        const mode = document.querySelector('input[name="analysisMode"]:checked').value;
+
+        if (mode === 'single') {
+            const raw = singleInput.value.trim();
+            if (!raw) {
+                errorMsg.textContent = 'Veuillez coller un UUID.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            const hex = analyserUUID(raw);
+            if (!hex) {
+                errorMsg.textContent = 'Format UUID invalide.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            analyserUnique(hex);
+            resultBox.style.display = 'block';
+        } else {
+            const raw = batchInput.value.trim();
+            if (!raw) {
+                errorMsg.textContent = 'Veuillez coller au moins deux UUID.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            const lignes = raw.split('\n').filter(l => l.trim() !== '');
+            analyserLot(lignes);
+            resultBox.style.display = 'block';
+        }
+    });
+})();
+</script>
+</body>
+</html>
