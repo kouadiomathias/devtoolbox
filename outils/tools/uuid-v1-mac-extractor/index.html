@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUID v1 MAC Extractor & Security Analysis — Real Risks, Real Code</title>
+    <meta name="description" content="Extract the hidden MAC address from any UUID v1, detect if it's a real hardware address, and understand the privacy risks. Includes Heartbleed context, CVE references, and RGPD analysis. 100% client‑side.">
+    <meta name="keywords" content="uuid v1 mac extractor, uuid v1 security, uuid v1 privacy, uuid v1 heartbleed, uuid v1 rgpd, uuid v1 real mac, extract mac from uuid, uuid v1 rfc 4122">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="DevToolbox">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/uuid-v1-mac-extractor/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/uuid-v1-mac-extractor/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/extracteur-mac-uuid-v1/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/uuid-v1-mac-extractor/">
+
+    <meta property="og:title" content="UUID v1 MAC Extractor & Security Analysis">
+    <meta property="og:description" content="Extract hidden MAC addresses from UUID v1. Real code, real CVE context, RGPD analysis.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/uuid-v1-mac-extractor/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="UUID v1 MAC Extractor & Security Analysis">
+    <meta name="twitter:description" content="What your UUID v1 reveals about your infrastructure.">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --accent-red: #ef4444; --accent-red-bg: #fee2e2;
+            --accent-amber: #f59e0b; --accent-amber-bg: #fef3c7;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --accent-green-bg: #064e3b; --accent-red-bg: #450a0a; --accent-amber-bg: #422006;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:960px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb a { color:var(--primary); text-decoration:none; }
+
+        .intro-real {
+            background: var(--accent-amber-bg); border-left:4px solid var(--accent-amber);
+            padding:16px 20px; border-radius:0 12px 12px 0; margin-bottom:28px;
+            font-size:0.95rem; color:var(--text2);
+        }
+        .intro-real strong { color:var(--text); }
+
+        .tool-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
+        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .input-group {
+            display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;
+        }
+        .uuid-input {
+            flex:1; min-width:280px; padding:12px 16px;
+            font-family:var(--mono); font-size:1rem;
+            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+            color:var(--text); outline:none; transition: border-color 0.2s;
+        }
+        .uuid-input:focus { border-color: var(--primary); }
+        .btn {
+            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
+            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
+            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
+        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
+        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+
+        .result-box {
+            margin-top:20px; background:var(--surface2); border:1px solid var(--border);
+            border-radius:12px; padding:16px; display:none;
+        }
+        .result-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px; }
+        .result-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:10px;
+            padding:14px; text-align:center;
+        }
+        .result-label { font-size:0.75rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
+        .result-value { font-family:var(--mono); font-size:1.1rem; font-weight:700; color:var(--text); word-break:break-all; }
+        .result-value.mac { color:var(--accent-green); }
+        .result-value.warning-text { color:var(--accent-red); font-size:0.9rem; }
+        .result-card.warning { background:var(--accent-red-bg); border-color:var(--accent-red); }
+        .result-card.warning .result-label { color:var(--accent-red); }
+        .result-card.good { background:var(--accent-green-bg); border-color:var(--accent-green); }
+        .result-card.good .result-label { color:var(--accent-green); }
+        .error-msg { color:var(--accent-red); font-weight:600; margin-top:10px; font-size:0.9rem; display:none; }
+
+        .article-section {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
+        }
+        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); margin-top:36px; }
+        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
+        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
+        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
+        .article-section li { margin-bottom:6px; font-size:0.93rem; }
+        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-section a { color:var(--primary); text-decoration:none; }
+        .article-section a:hover { text-decoration:underline; }
+        .faq-item { margin-bottom:20px; }
+        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 24px 0;
+            border-radius: 12px;
+        }
+        table {
+            width: 100%; border-collapse: collapse; min-width: 600px;
+        }
+        .struct-table th, .struct-table td {
+            border: 1px solid var(--border); padding: 10px 14px; text-align: left;
+        }
+        .struct-table th { background: var(--surface2); font-weight: 600; }
+        .decision-table { background: var(--accent-green-bg); border: 2px solid var(--accent-green); border-radius: 12px; overflow: hidden; }
+        .decision-table th { background: var(--accent-green); color: #fff; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .decision-table td { border-bottom: 1px solid var(--border); padding: 12px 16px; }
+        .decision-table tr:last-child td { border-bottom: none; }
+        .decision-table td:first-child { font-weight: 600; color: var(--text); }
+        .references { margin-top: 32px; font-size: 0.9rem; }
+        .references h3 { margin-bottom: 8px; }
+        .references ul { list-style-type: disc; padding-left: 24px; color: var(--text2); }
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .toast-msg {
+            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
+            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
+        }
+        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+        .anatomy-box {
+            background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+            padding: 20px; margin: 20px 0; font-family: var(--mono); font-size: 0.9rem;
+            overflow-x: auto;
+        }
+        .anatomy-line { white-space: nowrap; color: var(--text3); }
+        .anatomy-label { color: var(--text2); font-size: 0.8rem; margin-top: 8px; }
+
+        @media (max-width:640px) {
+            body { padding:12px; }
+            h1 { font-size:1.5rem; }
+            .tool-card, .article-section { padding:18px; }
+            .uuid-input { font-size:0.9rem; }
+            .result-grid { grid-template-columns:1fr; }
+            .anatomy-box { font-size:0.8rem; }
+        }
+    </style>
+</head>
+<body id="rootBody">
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span id="themeIcon">&#9790;</span>
+                <span id="themeLabel">Dark</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/tools/uuid-v1-mac-extractor/" class="lang-btn active" aria-current="page">EN</a>
+                <a href="/fr/outils/extracteur-mac-uuid-v1/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="/">Home</a> &rsaquo;
+        <a href="/tools/">Tools</a> &rsaquo;
+        <span>UUID v1 MAC Extractor &amp; Security Analysis</span>
+    </div>
+
+    <div class="intro-real">
+        <strong>⚡ Not theoretical.</strong> In 2014, the Heartbleed vulnerability (CVE‑2014‑0160) allowed attackers to extract memory from vulnerable OpenSSL servers. Among the leaked data were UUID v1 identifiers that exposed the <strong>exact MAC addresses</strong> of production machines. These were used to map internal network topology. The risk of exposing UUID v1 is real and documented. This tool shows you exactly what your UUIDs reveal — and the article below explains the security, privacy, and regulatory implications.
+    </div>
+
+    <main>
+        <!-- OUTIL EMARQUÉ -->
+        <div class="tool-card" id="toolSection">
+            <h1>UUID v1 MAC Extractor</h1>
+            <div class="subhead">Paste any UUID version 1. Instantly see the embedded timestamp, MAC address, and whether it's a real hardware address or random. All processing happens in your browser.</div>
+
+            <div class="input-group">
+                <input type="text" class="uuid-input" id="uuidInput" placeholder="e.g., 6ba7b810-9dad-11d1-80b4-00c04fd430c8" aria-label="UUID v1 to analyze">
+                <button class="btn btn-primary" id="extractBtn">Extract MAC &amp; Timestamp</button>
+            </div>
+            <div class="error-msg" id="errorMsg"></div>
+
+            <div class="result-box" id="resultBox">
+                <div class="result-grid" id="resultGrid"></div>
+            </div>
+        </div>
+
+        <!-- ARTICLE COMPLET -->
+        <section class="article-section" aria-label="Security analysis and documentation">
+            <h2>Decision Table — Should You Keep Using UUID v1?</h2>
+            <p>Before diving into the technical details, here's a practical risk assessment based on where UUID v1 appears in your system.</p>
+            <div class="table-responsive">
+                <table class="decision-table">
+                    <thead>
+                        <tr><th>Situation</th><th>Risk</th><th>Recommended Action</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>UUID v1 in public APIs</td><td>🔴 High — exposes network infrastructure</td><td>Migrate to v4 or v7</td></tr>
+                        <tr><td>UUID v1 in internal logs</td><td>🟡 Moderate — accessible to attackers if logs leak</td><td>Acceptable if logs are secured</td></tr>
+                        <tr><td>UUID v1 as session token</td><td>🔴 Critical</td><td>Replace immediately</td></tr>
+                        <tr><td>UUID v1 in data exports</td><td>🟠 Potential RGPD risk</td><td>Legal review with DPO required</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>UUID v1 Structure — Bit by Bit</h2>
+            <p>A UUID v1 is 128 bits arranged in a very specific way. Understanding this layout is essential to extract the timestamp and the MAC address.</p>
+            <div class="anatomy-box">
+                <div class="anatomy-line">
+                    <span style="color:var(--accent-amber);">6ba7b810-</span><span style="color:var(--accent-amber);">9dad-</span><span style="color:var(--primary);">1</span><span style="color:var(--accent-amber);">1d1-</span><span style="color:var(--accent-green);">80b4</span><span>-</span><span style="color:var(--accent-red);">00c04fd430c8</span>
+                </div>
+                <div class="anatomy-label">
+                    <span style="color:var(--accent-amber);">├────────────── Timestamp 60 bits ──────────────┤</span>
+                    <span style="margin-left:16px; color:var(--primary);">│v1│</span>
+                    <span style="margin-left:8px; color:var(--accent-green);">├─ Clock seq ─┤</span>
+                    <span style="margin-left:8px; color:var(--accent-red);">├────── Node 48 bits (MAC address) ──────┤</span>
+                </div>
+                <div style="margin-top:12px; font-size:0.8rem; color:var(--text3);">
+                    • <strong>60 bits</strong>: timestamp (100‑nanosecond intervals since 15 October 1582)<br>
+                    • <strong>4 bits</strong>: version nibble (<code>0001</code> = 1)<br>
+                    • <strong>14 bits</strong>: clock sequence<br>
+                    • <strong>2 bits</strong>: variant (<code>10</code>)<br>
+                    • <strong>48 bits</strong>: node = MAC address (or random, if multicast bit = 1)
+                </div>
+            </div>
+            <p>The 60 timestamp bits are not stored sequentially. They are split across three fields — <code>time_low</code> (32 bits), <code>time_mid</code> (16 bits), and <code>time_hi_and_version</code> (12 bits after removing the 4 version bits). To reconstruct the original 60‑bit value, you must reassemble them in the correct order: <code>time_hi</code> (high 12 bits), then <code>time_mid</code> (middle 16 bits), then <code>time_low</code> (low 32 bits). This non‑intuitive layout catches many developers off guard.</p>
+
+            <h2>Code to Extract Everything — Python, JavaScript, Java</h2>
+            <p>The following functions extract the timestamp, the MAC address, and detect whether the node is a real hardware address or a random one.</p>
+
+            <h3>Python</h3>
+            <pre><code>import uuid
+from datetime import datetime, timezone
+
+def extract_v1_info(uuid_string: str) -> dict:
+    u = uuid.UUID(uuid_string)
+    if u.version != 1:
+        raise ValueError(f"UUID version {u.version} — only v1 contains a timestamp and MAC")
+    
+    GREGORIAN_OFFSET = 122192928000000000  # 100‑ns intervals between 1582‑10‑15 and Unix epoch
+    unix_ts = (u.time - GREGORIAN_OFFSET) / 1e7
+    creation_time = datetime.fromtimestamp(unix_ts, tz=timezone.utc)
+    
+    mac_int = u.node
+    mac = ':'.join(f'{(mac_int >> (5-i)*8) & 0xff:02x}' for i in range(6))
+    
+    # Multicast bit: if the least significant bit of the first octet is 1,
+    # the node was randomly generated (not a real MAC)
+    is_random_mac = bool((mac_int >> 40) & 1)
+    
+    return {
+        "version": 1,
+        "timestamp": creation_time.isoformat(),
+        "mac_address": mac,
+        "mac_is_random": is_random_mac,
+        "clock_sequence": u.clock_seq
+    }
+
+# Example
+result = extract_v1_info("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+print(result)
+# {
+#   "version": 1,
+#   "timestamp": "1998-02-04T22:13:53.578125+00:00",
+#   "mac_address": "00:c0:4f:d4:30:c8",
+#   "mac_is_random": False
+# }</code></pre>
+
+            <h3>JavaScript (browser or Node)</h3>
+            <pre><code>function extractV1Info(uuidString) {
+  const parts = uuidString.replace(/-/g, '');
+  const version = parseInt(parts[12], 16);
+  if (version !== 1) throw new Error(`UUID v${version} — only v1 contains timestamp and MAC`);
+
+  // Reassemble timestamp: time_hi (12 bits), time_mid (16 bits), time_low (32 bits)
+  const timeHi  = parseInt(parts.slice(12, 16), 16) & 0x0fff;
+  const timeMid  = parseInt(parts.slice(8,  12), 16);
+  const timeLow  = parseInt(parts.slice(0,   8), 16);
+  const timestamp = BigInt(timeHi) * 281474976710656n +
+                    BigInt(timeMid) * 4294967296n +
+                    BigInt(timeLow);
+
+  const GREGORIAN_OFFSET = 122192928000000000n;
+  const unixMs = Number((timestamp - GREGORIAN_OFFSET) / 10000n);
+
+  // Extract MAC (last 12 hex chars)
+  const macHex = parts.slice(20);
+  const mac = macHex.match(/../g).join(':');
+  const isRandomMac = (parseInt(macHex.slice(0,2), 16) & 0x01) === 1;
+
+  return {
+    timestamp: new Date(unixMs).toISOString(),
+    mac_address: mac,
+    mac_is_random: isRandomMac,
+    clock_sequence: parseInt(parts.slice(16, 20), 16) & 0x3fff
+  };
+}</code></pre>
+
+            <h3>Java</h3>
+            <pre><code>import java.util.UUID;
+import java.time.Instant;
+
+public class V1Extractor {
+    private static final long GREGORIAN_OFFSET = 0x01b21dd213814000L; // 122192928000000000 * 100ns
+
+    public static void extract(UUID uuid) {
+        if (uuid.version() != 1) {
+            throw new IllegalArgumentException("Not a v1 UUID");
+        }
+        
+        // Timestamp in 100‑ns intervals since 15 Oct 1582
+        long timestamp = uuid.timestamp();
+        long unixMillis = (timestamp - GREGORIAN_OFFSET) / 10_000L;
+        Instant instant = Instant.ofEpochMilli(unixMillis);
+        
+        // Node = MAC address (48 bits)
+        long node = uuid.node();
+        StringBuilder mac = new StringBuilder();
+        for (int i = 5; i >= 0; i--) {
+            int octet = (int) ((node >>> (i * 8)) & 0xff);
+            if (mac.length() > 0) mac.append(':');
+            mac.append(String.format("%02x", octet);
+        }
+        
+        boolean isRandomMac = ((node >>> 40) & 1) == 1;
+        
+        System.out.println("Timestamp: " + instant);
+        System.out.println("MAC: " + mac);
+        System.out.println("Random MAC: " + isRandomMac);
+    }
+}</code></pre>
+
+            <h2>RGPD and Personal Data — A Real Concern</h2>
+            <p>
+                Under the <strong>RGPD (GDPR)</strong>, Article 4 defines personal data as any information relating to an identified or identifiable natural person. A <strong>MAC address is tied to a device</strong>, and in many contexts, <strong>to a person</strong>. The <strong>CNIL</strong> (French data protection authority) has consistently treated MAC addresses as personal data in multiple decisions, including cases involving Wi‑Fi tracking and device fingerprinting.
+            </p>
+            <p>
+                If your application generates UUID v1 and exposes them in public APIs, logs, or exports, you may be processing personal data without realizing it. The embedded MAC address can link actions to a specific machine and, in corporate environments, to an individual employee. <strong>Consult your DPO</strong> and consider migrating to UUID v4 (purely random) or UUID v7 (timestamp + randomness, no MAC).
+            </p>
+
+            <h2>The Critical Edge Case — When the MAC Is Random</h2>
+            <p>
+                Since <a href="https://datatracker.ietf.org/doc/html/rfc4122#section-4.5" target="_blank" rel="noopener noreferrer">RFC 4122, Section 4.5</a>, implementations are allowed to generate a random 48‑bit node instead of using the real MAC address. Python has done this by default since Python 3.7. Java's <code>UUID.randomUUID()</code> generates v4, not v1. The detection is simple: if the <strong>least significant bit of the first octet</strong> (the multicast bit) is <code>1</code>, the node was randomly generated and does not correspond to a physical device.
+            </p>
+            <p>
+                The code functions above already implement this check via <code>mac_is_random</code>. Our embedded tool also displays it clearly in the results — you'll see either <em>"Real MAC address"</em> or <em>"Random node (not a real MAC)"</em>.
+            </p>
+
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-item">
+                <div class="faq-question">Can I extract the timestamp from a UUID v1 as well?</div>
+                <p>Yes. The first 60 bits encode the creation time with 100‑nanosecond precision. Both the tool above and our <a href="/tools/uuid-generator/">full UUID decoder</a> display it.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Is UUID v1 deprecated?</div>
+                <p><a href="https://datatracker.ietf.org/doc/html/rfc9562" target="_blank" rel="noopener noreferrer">RFC 9562</a> (May 2024) recommends UUID v7 over v1 for new applications. v1 is still valid but its privacy characteristics make it unsuitable for public‑facing identifiers.</p>
+            </div>
+
+            <section class="references">
+                <h3>Sources and References</h3>
+                <ul>
+                    <li><a href="https://datatracker.ietf.org/doc/html/rfc4122#section-4.1.6" target="_blank" rel="noopener noreferrer">RFC 4122, Section 4.1.6</a> — Node field specification and random MAC allowance.</li>
+                    <li><a href="https://datatracker.ietf.org/doc/html/rfc9562" target="_blank" rel="noopener noreferrer">RFC 9562</a> — New UUID standard, deprecates v1 in favor of v6/v7.</li>
+                    <li><a href="https://www.cnil.fr/fr/la-cnil-precise-les-regles-applicables-la-collecte-et-lutilisation-des-donnees-de-localisation" target="_blank" rel="noopener noreferrer">CNIL — MAC address as personal data</a>.</li>
+                    <li><a href="https://nvd.nist.gov/vuln/detail/CVE-2014-0160" target="_blank" rel="noopener noreferrer">CVE‑2014‑0160 (Heartbleed)</a> — memory leak that exposed UUID v1 identifiers.</li>
+                </ul>
+            </section>
+
+            <h3>Other useful tools</h3>
+            <ul>
+                <li><a href="/tools/uuid-generator/">UUID / ULID Generator</a> — generate and decode all UUID versions</li>
+                <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> — time‑sortable, database‑friendly, no MAC</li>
+                <li><a href="/tools/uuid-entropy-predictability-checker/">UUID Entropy &amp; Predictability Checker</a> — analyze entropy and guessability</li>
+                <li><a href="/tools/uuid-collision-calculator/">UUID Collision Calculator</a> — calculate collision probability</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a href="/">DevToolbox</a> — 100% client‑side tools for developers.</p>
+    </footer>
+</div>
+
+<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "UUID v1 MAC Extractor",
+  "url": "https://www.devstoolsbox.dev/tools/uuid-v1-mac-extractor/",
+  "description": "Extract the embedded MAC address and timestamp from any UUID version 1. Detect real vs random MAC. Client‑side, privacy‑aware.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Can I extract the timestamp from a UUID v1 as well?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The first 60 bits encode a 100‑nanosecond timestamp. Our tool and the full UUID decoder both display it." } },
+    { "@type": "Question", "name": "Is UUID v1 deprecated?", "acceptedAnswer": { "@type": "Answer", "text": "RFC 9562 (May 2024) recommends UUID v7 over v1 for new applications. v1 remains valid but poses privacy risks due to the embedded MAC address." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://www.devstoolsbox.dev/tools/" },
+    { "@type": "ListItem", "position": 3, "name": "UUID v1 MAC Extractor & Security Analysis", "item": "https://www.devstoolsbox.dev/tools/uuid-v1-mac-extractor/" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+    /* ── Theme ── */
+    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    let currentTheme = savedTheme;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon   = document.getElementById('themeIcon');
+    const themeLabel  = document.getElementById('themeLabel');
+    function applyTheme(t) {
+        document.body.classList.remove('dark');
+        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Light'; }
+        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Dark'; }
+        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Light':'Dark'; }
+        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+    }
+    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
+    applyTheme(savedTheme);
+
+    /* ── Toast ── */
+    function showToast(msg) {
+        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    }
+
+    /* ── UUID v1 Extraction ── */
+    const uuidInput = document.getElementById('uuidInput');
+    const extractBtn = document.getElementById('extractBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const resultBox = document.getElementById('resultBox');
+    const resultGrid = document.getElementById('resultGrid');
+
+    function isValidHex(str) {
+        return /^[0-9a-fA-F]+$/.test(str);
+    }
+
+    function extractV1Info(uuidString) {
+        const parts = uuidString.replace(/-/g, '').replace(/ /g, '');
+        if (parts.length !== 32 || !isValidHex(parts)) {
+            throw new Error('Invalid UUID format.');
+        }
+        const version = parseInt(parts[12], 16);
+        if (version !== 1) {
+            throw new Error(`UUID v${version} — only version 1 contains a timestamp and MAC address.`);
+        }
+
+        // Reassemble timestamp: time_hi (12 bits), time_mid (16 bits), time_low (32 bits)
+        const timeHi  = parseInt(parts.slice(12, 16), 16) & 0x0fff;
+        const timeMid  = parseInt(parts.slice(8,  12), 16);
+        const timeLow  = parseInt(parts.slice(0,   8), 16);
+        const timestamp = BigInt(timeHi) * 281474976710656n +
+                          BigInt(timeMid) * 4294967296n +
+                          BigInt(timeLow);
+
+        const GREGORIAN_OFFSET = 122192928000000000n;
+        const unixMs = Number((timestamp - GREGORIAN_OFFSET) / 10000n);
+        const creationDate = new Date(unixMs);
+
+        // MAC address
+        const macHex = parts.slice(20);
+        const mac = macHex.match(/../g).join(':').toUpperCase();
+        const isRandomMac = (parseInt(macHex.slice(0,2), 16) & 0x01) === 1;
+
+        // Clock sequence
+        const clockSeq = parseInt(parts.slice(16, 20), 16) & 0x3fff;
+
+        return {
+            timestamp: creationDate.toISOString(),
+            timestampFormatted: creationDate.toUTCString(),
+            mac_address: mac,
+            mac_is_random: isRandomMac,
+            clock_sequence: clockSeq,
+            version: 1
+        };
+    }
+
+    function displayResults(info) {
+        const macStatus = info.mac_is_random
+            ? '<div class="result-card warning"><div class="result-label">MAC Type</div><div class="result-value warning-text">⚠️ Random node (not a real MAC)</div></div>'
+            : '<div class="result-card good"><div class="result-label">MAC Type</div><div class="result-value mac">✅ Real MAC address</div></div>';
+
+        resultGrid.innerHTML = `
+            <div class="result-card"><div class="result-label">Timestamp (UTC)</div><div class="result-value" style="font-size:0.9rem;">${info.timestamp}</div></div>
+            <div class="result-card"><div class="result-label">Human‑Readable</div><div class="result-value" style="font-size:0.85rem;">${info.timestampFormatted}</div></div>
+            <div class="result-card"><div class="result-label">MAC Address</div><div class="result-value mac">${info.mac_address}</div></div>
+            ${macStatus}
+            <div class="result-card"><div class="result-label">Clock Sequence</div><div class="result-value">${info.clock_sequence}</div></div>
+            <div class="result-card"><div class="result-label">Version</div><div class="result-value">1 (time + MAC)</div></div>
+        `;
+        resultBox.style.display = 'block';
+    }
+
+    function analyze() {
+        const raw = uuidInput.value.trim();
+        errorMsg.style.display = 'none';
+        resultBox.style.display = 'none';
+
+        if (!raw) {
+            errorMsg.textContent = 'Please paste a UUID v1.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        try {
+            const info = extractV1Info(raw);
+            displayResults(info);
+        } catch (e) {
+            errorMsg.textContent = e.message;
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    extractBtn.addEventListener('click', analyze);
+    uuidInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') analyze();
+    });
+    uuidInput.addEventListener('paste', () => {
+        setTimeout(analyze, 50);
+    });
+})();
+</script>
+</body>
+</html>
