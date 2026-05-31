@@ -1,4 +1,35 @@
- </script>
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur de formes CSS : clip-path, blobs et border-radius sans coder — DevToolbox</title>
+  <meta name="description" content="Tutoriel complet : générer un clip-path, un blob organique ou un border-radius custom en quelques clics. Exemples de code CSS, Tailwind et React. Outil gratuit, tout en navigateur.">
+  <meta name="keywords" content="générateur formes css, clip-path générateur, blob css, border-radius custom, formes css sans code, tailwind clip-path, react clip-path">
+  <meta name="author" content="Kouadio Mathias">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.devstoolsbox.dev/outils/generateur-formes-css/">
+  <meta property="og:title" content="Générateur de formes CSS : clip-path, blobs et border-radius sans coder">
+  <meta property="og:description" content="Tutoriel complet avec exemples de code pour créer des formes CSS complexes visuellement. Export CSS, Tailwind, React.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.devstoolsbox.dev/outils/generateur-formes-css/">
+  <meta property="og:site_name" content="DevToolbox">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"Générateur de formes CSS : créer des clip-path, blobs et border-radius sans coder","author":{"@type":"Person","name":"Kouadio Mathias","jobTitle":"Développeur web et mobile"},"datePublished":"2026-04-24","dateModified":"2026-05-30","mainEntityOfPage":"https://www.devstoolsbox.dev/outils/generateur-formes-css/","publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"clip-path fonctionne-t-il sur tous les navigateurs ?","acceptedAnswer":{"@type":"Answer","text":"Oui. clip-path polygon() est supporté par Chrome, Firefox, Safari et Edge sans préfixe. La compatibilité dépasse les 96% d'utilisateurs."}},{"@type":"Question","name":"Comment animer une forme CSS clip-path ?","acceptedAnswer":{"@type":"Answer","text":"Utilisez transition: clip-path 0.4s ease sur l'élément, puis changez la valeur au survol. Les deux états doivent avoir le même nombre de points."}},{"@type":"Question","name":"clip-path coupe les box-shadow, comment contourner ?","acceptedAnswer":{"@type":"Answer","text":"Enveloppez l'élément dans un div parent et appliquez filter: drop-shadow() sur ce parent — il suit le contour réel de la forme."}},{"@type":"Question","name":"Peut-on combiner clip-path et border-radius ?","acceptedAnswer":{"@type":"Answer","text":"border-radius est ignoré dès qu'un clip-path: polygon() est actif. Utilisez clip-path: path() avec des courbes de Bézier pour des coins arrondis sur un polygone."}}]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/blog/"},{"@type":"ListItem","position":3,"name":"Générateur de formes CSS","item":"https://www.devstoolsbox.dev/outils/generateur-formes-css/"}]}
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+   </script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -6,97 +37,843 @@
         gtag('js', new Date());
         gtag('config', 'G-JRBW78KE29');
     </script>
-<article itemscope itemtype="https://schema.org/Article" style="max-width:800px;margin:0 auto;font-family:Inter, sans-serif;line-height:1.7;">
-  <meta itemprop="datePublished" content="2026-04-24">
-  <meta itemprop="author" content="DevToolbox">
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --bg:           #f8fafc;
+      --surface:      #ffffff;
+      --surface2:     #f1f5f9;
+      --surface3:     #e8edf5;
+      --primary:      #7c3aed;
+      --primary-h:    #6d28d9;
+      --primary-l:    rgba(124,58,237,.09);
+      --primary-ll:   rgba(124,58,237,.05);
+      --text:         #0f172a;
+      --text2:        #334155;
+      --text3:        #64748b;
+      --border:       #e2e8f0;
+      --border2:      #cbd5e1;
+      --shadow-sm:    0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow:       0 4px 16px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.04);
+      --shadow-lg:    0 8px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.05);
+      --radius-sm:    8px;
+      --radius:       16px;
+      --radius-lg:    24px;
+      --code-bg:      #1e293b;
+      --code-fg:      #e2e8f0;
+      --warn-bg:      #fffbeb;
+      --warn-border:  #f59e0b;
+      --warn-text:    #78350f;
+      --tip-bg:       #f0fdf4;
+      --tip-border:   #22c55e;
+      --tip-text:     #14532d;
+    }
+    [data-theme="dark"] {
+      --bg:           #0b0f19;
+      --surface:      #141927;
+      --surface2:     #1c2236;
+      --surface3:     #232d45;
+      --primary:      #a78bfa;
+      --primary-h:    #8b5cf6;
+      --primary-l:    rgba(167,139,250,.12);
+      --primary-ll:   rgba(167,139,250,.06);
+      --text:         #f1f5f9;
+      --text2:        #cbd5e1;
+      --text3:        #94a3b8;
+      --border:       #2a3348;
+      --border2:      #374160;
+      --shadow-sm:    0 1px 3px rgba(0,0,0,.3);
+      --shadow:       0 4px 16px rgba(0,0,0,.4);
+      --shadow-lg:    0 8px 32px rgba(0,0,0,.5);
+      --code-bg:      #0f172a;
+      --code-fg:      #e2e8f0;
+      --warn-bg:      rgba(245,158,11,.1);
+      --warn-border:  #f59e0b;
+      --warn-text:    #fcd34d;
+      --tip-bg:       rgba(34,197,94,.08);
+      --tip-border:   #22c55e;
+      --tip-text:     #86efac;
+    }
 
-  <header style="margin-bottom:2em;">
-    <h1 itemprop="headline" style="font-size:2rem;font-weight:800;margin-bottom:0.5em;">Créez des formes CSS complexes sans effort : le guide complet du générateur DevToolbox</h1>
-    <p itemprop="description" style="color:#555;font-size:1.1rem;"><strong>Découvrez comment utiliser notre outil gratuit pour générer des clip-paths, des blobs organiques et des border-radius personnalisés. Édition visuelle, export React et bien plus.</strong></p>
-    <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:#666;">
-      <span>Par <span itemprop="author">L'équipe DevToolbox</span></span>
-      <span>·</span>
-      <time datetime="2026-04-24" itemprop="datePublished">24 avril 2026</time>
+    /* ── Reset ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 16px;
+      transition: background .3s ease, color .3s ease;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 0 32px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+      transition: background .3s, border-color .3s;
+    }
+    .logo {
+      font-weight: 800; font-size: 1.15rem;
+      color: var(--primary); text-decoration: none;
+      display: flex; align-items: center; gap: 7px;
+      letter-spacing: -.02em;
+    }
+    .logo-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--primary-l);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+    }
+    .header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    /* pill toggle shared */
+    .pill-toggle {
+      display: flex; align-items: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .pill-btn {
+      padding: 5px 13px; border: none; background: transparent;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      color: var(--text3); border-radius: 32px;
+      transition: all .18s ease;
+      text-decoration: none; white-space: nowrap;
+      font-family: inherit;
+    }
+    .pill-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(124,58,237,.3);
+    }
+
+    /* ── Layout ── */
+    .page { max-width: 820px; margin: 0 auto; padding: 40px 24px 100px; }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      font-size: 13px; color: var(--text3); margin-bottom: 32px;
+    }
+    .breadcrumb a { color: var(--text3); text-decoration: none; transition: color .15s; }
+    .breadcrumb a:hover { color: var(--primary); }
+    .breadcrumb-sep { opacity: .4; font-size: 11px; }
+
+    /* ── Hero ── */
+    .hero { margin-bottom: 36px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--primary-l); color: var(--primary);
+      font-size: 11px; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; padding: 5px 13px; border-radius: 40px;
+      margin-bottom: 18px; border: 1px solid rgba(124,58,237,.2);
+    }
+    [data-theme="dark"] .hero-badge { border-color: rgba(167,139,250,.25); }
+    .hero h1 {
+      font-size: clamp(1.75rem, 3.5vw, 2.4rem);
+      font-weight: 800; line-height: 1.2;
+      letter-spacing: -.03em; color: var(--text);
+      margin-bottom: 20px;
+    }
+    .hero-lead {
+      font-size: 1.05rem; color: var(--text2); line-height: 1.75;
+      border-left: 3px solid var(--primary);
+      padding-left: 18px;
+      margin-bottom: 0;
+    }
+
+    /* ── Article card ── */
+    .article-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      transition: background .3s, border-color .3s;
+    }
+
+    /* ── Author meta ── */
+    .author-meta {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      padding: 16px 20px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      margin-bottom: 40px;
+      border: 1px solid var(--border);
+    }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-h));
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 15px; flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(124,58,237,.35);
+    }
+    .author-info { flex: 1; min-width: 0; }
+    .author-name { font-weight: 700; font-size: 14px; color: var(--text); }
+    .author-role { font-size: 12px; color: var(--text3); }
+    .meta-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+    .meta-badge {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--text3);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 4px 10px; border-radius: 20px;
+    }
+
+    /* ── Typography ── */
+    h2 {
+      font-size: 1.45rem; font-weight: 800; letter-spacing: -.025em;
+      color: var(--text); margin: 48px 0 14px; line-height: 1.25;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+    h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+    h3 {
+      font-size: 1.05rem; font-weight: 700; color: var(--text);
+      margin: 28px 0 10px; letter-spacing: -.01em;
+    }
+    p { color: var(--text2); margin-bottom: 16px; }
+    strong { color: var(--text); font-weight: 600; }
+    a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--primary-h); }
+
+    /* ── Lists ── */
+    .styled-list { list-style: none; margin: 0 0 20px; padding: 0; }
+    .styled-list li {
+      display: flex; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      color: var(--text2); font-size: 15px;
+    }
+    .styled-list li:last-child { border-bottom: none; }
+    .styled-list .li-icon {
+      flex-shrink: 0; width: 20px; height: 20px;
+      background: var(--primary-l); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
+    }
+    .styled-list .li-icon svg { width: 11px; height: 11px; stroke: var(--primary); fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+    /* ── Steps ── */
+    .steps { display: flex; flex-direction: column; gap: 0; margin: 24px 0 32px; position: relative; }
+    .steps::before {
+      content: ''; position: absolute; left: 15px; top: 28px; bottom: 28px;
+      width: 1px; background: var(--border);
+    }
+    .step { display: flex; gap: 18px; padding: 16px 0; }
+    .step-num {
+      flex-shrink: 0; width: 32px; height: 32px;
+      background: var(--primary); color: #fff;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 13px; z-index: 1;
+      box-shadow: 0 0 0 4px var(--surface), 0 0 0 5px var(--border);
+    }
+    .step-body { flex: 1; padding-top: 5px; }
+    .step-title { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 15px; }
+    .step-desc { color: var(--text2); font-size: 14px; line-height: 1.65; }
+
+    /* ── Code ── */
+    .code-block { margin: 20px 0 28px; }
+    .code-label {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-bottom: none; padding: 8px 16px;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      font-size: 11px; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text3);
+    }
+    .copy-btn {
+      font-size: 11px; font-weight: 600; color: var(--primary);
+      background: none; border: none; cursor: pointer; padding: 2px 8px;
+      border-radius: 4px; transition: background .15s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--primary-l); }
+    pre {
+      background: var(--code-bg); color: var(--code-fg);
+      padding: 20px 22px; overflow-x: auto; margin: 0;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      border: 1px solid #0f172a;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 13.5px; line-height: 1.7;
+    }
+    code {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      background: var(--primary-ll); color: var(--primary);
+      padding: 2px 6px; border-radius: 4px; font-size: .88em;
+    }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    /* syntax colors */
+    .kw  { color: #c084fc; }
+    .prop{ color: #7dd3fc; }
+    .val { color: #86efac; }
+    .str { color: #fca5a5; }
+    .cmt { color: #64748b; font-style: italic; }
+    .num { color: #fdba74; }
+    .tag { color: #f9a8d4; }
+    .atr { color: #7dd3fc; }
+
+    /* ── Callouts ── */
+    .callout {
+      display: flex; gap: 12px;
+      padding: 14px 18px; border-radius: var(--radius-sm);
+      margin: 20px 0 28px; font-size: 14px; line-height: 1.65;
+      border-left: 3px solid;
+    }
+    .callout-icon { flex-shrink: 0; font-size: 16px; line-height: 1.65; }
+    .callout-warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-text); }
+    .callout-tip  { background: var(--tip-bg);  border-color: var(--tip-border);  color: var(--tip-text); }
+
+    /* ── Table ── */
+    .table-wrap {
+      overflow-x: auto; margin: 20px 0 28px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th {
+      background: var(--surface2); text-align: left;
+      padding: 11px 16px; font-weight: 700; color: var(--text);
+      border-bottom: 1px solid var(--border); font-size: 13px;
+    }
+    td { padding: 10px 16px; color: var(--text2); border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--primary-ll); }
+
+    /* ── Demo shapes ── */
+    .demo-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 14px; margin: 20px 0 28px;
+    }
+    .demo-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 20px 14px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .demo-card:hover { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-l); }
+    .demo-shape {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+    }
+    .demo-lbl { font-size: 11px; color: var(--text3); text-align: center; font-family: 'JetBrains Mono', monospace; line-height: 1.4; }
+
+    /* ── CTA ── */
+    .cta-block {
+      background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a855f7 100%);
+      border-radius: var(--radius-lg); padding: 40px 36px;
+      text-align: center; margin: 48px 0; position: relative; overflow: hidden;
+    }
+    .cta-block::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 30%, rgba(255,255,255,.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .cta-block h3 { color: #fff; margin-bottom: 10px; font-size: 1.35rem; font-weight: 800; }
+    .cta-block p { color: rgba(255,255,255,.7); margin-bottom: 24px; font-size: 15px; }
+    .btn-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; color: var(--primary-h);
+      padding: 13px 28px; border-radius: 40px; text-decoration: none;
+      font-weight: 700; font-size: 15px; transition: all .2s;
+      box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    }
+    .btn-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,.25); color: var(--primary-h); }
+    .btn-cta svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+    /* ── FAQ ── */
+    .faq { margin: 0 0 8px; }
+    .faq-item {
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      margin-bottom: 10px; overflow: hidden;
+      transition: border-color .2s;
+    }
+    .faq-item:hover { border-color: var(--primary); }
+    .faq-q {
+      width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+      padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+      font-weight: 600; font-size: 15px; color: var(--text); font-family: inherit;
+      gap: 12px;
+    }
+    .faq-q svg { flex-shrink: 0; transition: transform .25s ease; stroke: var(--primary); fill: none; stroke-width: 2; stroke-linecap: round; }
+    .faq-item.open .faq-q svg { transform: rotate(180deg); }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .3s ease, padding .3s ease;
+      padding: 0 20px; color: var(--text2); font-size: 14px; line-height: 1.7;
+    }
+    .faq-item.open .faq-a { max-height: 400px; padding: 0 20px 16px; }
+
+    /* ── Author card ── */
+    .author-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px;
+      display: flex; gap: 20px; align-items: flex-start;
+      box-shadow: var(--shadow-sm); margin-top: 48px;
+    }
+    .author-card-avatar {
+      flex-shrink: 0; width: 60px; height: 60px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 20px;
+      box-shadow: 0 4px 12px rgba(124,58,237,.35);
+    }
+    .author-card-name { font-weight: 800; color: var(--text); font-size: 15px; margin-bottom: 2px; }
+    .author-card-role { font-size: 12px; color: var(--text3); margin-bottom: 10px; }
+    .author-card-bio { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+    /* ── Related tools ── */
+    .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 16px;
+      text-decoration: none; color: var(--text2); font-size: 14px;
+      transition: all .2s; display: flex; flex-direction: column; gap: 6px;
+    }
+    .related-card:hover { border-color: var(--primary); background: var(--primary-ll); color: var(--text); }
+    .related-card-title { font-weight: 600; color: var(--text); font-size: 14px; }
+    .related-card-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border); text-align: center;
+      padding: 28px 24px; color: var(--text3); font-size: 13px;
+      transition: border-color .3s;
+    }
+    footer a { color: var(--text3); text-decoration: none; }
+    footer a:hover { color: var(--primary); }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .site-header { padding: 0 16px; }
+      .article-card { padding: 24px 20px; }
+      .cta-block { padding: 28px 20px; }
+      .author-card { flex-direction: column; }
+      h2 { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <a href="/" class="logo">
+    <span class="logo-icon">🛠</span>
+    DevToolbox
+  </a>
+  <div class="header-right">
+    <!-- Theme toggle -->
+    <div class="pill-toggle" role="group" aria-label="Thème">
+      <button class="pill-btn active" data-theme-btn="light">☀ Light</button>
+      <button class="pill-btn"        data-theme-btn="dark">☾ Dark</button>
     </div>
-  </header>
-  <figure style="margin: 28px 0; text-align: center;">
-  <img
-    src="/generateur-forme-css.webp"
-    alt="Interface du générateur de formes CSS de DevToolbox avec l'aperçu d'un polygone, les curseurs de réglage et l'export de code"
-    loading="lazy"
-    decoding="async"
-    style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
-  >
-  <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
-    Créez des polygones, des blobs organiques et des formes border‑radius complexes, avec export CSS / Tailwind / React.
-  </figcaption>
-</figure>
-  <div itemprop="articleBody">
-    <p>Les formes en CSS ont longtemps été limitées aux rectangles et aux cercles. Aujourd'hui, avec <code>clip-path</code> et les border-radius créatifs, vous pouvez dessiner des polygones, des gouttes, des vagues, et bien plus. Pourtant, coder ces formes à la main est fastidieux : il faut jongler avec des pourcentages, des angles, et parfois des fonctions mathématiques compliquées.</p>
-    <p>C'est exactement pour cela que nous avons créé le <strong>Générateur de Formes CSS DevToolbox</strong>. Il combine une édition visuelle intuitive, une génération procédurale de blobs par bruit de Perlin, et un export multi‑format. Voici comment en tirer le meilleur parti.</p>
-
-    <h2 style="margin-top:2em;">Pourquoi utiliser un générateur de formes CSS ?</h2>
-    <p>Que vous conceviez une section hero avec une vague, un avatar de profil original, ou une infographie, les formes non rectangulaires apportent de la personnalité à vos interfaces. Les techniques CSS pures offrent plusieurs avantages :</p>
-    <ul>
-      <li><strong>Performance</strong> : pas d'images, donc pas de requêtes HTTP supplémentaires.</li>
-      <li><strong>Adaptabilité</strong> : les formes s'adaptent au responsive sans perte de qualité.</li>
-      <li><strong>Interactivité</strong> : on peut les animer avec des transitions et des keyframes.</li>
-    </ul>
-    <p>Mais la création manuelle reste complexe. Un polygone à 6 côtés nécessite déjà une douzaine de coordonnées. C'est là que notre outil entre en jeu.</p>
-
-    <h2 style="margin-top:2em;">Les trois modes de forme expliqués</h2>
-
-    <h3>1. Mode Clip‑Path : polygones, étoiles, flèches</h3>
-    <p>Le mode <strong>Clip‑Path</strong> permet de découper un élément selon un polygone personnalisé. Par défaut, l'outil génère un pentagone régulier. Vous pouvez :</p>
-    <ul>
-      <li>Modifier le nombre de côtés (de 3 à 12).</li>
-      <li>Ajouter de l'arrondi (<code>inset</code> arrondi) pour des formes plus douces.</li>
-      <li>Pivoter la forme à l'aide du curseur de rotation.</li>
-      <li>Surtout, <strong>glisser les poignées</strong> directement sur l'aperçu pour déformer le polygone à main levée.</li>
-    </ul>
-    <p>Cette édition visuelle par glisser‑déposer vous fait gagner un temps précieux : plus besoin de deviner les coordonnées, vous voyez immédiatement le résultat. Chaque déplacement met à jour le code CSS en dessous.</p>
-
-    <h3>2. Mode Blob (Perlin) : formes organiques uniques</h3>
-    <p>Les blobs sont ces formes molles et organiques très utilisées dans les designs modernes. Le générateur ne se contente pas d'un simple arrondi : il utilise un <strong>algorithme de bruit de Perlin (Simplex noise)</strong> pour produire des contours naturels et fluides.</p>
-    <p>Réglez la complexité (nombre d'octaves du bruit), la graine (seed) pour obtenir une forme différente, et l'échelle. Chaque combinaison génère un blob unique, que vous pouvez exporter en SVG inline ou en clip‑path CSS. Le code SVG est directement affiché, prêt à être copié.</p>
-
-    <h3>3. Mode Border‑Radius : gouttes, feuilles, amibes</h3>
-    <p>Le mode <strong>Border‑Radius</strong> pousse la propriété <code>border-radius</code> dans ses retranchements en utilisant la notation à 8 valeurs (slash). Vous contrôlez indépendamment chaque courbe (haut‑gauche, haut‑droite, bas‑gauche, bas‑droite) sur les axes horizontaux et verticaux. Résultat : des formes de goutte, de feuille, ou même d'amibe.</p>
-    <p>L'aperçu en direct vous montre exactement comment les pourcentages se traduisent visuellement. C'est une façon bien plus intuitive que de taper des chiffres à l'aveugle.</p>
-
-    <h2 style="margin-top:2em;">Simulateur de daltonisme : concevoir pour tous</h2>
-    <p>Un détail qui fait la différence : le générateur intègre un <strong>simulateur de daltonisme</strong> basé sur le modèle de Brettel‑Viénot. D'un clic, vous pouvez appliquer un filtre de protanopie, deutéranopie ou tritanopie à l'aperçu. Cette fonctionnalité vous aide à vérifier que vos formes restent visuellement distinctes pour les utilisateurs ayant une déficience de la vision des couleurs. C'est un réflexe d'accessibilité que nous avons voulu rendre immédiat.</p>
-
-    <h2 style="margin-top:2em;">Exportez le code dont vous avez besoin</h2>
-    <p>Le panneau de code vous offre trois formats d'export :</p>
-    <ul>
-      <li><strong>CSS pur</strong> : la propriété <code>clip-path</code> ou <code>border-radius</code> prête à l'emploi.</li>
-      <li><strong>Tailwind CSS</strong> : la classe avec la syntaxe à crochets (ex. <code>[clip-path:polygon(…)]</code>) pour l'intégrer directement dans vos projets Tailwind.</li>
-      <li><strong>React JSX</strong> : un objet de style prêt à être utilisé dans un composant.</li>
-    </ul>
-    <p>Cette flexibilité vous évite de réécrire le code à chaque changement de framework.</p>
-
-    <h2 style="margin-top:2em;">Présets, aléatoire et partage d’URL</h2>
-    <p>Pour vous lancer rapidement, des présets sont disponibles : triangle, pentagone, hexagone, étoile, bulle, vague, cercle, goutte, etc. Un bouton « Aléatoire » vous surprend avec une forme inédite à chaque clic.</p>
-    <p>Vous avez trouvé la forme parfaite ? Cliquez sur « Partager URL » pour encoder toute la configuration dans le lien. Envoyez‑le à un collègue, il retrouvera exactement la même forme sans rien avoir à régler. Pratique pour les revues de design à distance.</p>
-
-    <h2 style="margin-top:2em;">Image d’arrière‑plan personnalisable</h2>
-    <p>Le générateur permet aussi d'importer une image comme fond de l'aperçu. Cela vous aide à visualiser comment votre forme se comporte sur une vraie photo ou un dégradé. L'image n'est pas envoyée sur un serveur, tout reste dans votre navigateur.</p>
-
-    <h2 style="margin-top:2em;">Intégration avec les autres outils DevToolbox</h2>
-    <p>Le générateur de formes s'inscrit dans une suite d'outils complémentaires :</p>
-    <ul>
-      <li>Le <a href="/fr/outils/generateur-arriere-plans/">Générateur d'arrière‑plans</a> vous aide à créer le fond parfait (dégradés, mesh, motifs) pour mettre en valeur vos formes.</li>
-      <li>Le <a href="/fr/outils/generateur-effets-visuels/">Générateur d'effets visuels</a> ajoute des styles glassmorphism, neumorphism ou des animations à vos formes, avec un vérificateur de contraste intégré.</li>
-    </ul>
-    <p>En combinant ces outils, vous pouvez prototyper une interface complète en quelques minutes, directement dans le navigateur.</p>
-
-    <h2 style="margin-top:2em;">Un mot sur la compatibilité et l’accessibilité</h2>
-    <p>Les formes générées utilisent des standards CSS largement supportés : <code>clip-path</code> est compatible avec tous les navigateurs modernes (Chrome, Firefox, Safari, Edge). Pour les polygones complexes sur des navigateurs plus anciens, pensez à fournir un fallback rectangulaire. Le simulateur de daltonisme vous rappelle de ne pas vous reposer uniquement sur la couleur pour transmettre une information : c'est un bon réflexe d'accessibilité.</p>
-
-    <h2 style="margin-top:2em;">Essayez le générateur maintenant</h2>
-    <p>Que vous soyez développeur, designer ou simplement curieux, je vous encourage à prendre l'outil en main. Modifiez les curseurs, faites glisser les points, et observez comment le code CSS évolue. C'est le moyen le plus rapide de comprendre le fonctionnement de <code>clip-path</code> et <code>border-radius</code> avancé.</p>
-    <p><a href="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/" style="background:#7c3aed;color:#fff;padding:12px 24px;border-radius:40px;text-decoration:none;display:inline-block;font-weight:600;">🔗 Accéder au générateur de formes CSS gratuit</a></p>
-    <p style="margin-top:1em;">Si vous avez des questions ou des suggestions, n'hésitez pas à nous contacter. Bonne création !</p>
+    <!-- Lang switch -->
+    <div class="pill-toggle" role="group" aria-label="Langue">
+      <a href="/outils/generateur-forme-css/" class="pill-btn active">FR</a>
+      <a href="/tools/blog/css-shap-generator/" class="pill-btn">EN</a>
+    </div>
   </div>
-</article>
+</header>
+
+<!-- ── Page ── -->
+<main>
+<div class="page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Fil d'Ariane">
+    <a href="/">Accueil</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="/blog/">Blog</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Générateur de formes CSS</span>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-badge">✦ Tutoriel CSS</div>
+    <h1 itemprop="headline">Générateur de formes CSS : créer des clip-path, blobs et border-radius sans coder</h1>
+    <p class="hero-lead">Tu passes 20 minutes à calculer des coordonnées <code>clip-path</code> à la main pour un simple hexagone — et le résultat ne ressemble à rien. Dans ce guide, je te montre comment générer n'importe quelle forme visuellement, comprendre le code produit, et l'intégrer en CSS pur, Tailwind ou React en moins d'une minute.</p>
+  </header>
+
+  <!-- Article card principal -->
+  <article class="article-card" itemscope itemtype="https://schema.org/Article">
+    <meta itemprop="datePublished" content="2026-04-24">
+    <meta itemprop="dateModified" content="2026-05-30">
+
+    <!-- Author meta -->
+    <div class="author-meta">
+      <div class="avatar">KM</div>
+      <div class="author-info">
+        <div class="author-name" itemprop="author">Kouadio Mathias</div>
+        <div class="author-role">Développeur web et mobile</div>
+      </div>
+      <div class="meta-badges">
+        <span class="meta-badge">📅 24 avril 2026</span>
+        <span class="meta-badge">🔄 30 mai 2026</span>
+        <span class="meta-badge">⏱ 9 min</span>
+      </div>
+    </div>
+
+    <div itemprop="articleBody">
+
+      <!-- ─── Section 1 ─── -->
+      <h2>Pourquoi des formes CSS plutôt que des images ?</h2>
+      <p>La question revient souvent : pourquoi s'embêter avec <code>clip-path</code> quand on peut exporter une forme depuis Figma en PNG ? Trois raisons concrètes :</p>
+      <ul class="styled-list">
+        <li>
+          <span class="li-icon"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>
+          <span><strong>Zéro requête HTTP supplémentaire.</strong> Un <code>clip-path</code> pèse quelques octets de CSS. Une image PNG de la même forme peut facilement peser 8 à 15 Ko — plus le temps de téléchargement, plus la gestion des résolutions écran.</span>
+        </li>
+        <li>
+          <span class="li-icon"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>
+          <span><strong>Responsive sans effort.</strong> Les valeurs en pourcentage s'adaptent à la taille du conteneur. Pas de <code>@2x</code>, pas de <code>srcset</code>, pas de recadrage à gérer.</span>
+        </li>
+        <li>
+          <span class="li-icon"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>
+          <span><strong>Animable nativement.</strong> On peut interpoler un <code>clip-path</code> avec <code>transition</code> ou <code>@keyframes</code> — à condition que les deux états aient le même nombre de points.</span>
+        </li>
+      </ul>
+      <p>La vraie difficulté, c'est l'écriture manuelle. Une forme à 6 côtés demande 6 paires de coordonnées, et la moindre erreur décale tout. C'est là qu'un générateur visuel change vraiment la donne.</p>
+
+      <!-- ─── Section 2 ─── -->
+      <h2>Mode Clip-Path : tutoriel pas à pas</h2>
+      <p>Le mode Clip-Path découpe un élément selon un polygone personnalisé. Voici le workflow en 4 étapes.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Choisir le nombre de côtés</div>
+            <div class="step-desc">Le générateur démarre avec un pentagone (5 côtés). Ajuste le curseur de 3 à 12 selon la forme voulue. Triangle, hexagone, étoile — chaque valeur produit instantanément un aperçu.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Déformer en glissant les poignées</div>
+            <div class="step-desc">Clique et glisse chaque sommet directement sur l'aperçu. Le code se met à jour en temps réel — c'est la fonctionnalité clé : tu modèles la forme à la main sans toucher à un seul chiffre.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Ajouter de l'arrondi</div>
+            <div class="step-desc">Le curseur d'arrondi applique un <code>inset()</code> pour adoucir les angles. Parfait pour des formes entre polygone strict et blob organique.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Copier le code généré</div>
+            <div class="step-desc">Choisis le format (CSS, Tailwind ou React) puis clique sur Copier. Le code est directement utilisable dans ton projet.</div>
+          </div>
+        </div>
+      </div>
+
+      <p>Voici un exemple de code réel généré pour un hexagone irrégulier :</p>
+
+      <div class="code-block">
+        <div class="code-label">CSS pur — hexagone irrégulier <button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+        <pre><code><span class="prop">.hero-shape</span> {
+  <span class="atr">clip-path</span>: <span class="val">polygon</span>(
+    <span class="num">50%</span>  <span class="num">0%</span>,
+    <span class="num">93%</span>  <span class="num">25%</span>,
+    <span class="num">93%</span>  <span class="num">75%</span>,
+    <span class="num">50%</span>  <span class="num">100%</span>,
+    <span class="num">7%</span>   <span class="num">75%</span>,
+    <span class="num">7%</span>   <span class="num">25%</span>
+  );
+}</code></pre>
+      </div>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠</span>
+        <span><strong>Piège fréquent :</strong> <code>clip-path</code> masque aussi le <code>box-shadow</code> et l'<code>overflow</code>. Pour une ombre portée qui suit le contour de la forme, utilise <code>filter: drop-shadow()</code> sur un <strong>div parent</strong> — contrairement à <code>box-shadow</code>, il respecte le tracé réel du <code>clip-path</code>.</span>
+      </div>
+
+      <!-- ─── Section 3 ─── -->
+      <h2>Mode Blob : comprendre le bruit de Perlin</h2>
+      <p>Les blobs sont ces formes molles et organiques qu'on retrouve partout dans les landing pages modernes. Le générateur ne se contente pas d'arrondir un cercle : il utilise un <strong>algorithme de bruit Simplex (Perlin noise)</strong> pour produire des contours naturels et non répétitifs — le même principe que les textures de terrain dans les jeux vidéo.</p>
+
+      <h3>Les trois paramètres à connaître</h3>
+      <ul class="styled-list">
+        <li>
+          <span class="li-icon"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>
+          <span><strong>Seed :</strong> le point de départ du générateur aléatoire. Changer le seed produit un blob complètement différent, avec les mêmes réglages de complexité.</span>
+        </li>
+        <li>
+          <span class="li-icon"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>
+          <span><strong>Complexité (octaves) :</strong> valeur basse = forme simple et ronde ; valeur haute = contour très irrégulier avec petites aspérités.</span>
+        </li>
+        <li>
+          <span class="li-icon"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>
+          <span><strong>Échelle :</strong> l'amplitude des déformations. Un blob très gonflé vers l'extérieur ou resserré vers le centre.</span>
+        </li>
+      </ul>
+
+      <div class="code-block">
+        <div class="code-label">SVG inline — blob généré (seed 42, complexité 3) <button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+        <pre><code><span class="tag">&lt;svg</span> <span class="atr">viewBox</span>=<span class="str">"0 0 200 200"</span> <span class="atr">xmlns</span>=<span class="str">"http://www.w3.org/2000/svg"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;path</span>
+    <span class="atr">d</span>=<span class="str">"M 48.2,-62.1 C 61.4,-52.8 70.1,-36.4 72.9,-19.4
+       C 75.7,-2.4 72.5,15.3 63.7,29.3
+       C 54.9,43.3 40.5,53.6 23.4,60.2
+       C 6.2,66.8 -13.7,69.6 -31.4,63.7
+       C -49.1,57.8 -64.6,43.1 -70.8,25.4
+       C -77,7.7 -73.8,-13 -63.8,-28.7
+       C -53.8,-44.5 -37,-55.2 -19.5,-63 Z"</span>
+    <span class="atr">fill</span>=<span class="str">"#7c3aed"</span>
+    <span class="atr">transform</span>=<span class="str">"translate(100 100)"</span>
+  <span class="tag">/&gt;</span>
+<span class="tag">&lt;/svg&gt;</span></code></pre>
+      </div>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <span><strong>Astuce :</strong> Pour utiliser un blob comme masque d'image, définis le path dans un <code>&lt;clipPath id="mon-blob"&gt;</code> SVG et applique <code>clip-path: url(#mon-blob)</code> à ton image. Le générateur propose cette option directement dans le panneau d'export.</span>
+      </div>
+
+      <!-- ─── Section 4 ─── -->
+      <h2>Mode Border-Radius : la notation à 8 valeurs</h2>
+      <p><code>border-radius</code> accepte jusqu'à 8 valeurs séparées par un slash. Peu de développeurs connaissent cette syntaxe — pourtant, elle permet de créer des gouttes, des feuilles, des amibes, sans toucher à SVG.</p>
+
+      <div class="code-block">
+        <div class="code-label">Syntaxe complète <button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+        <pre><code><span class="cmt">/* TL = top-left, TR = top-right, BR = bottom-right, BL = bottom-left */</span>
+<span class="atr">border-radius</span>: TL TR BR BL / TL-vertical TR-vertical BR-vertical BL-vertical;
+
+<span class="cmt">/* Exemple — forme feuille */</span>
+<span class="atr">border-radius</span>: <span class="num">60%</span> <span class="num">40%</span> <span class="num">30%</span> <span class="num">70%</span> / <span class="num">60%</span> <span class="num">30%</span> <span class="num">70%</span> <span class="num">40%</span>;</code></pre>
+      </div>
+
+      <p>Les 4 valeurs avant le slash contrôlent le rayon horizontal de chaque coin. Les 4 après le slash contrôlent le rayon vertical. En jouant sur l'asymétrie entre les deux axes, on obtient des courbes qui n'ont plus rien d'un rectangle arrondi classique.</p>
+
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-shape" style="border-radius:50%"></div>
+          <div class="demo-lbl">border-radius:<br>50%</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-shape" style="border-radius:60% 40% 30% 70%/60% 30% 70% 40%"></div>
+          <div class="demo-lbl">Forme<br>feuille</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-shape" style="border-radius:50% 50% 50% 0/50% 50% 0 50%"></div>
+          <div class="demo-lbl">Goutte<br>d'eau</div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-shape" style="border-radius:30% 70% 70% 30%/30% 30% 70% 70%"></div>
+          <div class="demo-lbl">Forme<br>organique</div>
+        </div>
+      </div>
+
+      <!-- ─── Section 5 ─── -->
+      <h2>Export : quel format choisir selon ton stack ?</h2>
+      <p>Une fois la forme créée, le panneau d'export propose trois formats. Le choix est simple :</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Format</th>
+              <th>Quand l'utiliser</th>
+              <th>Syntaxe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CSS pur</strong></td>
+              <td>Tout projet sans framework utilitaire</td>
+              <td><code>clip-path: polygon(…)</code></td>
+            </tr>
+            <tr>
+              <td><strong>Tailwind CSS</strong></td>
+              <td>Tailwind v3+ avec bracket syntax</td>
+              <td><code>[clip-path:polygon(…)]</code></td>
+            </tr>
+            <tr>
+              <td><strong>React JSX</strong></td>
+              <td>Composant React avec style inline</td>
+              <td><code>style={{ clipPath: '…' }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label">React JSX — composant prêt à l'emploi <button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+        <pre><code><span class="kw">const</span> <span class="prop">shapeStyle</span> = {
+  <span class="atr">clipPath</span>: <span class="str">'polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)'</span>,
+  <span class="atr">width</span>: <span class="str">'300px'</span>,
+  <span class="atr">height</span>: <span class="str">'300px'</span>,
+  <span class="atr">background</span>: <span class="str">'linear-gradient(135deg, #7c3aed, #a855f7)'</span>,
+};
+
+<span class="kw">export function</span> <span class="val">HeroShape</span>() {
+  <span class="kw">return</span> <span class="tag">&lt;div</span> <span class="atr">style</span>={shapeStyle} <span class="atr">aria-hidden</span>=<span class="str">"true"</span> <span class="tag">/&gt;</span>;
+}</code></pre>
+      </div>
+
+      <!-- ─── Section 6 ─── -->
+      <h2>Simulateur daltonisme : un réflexe accessibilité</h2>
+      <p>Le générateur intègre un simulateur de déficience visuelle basé sur le modèle de Brettel-Viénot. En un clic, tu appliques un filtre protanopie, deutéranopie ou tritanopie sur l'aperçu.</p>
+      <p>En pratique : lors d'un projet, j'ai testé une forme orange vif sur fond rouge — rendu parfait visuellement. En activant le filtre protanopie, la forme devenait quasiment invisible : les deux couleurs se fondaient en un même marron terne. Sans ce simulateur, j'aurais livré une interface inaccessible à 8 % des hommes.</p>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <span><strong>Règle d'accessibilité :</strong> ne jamais reposer uniquement sur la couleur pour véhiculer une information. Une forme, une bordure, un texte alternatif — il faut toujours un second signal visuel. Les WCAG 2.1 l'exigent au niveau AA.</span>
+      </div>
+
+      <!-- ─── Section 7 ─── -->
+      <h2>Partage et presets : gagner encore plus de temps</h2>
+      <p>Les <strong>presets</strong> (triangle, hexagone, étoile, bulle, vague, goutte…) servent de point de départ. Sélectionne le plus proche de ce que tu veux, puis affine avec les curseurs et les poignées.</p>
+      <p>Le bouton <strong>Share URL</strong> encode toute la configuration dans le lien — seed, mode, nombre de côtés, rotation. Envoie-le à un collègue ou retrouve-le dans tes favoris : il verra exactement la même forme, sans rien reconfigurer. Idéal pour les revues de design à distance.</p>
+
+    </div>
+  </article>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <h3>Prêt à générer ta première forme ?</h3>
+    <p>Gratuit, sans inscription, tout se passe dans ton navigateur. Aucune donnée envoyée à un serveur.</p>
+    <a href="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/" class="btn-cta">
+      Ouvrir le générateur
+      <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+    </a>
+  </div>
+
+  <!-- FAQ -->
+  <div class="article-card">
+    <h2 style="margin-top:0;padding-top:0;border-top:none;">Questions fréquentes</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          clip-path fonctionne-t-il sur tous les navigateurs ?
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>
+        </button>
+        <div class="faq-a">
+          Oui. <code>clip-path: polygon()</code> est supporté par Chrome, Firefox, Safari et Edge sans préfixe. La compatibilité dépasse les 96 % d'utilisateurs (source : caniuse.com). Pour les très vieux navigateurs, un fallback rectangulaire suffit : la forme disparaît, le contenu reste visible.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Comment animer une forme CSS clip-path ?
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>
+        </button>
+        <div class="faq-a">
+          Ajoute <code>transition: clip-path 0.4s ease</code> à ton élément, puis change la valeur au survol ou via une classe JS. Condition obligatoire : les deux états doivent avoir le <strong>même nombre de points</strong> dans le polygone. Si le nombre de sommets diffère, le navigateur ne peut pas interpoler.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          clip-path coupe les box-shadow — comment contourner ?
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>
+        </button>
+        <div class="faq-a">
+          Enveloppe l'élément dans un <code>div</code> parent et applique <code>filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2))</code> sur ce parent. Contrairement à <code>box-shadow</code>, <code>drop-shadow</code> suit le contour réel du <code>clip-path</code>.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Peut-on combiner clip-path et border-radius ?
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>
+        </button>
+        <div class="faq-a">
+          Techniquement oui, mais <code>border-radius</code> est ignoré dès qu'un <code>clip-path: polygon()</code> est actif sur le même élément. Pour des coins arrondis sur un polygone, utilise <code>clip-path: path()</code> avec des courbes de Bézier, ou génère directement ton contour arrondi dans le mode Border-Radius du générateur.
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          L'outil est-il vraiment gratuit ?
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>
+        </button>
+        <div class="faq-a">
+          Oui, entièrement. Aucune inscription, aucune limite d'utilisation. L'outil tourne côté client : tes images d'aperçu ne quittent jamais ton navigateur.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related tools -->
+  <div class="article-card">
+    <h2 style="margin-top:0;padding-top:0;border-top:none;">Outils complémentaires</h2>
+    <p>Le générateur de formes s'intègre dans un écosystème d'outils pensés pour fonctionner ensemble.</p>
+    <div class="related-grid">
+      <a href="https://www.devstoolsbox.dev/tools/background-generator/" class="related-card">
+        <div class="related-card-title"> Générateur de backgrounds</div>
+        <div class="related-card-desc">Dégradés, mesh, motifs — crée le fond qui met en valeur tes formes.</div>
+      </a>
+      <a href="https://www.devstoolsbox.dev/tools/visual-effects-generator/" class="related-card">
+        <div class="related-card-title"> Effets visuels</div>
+        <div class="related-card-desc">Glassmorphism, neumorphism, animations — avec vérificateur de contraste intégré.</div>
+      </a>
+      <a href="https://www.devstoolsbox.dev/tools/json-formatter/" class="related-card">
+        <div class="related-card-title"> JSON Formatter</div>
+        <div class="related-card-desc">Formate et valide tes données JSON en un clic.</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Author card -->
+  <div class="author-card">
+    <div class="author-card-avatar">KM</div>
+    <div>
+      <div class="author-card-name">Kouadio Mathias</div>
+      <div class="author-card-role">Développeur web et mobile</div>
+      <div class="author-card-bio">Développeur web et mobile avec plusieurs années d'expérience sur des projets allant du site vitrine à l'application SaaS. Passionné par les performances front-end, le CSS avancé et l'accessibilité numérique. Je contribue à DevToolbox pour partager des ressources pratiques, directement utilisables en projet.</div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour développeurs et designers &nbsp;·&nbsp; <a href="/blog/">Blog</a> &nbsp;·&nbsp; <a href="/contact/">Contact</a></p>
+</footer>
+
+<script>
+  /* ── Theme toggle ── */
+  const root = document.documentElement;
+  const saved = localStorage.getItem('dtb-theme') || 'light';
+  root.setAttribute('data-theme', saved);
+  document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.themeBtn === saved);
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.themeBtn;
+      root.setAttribute('data-theme', t);
+      localStorage.setItem('dtb-theme', t);
+      document.querySelectorAll('[data-theme-btn]').forEach(b =>
+        b.classList.toggle('active', b.dataset.themeBtn === t)
+      );
+    });
+  });
+
+  /* ── FAQ accordion ── */
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  /* ── Copy code ── */
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copié !';
+      setTimeout(() => btn.textContent = orig, 1800);
+    });
+  }
+</script>
+</body>
+</html>
