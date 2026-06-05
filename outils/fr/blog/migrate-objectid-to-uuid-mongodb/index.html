@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrer de MongoDB ObjectID vers UUID dans une application Node.js — Guide complet</title>
+    <meta name="description" content="Apprenez à remplacer les ObjectID MongoDB par des UUID dans votre app Node.js sans downtime. Script de migration par phases avec bulkWrite, double écriture, surveillance, rollback et validation.">
+    <meta name="keywords" content="mongodb objectid to uuid, migration uuid mongodb, remplacer objectid par uuid, nodejs uuid migration, mongodb migration uuid, objectid vs uuid, bulkWrite migration">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Mathias Kouadio">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/migration-objectid-vers-uuid-mongodb/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/migration-objectid-vers-uuid-mongodb/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/migrate-objectid-to-uuid-mongodb/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/migrate-objectid-to-uuid-mongodb/">
+
+    <meta property="og:title" content="Migrer de MongoDB ObjectID vers UUID dans Node.js">
+    <meta property="og:description" content="Script de migration complet avec bulkWrite, double écriture, rollback, monitoring et validation. Guide prêt pour la production.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/migration-objectid-vers-uuid-mongodb/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Migration ObjectID vers UUID MongoDB">
+    <meta name="twitter:description" content="Un guide pratique pour les développeurs Node.js avec des scripts testés en production.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Migrer de MongoDB ObjectID vers UUID dans une application Node.js — Guide complet",
+            "author": { "@type": "Person", "name": "Mathias Kouadio" },
+            "datePublished": "2026-06-06",
+            "dateModified": "2026-06-08",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/migration-objectid-vers-uuid-mongodb/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "Puis‑je supprimer le champ _id après la migration ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, vous ne pouvez pas supprimer _id car c'est la clé primaire imposée par MongoDB. Mais vous pouvez ne plus l'utiliser dans votre code applicatif et baser toutes vos requêtes sur le champ uuid." } },
+                { "@type": "Question", "name": "Quel est l'impact sur les performances ?", "acceptedAnswer": { "@type": "Answer", "text": "Un index UUID est légèrement plus grand qu'un index ObjectID (16 octets contre 12). Pour la plupart des applications avec des collections de moins de 10 millions de documents, la différence est négligeable sur les requêtes simples. Les pipelines d'agrégation complexes peuvent être plus sensibles." } },
+                { "@type": "Question", "name": "Dois‑je migrer toutes les collections en même temps ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, vous pouvez migrer collection par collection. Commencez par les collections sans relations, puis attaquez les collections avec références une fois que la double écriture est en place." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Migration ObjectID vers UUID", "item": "https://www.devstoolsbox.dev/fr/blog/migration-objectid-vers-uuid-mongodb/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --accent-red: #ef4444; --accent-red-bg: #fee2e2;
+            --accent-amber: #f59e0b; --accent-amber-bg: #fef3c7;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+            --decision-bg: #f0fdf4; --decision-border: #10b981;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --decision-bg: #064e3b; --decision-border: #34d399;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+            font-size: 13px; color: var(--text3); margin-bottom: 32px;
+        }
+        .breadcrumb a { color: var(--text3); text-decoration: none; transition: color .15s; }
+        .breadcrumb a:hover { color: var(--primary); }
+        .breadcrumb-sep { opacity: .4; font-size: 11px; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:8px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; display: flex; gap: 16px; flex-wrap: wrap; }
+        .meta time { font-weight:500; color:var(--text2); }
+        h2 { font-size:1.5rem; margin-top:36px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:28px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color); padding:2px 6px;
+            border-radius:4px; font-family:var(--mono); font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color); padding:16px; border-radius:12px;
+            overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.5;
+        }
+        .table-responsive {
+            overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 24px 0; border-radius: 12px;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .decision-table {
+            background:var(--decision-bg); border:2px solid var(--decision-border); border-radius:12px;
+            overflow:hidden;
+        }
+        .decision-table th, .decision-table td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); }
+        .decision-table th {
+            background:var(--decision-border); color:#fff; font-weight:700;
+            font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;
+        }
+        .decision-table tr:last-child td { border-bottom:none; }
+        .benchmark-table th, .benchmark-table td { border:1px solid var(--border); padding:10px 14px; text-align:left; }
+        .benchmark-table th { background:var(--surface2); font-weight:600; }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer { text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px; color:var(--text3); font-size:0.8rem; }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .warning-box {
+            background:var(--accent-amber-bg); border-left:4px solid var(--accent-amber);
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0;
+            font-size:0.9rem; color:var(--text2);
+        }
+        .references { margin-top: 32px; font-size: 0.9rem; }
+        .references h3 { margin-bottom: 8px; }
+        .references ul { list-style-type: disc; padding-left: 24px; color: var(--text2); }
+        .faq-item { margin-bottom: 16px; }
+        .faq-item summary {
+            font-weight: 600; color: var(--text); cursor: pointer; padding: 10px 0;
+            list-style: none; display: flex; justify-content: space-between; align-items: center;
+        }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after {
+            content: '＋'; font-size: 0.9rem; color: var(--text3);
+            transition: transform .2s; flex-shrink: 0; margin-left: 16px;
+        }
+        .faq-item[open] summary::after { transform: rotate(45deg); }
+        .faq-item .faq-answer { padding: 0 0 12px; color: var(--text2); line-height: 1.8; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/fr/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light">☀️ Clair</button>
+                <button class="theme-btn" data-theme="dark">🌙 Sombre</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/fr/blog/migration-objectid-vers-uuid-mongodb/" class="lang-btn active">FR</a>
+                <a href="/tools/blog/migrate-objectid-to-uuid-mongodb/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Fil d'Ariane">
+        <a href="/fr/">Accueil</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="/fr/blog/">Blog</a>
+        <span class="breadcrumb-sep">›</span>
+        <span>Migration ObjectID vers UUID</span>
+    </nav>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-06-06">
+            <meta itemprop="dateModified" content="2026-06-08">
+            <meta itemprop="author" content="Mathias Kouadio">
+
+            <h1 itemprop="headline">Migrer de MongoDB ObjectID vers UUID dans une application Node.js — Guide complet</h1>
+            <div class="meta">Publié le 6 juin 2026 · Mis à jour le 8 juin 2026 par Mathias Kouadio — 12 min de lecture</div>
+
+            <div itemprop="articleBody">
+                <p>Votre application MongoDB tourne en production depuis des mois. Les <code>ObjectID</code> font le travail, mais vous commencez à ressentir leurs limites. Vous prévoyez d'ajouter PostgreSQL, vous exposez vos IDs dans une API REST, ou vous voulez simplement des identifiants plus standards. Migrer vers <strong>UUID</strong> est la solution, mais comment faire sans casser votre base existante ?</p>
+                <p>Dans cet article, je vous guide à travers une migration par phases avec des scripts prêts pour la production, la gestion de la double écriture, la surveillance, la validation et un plan de rollback en cas de problème.</p>
+
+                <h2>Pourquoi abandonner ObjectID ?</h2>
+                <p>L'<code>ObjectID</code> est propre à MongoDB. Il est compact (12 octets) et contient un timestamp, mais il n'est pas facilement compatible avec d'autres SGBD ou avec les attentes des développeurs frontend. Un UUID, lui, est universel, aléatoire (v4) ou triable (v7), et bien mieux adapté aux API publiques.</p>
+                <p>Trois raisons concrètes de migrer :</p>
+                <ul>
+                    <li>Vous voulez <strong>exposer vos IDs dans des URLs</strong> sans qu'ils trahissent la date de création ou la séquence.</li>
+                    <li>Vous ajoutez <strong>PostgreSQL</strong> ou un autre SGBD qui ne comprend pas l'ObjectID.</li>
+                    <li>Vous souhaitez <strong>standardiser vos identifiants</strong> sur l'ensemble de votre architecture.</li>
+                </ul>
+
+                <h2>Table de décision rapide</h2>
+                <div class="table-responsive">
+                    <table class="decision-table">
+                        <thead>
+                            <tr><th>Situation</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Application existante avec des millions de documents</td><td>Migration progressive avec double écriture</td></tr>
+                            <tr><td>Nouveau projet ou petite base</td><td>Changer directement la génération des ID</td></tr>
+                            <tr><td>Vous utilisez déjà Mongoose avec des références</td><td>Ajouter un champ uuid et peupler les références</td></tr>
+                            <tr><td>API REST exposée publiquement</td><td>UUID v4 ou v7 pour éviter les énumérations</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>Phase 1 : ajouter le champ UUID sans toucher à _id</h2>
+                <p>La règle d'or : ne supprimez jamais <code>_id</code>. MongoDB en a besoin comme clé primaire. Nous allons ajouter un nouveau champ <code>uuid</code> à chaque document. Si vous utilisez Mongoose, commencez par mettre à jour le schéma :</p>
+                <pre><code>const userSchema = new mongoose.Schema({
+  uuid: { type: String, unique: true, sparse: true },
+  name: String,
+  email: String
+});</code></pre>
+                <p>Le flag <code>sparse: true</code> permet d'indexer uniquement les documents qui possèdent déjà le champ. Exécutez ensuite le script optimisé avec <strong>bulkWrite</strong> — c'est 10 à 50 fois plus rapide qu'une mise à jour document par document :</p>
+                <pre><code>const { v4: uuidv4 } = require('uuid');
+const BATCH_SIZE = 1000;
+
+async function migrateUUIDs(db) {
+  let processed = 0;
+  
+  while (true) {
+    const docs = await db.collection('users')
+      .find({ uuid: { $exists: false } })
+      .limit(BATCH_SIZE)
+      .toArray();
+    
+    if (docs.length === 0) break;
+    
+    const operations = docs.map(doc => ({
+      updateOne: {
+        filter: { _id: doc._id },
+        update: { $set: { uuid: uuidv4() } }
+      }
+    }));
+    
+    await db.collection('users').bulkWrite(operations, { ordered: false });
+    processed += docs.length;
+    console.log(`Documents migrés : ${processed}`);
+  }
+  
+  console.log(`Migration terminée : ${processed} au total`);
+}</code></pre>
+
+                <h2>Phase 2 : créer l'index unique</h2>
+                <p>Une fois tous les documents pourvus d'un UUID, créez un index unique :</p>
+                <pre><code>await db.collection('users').createIndex({ uuid: 1 }, { unique: true });</code></pre>
+
+                <h2>Phase 3 : mettre à jour les références</h2>
+                <p>Le plus délicat : les collections liées. Si un document <code>orders</code> référence un <code>user_id</code> sous forme d'ObjectID, vous devez migrer ces références. La méthode la plus sûre est d'ajouter un champ <code>user_uuid</code> tout en conservant <code>user_id</code> pendant la transition.</p>
+                <pre><code>// Pour chaque commande, retrouver l'UUID du user correspondant
+const orders = db.collection('orders').find({ user_uuid: { $exists: false } });
+while (await orders.hasNext()) {
+  const order = await orders.next();
+  const user = await db.collection('users').findOne({ _id: order.user_id });
+  if (user) {
+    await db.collection('orders').updateOne(
+      { _id: order._id },
+      { $set: { user_uuid: user.uuid } }
+    );
+  }
+}</code></pre>
+                <div class="warning-box">
+                    <strong>⚠ Important :</strong> Testez cette étape sur un environnement de staging avec un volume de données réaliste. Pour les grandes collections, découpez cette opération en lots comme à la Phase 1.
+                </div>
+
+                <h2>Surveiller la progression en temps réel</h2>
+                <p>Suivez le nombre de documents migrés pendant l'exécution du script :</p>
+                <pre><code>async function checkProgress(db) {
+  const total = await db.collection('users').countDocuments();
+  const migrated = await db.collection('users')
+    .countDocuments({ uuid: { $exists: true } });
+  const remaining = total - migrated;
+  const pct = ((migrated / total) * 100).toFixed(1);
+  
+  console.log(`Total : ${total} | Migrés : ${migrated} | Restants : ${remaining} | ${pct}%`);
+}
+
+// Appeler toutes les 30 secondes pendant la migration
+setInterval(() => checkProgress(db), 30000);</code></pre>
+
+                <h2>Phase 4 : la double écriture pendant la transition</h2>
+                <p>Pour éviter les incohérences pendant la migration, modifiez votre code applicatif pour qu'il écrive à la fois l'ancien <code>_id</code> et le nouveau <code>uuid</code>. Pour les nouveaux documents, préférez <strong>UUID v7</strong> (triable dans le temps) au lieu de v4 si vous avez besoin de requêtes chronologiques :</p>
+                <pre><code>// Pour les nouveaux documents après la migration
+// Préférer UUID v7 (trié dans le temps) à UUID v4 (purement aléatoire)
+// si vous avez besoin de requêtes chronologiques
+
+const { v7: uuidv7 } = require('uuid'); // uuid@9.0+
+const newUser = new User({
+  name: 'Alice',
+  email: 'alice@example.com',
+  uuid: uuidv7() // Trié dans le temps, pas d'impact sur l'index MongoDB
+});
+await newUser.save();
+// L'ancien code continue à utiliser _id, le nouveau utilise uuid</code></pre>
+
+                <h2>Phase 5 : basculer les requêtes sur UUID</h2>
+                <p>Une fois toutes les données migrées et les index en place, modifiez vos endpoints API pour utiliser <code>uuid</code> au lieu de <code>_id</code>. Supprimez progressivement les anciennes références.</p>
+
+                <h2>Validation — ne sautez pas cette étape</h2>
+                <p>Exécutez une validation statistiquement significative avant de déclarer la migration réussie :</p>
+                <pre><code>async function validateMigration(db, sampleSize = 1000) {
+  const results = {
+    total_checked: 0,
+    uuid_missing: 0,
+    uuid_invalid: 0,
+    broken_references: 0
+  };
+  
+  // 1. Vérifier que tous les documents ont un UUID valide
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  
+  const sample = await db.collection('users')
+    .aggregate([{ $sample: { size: sampleSize } }])
+    .toArray();
+  
+  for (const doc of sample) {
+    results.total_checked++;
+    if (!doc.uuid) results.uuid_missing++;
+    else if (!uuidRegex.test(doc.uuid)) results.uuid_invalid++;
+  }
+  
+  // 2. Vérifier l'intégrité des références
+  const orderSample = await db.collection('orders')
+    .aggregate([{ $sample: { size: sampleSize } }])
+    .toArray();
+    
+  for (const order of orderSample) {
+    if (order.user_uuid) {
+      const user = await db.collection('users')
+        .findOne({ uuid: order.user_uuid });
+      if (!user) results.broken_references++;
+    }
+  }
+  
+  console.log('Résultats de validation :', results);
+  
+  const isValid = results.uuid_missing === 0 && 
+                  results.uuid_invalid === 0 && 
+                  results.broken_references === 0;
+  
+  console.log(isValid ? '✅ Migration valide' : '❌ Problèmes détectés — corrigez avant de passer en production');
+  return isValid;
+}</code></pre>
+
+                <h2>Rollback : comment revenir en arrière</h2>
+                <p>Si la migration échoue, supprimez simplement le champ <code>uuid</code> et les index associés. Tant que vous n'avez pas supprimé <code>_id</code> ni les anciennes références, le rollback est instantané.</p>
+                <pre><code>// Supprimer l'index unique
+await db.collection('users').dropIndex('uuid_1');
+
+// Supprimer le champ uuid de tous les documents
+await db.collection('users').updateMany(
+  { uuid: { $exists: true } },
+  { $unset: { uuid: "" } }
+);</code></pre>
+                <p>Gardez toujours une sauvegarde de la base avant de lancer la migration.</p>
+
+                <h2>Foire Aux Questions</h2>
+                <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <summary itemprop="name">Puis‑je supprimer le champ _id après la migration ?</summary>
+                    <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <p itemprop="text">Non, vous ne pouvez pas supprimer <code>_id</code> car c'est la clé primaire imposée par MongoDB. Mais vous pouvez ne plus l'utiliser dans votre code applicatif et baser toutes vos requêtes sur le champ <code>uuid</code>.</p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>Quel est l'impact sur les performances ?</summary>
+                    <div class="faq-answer">
+                        <p>Un index UUID est légèrement plus grand qu'un index ObjectID (16 octets contre 12). Pour la plupart des applications avec des collections de moins de 10 millions de documents, la différence est négligeable sur les requêtes simples. Les pipelines d'agrégation complexes peuvent être plus sensibles — testez toujours avec votre propre volume de données.</p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>Dois‑je migrer toutes les collections en même temps ?</summary>
+                    <div class="faq-answer">
+                        <p>Non, vous pouvez migrer collection par collection. Commencez par les collections sans relations, puis attaquez les collections avec références une fois que la double écriture est en place.</p>
+                    </div>
+                </details>
+
+                <section class="references">
+                    <h3>Sources et références</h3>
+                    <ul>
+                        <li><a href="https://www.mongodb.com/docs/manual/core/index-unique/" target="_blank" rel="noopener noreferrer">Documentation MongoDB — Index uniques</a></li>
+                        <li><a href="https://mongoosejs.com/docs/guide.html" target="_blank" rel="noopener noreferrer">Mongoose — Définition de schémas</a></li>
+                        <li><a href="/fr/outils/generateur-uuid/">Générateur UUID en ligne</a> — pour générer des UUID v4 ou v7</li>
+                        <li><a href="/fr/outils/generateur-uuid-v7/">UUID v7 Generator</a> — triable dans le temps, adapté aux bases de données</li>
+                    </ul>
+                </section>
+
+                <h3 style="margin-top:32px;">Outils complémentaires</h3>
+                <ul>
+                    <li><a href="/fr/outils/generateur-uuid-v7/">UUID v7 Generator</a> — des UUID triables par date</li>
+                    <li><a href="/fr/blog/uuid-vs-auto-increment/">UUID vs Auto‑Incrément</a> — choisir la bonne clé primaire</li>
+                    <li><a href="/fr/outils/formateur-json/">JSON Formatter</a> — pour manipuler vos exports</li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="/fr/">DevToolbox</a> — Outils gratuits pour développeurs. <a href="/fr/blog/">Blog</a> | <a href="/fr/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
