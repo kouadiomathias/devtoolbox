@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime — Complete Guide</title>
+    <meta name="description" content="The most requested primary key migration in Django, Rails, and Laravel, explained step by step. Add a public UUID without interrupting your service, with a 4-phase strategy, code examples, MySQL specifics, and a full rollback plan.">
+    <meta name="keywords" content="migrate serial to uuid, auto increment to uuid, django uuid migration, rails uuid primary key, laravel uuid migration, zero downtime migration uuid, postgresql uuid public id, mysql uuid migration">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Mathias Kouadio">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/migration-serial-vers-uuid-zero-downtime/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
+
+    <meta property="og:title" content="Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime">
+    <meta property="og:description" content="A 4-phase strategy to expose a public UUID without breaking your API, with Django, Rails, Laravel, MySQL examples, and rollback plan.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Migrate SERIAL to UUID Without Downtime">
+    <meta name="twitter:description" content="Add a UUID to your existing tables without interrupting service. Complete guide with decision table, validation scripts, and rollback.">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime — Complete Guide",
+            "author": { "@type": "Person", "name": "Mathias Kouadio" },
+            "datePublished": "2026-06-08",
+            "dateModified": "2026-06-08",
+            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/",
+            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                { "@type": "Question", "name": "Can I remove my old auto-increment id after the migration?", "acceptedAnswer": { "@type": "Answer", "text": "Keep it internally for joins. Don't expose it in the API, but don't delete it: all your foreign keys depend on it." } },
+                { "@type": "Question", "name": "How long does the migration take on a large table?", "acceptedAnswer": { "@type": "Answer", "text": "Adding a nullable column is almost instantaneous. Updating UUIDs takes a few seconds per million rows. The UNIQUE CONCURRENTLY index can take several minutes, but without blocking writes." } },
+                { "@type": "Question", "name": "Should I migrate foreign keys to UUID?", "acceptedAnswer": { "@type": "Answer", "text": "No, that's the best way to kill your performance. Keep FKs as BIGINT and use UUID only for external identification." } }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
+                { "@type": "ListItem", "position": 3, "name": "Migrate SERIAL to UUID", "item": "https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/" }
+            ]
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --accent-red: #ef4444; --accent-red-bg: #fee2e2;
+            --accent-amber: #f59e0b; --accent-amber-bg: #fef3c7;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+            --decision-bg: #f0fdf4; --decision-border: #10b981;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --decision-bg: #064e3b; --decision-border: #34d399;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:8px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; display: flex; gap: 16px; flex-wrap: wrap; }
+        .meta time { font-weight:500; color:var(--text2); }
+        h2 { font-size:1.5rem; margin-top:36px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:28px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        code {
+            background:var(--code-bg); color:var(--code-color); padding:2px 6px;
+            border-radius:4px; font-family:var(--mono); font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color); padding:16px; border-radius:12px;
+            overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.5;
+        }
+        .table-responsive {
+            overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 24px 0; border-radius: 12px;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .decision-table {
+            background:var(--decision-bg); border:2px solid var(--decision-border); border-radius:12px;
+            overflow:hidden;
+        }
+        .decision-table th, .decision-table td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); }
+        .decision-table th {
+            background:var(--decision-border); color:#fff; font-weight:700;
+            font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;
+        }
+        .decision-table tr:last-child td { border-bottom:none; }
+        .benchmark-table th, .benchmark-table td { border:1px solid var(--border); padding:10px 14px; text-align:left; }
+        .benchmark-table th { background:var(--surface2); font-weight:600; }
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
+            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); }
+        .footer { text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px; color:var(--text3); font-size:0.8rem; }
+        .footer a { color:var(--primary); text-decoration:none; }
+        .warning-box {
+            background:var(--accent-amber-bg); border-left:4px solid var(--accent-amber);
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0;
+            font-size:0.9rem; color:var(--text2);
+        }
+        .references { margin-top: 32px; font-size: 0.9rem; }
+        .references h3 { margin-bottom: 8px; }
+        .references ul { list-style-type: disc; padding-left: 24px; color: var(--text2); }
+        .faq-item { margin-bottom: 16px; }
+        .faq-item summary {
+            font-weight: 600; color: var(--text); cursor: pointer; padding: 10px 0;
+            list-style: none; display: flex; justify-content: space-between; align-items: center;
+        }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after {
+            content: '＋'; font-size: 0.9rem; color: var(--text3);
+            transition: transform .2s; flex-shrink: 0; margin-left: 16px;
+        }
+        .faq-item[open] summary::after { transform: rotate(45deg); }
+        .faq-item .faq-answer { padding: 0 0 12px; color: var(--text2); line-height: 1.8; }
+        @media (max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light">☀️ Light</button>
+                <button class="theme-btn" data-theme="dark">🌙 Dark</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/blog/migrate-serial-to-uuid-zero-downtime/" class="lang-btn active">EN</a>
+                <a href="/fr/blog/migration-serial-vers-uuid-zero-downtime/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-06-08">
+            <meta itemprop="author" content="Mathias Kouadio">
+
+            <h1 itemprop="headline">Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime</h1>
+            <div class="meta">
+                <time datetime="2026-06-08">June 8, 2026</time>
+                <span>·</span>
+                <span>14 min read</span>
+                <span>·</span>
+                <span>By Mathias Kouadio</span>
+            </div>
+
+            <div itemprop="articleBody">
+                <p>It's the question that comes up every week on Django, Rails, and Laravel forums: <strong>"How do I switch my auto‑incremented IDs to UUIDs without breaking production?"</strong> You have thousands of users, foreign keys everywhere, and you want to expose non‑enumerable public identifiers in your API. The good news: it's possible, without downtime, and without migrating your foreign keys. This article gives you the exact method, tested on PostgreSQL, with specific steps for MySQL, Django, Rails, Laravel, and a full rollback plan.</p>
+
+                <h2>Decision Table — Choose Your Migration Strategy</h2>
+                <div class="table-responsive">
+                    <table class="decision-table">
+                        <thead>
+                            <tr><th>Situation</th><th>Recommended Strategy</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>PostgreSQL, table &lt; 10M rows</td><td>4 phases described here, migration in &lt; 30 min</td></tr>
+                            <tr><td>PostgreSQL, table &gt; 10M rows</td><td>Same strategy, budget 1‑2h for CONCURRENTLY index</td></tr>
+                            <tr><td>MySQL 8+, active table</td><td>ALTER TABLE + UUID() native, no CONCURRENTLY; use pt‑online‑schema‑change for large tables</td></tr>
+                            <tr><td>MySQL 5.7</td><td>Short maintenance window required; consider upgrading first</td></tr>
+                            <tr><td>Foreign keys on the table to migrate</td><td>Do not migrate FKs — keep BIGINT internally</td></tr>
+                            <tr><td>API with active external clients</td><td>Minimum 30‑day deprecation phase</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>Why this migration is so requested (and so poorly documented)</h2>
+                <p>SERIAL/BIGSERIAL are fast, compact, but they leak information: an attacker can infer your activity volume, and a simple loop is enough to enumerate your resources. Switching to a public UUID solves these security issues without touching your data integrity. The classic pitfall is wanting to replace the primary key itself — that's a mistake that blocks writes for hours. The strategy presented here is different: we add a column, migrate the API, and leave the old id internally.</p>
+
+                <h2>The zero‑downtime strategy in 4 phases (PostgreSQL)</h2>
+
+                <h3>Phase 1: add the UUID column without blocking writes</h3>
+                <p>On PostgreSQL, adding a nullable column is instantaneous. We'll create a <code>public_id</code> field that will hold the public UUID, while keeping <code>id</code> as the internal primary key.</p>
+                <pre><code>-- Add the column (instant, no lock)
+ALTER TABLE users ADD COLUMN public_id UUID;
+
+-- Populate values for existing rows
+UPDATE users SET public_id = gen_random_uuid() WHERE public_id IS NULL;
+
+-- Make the column NOT NULL once all rows are filled
+ALTER TABLE users ALTER COLUMN public_id SET NOT NULL;
+
+-- Create a unique index without blocking writes (CONCURRENTLY)
+CREATE UNIQUE INDEX CONCURRENTLY idx_users_public_id ON users(public_id);</code></pre>
+                <p>The <code>CONCURRENTLY</code> keyword is crucial: it builds the index in the background without locking the table. Expect a few minutes on a table with several million rows, but inserts continue normally.</p>
+
+                <h3>Phase 2: adapt the API to expose public_id</h3>
+                <p>Modify your serializers or views to return <code>public_id</code> instead of <code>id</code> in JSON responses. Here's a Django REST Framework example that fits the hybrid pattern:</p>
+                <pre><code># serializers.py
+class ArticleSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source='public_id', read_only=True)
+    
+    class Meta:
+        model = Article
+        fields = ['id', 'title', 'content']
+        # 'id' in the API = public_id in the database
+        # the real id (BIGINT) is never exposed</code></pre>
+                <p>For Rails and Laravel, we'll cover the specifics in the framework sections below.</p>
+
+                <h3>Phase 3: deprecate the old id field</h3>
+                <p>Add an HTTP header <code>Deprecation: true</code> or a warning in the documentation for clients still using the old <code>id</code>. Give them a month to migrate. Monitor logs to identify the last calls with the old format.</p>
+
+                <h3>Phase 4: remove id from API responses (keep it internally)</h3>
+                <p>Once all clients have migrated, remove the <code>id</code> field from your API responses. Never delete the column from the database: it remains essential for joins and foreign keys.</p>
+
+                <h2>MySQL specifics — what you need to know</h2>
+                <p>MySQL does not support <code>CONCURRENTLY</code> for index creation. For tables with high write traffic, use <strong>pt‑online‑schema‑change</strong> from Percona Toolkit to avoid locking. For smaller tables or maintenance windows, a direct <code>ALTER TABLE</code> works.</p>
+                <pre><code>-- MySQL 8.0+ : UUID() native but no CONCURRENTLY
+-- Requires a short maintenance window or pt-online-schema-change
+
+ALTER TABLE users ADD COLUMN public_id VARCHAR(36);
+UPDATE users SET public_id = UUID();
+ALTER TABLE users MODIFY public_id VARCHAR(36) NOT NULL;
+ALTER TABLE users ADD UNIQUE INDEX idx_users_public_id (public_id);
+
+-- For large MySQL tables: use pt-online-schema-change
+-- pt-online-schema-change --alter "ADD COLUMN public_id VARCHAR(36)" D=mydb,t=users</code></pre>
+                <p>To store UUIDs more efficiently, use <strong>BINARY(16)</strong> with <code>UUID_TO_BIN()</code> and <code>BIN_TO_UUID()</code> (MySQL 8.0+):</p>
+                <pre><code>-- Optimized storage: BINARY(16) instead of VARCHAR(36)
+ALTER TABLE users ADD COLUMN public_id BINARY(16);
+UPDATE users SET public_id = UUID_TO_BIN(UUID(), 1);  -- 1 = swap flag for ordered UUID v1
+
+-- Reading back
+SELECT BIN_TO_UUID(public_id, 1) as public_id FROM users LIMIT 5;</code></pre>
+
+                <h2>Complete example: Django</h2>
+                <p>Here is the recommended Django model for a progressive migration:</p>
+                <pre><code># models.py — recommended hybrid pattern
+import uuid
+from django.db import models
+
+class Article(models.Model):
+    id = models.AutoField(primary_key=True)  # internal, fast FKs
+    public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+
+    # The API exposes public_id, never id</code></pre>
+                <p>In your Django REST Framework views, use <code>public_id</code> as the lookup field:</p>
+                <pre><code>class ArticleViewSet(viewsets.ModelViewSet):
+    queryset = Article.objects.all()
+    lookup_field = 'public_id'</code></pre>
+
+                <h2>Complete example: Rails</h2>
+                <pre><code># db/migrate/20260608000001_add_public_id_to_articles.rb
+class AddPublicIdToArticles < ActiveRecord::Migration[7.1]
+  def up
+    add_column :articles, :public_id, :uuid
+    execute "UPDATE articles SET public_id = gen_random_uuid()"
+    change_column_null :articles, :public_id, false
+    add_index :articles, :public_id, unique: true, algorithm: :concurrently
+  end
+
+  def down
+    remove_column :articles, :public_id
+  end
+end
+
+# app/models/article.rb
+class Article < ApplicationRecord
+  before_create :set_public_id
+
+  private
+  def set_public_id
+    self.public_id = SecureRandom.uuid
+  end
+end
+
+# config/routes.rb
+resources :articles, param: :public_id</code></pre>
+
+                <h2>Complete example: Laravel</h2>
+                <pre><code>// database/migrations/xxxx_add_public_id_to_users.php
+public function up(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->uuid('public_id')->nullable()->after('id');
+    });
+    
+    DB::statement('UPDATE users SET public_id = UUID()');
+    
+    Schema::table('users', function (Blueprint $table) {
+        $table->uuid('public_id')->nullable(false)->change();
+        $table->unique('public_id');
+    });
+}
+
+// app/Models/User.php
+use Illuminate\Support\Str;
+
+class User extends Model
+{
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->public_id = Str::uuid();
+        });
+    }
+    
+    public function getRouteKeyName(): string
+    {
+        return 'public_id';
+    }
+}</code></pre>
+
+                <h2>Monitoring the migration progress</h2>
+                <p>Use these queries to track the update and index creation in real time:</p>
+                <pre><code>-- Track how many rows have been updated
+SELECT 
+  COUNT(*) FILTER (WHERE public_id IS NOT NULL) as migrated,
+  COUNT(*) FILTER (WHERE public_id IS NULL) as remaining,
+  COUNT(*) as total,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE public_id IS NOT NULL) / COUNT(*), 1) as pct_done
+FROM users;
+
+-- Track index creation progress (PostgreSQL)
+SELECT phase, blocks_done, blocks_total, 
+       ROUND(100.0 * blocks_done / NULLIF(blocks_total, 0), 1) as pct
+FROM pg_stat_progress_create_index
+WHERE relid = 'users'::regclass;</code></pre>
+
+                <h2>Post‑migration validation — copy‑paste these checks</h2>
+                <pre><code>-- Verification 1: total uniqueness
+SELECT COUNT(*), COUNT(DISTINCT public_id) FROM users;
+-- Both numbers must be identical
+
+-- Verification 2: no NULL values remain
+SELECT COUNT(*) FROM users WHERE public_id IS NULL;
+-- Must return 0
+
+-- Verification 3: index is actually used
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM users WHERE public_id = gen_random_uuid();
+-- Should show "Index Scan" not "Seq Scan"
+
+-- Verification 4: point lookup performance
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id FROM users WHERE public_id = '550e8400-e29b-41d4-a716-446655440000';
+-- Target: < 1ms on a 1M-row table</code></pre>
+
+                <h2>Rollback plan — how to revert if something goes wrong</h2>
+                <pre><code>-- Step 1: drop the index (fast)
+DROP INDEX CONCURRENTLY idx_users_public_id;
+
+-- Step 2: drop the column (fast)
+ALTER TABLE users DROP COLUMN public_id;
+
+-- No impact on existing data — original IDs are intact
+-- The API must be routed back to the old version before the DB rollback</code></pre>
+
+                <h2>The golden rule: never migrate foreign keys to UUID</h2>
+                <p>This is the most important point of this article. Foreign keys as BIGINT are compact (8 bytes) and fast. If you convert them to UUID (16 bytes), you double the size of all your join indexes and degrade performance without any benefit. The <code>public_id</code> is meant for the outside; <code>id</code> remains the internal pillar of your database.</p>
+
+                <h2>Frequently Asked Questions</h2>
+                <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <summary itemprop="name">Can I remove my old auto-increment id after the migration?</summary>
+                    <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <p itemprop="text">Keep it internally for joins. Don't expose it in the API, but don't delete it: all your foreign keys depend on it.</p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>How long does the migration take on a large table?</summary>
+                    <div class="faq-answer">
+                        <p>Adding a nullable column is almost instantaneous. Updating UUIDs takes a few seconds per million rows. The UNIQUE CONCURRENTLY index can take several minutes, but without blocking writes.</p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>Should I migrate foreign keys to UUID?</summary>
+                    <div class="faq-answer">
+                        <p>No, that's the best way to kill your performance. Keep FKs as BIGINT and use UUID only for external identification.</p>
+                    </div>
+                </details>
+
+                <section class="references">
+                    <h3>Sources and references</h3>
+                    <ul>
+                        <li><a href="https://www.postgresql.org/docs/16/sql-altertable.html" target="_blank" rel="noopener noreferrer">PostgreSQL Documentation — ALTER TABLE</a></li>
+                        <li><a href="https://dev.mysql.com/doc/refman/8.0/en/miscellaneous-functions.html#function_uuid-to-bin" target="_blank" rel="noopener noreferrer">MySQL 8.0 UUID_TO_BIN / BIN_TO_UUID</a></li>
+                        <li><a href="https://docs.djangoproject.com/en/stable/ref/models/fields/#uuidfield" target="_blank" rel="noopener noreferrer">Django Documentation — UUIDField</a></li>
+                        <li><a href="/tools/uuid-generator/">Online UUID Generator</a></li>
+                    </ul>
+                </section>
+
+                <h3 style="margin-top:32px;">Complementary tools</h3>
+                <ul>
+                    <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> — sortable UUIDs for your new keys</li>
+                    <li><a href="/tools/blog/uuid-vs-autoincrement/">UUID vs Auto‑Increment</a> — choosing the right strategy</li>
+                    <li><a href="/tools/json-formatter/">JSON Formatter</a> — to check your API responses</li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers. <a href="/blog/">Blog</a> | <a href="/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const btns = document.querySelectorAll('.theme-btn');
+        btns.forEach(b => b.addEventListener('click', () => {
+            const t = b.dataset.theme;
+            document.body.classList.toggle('dark', t === 'dark');
+            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+            localStorage.setItem('theme', t);
+        }));
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', saved === 'dark');
+        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+    })();
+</script>
+</body>
+</html>
