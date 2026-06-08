@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Encoding & Decoding: The Complete Developer Guide (2026)</title>
+    <meta name="description" content="Master URL encoding in JavaScript, Python, Java, PHP and Go. Understand encodeURI vs encodeURIComponent, fix double-encoding bugs, avoid XSS and open redirect vulnerabilities. Free online tool included.">
+    <meta name="keywords" content="url encoding, encodeURIComponent, encodeURI, url decoder online, url encode python, url encode javascript, double encoding bug, percent encoding, url encoding security">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Mathias Kouadio">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/url-encoding-decoding-guide/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/url-encoding-decoding-guide/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/guide-encodage-url/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/url-encoding-decoding-guide/">
+
+    <meta property="og:title" content="URL Encoding & Decoding: The Complete Developer Guide (2026)">
+    <meta property="og:description" content="encodeURI vs encodeURIComponent, double-encoding bugs, + vs %20, security pitfalls, and code examples in 5 languages.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/url-encoding-decoding-guide/">
+    <meta property="og:site_name" content="DevToolbox">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="URL Encoding Complete Guide — encodeURI vs encodeURIComponent and beyond">
+    <meta name="twitter:description" content="The bugs, security traps, and code examples in 5 languages you won't find anywhere else.">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "URL Encoding & Decoding: The Complete Developer Guide (2026)",
+        "author": { "@type": "Person", "name": "Mathias Kouadio" },
+        "datePublished": "2026-06-08",
+        "dateModified": "2026-06-08",
+        "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/url-encoding-decoding-guide/",
+        "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the difference between encodeURI and encodeURIComponent?",
+                "acceptedAnswer": { "@type": "Answer", "text": "encodeURI encodes a full URL while preserving its structure characters (/, ?, &, #, =). encodeURIComponent encodes everything except alphanumeric characters, making it suitable for encoding individual parameter values." }
+            },
+            {
+                "@type": "Question",
+                "name": "Why does my URL contain %2520 instead of %20?",
+                "acceptedAnswer": { "@type": "Answer", "text": "This is a double-encoding bug. The % character was itself encoded to %25, so %20 became %2520. Always decode first before re-encoding, or use the safeEncode() pattern shown in this article." }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the difference between + and %20 in a URL?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Both represent a space, but in different contexts. The + encoding is the application/x-www-form-urlencoded standard used in HTML forms. The %20 encoding is the RFC 3986 standard for path segments and query strings. When in doubt, use %20 (encodeURIComponent)." }
+            },
+            {
+                "@type": "Question",
+                "name": "Is URL encoding case-sensitive?",
+                "acceptedAnswer": { "@type": "Answer", "text": "%2F and %2f are equivalent according to RFC 3986. Modern browsers normalize to uppercase. However, percent-encoded characters in path segments are case-sensitive for the decoded value." }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I decode a URL in the terminal?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Use Python: python3 -c \"import urllib.parse; print(urllib.parse.unquote('hello%20world'))\" or Node.js: node -e \"console.log(decodeURIComponent('hello%20world'))\"" }
+            },
+            {
+                "@type": "Question",
+                "name": "Should I validate a URL before or after decoding?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Always decode first, then validate. Validating an encoded URL is a common security mistake — an attacker can encode characters to bypass your checks, then the server decodes them into something malicious." }
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
+            { "@type": "ListItem", "position": 3, "name": "URL Encoding & Decoding Guide", "item": "https://www.devstoolsbox.dev/tools/blog/url-encoding-decoding-guide/" }
+        ]
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
+            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
+            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --accent-red: #ef4444; --accent-red-bg: #fee2e2;
+            --accent-amber: #f59e0b; --accent-amber-bg: #fef3c7;
+            --text: #0f172a; --text2: #374151; --text3: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
+            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
+            --decision-bg: #f0fdf4; --decision-border: #10b981;
+        }
+        body.dark {
+            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
+            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --decision-bg: #064e3b; --decision-border: #34d399;
+            --accent-green-bg: #064e3b; --accent-red-bg: #450a0a; --accent-amber-bg: #422006;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width:900px; margin:0 auto; }
+
+        /* ── Header ── */
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .logo::before { content:'🛠️'; }
+        .header-right { display:flex; gap:8px; align-items:center; }
+        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
+        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
+        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+
+        /* ── Breadcrumb ── */
+        .breadcrumb { margin-bottom:20px; }
+        .breadcrumb nav ol { list-style:none; display:flex; flex-wrap:wrap; gap:4px; font-size:0.82rem; color:var(--text3); }
+        .breadcrumb nav li { display:flex; align-items:center; }
+        .breadcrumb nav li+li::before { content:'/'; margin:0 6px; color:var(--text3); }
+        .breadcrumb nav a { color:var(--text2); text-decoration:none; }
+        .breadcrumb nav a:hover { color:var(--primary); }
+
+        /* ── Article ── */
+        .article-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
+        }
+        h1 { font-size:2rem; font-weight:800; margin-bottom:8px; line-height:1.3; }
+        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; display:flex; gap:16px; flex-wrap:wrap; }
+        .meta time { font-weight:500; color:var(--text2); }
+        h2 { font-size:1.5rem; margin-top:40px; margin-bottom:12px; font-weight:700; }
+        h3 { font-size:1.2rem; margin-top:28px; margin-bottom:8px; font-weight:600; }
+        p { margin-bottom:16px; color:var(--text2); }
+        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
+        li { margin-bottom:8px; }
+        strong { color:var(--text); }
+        a { color:var(--primary); text-decoration:none; }
+        a:hover { text-decoration:underline; }
+        code {
+            background:var(--code-bg); color:var(--code-color); padding:2px 6px;
+            border-radius:4px; font-family:var(--mono); font-size:0.9em;
+        }
+        pre {
+            background:var(--code-bg); color:var(--code-color); padding:16px; border-radius:12px;
+            overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.6;
+        }
+
+        /* ── Tables ── */
+        .table-responsive { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:24px 0; border-radius:12px; }
+        table { width:100%; border-collapse:collapse; min-width:560px; }
+        .decision-table { background:var(--decision-bg); border:2px solid var(--decision-border); border-radius:12px; overflow:hidden; }
+        .decision-table th, .decision-table td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); }
+        .decision-table th { background:var(--decision-border); color:#fff; font-weight:700; font-size:0.85rem; text-transform:uppercase; letter-spacing:.05em; }
+        .decision-table tr:last-child td { border-bottom:none; }
+        .char-table th, .char-table td { border:1px solid var(--border); padding:9px 12px; text-align:center; font-size:0.87rem; }
+        .char-table th { background:var(--surface2); font-weight:600; }
+        .char-table td:first-child { font-family:var(--mono); font-weight:700; color:var(--text); text-align:center; }
+        .bench-table th, .bench-table td { border:1px solid var(--border); padding:10px 14px; text-align:left; }
+        .bench-table th { background:var(--surface2); font-weight:600; }
+        .ok   { color:var(--accent-green); font-weight:700; }
+        .enc  { color:var(--primary); font-weight:600; font-family:var(--mono); font-size:0.82em; }
+        .dep  { color:var(--accent-red); font-weight:700; }
+
+        /* ── Callout boxes ── */
+        .note-box {
+            background:var(--primary-light); border-left:4px solid var(--primary);
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0; font-size:0.9rem; color:var(--text2);
+        }
+        .warning-box {
+            background:var(--accent-amber-bg); border-left:4px solid var(--accent-amber);
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0; font-size:0.9rem; color:var(--text2);
+        }
+        .danger-box {
+            background:var(--accent-red-bg); border-left:4px solid var(--accent-red);
+            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0; font-size:0.9rem; color:var(--text2);
+        }
+        .note-box strong, .warning-box strong, .danger-box strong { color:var(--text); }
+
+        /* ── Security checklist ── */
+        .security-checklist {
+            background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+            padding:20px 24px; margin:20px 0;
+        }
+        .security-checklist h3 { margin-top:0; margin-bottom:12px; }
+        .security-checklist ul { list-style:none; padding:0; margin:0; }
+        .security-checklist li { padding:6px 0; border-bottom:1px solid var(--border); font-size:0.9rem; color:var(--text2); display:flex; align-items:flex-start; gap:10px; }
+        .security-checklist li:last-child { border-bottom:none; }
+        .security-checklist li::before { content:'☐'; color:var(--primary); font-size:1rem; flex-shrink:0; margin-top:1px; }
+
+        /* ── FAQ ── */
+        .faq-wrap { margin-top:8px; }
+        .faq-item { margin-bottom:12px; border-top:1px solid var(--border); }
+        .faq-item:last-child { border-bottom:1px solid var(--border); }
+        .faq-item summary {
+            list-style:none; padding:14px 0; cursor:pointer; font-weight:600;
+            color:var(--text); font-size:0.95rem; display:flex; justify-content:space-between; align-items:center;
+        }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after { content:'＋'; font-size:.9rem; color:var(--text3); transition:transform .2s; flex-shrink:0; margin-left:16px; }
+        .faq-item[open] summary::after { transform:rotate(45deg); }
+        .faq-item[open] summary { color:var(--primary); }
+        .faq-answer { padding:0 0 14px; color:var(--text2); font-size:0.9rem; line-height:1.8; }
+        .faq-answer code { font-size:0.85em; }
+
+        /* ── Btn ── */
+        .btn-tool {
+            display:inline-block; background:var(--primary); color:#fff !important; padding:11px 22px; border-radius:40px;
+            text-decoration:none !important; font-weight:600; margin:16px 0; transition:.2s;
+        }
+        .btn-tool:hover { background:var(--primary-hover); transform:translateY(-1px); }
+
+        /* ── References ── */
+        .references { margin-top:32px; font-size:.9rem; }
+        .references h3 { margin-bottom:8px; }
+        .references ul { list-style:disc; padding-left:24px; color:var(--text2); }
+
+        /* ── Footer ── */
+        .footer { text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px; color:var(--text3); font-size:.8rem; }
+        .footer a { color:var(--primary); text-decoration:none; }
+
+        /* ── Language tabs ── */
+        .lang-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+        .lang-tab {
+            padding:5px 14px; border-radius:20px; font-size:.8rem; font-weight:600;
+            background:var(--surface2); border:1px solid var(--border); color:var(--text2);
+            cursor:pointer; transition:.15s;
+        }
+        .lang-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+        @media(max-width:600px) {
+            h1 { font-size:1.6rem; }
+            .article-card { padding:20px; }
+            .char-table th, .char-table td { padding:6px 8px; font-size:.78rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+        <a href="/" class="logo">DevToolbox</a>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light"> Light</button>
+                <button class="theme-btn" data-theme="dark"> Dark</button>
+            </div>
+            <div class="lang-switch">
+                <a href="/tools/blog/url-encoding-decoding-guide/" class="lang-btn active">EN</a>
+                <a href="/fr/blog/guide-encodage-url/" class="lang-btn">FR</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── BREADCRUMB ── -->
+    <div class="breadcrumb">
+        <nav aria-label="Breadcrumb">
+            <ol>
+                <li><a href="/">Home</a></li>
+                <li><a href="/tools/blog/">Blog</a></li>
+                <li aria-current="page">URL Encoding &amp; Decoding Guide</li>
+            </ol>
+        </nav>
+    </div>
+
+    <main>
+        <article itemscope itemtype="https://schema.org/Article" class="article-card">
+            <meta itemprop="datePublished" content="2026-06-08">
+            <meta itemprop="dateModified" content="2026-06-08">
+
+            <h1 itemprop="headline">URL Encoding &amp; Decoding: The Complete Developer Guide (2026)</h1>
+            <div class="meta">
+                <time datetime="2026-06-08" itemprop="datePublished">June 8, 2026</time>
+                <span>·</span>
+                <span>14 min read</span>
+                <span>·</span>
+                <span>By <span itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></span></span>
+            </div>
+
+            <div itemprop="articleBody">
+
+                <!-- ── INTRO ── -->
+                <p>In 2021, a single unencoded curly brace in a <code>redirect_uri</code> parameter enabled an open redirect attack on a widely-used OAuth service. The token was valid, the domain check passed — but the URL was never properly decoded before validation. One character, silently bypassing security. URL encoding is one of those topics that feels trivial until a production incident proves otherwise.</p>
+                <p>This guide covers everything you need to know: the exact difference between the three JavaScript encoding functions, the double-encoding bug that silently breaks APIs, <code>+</code> vs <code>%20</code>, code examples in five languages, and the security vulnerabilities that improper encoding enables. The <a href="/tools/url-encoder-decoder/">free online URL Encoder/Decoder</a> runs entirely in your browser — no data leaves your machine.</p>
+
+                <!-- ── DECISION TABLE ── -->
+                <h2>Decision table — pick the right function for your situation</h2>
+                <p>Skip straight here if you know URL encoding and just need the answer for your current situation.</p>
+                <div class="table-responsive">
+                    <table class="decision-table">
+                        <thead>
+                            <tr><th>Situation</th><th>Function to use</th><th>What it encodes</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Encoding a query parameter value (<code>?q=hello world</code>)</td>
+                                <td><code>encodeURIComponent()</code></td>
+                                <td>Everything except <code>A-Z a-z 0-9 - _ . ! ~ * ' ( )</code></td>
+                            </tr>
+                            <tr>
+                                <td>Encoding a complete URL with path and query</td>
+                                <td><code>encodeURI()</code></td>
+                                <td>Everything except URL structural characters (<code>/ ? # : @ ! $ &amp; ' ( ) * + , ; =</code>)</td>
+                            </tr>
+                            <tr>
+                                <td>Decoding a parameter received from an API</td>
+                                <td><code>decodeURIComponent()</code></td>
+                                <td>Inverse of encodeURIComponent</td>
+                            </tr>
+                            <tr>
+                                <td>Encoding HTML form data (<code>application/x-www-form-urlencoded</code>)</td>
+                                <td><code>URLSearchParams</code></td>
+                                <td>Encodes spaces as <code>+</code> — the HTML form standard</td>
+                            </tr>
+                            <tr>
+                                <td>Encoding a path segment that may contain slashes</td>
+                                <td><code>encodeURIComponent()</code> only</td>
+                                <td><code>encodeURI()</code> preserves <code>/</code> — use Component for path values</td>
+                            </tr>
+                            <tr>
+                                <td>You suspect double-encoding (<code>%2520</code> in your URL)</td>
+                                <td>Decode first, then re-encode</td>
+                                <td>See the <a href="#double-encoding">double-encoding section</a> below</td>
+                            </tr>
+                            <tr>
+                                <td>You need to validate a URL for security</td>
+                                <td>Decode first, then validate</td>
+                                <td>Never validate an encoded URL — attackers exploit this</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ── THREE JS FUNCTIONS ── -->
+                <h2>The three JavaScript encoding functions — exact differences</h2>
+                <p>Most articles explain these vaguely. Here is the exact behavior with the same input string to make the comparison unambiguous:</p>
+
+                <pre><code>const input = "hello world/path?key=val&amp;other=a+b#anchor";
+
+// encodeURI — preserves URL structure
+encodeURI(input);
+// "hello%20world/path?key=val&amp;other=a+b#anchor"
+// ✅ / ? &amp; # = + preserved intentionally
+// ⚠️  space → %20, but &amp; and = are NOT encoded
+
+// encodeURIComponent — encodes EVERYTHING except alphanumerics
+encodeURIComponent(input);
+// "hello%20world%2Fpath%3Fkey%3Dval%26other%3Da%2Bb%23anchor"
+// ✅ / ? &amp; # = + ALL encoded — correct for parameter values
+
+// escape() — DO NOT USE, deprecated since ES3
+escape(input);
+// "hello%20world/path%3Fkey%3Dval%26other%3Da+b%23anchor"
+// ❌ encodes differently, incompatible with modern standards</code></pre>
+
+                <h3>Character-by-character reference table</h3>
+                <p>This is the table that gets cited in Stack Overflow answers, team wikis, and README files. Print it, bookmark it, or link to this section directly.</p>
+                <div class="table-responsive">
+                    <table class="char-table">
+                        <thead>
+                            <tr>
+                                <th>Character</th>
+                                <th><code>encodeURI</code></th>
+                                <th><code>encodeURIComponent</code></th>
+                                <th><code>escape</code> ⚠️</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>space</td><td class="enc">%20</td><td class="enc">%20</td><td class="enc">%20</td></tr>
+                            <tr><td>/</td><td class="ok">✅ preserved</td><td class="enc">%2F</td><td class="ok">✅ preserved</td></tr>
+                            <tr><td>?</td><td class="ok">✅ preserved</td><td class="enc">%3F</td><td class="enc">%3F</td></tr>
+                            <tr><td>&amp;</td><td class="ok">✅ preserved</td><td class="enc">%26</td><td class="ok">✅ preserved</td></tr>
+                            <tr><td>=</td><td class="ok">✅ preserved</td><td class="enc">%3D</td><td class="enc">%3D</td></tr>
+                            <tr><td>#</td><td class="ok">✅ preserved</td><td class="enc">%23</td><td class="enc">%23</td></tr>
+                            <tr><td>+</td><td class="ok">✅ preserved</td><td class="enc">%2B</td><td class="ok">✅ preserved</td></tr>
+                            <tr><td>@</td><td class="ok">✅ preserved</td><td class="enc">%40</td><td class="ok">✅ preserved</td></tr>
+                            <tr><td>[</td><td class="enc">%5B</td><td class="enc">%5B</td><td class="ok">✅ preserved</td></tr>
+                            <tr><td>~</td><td class="ok">✅ preserved</td><td class="ok">✅ preserved</td><td class="enc">%7E</td></tr>
+                            <tr><td>!</td><td class="ok">✅ preserved</td><td class="ok">✅ preserved</td><td class="enc">%21</td></tr>
+                            <tr><td>'</td><td class="ok">✅ preserved</td><td class="ok">✅ preserved</td><td class="enc">%27</td></tr>
+                            <tr><td>é (UTF-8)</td><td class="enc">%C3%A9</td><td class="enc">%C3%A9</td><td class="enc">%E9 (Latin-1 ⚠️)</td></tr>
+                            <tr><td>🔧 (emoji)</td><td class="enc">%F0%9F%94%A7</td><td class="enc">%F0%9F%94%A7</td><td class="dep">❌ broken</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="warning-box">
+                    <strong>Never use <code>escape()</code></strong> in modern code. It encodes Unicode characters using Latin-1 (%E9 for é) instead of UTF-8 (%C3%A9), breaking any non-ASCII content. It also fails completely on emoji and characters above U+00FF. It was deprecated in ES3 and exists today only for legacy script compatibility.
+                </div>
+
+                <!-- ── DOUBLE ENCODING ── -->
+                <h2 id="double-encoding">The double-encoding trap — the most common silent bug</h2>
+                <p>This is the bug that generates the most confused Stack Overflow questions. You're getting <code>%2520</code> in your URL when you expected <code>%20</code>. Here's exactly what happened and how to fix it.</p>
+
+                <pre><code>// The scenario: you encode a string that was already encoded
+const original = "hello world";
+const encoded = encodeURIComponent(original);
+// "hello%20world"
+
+// Bug: encoding it a second time by mistake
+const doubleEncoded = encodeURIComponent(encoded);
+// "hello%2520world"
+// The % character was itself encoded to %25
+// So %20 became %2520
+
+// When the server decodes it: it receives "hello%20world"
+// not "hello world" as expected
+decodeURIComponent("hello%2520world"); // "hello%20world" ← still encoded!</code></pre>
+
+                <h3>Detect and fix double-encoding programmatically</h3>
+                <pre><code>// Detect if a string is already encoded
+function isAlreadyEncoded(str) {
+  try {
+    // If decoding changes the string, it was encoded
+    return str !== decodeURIComponent(str);
+  } catch {
+    // Malformed URI — has invalid % sequences
+    return false;
+  }
+}
+
+// Encode idempotently — only encode if not already encoded
+function safeEncode(str) {
+  return isAlreadyEncoded(str) ? str : encodeURIComponent(str);
+}
+
+// Detect double-encoding in a URL
+// %25XX pattern is a near-certain sign of double encoding
+const doubleEncodingRegex = /%25[0-9A-Fa-f]{2}/gi;
+
+function hasDoubleEncoding(url) {
+  return doubleEncodingRegex.test(url);
+}
+
+console.log(hasDoubleEncoding("hello%2520world")); // true — double encoded
+console.log(hasDoubleEncoding("hello%20world"));   // false — correct</code></pre>
+
+                <div class="note-box">
+                    <strong>Root cause:</strong> double-encoding usually happens at framework boundaries — a middleware encodes a value, then your code encodes it again before inserting it into a URL. The fix is to identify which layer is responsible for encoding and remove the duplicate.
+                </div>
+
+                <!-- ── + vs %20 ── -->
+                <h2>The <code>+</code> vs <code>%20</code> difference that breaks API integrations</h2>
+                <p>Both represent a space in a URL — but they come from different standards and are not interchangeable in all contexts. Mixing them up causes silent failures in API calls.</p>
+
+                <pre><code>// application/x-www-form-urlencoded standard (HTML forms)
+// Spaces are encoded as +
+const formData = new URLSearchParams({ q: "hello world", filter: "dev tools" });
+console.log(formData.toString()); // "q=hello+world&amp;filter=dev+tools"
+
+// RFC 3986 standard (encodeURIComponent)
+// Spaces are encoded as %20
+encodeURIComponent("hello world"); // "hello%20world"
+
+// The problem: mixing the two
+const url1 = `https://api.example.com/search?q=${encodeURIComponent("hello world")}`;
+// ✅ "https://api.example.com/search?q=hello%20world"
+// Most APIs accept this — RFC 3986 standard
+
+const url2 = `https://api.example.com/search?q=${"hello world".replace(/ /g, "+")}`;
+// ⚠️ "https://api.example.com/search?q=hello+world"
+// Some APIs require this, others don't decode + as a space
+
+// Rule: use encodeURIComponent by default (%20)
+// Only use + when the API specification explicitly requires it
+// or when using URLSearchParams for form submission</code></pre>
+
+                <h3>The safe way to build URLs in JavaScript</h3>
+                <pre><code>// ❌ Never build URLs by string concatenation
+const badUrl = "https://api.example.com/search?q=" + userInput;
+// If userInput = "a&amp;b" → breaks the query string
+// If userInput = "&lt;script&gt;" → potential XSS
+
+// ✅ Always use the URL class
+const url = new URL("https://api.example.com/search");
+url.searchParams.set("q", userInput);        // Encoded automatically
+url.searchParams.set("filter", "price&lt;100");  // &lt; → %3C
+url.searchParams.set("tags", "a&amp;b");          // &amp; → %26
+console.log(url.toString());
+// "https://api.example.com/search?q=hello%20world&amp;filter=price%3C100&amp;tags=a%26b"</code></pre>
+
+                <!-- ── BY LANGUAGE ── -->
+                <h2>URL encoding in 5 languages — copy-paste ready</h2>
+                <p>Each language has its own encoding functions and its own traps. Here is the complete reference for the most common tasks in each ecosystem.</p>
+
+                <h3>Python</h3>
+                <pre><code>from urllib.parse import (
+    quote, unquote,
+    quote_plus, unquote_plus,
+    urlencode, urlparse, urlunparse, parse_qs
+)
+
+# Encode a parameter value (equivalent of encodeURIComponent)
+quote("hello world/path", safe='')
+# "hello%20world%2Fpath"
+# safe='' means encode everything including /
+
+# Encode for HTML forms (space → +)
+quote_plus("hello world")
+# "hello+world"
+
+# Decode
+unquote("hello%20world")       # "hello world"
+unquote_plus("hello+world")    # "hello world"
+
+# Encode a dictionary of parameters
+params = {"q": "hello world", "page": 2, "filter": "price&lt;100"}
+urlencode(params)
+# "q=hello+world&amp;page=2&amp;filter=price%3C100"
+
+# Build a complete URL safely
+from urllib.parse import urlencode, urlunparse
+
+params = urlencode({"q": "hello world", "lang": "fr"})
+url = urlunparse(("https", "api.example.com", "/search", "", params, ""))
+# "https://api.example.com/search?q=hello+world&amp;lang=fr"
+
+# Parse an existing URL
+parsed = urlparse("https://example.com/path?q=hello%20world#anchor")
+print(parsed.scheme)    # "https"
+print(parsed.netloc)    # "example.com"
+print(parsed.path)      # "/path"
+print(parsed.query)     # "q=hello%20world"
+print(parsed.fragment)  # "anchor"
+
+# Parse query parameters
+parse_qs("q=hello+world&amp;page=2")
+# {'q': ['hello world'], 'page': ['2']}</code></pre>
+
+                <div class="warning-box">
+                    <strong>Python trap:</strong> <code>quote()</code> has <code>safe='/'</code> by default, which means slashes are NOT encoded. Always pass <code>safe=''</code> when encoding parameter values. Otherwise <code>quote("path/to/file")</code> returns <code>"path/to/file"</code> unchanged.
+                </div>
+
+                <h3>JavaScript / Node.js</h3>
+                <pre><code>// Browser-native — no library needed
+encodeURIComponent("hello world &amp; more"); // "hello%20world%20%26%20more"
+
+// URLSearchParams — the standard for query strings
+const params = new URLSearchParams({
+  q: "hello world",
+  filter: "price&lt;100",
+  tags: "a&amp;b"
+});
+console.log(params.toString());
+// "q=hello+world&amp;filter=price%3C100&amp;tags=a%26b"
+// Note: URLSearchParams uses + for spaces (form encoding)
+
+// URL class — safe URL construction
+const url = new URL("https://api.example.com/search");
+url.searchParams.set("q", "hello world");
+url.searchParams.set("category", "dev/tools");
+console.log(url.toString());
+// "https://api.example.com/search?q=hello+world&amp;category=dev%2Ftools"
+
+// Reading search parameters from a URL
+const currentUrl = new URL("https://example.com/page?q=hello%20world&amp;page=2");
+console.log(currentUrl.searchParams.get("q"));    // "hello world" (auto-decoded)
+console.log(currentUrl.searchParams.get("page")); // "2"
+
+// Encoding a path segment (not a parameter)
+const slug = "my article title/2026";
+const path = `/blog/${encodeURIComponent(slug)}`;
+// "/blog/my%20article%20title%2F2026"</code></pre>
+
+                <h3>Java</h3>
+                <pre><code>import java.net.URLEncoder;
+import java.net.URLDecoder;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.nio.charset.StandardCharsets;
+
+// Encode a single parameter (always specify UTF-8)
+String encoded = URLEncoder.encode("hello world/path", StandardCharsets.UTF_8);
+// "hello+world%2Fpath"
+// ⚠️ URLEncoder encodes space as + (form encoding)
+// For %20, replace: encoded.replace("+", "%20")
+
+// Decode
+String decoded = URLDecoder.decode("hello+world%2Fpath", StandardCharsets.UTF_8);
+// "hello world/path"
+
+// Build a URI safely using the multi-argument constructor
+// This handles encoding automatically
+URI uri = new URI("https", "api.example.com", "/search", "q=hello world", null);
+System.out.println(uri.toString());
+// "https://api.example.com/search?q=hello%20world"
+
+// Modern approach with HttpRequest.Builder (Java 11+)
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("https://api.example.com/search?q=" +
+         URLEncoder.encode("hello world", StandardCharsets.UTF_8).replace("+", "%20")))
+    .GET()
+    .build();</code></pre>
+
+                <h3>PHP</h3>
+                <pre><code>&lt;?php
+
+// urlencode — HTML form standard (space → +)
+urlencode("hello world");    // "hello+world"
+urldecode("hello+world");    // "hello world"
+
+// rawurlencode — RFC 3986 standard (space → %20)
+rawurlencode("hello world"); // "hello%20world"
+rawurldecode("hello%20world"); // "hello world"
+
+// Rule: use rawurlencode for path segments
+//       use urlencode for query parameters in forms
+//       use http_build_query for multiple parameters
+
+// Build query string safely
+$params = http_build_query([
+    "q"      =&gt; "hello world",
+    "filter" =&gt; "price&lt;100",
+    "page"   =&gt; 2
+]);
+$url = "https://api.example.com/search?" . $params;
+// "https://api.example.com/search?q=hello+world&amp;filter=price%3C100&amp;page=2"
+
+// Parse a URL
+$parsed = parse_url("https://example.com/path?q=hello%20world#anchor");
+// ["scheme"=&gt;"https", "host"=&gt;"example.com", "path"=&gt;"/path",
+//  "query"=&gt;"q=hello%20world", "fragment"=&gt;"anchor"]
+
+// Parse query parameters
+parse_str("q=hello+world&amp;page=2", $result);
+// $result["q"] = "hello world"  (auto-decoded)
+?&gt;</code></pre>
+
+                <h3>Go</h3>
+                <pre><code>import (
+    "fmt"
+    "net/url"
+)
+
+// QueryEscape — form encoding (space → +)
+encoded := url.QueryEscape("hello world &amp; more")
+// "hello+world+%26+more"
+
+// PathEscape — RFC 3986 path encoding (space → %20, / preserved)
+pathEncoded := url.PathEscape("hello world/path")
+// "hello%20world/path"
+
+// PathEscape preserves / — use it for path segments
+// QueryEscape encodes / — use it for query values
+
+// Build a URL safely with url.Values
+params := url.Values{}
+params.Set("q", "hello world")
+params.Set("filter", "price&lt;100")
+params.Set("tags", "a&amp;b")
+
+baseURL, _ := url.Parse("https://api.example.com/search")
+baseURL.RawQuery = params.Encode()
+fmt.Println(baseURL.String())
+// "https://api.example.com/search?filter=price%3C100&amp;q=hello+world&amp;tags=a%26b"
+
+// Decode
+decoded, err := url.QueryUnescape("hello+world%26more")
+if err == nil {
+    fmt.Println(decoded) // "hello world&amp;more"
+}
+
+// Parse an existing URL
+parsed, _ := url.Parse("https://example.com/search?q=hello%20world&amp;page=2")
+fmt.Println(parsed.Host)                    // "example.com"
+fmt.Println(parsed.Query().Get("q"))        // "hello world" (auto-decoded)
+fmt.Println(parsed.Query().Get("page"))     // "2"</code></pre>
+
+                <!-- ── SECURITY ── -->
+                <h2>URL encoding and security — vulnerabilities you need to know</h2>
+                <p>Improper URL encoding is not just a formatting issue. It enables three categories of real attacks. Understanding them will change how you write validation code.</p>
+
+                <h3>Open Redirect via incomplete encoding</h3>
+                <pre><code>// The attack: encoding only part of a malicious URL
+// URL validation checks the domain — but on the encoded version
+
+// Server-side validation (INCORRECT)
+function isValidRedirect(url) {
+  return url.startsWith("https://trusted.com");
+}
+
+// Attack URL 1: encoded colon
+const attackUrl1 = "https%3A//evil.com/phishing";
+isValidRedirect(attackUrl1); // false ← catches this
+
+// Attack URL 2: the domain check passes, then the server decodes
+const attackUrl2 = "https://trusted.com.evil.com/phishing";
+isValidRedirect(attackUrl2); // true ← BYPASSED
+
+// Attack URL 3: double-encoded slash
+const attackUrl3 = "https://trusted.com%2F@evil.com";
+// After decode: "https://trusted.com/@evil.com" → redirects to evil.com
+
+// CORRECT approach: always decode THEN validate
+function safeRedirect(encodedUrl) {
+  let decoded;
+  try {
+    decoded = decodeURIComponent(encodedUrl);
+  } catch {
+    return null; // Malformed URL — reject
+  }
+  
+  try {
+    const parsed = new URL(decoded);
+    const allowedDomains = ["trusted.com", "api.trusted.com"];
+    
+    if (!allowedDomains.includes(parsed.hostname)) {
+      return null; // Domain not in allowlist
+    }
+    return decoded;
+  } catch {
+    return null; // Not a valid URL
+  }
+}</code></pre>
+
+                <h3>XSS via unencoded URL fragment</h3>
+                <pre><code>// Classic XSS bug: using the # fragment in HTML without encoding
+// The fragment is never sent to the server — the browser handles it
+
+// ❌ Vulnerable code
+const fragment = location.hash.slice(1); // No server-side encoding
+document.getElementById('title').innerHTML = fragment; // ← XSS
+
+// Attack URL
+// https://app.example.com/page#&lt;img src=x onerror=alert(document.cookie)&gt;
+
+// ✅ Safe code
+const fragment = decodeURIComponent(location.hash.slice(1));
+document.getElementById('title').textContent = fragment;
+//                                ^^^^^^^^^^^^^
+//                         textContent instead of innerHTML
+//                         — treats content as text, not HTML</code></pre>
+
+                <h3>Parameter injection via unvalidated query strings</h3>
+                <pre><code>// ❌ Building a backend URL with unvalidated user input
+app.get('/proxy', (req, res) =&gt; {
+  const target = req.query.url;
+  // If url = "https://api.example.com/data?admin=true"
+  // Attacker appends their own parameters
+
+  const backendUrl = `https://internal-api.com/fetch?url=${target}`;
+  // ← SSRF (Server-Side Request Forgery) risk
+});
+
+// ✅ Always validate the decoded value against an allowlist
+app.get('/proxy', (req, res) =&gt; {
+  const rawUrl = req.query.url;
+  
+  let decoded;
+  try {
+    decoded = decodeURIComponent(rawUrl);
+  } catch {
+    return res.status(400).json({ error: "Invalid URL encoding" });
+  }
+  
+  const ALLOWED_ORIGINS = [
+    "https://api.trusted.com",
+    "https://data.trusted.com"
+  ];
+  
+  const isAllowed = ALLOWED_ORIGINS.some(origin =&gt; decoded.startsWith(origin));
+  if (!isAllowed) {
+    return res.status(403).json({ error: "URL not allowed" });
+  }
+  
+  // Safe to proceed
+});</code></pre>
+
+                <div class="security-checklist">
+                    <h3>Security checklist — URL encoding audit</h3>
+                    <ul>
+                        <li>Decode BEFORE validating — never validate an encoded URL</li>
+                        <li>Never inject unencoded URL parameters into HTML (XSS)</li>
+                        <li>Use parameterized queries even with decoded values (SQLi)</li>
+                        <li>Validate redirect URLs against an allowlist after full decoding (Open Redirect)</li>
+                        <li>Check for <code>%25XX</code> in logs — likely sign of double-encoding</li>
+                        <li>Use the native <code>URL</code> class — never concatenate URLs manually</li>
+                        <li>Test all inputs with: <code>&amp;</code> <code>=</code> <code>+</code> <code>?</code> <code>#</code> <code>/</code> <code>:</code> <code>@</code> <code>%</code> <code>[</code> <code>]</code></li>
+                        <li>Handle <code>URIError</code> from <code>decodeURIComponent()</code> — invalid sequences must not crash the app</li>
+                    </ul>
+                </div>
+
+                <!-- ── EDGE CASES ── -->
+                <h2>Edge cases</h2>
+
+                <h3>Unicode, emoji, and accented characters</h3>
+                <pre><code>// Emoji → multi-byte UTF-8 sequences
+encodeURIComponent("🔧");
+// "%F0%9F%94%A7"  — 4 bytes, each → %XX
+
+encodeURIComponent("🔧 fix it");
+// "%F0%9F%94%A7%20fix%20it"
+
+// Accented characters — important for FR/ES/DE markets
+encodeURIComponent("déjà vu");
+// "d%C3%A9j%C3%A0%20vu"
+// é → %C3%A9 (UTF-8, correct)
+// NOT %E9 (Latin-1, produced by the deprecated escape())
+
+// Decode both UTF-8 and Latin-1 for legacy compatibility
+function robustDecode(str) {
+  try {
+    return decodeURIComponent(str); // Handles UTF-8 %C3%A9
+  } catch {
+    try {
+      // Fallback: unescape handles Latin-1 %E9 (deprecated but useful here)
+      return unescape(str);
+    } catch {
+      return str; // Return unchanged if all decoding fails
+    }
+  }
+}</code></pre>
+
+                <h3>Malformed percent sequences</h3>
+                <pre><code>// decodeURIComponent throws on invalid sequences
+try {
+  decodeURIComponent("hello%XYworld"); // %XY is not valid hex
+} catch (e) {
+  console.error(e.name);    // "URIError"
+  console.error(e.message); // "URI malformed"
+}
+
+// Safe decode that never throws
+function safeDecode(str) {
+  try {
+    return decodeURIComponent(str);
+  } catch {
+    // Return the original string if it can't be decoded
+    // This is better than crashing the application
+    return str;
+  }
+}
+
+// Our online tool displays the error clearly without crashing
+safeDecode("hello%XYworld"); // "hello%XYworld" (unchanged)</code></pre>
+
+                <h3>Already partially-encoded URLs</h3>
+                <pre><code>// Input mixed — partially encoded
+const mixed = "hello%20world &amp; café";
+
+// Correct — decode the encoded parts first
+decodeURIComponent("hello%20world &amp; caf%C3%A9");
+// "hello world &amp; café" ✅
+
+// Then re-encode cleanly if needed
+encodeURIComponent("hello world &amp; café");
+// "hello%20world%20%26%20caf%C3%A9"
+
+// Detect partial encoding before processing
+function encodingStatus(str) {
+  const hasPercent = /%[0-9A-Fa-f]{2}/.test(str);
+  const hasUnencoded = /[&amp;=+?#\[\] ]/.test(str);
+  
+  if (hasPercent &amp;&amp; hasUnencoded) return 'partial';
+  if (hasPercent) return 'encoded';
+  if (hasUnencoded) return 'raw';
+  return 'clean';
+}</code></pre>
+
+                <!-- ── TERMINAL ── -->
+                <h2>Decode and encode URLs in the terminal</h2>
+                <p>These one-liners end up in dotfiles, shell scripts, and team Gists. They're the commands you reach for during debugging without wanting to open a browser.</p>
+
+                <pre><code># Python — available on every system, handles UTF-8 correctly
+python3 -c "import urllib.parse; print(urllib.parse.unquote('hello%20world%2Fpath'))"
+# hello world/path
+
+# Encode
+python3 -c "import urllib.parse; print(urllib.parse.quote('hello world/path', safe=''))"
+# hello%20world%2Fpath
+
+# Node.js
+node -e "console.log(decodeURIComponent('hello%20world%2Fpath'))"
+# hello world/path
+
+node -e "console.log(encodeURIComponent('hello world/path'))"
+# hello%20world%2Fpath
+
+# curl — encodes parameters automatically with --data-urlencode
+curl -G "https://api.example.com/search" \
+  --data-urlencode "q=hello world" \
+  --data-urlencode "filter=price&lt;100"
+# → GET https://api.example.com/search?q=hello+world&amp;filter=price%3C100
+
+# Perl (available on most Linux/macOS)
+perl -MURI::Escape -e 'print uri_unescape("hello%20world%2Fpath"), "\n"'
+# hello world/path
+
+# Pure bash (for simple cases)
+printf '%b\n' "${1//%/\\x}"
+# Replaces %XX with the actual character (basic, no UTF-8)</code></pre>
+
+                <!-- ── USE THE TOOL ── -->
+                <h2>Try the online URL Encoder/Decoder</h2>
+                <p>The tool handles all edge cases described in this article: Unicode, emoji, malformed sequences, partial encoding detection, and both <code>%20</code> and <code>+</code> space encoding. All processing runs in your browser — nothing is sent to a server.</p>
+                <p style="text-align:center;">
+                    <a href="https://www.devstoolsbox.dev/tools/url-encoder-decoder/" class="btn-tool">🔗 Open the URL Encoder / Decoder</a>
+                </p>
+
+                <!-- ── FAQ ── -->
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-wrap">
+
+                    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                        <summary itemprop="name">What is the difference between encodeURI and encodeURIComponent?</summary>
+                        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p itemprop="text"><code>encodeURI</code> is designed to encode a full URL and preserves all characters that are structurally meaningful in a URL: <code>/</code>, <code>?</code>, <code>&amp;</code>, <code>#</code>, <code>=</code>, <code>:</code>, <code>@</code>. Use it when you have an already-formed URL and just want to ensure it's valid. <code>encodeURIComponent</code> encodes everything except alphanumeric characters and the safe set <code>- _ . ! ~ * ' ( )</code>. Use it for encoding individual parameter values before inserting them into a URL.</p>
+                        </div>
+                    </details>
+
+                    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                        <summary itemprop="name">Why does my URL contain %2520 instead of %20?</summary>
+                        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p itemprop="text">This is a double-encoding bug. The <code>%</code> character itself was encoded to <code>%25</code>, turning <code>%20</code> into <code>%2520</code>. It happens when a value that was already encoded (like <code>hello%20world</code>) is encoded again. The fix: find which layer is encoding the value twice and remove the duplicate. Use the <code>safeEncode()</code> pattern in this article to encode idempotently, or use the <code>hasDoubleEncoding()</code> detector to find the affected requests in your logs.</p>
+                        </div>
+                    </details>
+
+                    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                        <summary itemprop="name">What is the difference between + and %20 in a URL?</summary>
+                        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p itemprop="text">Both represent a space but come from different standards. The <code>+</code> encoding comes from the <code>application/x-www-form-urlencoded</code> standard used in HTML forms — it's what <code>URLSearchParams</code> and most form processors produce. The <code>%20</code> encoding follows RFC 3986, the general URL standard — it's what <code>encodeURIComponent()</code> produces. Most servers accept both, but some strict implementations only accept one. When in doubt, use <code>%20</code> (<code>encodeURIComponent</code>). Only use <code>+</code> when an API explicitly specifies it or when submitting HTML forms.</p>
+                        </div>
+                    </details>
+
+                    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                        <summary itemprop="name">Should I validate a URL before or after decoding?</summary>
+                        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p itemprop="text">Always <strong>decode first, then validate</strong>. Validating an encoded URL is a critical security mistake. An attacker can encode characters to bypass your validation rules, then the server decodes them into something malicious after the check passes. For example, <code>https://trusted.com%2F@evil.com</code> might pass a <code>startsWith("https://trusted.com")</code> check, but after decoding it becomes a redirect to <code>evil.com</code>. Always use <code>new URL(decoded)</code> to parse the URL, then check <code>parsed.hostname</code> against an allowlist.</p>
+                        </div>
+                    </details>
+
+                    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                        <summary itemprop="name">How do I decode a URL in the terminal?</summary>
+                        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p itemprop="text">Python: <code>python3 -c "import urllib.parse; print(urllib.parse.unquote('hello%20world'))"</code>. Node.js: <code>node -e "console.log(decodeURIComponent('hello%20world'))"</code>. For encoding: <code>python3 -c "import urllib.parse; print(urllib.parse.quote('hello world', safe=''))"</code>.</p>
+                        </div>
+                    </details>
+
+                    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                        <summary itemprop="name">Is URL encoding case-sensitive?</summary>
+                        <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p itemprop="text">The percent-encoding itself is case-insensitive: <code>%2F</code> and <code>%2f</code> are equivalent according to RFC 3986, and modern browsers normalize to uppercase. However, the decoded values (what the percent sequences represent) may be case-sensitive — it depends on the server's interpretation of the path or parameter. Stick to uppercase encoding (<code>encodeURIComponent</code> produces uppercase by default) to stay consistent.</p>
+                        </div>
+                    </details>
+
+                </div>
+
+                <!-- ── REFERENCES ── -->
+                <section class="references">
+                    <h3>Sources and references</h3>
+                    <ul>
+                        <li><a href="https://datatracker.ietf.org/doc/html/rfc3986" target="_blank" rel="noopener noreferrer">RFC 3986 — Uniform Resource Identifier (URI): Generic Syntax</a> — the foundational standard for percent-encoding.</li>
+                        <li><a href="https://url.spec.whatwg.org/" target="_blank" rel="noopener noreferrer">WHATWG URL Standard</a> — the living standard implemented by all modern browsers.</li>
+                        <li><a href="https://owasp.org/www-community/attacks/Open_redirect" target="_blank" rel="noopener noreferrer">OWASP — Open Redirect</a> — the attack category enabled by insufficient URL validation.</li>
+                        <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent" target="_blank" rel="noopener noreferrer">MDN — encodeURIComponent()</a></li>
+                        <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/URL" target="_blank" rel="noopener noreferrer">MDN — URL API</a> — the recommended way to build and parse URLs in JavaScript.</li>
+                        <li><a href="https://docs.python.org/3/library/urllib.parse.html" target="_blank" rel="noopener noreferrer">Python urllib.parse documentation</a></li>
+                    </ul>
+                </section>
+
+                <!-- ── RELATED TOOLS ── -->
+                <h3 style="margin-top:32px;">Complementary tools on DevToolbox</h3>
+                <ul>
+                    <li><a href="/tools/url-encoder-decoder/">URL Encoder / Decoder</a> — the tool described in this article, handles all edge cases client-side</li>
+                    <li><a href="/tools/jwt-decoder/">JWT Decoder</a> — JWTs often contain URL-encoded values in their claims; decode them without leaving your browser</li>
+                    <li><a href="/tools/json-formatter/">JSON Formatter</a> — APIs frequently return URL-encoded strings in JSON payloads; format and inspect them</li>
+                    <li><a href="/tools/regex-tester/">Regex Tester</a> — validate URL patterns and percent-encoding sequences before deploying</li>
+                    <li><a href="/tools/text-diff/">Text Diff</a> — compare two versions of a URL before and after encoding to spot unexpected changes</li>
+                    <li><a href="/tools/base64-encoder/">Base64 Encoder</a> — Base64 and percent-encoding are often combined in API authentication headers</li>
+                </ul>
+
+            </div><!-- /articleBody -->
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers.
+        <a href="/tools/blog/">Blog</a> | <a href="/tools/contact/">Contact</a></p>
+    </footer>
+</div>
+
+<script>
+(function() {
+    const btns = document.querySelectorAll('.theme-btn');
+    btns.forEach(b => b.addEventListener('click', () => {
+        const t = b.dataset.theme;
+        document.body.classList.toggle('dark', t === 'dark');
+        btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
+        localStorage.setItem('theme', t);
+    }));
+    const saved = localStorage.getItem('theme') || 'light';
+    document.body.classList.toggle('dark', saved === 'dark');
+    document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+})();
+</script>
+</body>
+</html>
