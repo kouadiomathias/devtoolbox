@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur YAML ↔ JSON ↔ TOML | Validation, typage, style</title>
+    <meta name="description" content="Convertisseur multi‑formats YAML, JSON, TOML. Validation, typage sûr, ancres YAML, comparaison sémantique et contrôle du style. 100% client.">
+    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/convertisseur-yaml-json-toml/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/convertisseur-yaml-json-toml/">
+    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
+    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
+
+    <meta property="og:title" content="Convertisseur YAML ↔ JSON ↔ TOML | Validation, typage, style">
+    <meta property="og:description" content="Convertissez entre YAML, JSON et TOML avec typage fort, validation et contrôle du formatage. 100% côté client.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+   
+
+    <!-- Librairies -->
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/smol-toml@1.1.4/dist/index.umd.min.js"></script>
+    <!-- smol-toml expose global smolToml, js-yaml expose jsyaml -->
+
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --yaml: #ec4899;
+            --json: #3b82f6;
+            --toml: #10b981;
+            --code-bg: #f9f9fb;
+            --input-bg: #f8fafc;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --primary: #60a5fa;
+                --primary-dark: #3b82f6;
+                --text: #f1f5f9;
+                --text-light: #94a3b8;
+                --border: #334155;
+                --success: #34d399;
+                --warning: #fbbf24;
+                --error: #f87171;
+                --shadow: 0 10px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.3);
+                --code-bg: #0f172a;
+                --input-bg: #0f172a;
+            }
+        }
+        .dark-forced {
+            --bg: #0f172a; --surface: #1e293b; --primary: #60a5fa; --primary-dark: #3b82f6;
+            --text: #f1f5f9; --text-light: #94a3b8; --border: #334155;
+            --success: #34d399; --warning: #fbbf24; --error: #f87171;
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.4);
+            --code-bg: #0f172a; --input-bg: #0f172a;
+        }
+        .light-forced {
+            --bg: #f8fafc; --surface: #ffffff; --primary: #3b82f6; --primary-dark: #2563eb;
+            --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+            --success: #10b981; --warning: #f59e0b; --error: #ef4444;
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            --code-bg: #f9f9fb; --input-bg: #f8fafc;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.5; padding: 24px;
+            display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width: 1300px; width: 100%; margin: 0 auto; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); }
+        .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .theme-toggle, .lang-btn {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 40px;
+            padding: 6px 14px; cursor: pointer; font-size: 0.85rem; font-weight: 500;
+            color: var(--text-light); transition: all 0.2s; box-shadow: var(--shadow);
+            display: flex; align-items: center; gap: 6px; text-decoration: none;
+        }
+        .theme-toggle:hover, .lang-btn:hover { color: var(--text); border-color: var(--primary); }
+        .lang-switch { display: flex; gap: 8px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        .tool-card {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
+        }
+        h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1.05rem; }
+
+        .convert-panels { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+        .panel { flex: 1; min-width: 300px; display: flex; flex-direction: column; }
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+            font-weight: 600; font-size: 0.9rem; color: var(--text);
+        }
+        .format-select {
+            padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text); font-weight: 500; font-size: 0.85rem;
+            cursor: pointer; outline: none;
+        }
+        textarea {
+            width: 100%; flex: 1; min-height: 280px; padding: 16px;
+            font-family: 'SF Mono', 'Menlo', 'Cascadia Code', monospace; font-size: 13px;
+            border: 1.5px solid var(--border); border-radius: 12px;
+            background: var(--input-bg); color: var(--text); resize: vertical;
+            transition: border 0.2s, background 0.3s, color 0.3s;
+        }
+        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        .error-msg { color: var(--error); font-size: 0.85rem; min-height: 20px; margin: 4px 0; }
+        .button-group { display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap; align-items: center; }
+        .btn {
+            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
+            cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--text);
+            border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-outline:hover { background: var(--bg); border-color: var(--primary); }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+        .options-bar {
+            background: var(--bg); border-radius: 12px; padding: 12px 16px; margin: 16px 0;
+            display: flex; flex-wrap: wrap; gap: 16px; align-items: center; border: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        .options-bar label { display: flex; align-items: center; gap: 6px; color: var(--text-light); }
+        .options-bar input[type="number"], .options-bar select {
+            width: 70px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text); font-size: 0.85rem;
+        }
+        .compare-section { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
+        .compare-result {
+            padding: 8px 16px; border-radius: 20px; font-weight: 600; display: inline-block;
+        }
+        .equal { background: rgba(16,185,129,0.1); color: var(--success); }
+        .different { background: rgba(245,158,11,0.1); color: var(--warning); }
+
+        .faq-section {
+            background: var(--surface); border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-top: 32px;
+        }
+        .faq-section h2 { font-size: 1.7rem; margin-bottom: 20px; }
+        .faq-item { margin-bottom: 24px; }
+        .faq-question { font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+        .footer { text-align: center; color: var(--text-light); margin-top: 24px; font-size: 0.9rem; }
+        .toast {
+            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--surface);
+            padding: 10px 20px; border-radius: 40px; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: 1000; box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <span class="logo">📦 DevToolbox</span>
+        <div class="header-actions">
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">🌙</span> <span id="themeLabel">Sombre</span>
+            </button>
+            <div class="lang-switch">
+                <a href="/fr/outils/convertisseur-yaml-json-toml/" class="lang-btn active">FR</a>
+                <a href="/tools/yaml-json-toml-converter/" class="lang-btn">EN</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="tool-card">
+            <h1>🔄 Convertisseur YAML ↔ JSON ↔ TOML</h1>
+            <div class="subhead">
+                Conversion précise avec typage fort, validation, ancres YAML, comparaison sémantique et contrôle du style. 100% côté client.
+            </div>
+
+            <div class="convert-panels">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Source</span>
+                        <select class="format-select" id="sourceFormat">
+                            <option value="yaml" selected>YAML</option>
+                            <option value="json">JSON</option>
+                            <option value="toml">TOML</option>
+                        </select>
+                    </div>
+                    <textarea id="sourceInput" placeholder="Collez votre contenu YAML, JSON ou TOML ici..."></textarea>
+                    <div class="error-msg" id="sourceError"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Résultat</span>
+                        <select class="format-select" id="targetFormat">
+                            <option value="json" selected>JSON</option>
+                            <option value="yaml">YAML</option>
+                            <option value="toml">TOML</option>
+                        </select>
+                    </div>
+                    <textarea id="targetOutput" readonly placeholder="Le résultat apparaîtra ici..."></textarea>
+                    <div class="error-msg" id="targetError"></div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="convertBtn">🚀 Convertir</button>
+                <button class="btn btn-outline" id="swapBtn">⇄ Échanger</button>
+                <button class="btn btn-outline" id="copyResultBtn">📋 Copier résultat</button>
+                <button class="btn btn-outline" id="compareBtn">🔍 Comparaison sémantique</button>
+            </div>
+
+            <div class="options-bar" id="yamlOptions" style="display: none;">
+                <span style="font-weight:600;">⚙️ Style YAML</span>
+                <label>Indent <input type="number" id="yamlIndent" value="2" min="1" max="8"></label>
+                <label>Largeur ligne <input type="number" id="yamlLineWidth" value="80" min="20" max="200"></label>
+                <label>Guillemets <select id="yamlQuotes">
+                    <option value="auto">Auto</option>
+                    <option value="single">Simples</option>
+                    <option value="double">Doubles</option>
+                </select></label>
+                <label><input type="checkbox" id="yamlNoRefs"> Pas d'ancres</label>
+                <label><input type="checkbox" id="yamlTypeSafe"> Typage strict (dates → string)</label>
+            </div>
+            <div class="options-bar" id="jsonOptions" style="display: none;">
+                <span style="font-weight:600;">⚙️ Style JSON</span>
+                <label>Indent <input type="number" id="jsonIndent" value="2" min="0" max="8"></label>
+                <label><input type="checkbox" id="jsonSortKeys"> Trier les clés</label>
+            </div>
+
+            <div class="compare-section" id="compareSection" style="display: none;">
+                <h4 style="margin-bottom:8px;">🔍 Comparaison sémantique (normalisation)</h4>
+                <textarea id="compareInputA" placeholder="Premier document..." style="min-height:120px; margin-bottom:8px;"></textarea>
+                <textarea id="compareInputB" placeholder="Second document..." style="min-height:120px; margin-bottom:8px;"></textarea>
+                <div class="button-group">
+                    <select id="compareFormat" class="format-select">
+                        <option value="yaml">YAML</option>
+                        <option value="json">JSON</option>
+                    </select>
+                    <button class="btn btn-outline btn-sm" id="runCompareBtn">Comparer</button>
+                    <span id="compareStatus"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq-section">
+            <h2>Foire aux questions</h2>
+            <div class="faq-item">
+                <div class="faq-question">Pourquoi un convertisseur YAML/JSON/TOML différent ?</div>
+                <p>Contrairement aux outils basiques, celui‑ci préserve les types (les dates restent des chaînes si vous le souhaitez), gère les ancres YAML, valide rigoureusement les entrées et offre un contrôle fin du formatage de sortie.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Comment activer le typage strict ?</div>
+                <p>Cochez « Typage strict (dates → string) » dans les options YAML. Les dates comme 2024-01-01 seront conservées en tant que chaînes, au lieu d'être converties en objets Date JavaScript.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Qu'est‑ce que la comparaison sémantique ?</div>
+                <p>Deux documents YAML peuvent être syntaxiquement différents mais représenter la même structure. Notre comparateur parse les deux, normalise l'ordre des clés et vérifie l'égalité profonde.</p>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Les données sont‑elles envoyées à un serveur ?</div>
+                <p>Non. Tout le traitement (parsing, conversion, comparaison) s'exécute dans votre navigateur. Aucune donnée ne quitte votre machine.</p>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">© 2025 DevToolbox — Outils 100% côté client pour les développeurs.</footer>
+    <div class="toast" id="toast">Copié !</div>
+</div>
+
+<script>
+(function() {
+    // Références DOM
+    const sourceInput = document.getElementById('sourceInput');
+    const targetOutput = document.getElementById('targetOutput');
+    const sourceFormat = document.getElementById('sourceFormat');
+    const targetFormat = document.getElementById('targetFormat');
+    const convertBtn = document.getElementById('convertBtn');
+    const swapBtn = document.getElementById('swapBtn');
+    const copyResultBtn = document.getElementById('copyResultBtn');
+    const compareBtn = document.getElementById('compareBtn');
+    const sourceError = document.getElementById('sourceError');
+    const targetError = document.getElementById('targetError');
+    const yamlOptions = document.getElementById('yamlOptions');
+    const jsonOptions = document.getElementById('jsonOptions');
+    const yamlIndent = document.getElementById('yamlIndent');
+    const yamlLineWidth = document.getElementById('yamlLineWidth');
+    const yamlQuotes = document.getElementById('yamlQuotes');
+    const yamlNoRefs = document.getElementById('yamlNoRefs');
+    const yamlTypeSafe = document.getElementById('yamlTypeSafe');
+    const jsonIndent = document.getElementById('jsonIndent');
+    const jsonSortKeys = document.getElementById('jsonSortKeys');
+    const compareSection = document.getElementById('compareSection');
+    const compareInputA = document.getElementById('compareInputA');
+    const compareInputB = document.getElementById('compareInputB');
+    const runCompareBtn = document.getElementById('runCompareBtn');
+    const compareStatus = document.getElementById('compareStatus');
+    const compareFormat = document.getElementById('compareFormat');
+    const toast = document.getElementById('toast');
+
+    // Thème
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+    let currentTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
+    function applyTheme(t) {
+        document.body.classList.remove('dark-forced', 'light-forced');
+        if (t === 'dark') { document.body.classList.add('dark-forced'); themeIcon.textContent='☀️'; themeLabel.textContent='Clair'; }
+        else if (t === 'light') { document.body.classList.add('light-forced'); themeIcon.textContent='🌙'; themeLabel.textContent='Sombre'; }
+        else {
+            const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            themeIcon.textContent = prefers ? '☀️' : '🌙';
+            themeLabel.textContent = prefers ? 'Clair' : 'Sombre';
+        }
+        localStorage.setItem('devtoolbox-theme', t);
+        currentTheme = t;
+    }
+    themeToggle.addEventListener('click', ()=> applyTheme(currentTheme==='dark' ? 'light' : 'dark'));
+    applyTheme(currentTheme);
+
+    // Afficher/masquer options selon format cible
+    function updateOptionsVisibility() {
+        const tgt = targetFormat.value;
+        yamlOptions.style.display = tgt === 'yaml' ? 'flex' : 'none';
+        jsonOptions.style.display = tgt === 'json' ? 'flex' : 'none';
+    }
+    targetFormat.addEventListener('change', updateOptionsVisibility);
+    sourceFormat.addEventListener('change', ()=>{
+        // On pourrait ajuster, mais pas nécessaire
+    });
+    updateOptionsVisibility();
+
+    // Conversion
+    function parseSource(text, format) {
+        if (format === 'yaml') {
+            const schema = yamlTypeSafe.checked ? jsyaml.JSON_SCHEMA : jsyaml.DEFAULT_SCHEMA;
+            return jsyaml.load(text, { schema });
+        } else if (format === 'json') {
+            return JSON.parse(text);
+        } else if (format === 'toml') {
+            return smolToml.parse(text);
+        }
+    }
+    function stringifyTarget(obj, format) {
+        if (format === 'yaml') {
+            const indent = parseInt(yamlIndent.value, 10) || 2;
+            const lineWidth = parseInt(yamlLineWidth.value, 10) || 80;
+            const noRefs = yamlNoRefs.checked;
+            const quotingType = yamlQuotes.value === 'single' ? "'" : yamlQuotes.value === 'double' ? '"' : null;
+            return jsyaml.dump(obj, {
+                indent,
+                lineWidth,
+                noRefs,
+                quotingType,
+                forceQuotes: quotingType ? true : false,
+                schema: jsyaml.DEFAULT_SCHEMA
+            });
+        } else if (format === 'json') {
+            const indent = parseInt(jsonIndent.value, 10) || 2;
+            const sortKeys = jsonSortKeys.checked;
+            return JSON.stringify(obj, sortKeys ? Object.keys(obj).sort() : null, indent);
+        } else if (format === 'toml') {
+            return smolToml.stringify(obj);
+        }
+    }
+
+    function doConvert() {
+        sourceError.textContent = '';
+        targetError.textContent = '';
+        targetOutput.value = '';
+        const srcText = sourceInput.value.trim();
+        if (!srcText) return;
+        try {
+            const data = parseSource(srcText, sourceFormat.value);
+            const result = stringifyTarget(data, targetFormat.value);
+            targetOutput.value = result;
+        } catch (e) {
+            sourceError.textContent = 'Erreur de conversion : ' + e.message;
+        }
+    }
+
+    convertBtn.addEventListener('click', doConvert);
+    // Conversion automatique après 800ms d'inactivité
+    let autoTimer;
+    sourceInput.addEventListener('input', ()=>{
+        clearTimeout(autoTimer);
+        autoTimer = setTimeout(doConvert, 800);
+    });
+    // Actualisation si options changent
+    document.querySelectorAll('#yamlOptions input, #yamlOptions select, #jsonOptions input, #jsonOptions select')
+        .forEach(el => el.addEventListener('change', doConvert));
+
+    // Échange
+    swapBtn.addEventListener('click', ()=>{
+        const tmpFormat = sourceFormat.value;
+        sourceFormat.value = targetFormat.value;
+        targetFormat.value = tmpFormat;
+        const tmpText = sourceInput.value;
+        sourceInput.value = targetOutput.value;
+        targetOutput.value = tmpText;
+        updateOptionsVisibility();
+        doConvert();
+    });
+
+    // Copier
+    copyResultBtn.addEventListener('click', ()=>{
+        if (!targetOutput.value) return;
+        navigator.clipboard.writeText(targetOutput.value).then(()=>{
+            showToast('Résultat copié !');
+        });
+    });
+
+    // Comparaison sémantique
+    compareBtn.addEventListener('click', ()=>{
+        compareSection.style.display = compareSection.style.display === 'none' ? 'block' : 'none';
+    });
+    runCompareBtn.addEventListener('click', ()=>{
+        const fmt = compareFormat.value;
+        const a = compareInputA.value.trim();
+        const b = compareInputB.value.trim();
+        if (!a || !b) { compareStatus.innerHTML = '<span class="compare-result different">Remplissez les deux champs.</span>'; return; }
+        try {
+            const dataA = parseSource(a, fmt);
+            const dataB = parseSource(b, fmt);
+            // Normalisation : tri récursif des clés
+            const normalize = (obj) => {
+                if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+                    const sorted = {};
+                    Object.keys(obj).sort().forEach(k => { sorted[k] = normalize(obj[k]); });
+                    return sorted;
+                } else if (Array.isArray(obj)) {
+                    return obj.map(normalize);
+                }
+                return obj;
+            };
+            const normA = normalize(dataA);
+            const normB = normalize(dataB);
+            const equal = JSON.stringify(normA) === JSON.stringify(normB);
+            compareStatus.innerHTML = equal
+                ? '<span class="compare-result equal">✅ Structures identiques (sémantiquement égales)</span>'
+                : '<span class="compare-result different">❌ Structures différentes</span>';
+        } catch (e) {
+            compareStatus.innerHTML = `<span class="compare-result different">Erreur : ${e.message}</span>`;
+        }
+    });
+
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        setTimeout(()=> toast.style.opacity = '0', 2200);
+    }
+
+    // Exemple initial
+    sourceInput.value = `nom: "Exemple"
+age: 30
+date_naissance: 1995-07-20
+adresse:
+  rue: "123 rue Principale"
+  ville: "Montréal"
+tags:
+  - dev
+  - yaml
+`;
+    // Conversion automatique initiale après chargement
+    setTimeout(doConvert, 300);
+})();
+</script>
+</body>
+</html>

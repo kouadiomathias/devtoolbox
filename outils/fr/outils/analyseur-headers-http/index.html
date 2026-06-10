@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analyseur d’en‑têtes HTTP — Score de sécurité, explications & comparaison | DevToolbox</title>
+<meta name="description" content="Collez les en‑têtes bruts d’une réponse HTTP et obtenez une analyse instantanée : score de sécurité de A à F, explication en langage clair de chaque en‑tête, en‑têtes de sécurité manquants et comparaison côte à côte. 100 % côté client.">
+<meta name="keywords" content="analyseur en‑têtes http, vérificateur sécurité http, vérificateur content security policy, vérificateur hsts, x-frame-options, explication en‑têtes http, score sécurité en‑têtes réponse">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/analyseur-headers-http/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/analyseur-headers-http/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/http-header-analyzer/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/http-header-analyzer/">
+
+<meta property="og:title" content="Analyseur d’en‑têtes HTTP — Score de sécurité et explications">
+<meta property="og:description" content="Collez n’importe quels en‑têtes de réponse HTTP. Obtenez une note de sécurité, des explications en français et des corrections concrètes.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/analyseur-headers-http/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"WebApplication",
+  "name":"Analyseur d’en‑têtes HTTP","url":"https://www.devstoolsbox.dev/fr/outils/analyseur-headers-http/",
+  "description":"Analysez les en‑têtes HTTP : note de sécurité, explication de chaque en‑tête, en‑têtes de sécurité manquants, comparaison avant/après. 100 % côté client.",
+  "applicationCategory":"DeveloperApplication","operatingSystem":"Any",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/fr/"},
+    {"@type":"ListItem","position":2,"name":"Outils","item":"https://www.devstoolsbox.dev/fr/outils/"},
+    {"@type":"ListItem","position":3,"name":"Analyseur d’en‑têtes HTTP","item":"https://www.devstoolsbox.dev/fr/outils/analyseur-headers-http/"}
+  ]
+}
+</script>
+
+<style>
+/* ── tokens ── */
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;--surface3:#e8edf3;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --grade-a-plus:#059669;--grade-a:#10b981;--grade-b:#0891b2;
+  --grade-c:#d97706;--grade-d:#ea580c;--grade-f:#dc2626;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;--info:#7c3aed;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;--info-bg:rgba(124,58,237,.08);
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;--surface3:#252e3f;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--code-bg:#0f172a;--code-color:#cbd5e1;
+  --shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;--info-bg:rgba(167,139,250,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:1000px;margin:0 auto}
+
+/* ── header bar ── */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px;align-items:center}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+/* ── breadcrumb ── */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+/* ── hero ── */
+.tool-hero{margin-bottom:28px}
+.tool-hero h1{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:6px}
+.tool-hero p{color:var(--text2);font-size:.95rem;max-width:640px}
+
+/* ── mode tabs ── */
+.mode-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.mode-tab{padding:8px 18px;border-radius:40px;border:1px solid var(--border);background:var(--surface);font-weight:600;font-size:.82rem;cursor:pointer;color:var(--text2);transition:.18s;font-family:inherit}
+.mode-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── input panels ── */
+.input-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px;box-shadow:var(--shadow)}
+.input-label{font-weight:700;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:block}
+.header-textarea{width:100%;min-height:180px;padding:14px 16px;font-family:var(--mono);font-size:.83rem;line-height:1.6;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);outline:none;resize:vertical;transition:border-color .2s}
+.header-textarea:focus{border-color:var(--primary)}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.action-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.btn{padding:9px 20px;border-radius:40px;font-weight:600;font-size:.85rem;border:none;cursor:pointer;transition:all .18s;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover);transform:translateY(-1px)}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.example-links{font-size:.78rem;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.example-links span{font-weight:600}
+.example-link{color:var(--primary);cursor:pointer;text-decoration:none;font-weight:500}
+.example-link:hover{text-decoration:underline}
+
+/* ── results ── */
+.results{display:none}
+
+/* ── score section ── */
+.score-band{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.grade-circle{width:88px;height:88px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border:4px solid currentColor}
+.grade-letter{font-size:2.4rem;font-weight:900;line-height:1;letter-spacing:-.04em}
+.grade-plus{font-size:1.1rem;font-weight:800;margin-top:-4px}
+.grade-a-plus{color:var(--grade-a-plus)}
+.grade-a{color:var(--grade-a)}
+.grade-b{color:var(--grade-b)}
+.grade-c{color:var(--grade-c)}
+.grade-d{color:var(--grade-d)}
+.grade-f{color:var(--grade-f)}
+.score-details h2{font-size:1.25rem;font-weight:800;margin-bottom:6px}
+.score-subtitle{font-size:.88rem;color:var(--text2);margin-bottom:12px}
+.score-bar-wrap{background:var(--surface2);border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px;width:100%;max-width:400px}
+.score-bar{height:100%;border-radius:99px;transition:width .6s ease}
+.score-stats{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--text3)}
+.score-stat strong{color:var(--text);font-weight:700}
+
+/* ── issues summary ── */
+.issues-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+.issue-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.issue-card-label{font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.issue-card-value{font-size:1.6rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.issue-card-sub{font-size:.75rem;color:var(--text3);margin-top:2px}
+.ic-pass .issue-card-label,.ic-pass .issue-card-value{color:var(--pass)}
+.ic-warn .issue-card-label,.ic-warn .issue-card-value{color:var(--warn)}
+.ic-fail .issue-card-label,.ic-fail .issue-card-value{color:var(--fail)}
+
+/* ── section headings ── */
+.section-heading{font-size:1rem;font-weight:800;letter-spacing:-.01em;color:var(--text);margin:0 0 14px;display:flex;align-items:center;gap:8px}
+.section-heading .badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;letter-spacing:.04em;text-transform:uppercase}
+.badge-fail{background:var(--fail-bg);color:var(--fail)}
+.badge-warn{background:var(--warn-bg);color:var(--warn)}
+.badge-pass{background:var(--pass-bg);color:var(--pass)}
+
+/* ── security header cards ── */
+.sec-headers-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px;box-shadow:var(--shadow)}
+.sec-header-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--border)}
+.sec-header-row:last-child{border-bottom:none}
+.sec-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.dot-pass{background:var(--pass)}
+.dot-warn{background:var(--warn)}
+.dot-fail{background:var(--fail)}
+.sec-header-name{font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--text)}
+.sec-header-val{font-family:var(--mono);font-size:.75rem;color:var(--text3);margin-top:2px;word-break:break-all}
+.sec-header-msg{font-size:.83rem;color:var(--text2);line-height:1.6}
+.sec-header-fix{font-size:.78rem;color:var(--text3);margin-top:4px;line-height:1.5}
+.sec-header-fix code{background:var(--code-bg);color:var(--code-color);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:.78em}
+.sec-impact{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap;align-self:start;margin-top:2px}
+.impact-critical{background:var(--fail-bg);color:var(--fail)}
+.impact-high{background:#fff0e8;color:#c2410c}
+.impact-medium{background:var(--warn-bg);color:var(--warn)}
+.impact-low{background:var(--pass-bg);color:var(--pass)}
+body.dark .impact-high{background:#4a1a00;color:#fb923c}
+
+/* ── all headers accordion ── */
+.all-headers-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px;box-shadow:var(--shadow)}
+.hdr-item{border-bottom:1px solid var(--border)}
+.hdr-item:last-child{border-bottom:none}
+.hdr-item summary{list-style:none;padding:12px 0;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.hdr-item summary::-webkit-details-marker{display:none}
+.hdr-type-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dot-security{background:#7c3aed}
+.dot-caching{background:#0891b2}
+.dot-content{background:#10b981}
+.dot-cors{background:#f59e0b}
+.dot-server{background:#ef4444}
+.dot-misc{background:#64748b}
+.hdr-name-val{min-width:0}
+.hdr-name{font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--text)}
+.hdr-short-val{font-family:var(--mono);font-size:.74rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+.hdr-tag{font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.tag-security{background:var(--info-bg);color:var(--primary)}
+.tag-caching{background:#e0f2fe;color:#0369a1}
+.tag-content{background:var(--pass-bg);color:var(--pass)}
+.tag-cors{background:var(--warn-bg);color:#b45309}
+.tag-server{background:var(--fail-bg);color:var(--fail)}
+.tag-misc{background:var(--surface2);color:var(--text3)}
+body.dark .tag-caching{background:#0c2d40;color:#38bdf8}
+.hdr-body{padding:0 0 14px 20px}
+.hdr-full-val{font-family:var(--mono);font-size:.8rem;color:var(--text2);word-break:break-all;margin-bottom:10px;padding:8px 12px;background:var(--surface2);border-radius:8px}
+.hdr-explanation{font-size:.88rem;color:var(--text2);line-height:1.75}
+.hdr-explanation strong{color:var(--text)}
+.hdr-parsed-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.parsed-token{font-size:.75rem;font-family:var(--mono);padding:3px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text2)}
+.parsed-token.directive-known{border-color:var(--primary);color:var(--primary);background:var(--info-bg)}
+
+/* ── compare view ── */
+.compare-results{display:none}
+.compare-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.compare-col h3{font-size:.9rem;font-weight:800;color:var(--text);padding:10px 0;border-bottom:2px solid var(--border);margin-bottom:12px}
+.compare-col.before h3{border-color:var(--fail)}
+.compare-col.after h3{border-color:var(--pass)}
+.diff-row{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.diff-row:last-child{border-bottom:none}
+.diff-icon{flex-shrink:0;margin-top:1px}
+.diff-added{color:var(--pass)}
+.diff-removed{color:var(--fail)}
+.diff-changed{color:var(--warn)}
+.diff-unchanged{color:var(--text3)}
+
+/* ── toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--surface);padding:10px 20px;border-radius:40px;font-size:.85rem;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);z-index:1000}
+body.dark .toast{background:var(--surface);color:var(--text)}
+
+/* ── article below tool ── */
+.article-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:28px;box-shadow:var(--shadow)}
+.article-section h2{font-size:1.35rem;font-weight:800;margin-top:32px;margin-bottom:10px}
+.article-section h2:first-of-type{margin-top:0}
+.article-section h3{font-size:1.05rem;font-weight:700;margin-top:20px;margin-bottom:6px}
+.article-section p{color:var(--text2);font-size:.93rem;margin-bottom:12px;line-height:1.8}
+.article-section code{background:var(--code-bg);color:var(--code-color);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.87em}
+.article-section pre{background:var(--code-bg);color:var(--code-color);padding:16px;border-radius:10px;overflow-x:auto;margin-bottom:16px;font-family:var(--mono);font-size:.82rem;line-height:1.6}
+.article-section a{color:var(--primary);text-decoration:none}
+.article-section a:hover{text-decoration:underline}
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.88rem;line-height:1.8}
+
+/* ── footer ── */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+
+/* ── responsive ── */
+@media(max-width:700px){
+  .compare-grid,.compare-columns{grid-template-columns:1fr}
+  .score-band{grid-template-columns:auto 1fr;gap:16px}
+  .grade-circle{width:70px;height:70px}
+  .grade-letter{font-size:1.9rem}
+  .hdr-short-val{max-width:180px}
+  .sec-header-row{grid-template-columns:auto 1fr}
+  .sec-impact{display:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<header class="site-header">
+  <a href="/fr/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
+    </div>
+    <div class="pill-group">
+      <a href="/fr/outils/analyseur-headers-http/" class="pill-btn active">FR</a>
+      <a href="/tools/http-header-analyzer/" class="pill-btn">EN</a>
+    </div>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Fil d’Ariane">
+  <ol>
+    <li><a href="/fr/">Accueil</a></li>
+    <li><a href="/fr/outils/">Outils</a></li>
+    <li aria-current="page">Analyseur d’en‑têtes HTTP</li>
+  </ol>
+</nav>
+
+<main>
+<!-- HERO -->
+<div class="tool-hero">
+  <h1>Analyseur d’en‑têtes HTTP</h1>
+  <p>Collez n’importe quels en‑têtes de réponse HTTP. Obtenez immédiatement une note de sécurité, une explication en langage clair de chaque en‑tête et des corrections concrètes pour ce qui manque ou est mal configuré. 100 % côté client — rien ne quitte votre navigateur.</p>
+</div>
+
+<!-- MODE TABS -->
+<div class="mode-tabs" role="tablist">
+  <button class="mode-tab active" id="tab-single" onclick="switchMode('single')" role="tab">🔍 Analyser</button>
+  <button class="mode-tab" id="tab-compare" onclick="switchMode('compare')" role="tab">⚖️ Avant / Après</button>
+</div>
+
+<!-- SINGLE MODE -->
+<div id="mode-single">
+  <div class="input-panel">
+    <label class="input-label" for="headerInput">Collez les en‑têtes bruts de la réponse HTTP</label>
+    <textarea class="header-textarea" id="headerInput" placeholder="HTTP/1.1 200 OK&#10;Content-Type: text/html; charset=UTF-8&#10;Cache-Control: max-age=3600&#10;Strict-Transport-Security: max-age=31536000; includeSubDomains&#10;X-Frame-Options: DENY&#10;..." spellcheck="false" autocomplete="off"></textarea>
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="analyze()">Analyser les en‑têtes</button>
+      <button class="btn btn-ghost" onclick="clearAll()">Effacer</button>
+      <div class="example-links">
+        <span>Essayer :</span>
+        <a class="example-link" onclick="loadExample('secure')">Configuration sécurisée</a>
+        <a class="example-link" onclick="loadExample('minimal')">Configuration minimale</a>
+        <a class="example-link" onclick="loadExample('insecure')">Configuration non sécurisée</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+
+    <!-- SCORE BAND -->
+    <div class="score-band" id="scoreBand">
+      <div class="grade-circle" id="gradeCircle">
+        <div class="grade-letter" id="gradeLetter">A</div>
+        <div class="grade-plus" id="gradePlus"></div>
+      </div>
+      <div class="score-details">
+        <h2 id="scoreTitle">Note de sécurité</h2>
+        <p class="score-subtitle" id="scoreSubtitle"></p>
+        <div class="score-bar-wrap"><div class="score-bar" id="scoreBar"></div></div>
+        <div class="score-stats" id="scoreStats"></div>
+      </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="issues-grid" id="issuesGrid"></div>
+
+    <!-- SECURITY HEADERS -->
+    <div class="sec-headers-panel" id="secPanel">
+      <div class="section-heading">En‑têtes de sécurité <span class="badge" id="secBadge"></span></div>
+      <div id="secRows"></div>
+    </div>
+
+    <!-- ALL HEADERS -->
+    <div class="all-headers-panel" id="allPanel">
+      <div class="section-heading">Tous les en‑têtes <span class="badge badge-pass" id="totalBadge"></span></div>
+      <div id="allRows"></div>
+    </div>
+
+  </div><!-- /results -->
+</div><!-- /mode-single -->
+
+<!-- COMPARE MODE -->
+<div id="mode-compare" style="display:none">
+  <div class="input-panel">
+    <div class="compare-grid">
+      <div>
+        <label class="input-label" for="beforeInput">Avant (configuration d’origine)</label>
+        <textarea class="header-textarea" id="beforeInput" placeholder="Collez vos en‑têtes avant ici..." spellcheck="false"></textarea>
+      </div>
+      <div>
+        <label class="input-label" for="afterInput">Après (nouvelle configuration)</label>
+        <textarea class="header-textarea" id="afterInput" placeholder="Collez vos en‑têtes après ici..." spellcheck="false"></textarea>
+      </div>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="compareHeaders()">Comparer</button>
+      <button class="btn btn-ghost" onclick="clearCompare()">Effacer</button>
+      <div class="example-links">
+        <span>Essayer :</span>
+        <a class="example-link" onclick="loadCompareExample()">Exemple de migration nginx</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="compare-results" id="compareResults">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="score-band">
+        <div class="grade-circle" id="gradeCircleBefore"></div>
+        <div class="score-details"><h2>Avant</h2><div class="score-bar-wrap"><div class="score-bar" id="scoreBarBefore"></div></div><p class="score-subtitle" id="subtitleBefore"></p></div>
+      </div>
+      <div class="score-band">
+        <div class="grade-circle" id="gradeCircleAfter"></div>
+        <div class="score-details"><h2>Après</h2><div class="score-bar-wrap"><div class="score-bar" id="scoreBarAfter"></div></div><p class="score-subtitle" id="subtitleAfter"></p></div>
+      </div>
+    </div>
+    <div class="all-headers-panel">
+      <div class="section-heading">Modifications détectées</div>
+      <div class="compare-columns">
+        <div class="compare-col before"><h3>⬅ Avant</h3><div id="diffBefore"></div></div>
+        <div class="compare-col after"><h3>Après ➡</h3><div id="diffAfter"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ARTICLE ── -->
+<section class="article-section" itemscope itemtype="https://schema.org/Article">
+  <meta itemprop="author" content="Mathias Kouadio">
+  <meta itemprop="datePublished" content="2026-06-08">
+
+  <h2>Pourquoi les en‑têtes HTTP sont plus importants qu’on ne le pense</h2>
+  <p>Les en‑têtes HTTP sont la première chose qu’un navigateur lit lorsqu’il reçoit une réponse — avant même le moindre octet de HTML. Ils indiquent au navigateur comment restituer le contenu, ce qu’il doit mettre en cache, quelles origines sont fiables et comment protéger l’utilisateur. Un seul en‑tête manquant peut exposer les utilisateurs au détournement de clic, au cross‑site scripting ou à des attaques de l’homme du milieu. Un en‑tête <code>Cache-Control</code> mal configuré peut diffuser des données obsolètes pendant des heures.</p>
+  <p>Le problème, c’est que les en‑têtes sont invisibles lors de la navigation habituelle. Ils vivent dans le panneau Réseau des DevTools, dans la sortie de <code>curl -I</code> ou dans les fichiers de configuration Nginx — pas dans la page elle‑même. Cet outil les rend visibles, explique chacun d’entre eux en langage clair et vous indique ceux qui vous manquent avant qu’un attaquant ne s’en aperçoive.</p>
+
+  <h2>Les en‑têtes de sécurité que tout serveur de production devrait avoir</h2>
+
+  <h3>Strict-Transport-Security (HSTS)</h3>
+  <p>Indique au navigateur de toujours utiliser HTTPS pour ce domaine, même si l’utilisateur tape <code>http://</code>. Sans cela, un attaquant réseau peut intercepter la première requête HTTP avant la redirection vers HTTPS. La valeur recommandée est <code>max-age=31536000; includeSubDomains</code> (un an). L’ajout de <code>preload</code> enregistre également le domaine dans les listes de préchargement des navigateurs, empêchant toute connexion HTTP.</p>
+
+  <h3>Content-Security-Policy (CSP)</h3>
+  <p>Définit quelles sources de scripts, styles, images et polices sont autorisées. C’est la principale défense contre le cross‑site scripting (XSS). Une CSP stricte comme <code>default-src 'self'; script-src 'self'</code> empêche l’exécution de scripts injectés. La CSP est l’en‑tête le plus complexe à configurer correctement — l’outil met en évidence les valeurs dangereusement permissives telles que <code>unsafe-inline</code> et <code>unsafe-eval</code>.</p>
+
+  <h3>X-Frame-Options</h3>
+  <p>Empêche votre page d’être chargée dans une <code>&lt;iframe&gt;</code> sur un domaine différent — la défense classique contre le détournement de clic. Utilisez <code>DENY</code> pour bloquer complètement l’affichage dans une iframe, ou <code>SAMEORIGIN</code> pour l’autoriser uniquement depuis votre propre domaine. Note : l’équivalent moderne est la directive CSP <code>frame-ancestors</code>, plus flexible.</p>
+
+  <h3>X-Content-Type-Options</h3>
+  <p>Régler cet en‑tête à <code>nosniff</code> empêche les navigateurs de deviner le type MIME du contenu. Sans cela, un navigateur pourrait exécuter un fichier texte comme du JavaScript si une balise script pointe dessus. Une ligne, une énorme protection. Il n’y a aucune raison de ne pas le définir.</p>
+
+  <h3>Referrer-Policy</h3>
+  <p>Contrôle la quantité d’informations incluses dans l’en‑tête <code>Referer</code> lors de la navigation entre pages. Sans cet en‑tête, l’URL complète (y compris les paramètres de requête, qui peuvent contenir des jetons de session) est envoyée aux sites tiers. <code>strict-origin-when-cross-origin</code> est la valeur par défaut recommandée en 2026.</p>
+
+  <h3>Permissions-Policy</h3>
+  <p>Le successeur de <code>Feature-Policy</code>. Restreint l’accès aux API du navigateur comme la caméra, le microphone, la géolocalisation et les paiements. Si votre application n’utilise pas la caméra, définir <code>camera=()</code> signifie qu’un script compromis ne pourra jamais y accéder.</p>
+
+  <h2>En‑têtes qui fuient des informations — supprimez‑les ou masquez‑les</h2>
+
+  <h3>Server</h3>
+  <p>Des en‑têtes comme <code>Server: Apache/2.4.51 (Ubuntu)</code> ou <code>Server: nginx/1.18.0</code> révèlent votre logiciel serveur et sa version à quiconque les consulte. Les attaquants s’en servent pour rechercher des CVE connues pour cette version précise. Définissez une valeur générique ou supprimez‑le entièrement : dans Nginx, <code>server_tokens off;</code>.</p>
+
+  <h3>X-Powered-By</h3>
+  <p>Ajouté par défaut par des frameworks comme Express.js et PHP. <code>X-Powered-By: Express</code> ou <code>X-Powered-By: PHP/8.1.0</code> est un renseignement gratuit pour un attaquant. Dans Express : <code>app.disable('x-powered-by')</code>. Dans PHP : <code>expose_php = Off</code> dans php.ini.</p>
+
+  <h2>Comprendre les directives Cache-Control</h2>
+  <p>Cache-Control est l’un des en‑têtes les plus importants pour la performance, mais ses directives sont souvent mal comprises :</p>
+  <ul style="margin-left:20px;color:var(--text2);font-size:.93rem;line-height:2">
+    <li><code>max-age=N</code> — mettre en cache la réponse pendant N secondes</li>
+    <li><code>no-store</code> — ne jamais mettre en cache cette réponse (données sensibles)</li>
+    <li><code>no-cache</code> — mettre en cache mais toujours revalider auprès du serveur avant de servir</li>
+    <li><code>private</code> — seul le navigateur peut mettre en cache (pas les CDN ni les proxys)</li>
+    <li><code>public</code> — les CDN et les proxys peuvent mettre en cache</li>
+    <li><code>stale-while-revalidate=N</code> — servir du contenu périmé pendant N secondes tout en récupérant une version fraîche en arrière‑plan</li>
+    <li><code>immutable</code> — la ressource ne changera jamais ; saute complètement la revalidation</li>
+  </ul>
+
+  <h2>Comment la note de sécurité est calculée</h2>
+  <p>Le score commence à 100 et des points sont déduits pour chaque en‑tête de sécurité manquant ou mal configuré. Voici l’échelle de notation :</p>
+  <ul style="margin-left:20px;color:var(--text2);font-size:.93rem;line-height:2">
+    <li><strong>A+ (95–100) :</strong> tous les en‑têtes de sécurité critiques présents et bien configurés</li>
+    <li><strong>A (85–94) :</strong> la plupart des en‑têtes de sécurité présents, aucun problème critique</li>
+    <li><strong>B (70–84) :</strong> quelques en‑têtes de sécurité présents, des lacunes mineures</li>
+    <li><strong>C (50–69) :</strong> des en‑têtes de sécurité importants sont manquants</li>
+    <li><strong>D (30–49) :</strong> la plupart des en‑têtes de sécurité sont absents</li>
+    <li><strong>F (0–29) :</strong> configuration de sécurité critique manquante</li>
+  </ul>
+
+  <h2>Foire aux questions</h2>
+  <div>
+    <details class="faq-item">
+      <summary>Comment obtenir les en‑têtes HTTP de mon site web ?</summary>
+      <div class="faq-answer">
+        <p>Trois méthodes : (1) Outils de développement du navigateur → onglet Réseau → cliquez sur une requête → panneau En‑têtes → copiez la section En‑têtes de réponse. (2) Terminal : <code>curl -I https://votresite.com</code>. (3) Terminal avec tous les en‑têtes : <code>curl -D - https://votresite.com -o /dev/null</code>. Collez la sortie directement dans cet outil.</p>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>Mes données sont‑elles envoyées à un serveur lorsque j’utilise cet outil ?</summary>
+      <div class="faq-answer">
+        <p>Non. Toute l’analyse s’effectue dans votre navigateur grâce à JavaScript. Vos en‑têtes — qui peuvent contenir des détails de configuration sensibles — ne quittent jamais votre machine. C’est pourquoi nous avons conçu cet outil en pur côté client plutôt que de demander une URL qui nécessiterait un proxy côté serveur.</p>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>Ma CSP contient unsafe-inline. Est‑ce toujours mauvais ?</summary>
+      <div class="faq-answer">
+        <p>Presque toujours. <code>unsafe-inline</code> autorise les balises <code>&lt;script&gt;</code> en ligne et les attributs d’événements JavaScript, exactement ce qu’injectent les attaques XSS. Si vous avez besoin de scripts en ligne, utilisez plutôt une CSP basée sur un nonce : <code>script-src 'nonce-{aléatoire}'</code>. Pour les styles en ligne, envisagez de les déplacer dans une feuille de style. Il y a très peu de raisons légitimes d’utiliser <code>unsafe-inline</code> dans une application de production.</p>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>Quelle est la différence entre X-Frame-Options et CSP frame-ancestors ?</summary>
+      <div class="faq-answer">
+        <p><code>X-Frame-Options</code> est l’ancien en‑tête (2008) avec trois options : <code>DENY</code>, <code>SAMEORIGIN</code> et la désormais dépréciée <code>ALLOW-FROM</code>. La directive CSP <code>frame-ancestors</code> est l’équivalent moderne et plus flexible — elle prend en charge plusieurs origines autorisées, les jokers et <code>'none'</code> (équivalent à <code>DENY</code>). Si vous utilisez CSP avec <code>frame-ancestors</code>, vous pouvez omettre <code>X-Frame-Options</code>, mais conserver les deux offre une défense en profondeur pour les navigateurs plus anciens.</p>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>Comment ajouter des en‑têtes de sécurité dans Nginx ?</summary>
+      <div class="faq-answer">
+        <p>Ajoutez ces directives dans votre bloc <code>server</code> ou <code>location</code> de votre configuration Nginx :</p>
+        <pre>add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+add_header X-Frame-Options "DENY" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+server_tokens off;</pre>
+        <p>Puis rechargez : <code>nginx -t &amp;&amp; systemctl reload nginx</code></p>
+      </div>
+    </details>
+  </div>
+
+  <h3 style="margin-top:28px">Outils associés</h3>
+  <ul style="margin-left:20px;color:var(--text2);font-size:.88rem;line-height:2.2">
+    <li><a href="/fr/outils/decodeur-jwt/">Décodeur JWT</a> — inspectez les jetons d’authentification qui apparaissent dans les en‑têtes Authorization</li>
+    <li><a href="/fr/outils/encodeur-decodeur-url/">Encodeur / Décodeur d’URL</a> — décodez les valeurs encodées en pourcentage dans les en‑têtes Location ou Cookie</li>
+    <li><a href="/fr/outils/encodeur-base64/">Encodeur Base64</a> — décodez les valeurs d’en‑tête encodées en Base64 (Basic Auth, clés d’API)</li>
+    <li><a href="/fr/outils/formateur-json/">Formateur JSON</a> — formatez les charges JSON dans les réponses d’API</li>
+  </ul>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/fr/">DevToolbox</a> — Outils gratuits côté client pour développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/fr/contact/">Contact</a></p>
+</footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   BASE DE CONNAISSANCES DES EN‑TÊTES (traduite)
+═══════════════════════════════════════════════════════ */
+const HEADER_DB = {
+  /* ── SECURITE ── */
+  'strict-transport-security': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      const parts={};
+      v.toLowerCase().split(';').forEach(p=>{const t=p.trim();if(t.startsWith('max-age='))parts.maxAge=parseInt(t.split('=')[1]);if(t.includes('includesubdomains'))parts.subdomains=true;if(t.includes('preload'))parts.preload=true;});
+      let msg=`HSTS (HTTP Strict Transport Security) indique au navigateur de toujours se connecter à ce domaine en HTTPS pour les <strong>${parts.maxAge?Math.round(parts.maxAge/86400)+' prochains jours':v}</strong>.`;
+      if(parts.subdomains)msg+=` La directive <strong>includeSubDomains</strong> étend cette règle à tous les sous‑domaines.`;
+      if(parts.preload)msg+=` Le drapeau <strong>preload</strong> enregistre ce domaine dans les listes de préchargement des navigateurs — aucune connexion HTTP ne sera jamais autorisée.`;
+      if(!parts.maxAge||parts.maxAge<86400)msg+=` ⚠️ La durée est très courte. Recommandation : au moins <code>max-age=31536000</code> (1 an).`;
+      return msg;
+    },
+    desc:'Force les connexions HTTPS et empêche les attaques de rétrogradation de protocole.'
+  },
+  'content-security-policy': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      const dangerous=['unsafe-inline','unsafe-eval','*','data:','http:'];
+      const found=dangerous.filter(d=>v.toLowerCase().includes(d));
+      let msg=`La Content Security Policy définit quelles sources de scripts, styles, images et autres ressources le navigateur est autorisé à charger. C’est la principale défense contre le cross‑site scripting (XSS).`;
+      if(found.length>0)msg+=` ⚠️ <strong>Directives dangereuses détectées :</strong> <code>${found.join(', ')}</code> — elles affaiblissent considérablement la protection CSP.`;
+      if(v.includes("'nonce-"))msg+=` ✅ CSP basée sur un nonce détectée — c’est le modèle recommandé pour autoriser les scripts en ligne.`;
+      return msg;
+    },
+    desc:'Définit les sources fiables pour les scripts, styles, images et plus encore.'
+  },
+  'x-frame-options': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      const val=v.trim().toUpperCase();
+      if(val==='DENY')return`Protection anti‑clic : cette page <strong>ne peut être chargée dans aucune iframe</strong>, sur aucun domaine, y compris le vôtre. Le réglage le plus strict.`;
+      if(val==='SAMEORIGIN')return`Protection anti‑clic : cette page <strong>ne peut être mise en iframe que par des pages de la même origine</strong> (même schéma, hôte et port). L’affichage par des tiers est bloqué.`;
+      if(val.startsWith('ALLOW-FROM'))return`Protection anti‑clic avec une origine autorisée. Note : <code>ALLOW-FROM</code> est <strong>déprécié</strong> et ignoré par la plupart des navigateurs modernes. Utilisez plutôt CSP <code>frame-ancestors</code>.`;
+      return`X-Frame-Options contrôle l’intégration dans une iframe. Valeur non reconnue : <code>${v}</code>. Attendu : <code>DENY</code> ou <code>SAMEORIGIN</code>.`;
+    },
+    desc:'Empêche l’intégration de la page dans une iframe (défense contre le détournement de clic).'
+  },
+  'x-content-type-options': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      if(v.trim().toLowerCase()==='nosniff')return`Défini sur <code>nosniff</code>. ✅ Cela empêche le navigateur <strong>de deviner le type MIME</strong> de la réponse. Sans cela, un navigateur pourrait exécuter un fichier JavaScript servi en tant que <code>text/plain</code>, ouvrant la voie à une catégorie d’attaques XSS.`;
+      return`Valeur : <code>${v}</code>. La seule valeur utile est <code>nosniff</code>. Toute autre valeur n’offre aucune protection.`;
+    },
+    desc:'Empêche la détection automatique du type MIME, bloquant une classe d’attaques XSS.'
+  },
+  'referrer-policy': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      const policies={
+        'no-referrer':'Le navigateur n’envoie <strong>aucun en‑tête Referer</strong> dans aucune requête.',
+        'no-referrer-when-downgrade':'L’URL complète est envoyée comme Referer pour les requêtes de même niveau de sécurité (HTTPS→HTTPS), mais rien n’est envoyé pour les requêtes de niveau inférieur (HTTPS→HTTP). C’est le comportement par défaut du navigateur sans cet en‑tête.',
+        'origin':'Seule l’origine (schéma + hôte) est envoyée, jamais le chemin complet ni la chaîne de requête.',
+        'origin-when-cross-origin':'URL complète pour les requêtes même origine ; uniquement l’origine pour les requêtes inter‑origine.',
+        'same-origin':'L’URL complète est envoyée uniquement pour les requêtes même origine. Pas de Referer pour les requêtes inter‑origine.',
+        'strict-origin':'Seule l’origine est envoyée, et uniquement pour les requêtes de même niveau de sécurité (HTTPS→HTTPS).',
+        'strict-origin-when-cross-origin':'URL complète pour la même origine ; origine seule pour les requêtes inter‑origine ; rien pour HTTPS→HTTP. ✅ C’est la valeur recommandée en 2026.',
+        'unsafe-url':'⚠️ L’URL complète (y compris les paramètres de requête) est toujours envoyée, même vers les origines HTTP. Cela peut divulguer des paramètres sensibles comme des jetons de session.'
+      };
+      return policies[v.toLowerCase().trim()]||`Contrôle la quantité d’informations Referer incluses dans les requêtes. Valeur : <code>${v}</code>.`;
+    },
+    desc:'Contrôle la quantité d’informations d’URL partagées via l’en‑tête Referer.'
+  },
+  'permissions-policy': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      const features=v.split(',').map(f=>f.trim());
+      const disabled=features.filter(f=>f.includes('=()')).map(f=>f.split('=')[0]);
+      const allowed=features.filter(f=>!f.includes('=()')).map(f=>f.split('=')[0]);
+      let msg=`Permissions Policy contrôle l’accès aux API et fonctionnalités du navigateur.`;
+      if(disabled.length)msg+=` <strong>Fonctionnalités désactivées :</strong> ${disabled.map(f=>`<code>${f}</code>`).join(', ')}.`;
+      if(allowed.length)msg+=` <strong>Fonctionnalités autorisées/spécifiées :</strong> ${allowed.map(f=>`<code>${f}</code>`).join(', ')}.`;
+      return msg;
+    },
+    desc:'Restreint l’accès aux API du navigateur (caméra, micro, géolocalisation, etc.).'
+  },
+  'x-xss-protection': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      if(v.trim()==='0')return`Défini sur <code>0</code> — l’auditeur XSS est <strong>désactivé</strong>. C’est en réalité la valeur recommandée aujourd’hui car l’auditeur XSS intégré du navigateur peut introduire de nouvelles vulnérabilités. Utilisez plutôt CSP.`;
+      if(v.includes('1'))return`⚠️ Défini sur <code>${v}</code>. L’auditeur XSS intégré du navigateur est activé. Cet en‑tête est <strong>déprécié</strong> et devrait être remplacé par une Content-Security-Policy appropriée. Certaines configurations de cet en‑tête peuvent introduire de nouveaux problèmes de sécurité.`;
+      return`X-XSS-Protection : <code>${v}</code>. Cet en‑tête est déprécié. Réglez‑le sur <code>0</code> et utilisez CSP à la place.`;
+    },
+    desc:'Contrôle de l’auditeur XSS déprécié — utilisez CSP à la place.'
+  },
+  'cross-origin-opener-policy': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      const vals={'unsafe-none':'Pas d’isolation (par défaut). Les fenêtres inter‑origine peuvent interagir.','same-origin-allow-popups':'Isole la fenêtre des documents inter‑origine sauf les popups qu’elle ouvre.','same-origin':'✅ Isolation complète. Les documents inter‑origine dans le même groupe de contexte de navigation sont empêchés. Requis pour SharedArrayBuffer et les timers haute résolution.'};
+      return (vals[v.toLowerCase().trim()]||`Valeur : <code>${v}</code>. Contrôle l’isolation des fenêtres inter‑origine.`)+` COOP fait partie de la suite d’isolation inter‑origine avec COEP et CORP.`;
+    },
+    desc:'Contrôle l’isolation des fenêtres inter‑origine (requis pour SharedArrayBuffer).'
+  },
+  'cross-origin-embedder-policy': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      if(v.toLowerCase().includes('require-corp'))return`Défini sur <code>require-corp</code>. ✅ Seules les ressources qui autorisent explicitement l’intégration inter‑origine (via CORP ou CORS) peuvent être chargées. Requis pour l’isolation inter‑origine.`;
+      if(v.toLowerCase().includes('unsafe-none'))return`Défini sur <code>unsafe-none</code>. Aucune restriction d’intégration inter‑origine (par défaut du navigateur).`;
+      return`Cross-Origin Embedder Policy. Valeur : <code>${v}</code>.`;
+    },
+    desc:'Exige que les ressources inter‑origine acceptent d’être intégrées.'
+  },
+  'cross-origin-resource-policy': {
+    type:'security', tag:'Sécurité',
+    explain:(v)=>{
+      const vals={'same-origin':'Seuls les documents de la même origine peuvent lire cette ressource.','same-site':'Seuls les documents du même site (sous‑domaines inclus) peuvent lire cette ressource.','cross-origin':'Toute origine peut lire cette ressource.'};
+      return (vals[v.toLowerCase().trim()]||`Valeur : <code>${v}</code>.`)+` CORP empêche d’autres origines de charger cette ressource dans certains scénarios (attaques de type Spectre).`;
+    },
+    desc:'Contrôle quelles origines peuvent lire cette ressource (atténuation Spectre).'
+  },
+
+  /* ── CACHE ── */
+  'cache-control': {
+    type:'caching', tag:'Cache',
+    explain:(v)=>{
+      const directives=v.split(',').map(d=>d.trim().toLowerCase());
+      const msgs=[];
+      directives.forEach(d=>{
+        if(d.startsWith('max-age='))msgs.push(`Mise en cache pendant <strong>${Math.round(parseInt(d.split('=')[1])/3600)} heures</strong> (max-age=${d.split('=')[1]}s)`);
+        else if(d==='no-store')msgs.push(`<strong>Ne jamais mettre en cache</strong> cette réponse — approprié pour les données sensibles`);
+        else if(d==='no-cache')msgs.push(`Mise en cache mais <strong>toujours revalider</strong> avant de servir`);
+        else if(d==='private')msgs.push(`Seul le <strong>cache du navigateur</strong> peut stocker cette réponse (pas les CDN ni les proxys)`);
+        else if(d==='public')msgs.push(`Les <strong>CDN et proxys</strong> peuvent mettre en cache cette réponse`);
+        else if(d.startsWith('s-maxage='))msgs.push(`TTL du cache partagé/CDN : <strong>${Math.round(parseInt(d.split('=')[1])/3600)} heures</strong>`);
+        else if(d.startsWith('stale-while-revalidate='))msgs.push(`Servir du contenu périmé pendant <strong>${d.split('=')[1]}s</strong> tout en récupérant une version fraîche en arrière‑plan`);
+        else if(d==='immutable')msgs.push(`La ressource est <strong>immuable</strong> — le navigateur ignorera la revalidation pendant la durée max-age`);
+        else if(d==='must-revalidate')msgs.push(`Doit revalider auprès de l’origine une fois périmé`);
+      });
+      return msgs.length?`Directives Cache-Control : ${msgs.join('; ')}.`:`Cache-Control : <code>${v}</code>.`;
+    },
+    desc:'Contrôle le comportement de mise en cache pour les navigateurs et les CDN.'
+  },
+  'etag': {
+    type:'caching', tag:'Cache',
+    explain:(v)=>{
+      const isWeak=v.startsWith('W/');
+      return`ETag est un jeton de validation de cache. Le navigateur l’envoie dans <code>If-None-Match</code> lors des requêtes suivantes. Si la ressource n’a pas changé, le serveur renvoie <code>304 Not Modified</code> au lieu de la réponse complète.${isWeak?` Il s’agit d’un <strong>ETag faible</strong> (préfixe W/) — il indique une équivalence sémantique mais pas une identité octet par octet.`:''} Valeur : <code>${v}</code>.`;
+    },
+    desc:'Jeton de validation de cache pour les requêtes conditionnelles.'
+  },
+  'last-modified': {
+    type:'caching', tag:'Cache',
+    explain:(v)=>{
+      return`Last-Modified fournit un horodatage de la dernière modification de la ressource. Les navigateurs l’utilisent dans les requêtes <code>If-Modified-Since</code> pour la validation du cache. Il est moins précis que ETag pour l’invalidation du cache. Valeur : <code>${v}</code>.`;
+    },
+    desc:'Horodatage de la dernière modification de la ressource pour la validation du cache.'
+  },
+  'expires': {
+    type:'caching', tag:'Cache',
+    explain:(v)=>{
+      if(v.trim()==='-1'||v.trim()==='0')return`Expires : <code>${v}</code> signifie que la réponse est <strong>immédiatement périmée</strong> — le navigateur ne doit pas la mettre en cache. Cependant, <code>Cache-Control: no-store</code> est la manière moderne d’exprimer cela.`;
+      return`Expires définit une date d’expiration absolue : <code>${v}</code>. Cet en‑tête est supplanté par <code>Cache-Control: max-age</code> lorsque les deux sont présents. Préférez Cache-Control pour un contrôle moderne du cache.`;
+    },
+    desc:'Date d’expiration absolue (supplantée par Cache-Control).'
+  },
+  'vary': {
+    type:'caching', tag:'Cache',
+    explain:(v)=>{
+      const fields=v.split(',').map(f=>f.trim());
+      let msg=`Vary indique aux caches de stocker des versions distinctes de cette ressource en fonction des en‑têtes de requête listés : <strong>${fields.join(', ')}</strong>.`;
+      if(v.toLowerCase().includes('accept-encoding'))msg+=` <code>Accept-Encoding</code> signifie que différentes versions sont mises en cache pour les réponses compressées (gzip/br) et non compressées.`;
+      if(v.toLowerCase().includes('origin'))msg+=` <code>Origin</code> dans Vary est couramment utilisé avec les réponses CORS.`;
+      if(v==='*')msg+=` ⚠️ <code>Vary: *</code> signifie qu’aucune mise en cache n’est possible car chaque requête est considérée comme unique.`;
+      return msg;
+    },
+    desc:'Indique aux caches de baser la clé de cache sur des en‑têtes de requête spécifiques.'
+  },
+  'age': {
+    type:'caching', tag:'Cache',
+    explain:(v)=>{
+      return`Age indique que cette réponse a été servie depuis un <strong>cache CDN ou proxy</strong>. La valeur <code>${v}</code> signifie qu’elle est dans le cache depuis <strong>${v} secondes</strong> (${Math.round(parseInt(v)/60)} minutes). Elle n’a pas été récupérée fraîchement de l’origine pour cette requête.`;
+    },
+    desc:'Temps en secondes pendant lequel la réponse est restée dans un cache proxy/CDN.'
+  },
+
+  /* ── CONTENU ── */
+  'content-type': {
+    type:'content', tag:'Contenu',
+    explain:(v)=>{
+      const[mime,...params]=v.split(';');
+      const charsets=params.find(p=>p.trim().startsWith('charset'));
+      let msg=`Content-Type indique au navigateur le type de données de cette réponse : <strong>${mime.trim()}</strong>.`;
+      if(charsets)msg+=` Encodage des caractères : <strong>${charsets.split('=')[1]?.trim()}</strong>.`;
+      if(mime.trim()==='text/html'&&!charsets)msg+=` ⚠️ Aucun charset spécifié pour le HTML. Ajoutez <code>; charset=UTF-8</code> pour éviter toute ambiguïté d’encodage.`;
+      return msg;
+    },
+    desc:'Le type MIME du corps de la réponse.'
+  },
+  'content-encoding': {
+    type:'content', tag:'Contenu',
+    explain:(v)=>{
+      const enc={'gzip':'Compressé avec <strong>gzip</strong> — un algorithme de compression largement supporté.','br':'Compressé avec <strong>Brotli</strong> — meilleur taux de compression que gzip, supporté par tous les navigateurs modernes.','deflate':'Compressé avec <strong>deflate</strong>. Moins courant que gzip.','identity':'Aucune compression appliquée.'};
+      return (enc[v.toLowerCase()]||`Encodage : <code>${v}</code>`)+` Le navigateur décompressera la réponse avant de la traiter.`;
+    },
+    desc:'Algorithme de compression appliqué au corps de la réponse.'
+  },
+  'content-length': {
+    type:'content', tag:'Contenu',
+    explain:(v)=>{
+      const bytes=parseInt(v);
+      let size;
+      if(bytes<1024)size=`${bytes} octets`;
+      else if(bytes<1048576)size=`${(bytes/1024).toFixed(1)} Ko`;
+      else size=`${(bytes/1048576).toFixed(2)} Mo`;
+      return`Le corps de la réponse fait <strong>${size}</strong> (${v} octets). Lorsque Content-Length est présent, la connexion peut être réutilisée (HTTP persistant) au lieu d’être fermée après la réponse.`;
+    },
+    desc:'Taille du corps de la réponse en octets.'
+  },
+  'content-language': {
+    type:'content', tag:'Contenu',
+    explain:(v)=>{ return`Déclare la langue du contenu : <strong>${v}</strong>. Utilisé par les navigateurs et les lecteurs d’écran pour choisir la langue appropriée pour le rendu.`; },
+    desc:'Langue du contenu de la réponse.'
+  },
+  'transfer-encoding': {
+    type:'content', tag:'Contenu',
+    explain:(v)=>{
+      if(v.toLowerCase()==='chunked')return`Le corps de la réponse est envoyé en <strong>morceaux</strong> (chunks) plutôt qu’en un seul bloc. Cela permet au serveur de commencer à envoyer des données avant d’en connaître la taille totale — utile pour les réponses de streaming comme les événements envoyés par le serveur ou les téléchargements de fichiers volumineux.`;
+      return`Transfer-Encoding : <code>${v}</code>. Contrôle la manière dont le corps de la réponse est transmis.`;
+    },
+    desc:'Encodage utilisé pour le transfert des données (chunked, etc.).'
+  },
+
+  /* ── CORS ── */
+  'access-control-allow-origin': {
+    type:'cors', tag:'CORS',
+    explain:(v)=>{
+      if(v==='*')return`⚠️ <strong>CORS avec joker</strong> : toute origine peut effectuer des requêtes inter‑origine vers ce point de terminaison. C’est acceptable pour les API entièrement publiques et non authentifiées (comme une API météo ou de recherche publique), mais dangereux pour les API qui utilisent des cookies ou une authentification par session, car les navigateurs n’enverront pas d’informations d’identification avec le joker CORS.`;
+      if(v==='null')return`⚠️ L’origine <code>null</code> est autorisée. Cela peut être exploité par des attaquants utilisant des iframes sandboxed, qui envoient <code>Origin: null</code>. À éviter sauf raison spécifique.`;
+      return`Seules les requêtes depuis <strong><code>${v}</code></strong> sont autorisées à lire cette réponse en inter‑origine. C’est le modèle CORS attendu pour les API authentifiées.`;
+    },
+    desc:'Contrôle quelles origines peuvent lire la réponse en inter‑origine.'
+  },
+  'access-control-allow-methods': {
+    type:'cors', tag:'CORS',
+    explain:(v)=>{ return`Réponse de pré‑vérification CORS : les méthodes HTTP suivantes sont autorisées pour les requêtes inter‑origine : <strong>${v}</strong>.`; },
+    desc:'Méthodes HTTP autorisées dans les requêtes inter‑origine.'
+  },
+  'access-control-allow-headers': {
+    type:'cors', tag:'CORS',
+    explain:(v)=>{ return`Pré‑vérification CORS : les en‑têtes de requête suivants peuvent être utilisés dans les requêtes inter‑origine : <strong>${v}</strong>.`; },
+    desc:'En‑têtes de requête autorisés dans les requêtes inter‑origine.'
+  },
+  'access-control-allow-credentials': {
+    type:'cors', tag:'CORS',
+    explain:(v)=>{
+      if(v.toLowerCase()==='true')return`Les informations d’identification (cookies, en‑têtes d’autorisation, certificats client TLS) <strong>sont autorisées</strong> dans les requêtes inter‑origine. ⚠️ Lorsque ceci est <code>true</code>, l’en‑tête <code>Access-Control-Allow-Origin</code> doit spécifier une origine concrète — pas <code>*</code>.`;
+      return`Les informations d’identification ne sont pas autorisées dans les requêtes inter‑origine (<code>${v}</code>).`;
+    },
+    desc:'Indique si les cookies/en‑têtes d’authentification sont autorisés dans les requêtes inter‑origine.'
+  },
+  'access-control-max-age': {
+    type:'cors', tag:'CORS',
+    explain:(v)=>{ return`Les résultats de la requête de pré‑vérification CORS sont mis en cache pendant <strong>${v} secondes</strong> (${Math.round(parseInt(v)/60)} minutes). Cela réduit les requêtes OPTIONS de pré‑vérification.`; },
+    desc:'Durée de mise en cache du résultat de la pré‑vérification.'
+  },
+
+  /* ── SERVEUR ── */
+  'server': {
+    type:'server', tag:'Info serveur',
+    explain:(v)=>{
+      if(v.match(/\d+\.\d+/))return`⚠️ <strong>Logiciel serveur et version exposés</strong> : <code>${v}</code>. Cela donne aux attaquants une piste directe vers des CVE spécifiques à la version. Configurez votre serveur pour omettre le numéro de version ou utilisez une valeur générique. Dans Nginx : <code>server_tokens off;</code>`;
+      return`Logiciel serveur : <code>${v}</code>. Le numéro de version n’est pas exposé, ce qui est une bonne chose. Envisagez de définir une valeur générique ou de le supprimer entièrement.`;
+    },
+    desc:'Identifie le logiciel serveur — peut divulguer des informations de version.'
+  },
+  'x-powered-by': {
+    type:'server', tag:'Info serveur',
+    explain:(v)=>{ return`⚠️ <strong>Empreinte du framework exposée</strong> : <code>${v}</code>. Cet en‑tête révèle votre pile technologique à quiconque le regarde, ce qui facilite les attaques ciblées. Supprimez‑le. Dans Express : <code>app.disable('x-powered-by')</code>. Dans PHP : <code>expose_php = Off</code> dans php.ini.`; },
+    desc:'Révèle le framework/la technologie — à supprimer en production.'
+  },
+  'x-aspnet-version': {
+    type:'server', tag:'Info serveur',
+    explain:(v)=>{ return`⚠️ <strong>Version ASP.NET exposée</strong> : <code>${v}</code>. Supprimez‑la en ajoutant <code>&lt;httpRuntime enableVersionHeader="false" /&gt;</code> à votre web.config.`; },
+    desc:'Expose la version ASP.NET — supprimez cet en‑tête.'
+  },
+  'x-aspnetmvc-version': {
+    type:'server', tag:'Info serveur',
+    explain:(v)=>{ return`⚠️ <strong>Version ASP.NET MVC exposée</strong> : <code>${v}</code>. Supprimez‑la avec <code>MvcHandler.DisableMvcResponseHeader = true;</code> dans Global.asax.`; },
+    desc:'Expose la version ASP.NET MVC — supprimez cet en‑tête.'
+  },
+
+  /* ── DIVERS ── */
+  'date': {
+    type:'misc', tag:'Divers',
+    explain:(v)=>{ return`La date et l’heure auxquelles la réponse a été générée par le serveur d’origine : <code>${v}</code>.`; },
+    desc:'Horodatage de la génération de la réponse.'
+  },
+  'connection': {
+    type:'misc', tag:'Divers',
+    explain:(v)=>{
+      if(v.toLowerCase()==='keep-alive')return`La connexion TCP est maintenue ouverte pour d’autres requêtes — <strong>connexions persistantes</strong> (par défaut en HTTP/1.1). Cela réduit la latence en évitant la surcharge d’établissement de connexion pour les requêtes suivantes.`;
+      if(v.toLowerCase()==='close')return`Le serveur fermera la connexion TCP après cette réponse. Chaque requête nécessite une nouvelle connexion — moins efficace que keep-alive.`;
+      return`Connection : <code>${v}</code>.`;
+    },
+    desc:'Contrôle de la persistance de la connexion.'
+  },
+  'location': {
+    type:'misc', tag:'Redirection',
+    explain:(v)=>{ return`Emplacement de redirection : le client doit suivre la redirection vers <strong><code>${v}</code></strong>. Cet en‑tête est utilisé avec les codes de statut 3xx (301 Moved Permanently, 302 Found, 307 Temporary Redirect, etc.).`; },
+    desc:'URL cible de la redirection.'
+  },
+  'set-cookie': {
+    type:'misc', tag:'Cookie',
+    explain:(v)=>{
+      const flags=v.toLowerCase();
+      const issues=[];
+      if(!flags.includes('httponly'))issues.push(`<strong>HttpOnly est manquant</strong> — JavaScript peut lire ce cookie, permettant le vol de cookie via XSS`);
+      if(!flags.includes('secure'))issues.push(`<strong>Drapeau Secure manquant</strong> — le cookie sera envoyé via des connexions HTTP`);
+      if(!flags.includes('samesite'))issues.push(`<strong>SameSite n’est pas défini</strong> — vulnérable aux attaques CSRF`);
+      let msg=`Définit un cookie : <code>${v.split(';')[0]}</code>.`;
+      if(issues.length)msg+=` ⚠️ Problèmes : ${issues.join('; ')}.`;
+      else msg+=` ✅ Les drapeaux de sécurité semblent corrects.`;
+      return msg;
+    },
+    desc:'Définit un cookie navigateur — vérifiez les drapeaux HttpOnly, Secure, SameSite.'
+  },
+  'x-request-id': {
+    type:'misc', tag:'Traçage',
+    explain:(v)=>{ return`ID de traçage de requête : <code>${v}</code>. Utilisé pour corréler cette requête dans les logs serveur, les systèmes de traçage distribué (Jaeger, Zipkin) ou les outils de suivi d’erreurs (Sentry). Pas un problème de sécurité.`; },
+    desc:'Identifiant de corrélation de requête pour le traçage distribué.'
+  },
+  'cf-cache-status': {
+    type:'caching', tag:'CDN',
+    explain:(v)=>{
+      const statuses={'HIT':'Servi depuis le cache Cloudflare ✅','MISS':'Non trouvé dans le cache — récupéré depuis l’origine','EXPIRED':'Était dans le cache mais a expiré — récupéré fraîchement de l’origine','REVALIDATED':'Le cache a été revalidé','UPDATING':'Réponse périmée servie pendant la mise à jour en arrière‑plan','DYNAMIC':'Le contenu n’a pas été mis en cache par Cloudflare (par ex., pages dynamiques)','BYPASS':'Le cache a été contourné'};
+      return`Statut du cache CDN Cloudflare : <strong>${statuses[v.toUpperCase()]||v}</strong>.`;
+    },
+    desc:'Statut du cache Cloudflare pour cette réponse.'
+  },
+  'cf-ray': {
+    type:'misc', tag:'CDN',
+    explain:(v)=>{ return`Cloudflare Ray ID : <code>${v}</code>. Identifie de manière unique la requête dans le réseau de Cloudflare. Si vous contactez le support Cloudflare à propos d’un problème de requête, fournissez cet ID.`; },
+    desc:'Identifiant de requête Cloudflare pour le débogage.'
+  },
+  'x-cache': {
+    type:'caching', tag:'CDN',
+    explain:(v)=>{
+      const hit=v.toLowerCase().includes('hit');
+      return`Statut du cache CDN/proxy : <code>${v}</code>. ${hit?'✅ Servi depuis le cache — aucune requête à l’origine.':'Le serveur d’origine a été contacté pour cette réponse.'}`;
+    },
+    desc:'Statut de succès/échec du cache CDN ou proxy.'
+  },
+  'x-cache-status': {
+    type:'caching', tag:'CDN',
+    explain:(v)=>{ return`Statut du cache de votre CDN/proxy inverse : <strong>${v}</strong>.`; },
+    desc:'Indicateur d’état du cache du CDN/proxy.'
+  },
+  'via': {
+    type:'misc', tag:'Proxy',
+    explain:(v)=>{ return`Cette requête/réponse est passée par un ou plusieurs proxys : <code>${v}</code>. L’en‑tête Via liste les nœuds intermédiaires (caches, répartiteurs de charge, CDN) par lesquels le message est passé.`; },
+    desc:'Proxys et passerelles traversés par ce message.'
+  },
+  'link': {
+    type:'misc', tag:'Divers',
+    explain:(v)=>{ return`L’en‑tête Link fournit des métadonnées sur les ressources liées : <code>${v}</code>. Utilisations courantes : préchargement de ressources (<code>rel=preload</code>), pagination (<code>rel=next</code>/<code>rel=prev</code>), et relations de liens d’API.`; },
+    desc:'Liens vers des ressources associées (préchargement, pagination, etc.).'
+  },
+};
+
+/* ─────────────────────────────────────────────────────────────
+   CONFIGURATION DES EN‑TÊTES DE SÉCURITÉ (traduite)
+───────────────────────────────────────────────────────────── */
+const SEC_HEADERS = [
+  {
+    key:'strict-transport-security',
+    label:'Strict-Transport-Security',
+    impact:'Critique',
+    points:25,
+    missing:'HSTS n’est pas défini. Le navigateur peut tenter une connexion HTTP d’abord, ce qui est vulnérable aux attaques de rétrogradation.',
+    fix:'add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;',
+    check:(v)=>{
+      if(!v)return{status:'fail',msg:'Manquant — aucune protection HSTS.'};
+      const ma=v.match(/max-age=(\d+)/i);
+      if(ma&&parseInt(ma[1])<86400)return{status:'warn',msg:`max-age=${ma[1]}s est très court. Le minimum recommandé est 31536000 (1 an).`};
+      return{status:'pass',msg:'Présent et configuré. ✅'};
+    }
+  },
+  {
+    key:'content-security-policy',
+    label:'Content-Security-Policy',
+    impact:'Critique',
+    points:25,
+    fix:"Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'",
+    check:(v)=>{
+      if(!v)return{status:'fail',msg:'Manquante — aucune protection XSS par CSP.'};
+      const dangerous=['unsafe-inline','unsafe-eval','*'];
+      const found=dangerous.filter(d=>v.toLowerCase().includes(d));
+      if(found.length)return{status:'warn',msg:`Présente mais contient une ou des valeurs dangereuses : ${found.map(f=>`<code>${f}</code>`).join(', ')}.`};
+      return{status:'pass',msg:'Présente et aucune valeur manifestement dangereuse. ✅'};
+    }
+  },
+  {
+    key:'x-frame-options',
+    label:'X-Frame-Options',
+    impact:'Élevé',
+    points:15,
+    fix:'X-Frame-Options: DENY',
+    check:(v)=>{
+      if(!v){
+        return{status:'fail',msg:'Manquant — la page peut être intégrable dans des iframes (risque de détournement de clic).'};
+      }
+      const val=v.trim().toUpperCase();
+      if(val==='DENY'||val==='SAMEORIGIN')return{status:'pass',msg:`Défini sur <code>${val}</code>. ✅`};
+      if(val.startsWith('ALLOW-FROM'))return{status:'warn',msg:'ALLOW-FROM est déprécié et ignoré par les navigateurs modernes. Utilisez plutôt CSP frame-ancestors.'};
+      return{status:'warn',msg:`Valeur non reconnue : <code>${v}</code>.`};
+    }
+  },
+  {
+    key:'x-content-type-options',
+    label:'X-Content-Type-Options',
+    impact:'Moyen',
+    points:10,
+    fix:'X-Content-Type-Options: nosniff',
+    check:(v)=>{
+      if(!v)return{status:'fail',msg:'Manquant — le navigateur peut deviner le type MIME des réponses.'};
+      if(v.trim().toLowerCase()==='nosniff')return{status:'pass',msg:'Défini sur nosniff. ✅'};
+      return{status:'warn',msg:`La valeur devrait être <code>nosniff</code>, or elle est <code>${v}</code>.`};
+    }
+  },
+  {
+    key:'referrer-policy',
+    label:'Referrer-Policy',
+    impact:'Moyen',
+    points:10,
+    fix:'Referrer-Policy: strict-origin-when-cross-origin',
+    check:(v)=>{
+      if(!v)return{status:'warn',msg:'Non défini — le comportement par défaut du navigateur est no-referrer-when-downgrade, qui envoie les URL complètes vers les origines HTTPS.'};
+      const safe=['no-referrer','origin','same-origin','strict-origin','strict-origin-when-cross-origin','origin-when-cross-origin'];
+      const dangerous=['unsafe-url','no-referrer-when-downgrade'];
+      if(dangerous.includes(v.toLowerCase().trim()))return{status:'warn',msg:`<code>${v}</code> peut exposer les URL complètes, y compris les paramètres de requête, à des tiers.`};
+      if(safe.includes(v.toLowerCase().trim()))return{status:'pass',msg:`Défini sur <code>${v}</code>. ✅`};
+      return{status:'warn',msg:`Valeur non reconnue : <code>${v}</code>.`};
+    }
+  },
+  {
+    key:'permissions-policy',
+    label:'Permissions-Policy',
+    impact:'Faible',
+    points:5,
+    fix:"Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()",
+    check:(v)=>{
+      if(!v)return{status:'warn',msg:'Non définie — toutes les API du navigateur sont activées par défaut pour cette origine.'};
+      return{status:'pass',msg:'Présente. ✅ Passez en revue les restrictions listées.'};
+    }
+  },
+  {
+    key:'x-powered-by',
+    label:'X-Powered-By (devrait être absent)',
+    impact:'Faible',
+    points:5,
+    fix:"Dans Express : app.disable('x-powered-by') | Dans PHP : expose_php = Off",
+    check:(v)=>{
+      if(!v)return{status:'pass',msg:'Non présent — bien. ✅ Les informations sur le framework ne sont pas exposées.'};
+      return{status:'warn',msg:`Présent : <code>${v}</code>. Supprimez cet en‑tête — il révèle votre pile technologique.`};
+    },
+    inverse:true
+  },
+  {
+    key:'server',
+    label:'Server (la version devrait être masquée)',
+    impact:'Faible',
+    points:5,
+    fix:'Dans Nginx : server_tokens off; | Dans Apache : ServerTokens Prod',
+    check:(v)=>{
+      if(!v)return{status:'pass',msg:'Non présent — l’identité du serveur est entièrement masquée. ✅'};
+      if(v.match(/\d+\.\d+/))return{status:'warn',msg:`Numéro de version exposé : <code>${v}</code>. Supprimez la version avec <code>server_tokens off</code>.`};
+      return{status:'pass',msg:`Valeur générique : <code>${v}</code>. La version n’est pas exposée. ✅`};
+    },
+    inverse:true
+  }
+];
+
+/* ─────────────────────────────────────────────────────────────
+   EXEMPLES DE CHARGES (identiques)
+───────────────────────────────────────────────────────────── */
+const EXAMPLES = {
+  secure:`HTTP/2 200 OK
+Date: Sun, 08 Jun 2026 10:00:00 GMT
+Content-Type: text/html; charset=UTF-8
+Content-Encoding: br
+Content-Length: 4823
+Cache-Control: max-age=3600, stale-while-revalidate=86400
+ETag: "a1b2c3d4"
+Vary: Accept-Encoding
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+Server: nginx`,
+
+  minimal:`HTTP/1.1 200 OK
+Date: Sun, 08 Jun 2026 10:00:00 GMT
+Content-Type: text/html; charset=UTF-8
+Content-Length: 2048
+Server: Apache/2.4.51 (Ubuntu)
+X-Powered-By: PHP/8.1.0`,
+
+  insecure:`HTTP/1.1 200 OK
+Date: Sun, 08 Jun 2026 10:00:00 GMT
+Content-Type: text/html
+Server: Apache/2.4.29 (Ubuntu)
+X-Powered-By: PHP/7.2.0
+X-AspNet-Version: 4.0.30319
+Cache-Control: no-cache
+X-XSS-Protection: 1; mode=block
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true`
+};
+
+/* ─────────────────────────────────────────────────────────────
+   ANALYSEUR (inchangé)
+───────────────────────────────────────────────────────────── */
+function parseHeaders(raw) {
+  const lines = raw.split('\n');
+  const headers = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('HTTP/')) continue;
+    const colon = trimmed.indexOf(':');
+    if (colon < 1) continue;
+    const name = trimmed.slice(0, colon).trim();
+    const value = trimmed.slice(colon + 1).trim();
+    if (name && value !== undefined) {
+      headers.push({ name, value, key: name.toLowerCase() });
+    }
+  }
+  return headers;
+}
+
+function headerMap(headers) {
+  const m = {};
+  headers.forEach(h => { m[h.key] = h.value; });
+  return m;
+}
+
+function calcScore(map) {
+  let score = 100;
+  const issues = [];
+  const secResults = [];
+
+  SEC_HEADERS.forEach(sh => {
+    const v = map[sh.key] || '';
+    const result = sh.check(v);
+    secResults.push({ ...sh, result, value: v });
+    if (result.status === 'fail') {
+      score -= sh.points;
+      issues.push({ level: 'fail', label: sh.label, msg: result.msg });
+    } else if (result.status === 'warn' && sh.points >= 10) {
+      score -= Math.floor(sh.points * 0.4);
+      issues.push({ level: 'warn', label: sh.label, msg: result.msg });
+    }
+  });
+
+  score = Math.max(0, Math.min(100, score));
+
+  let grade, gradeClass, color;
+  if (score >= 95) { grade = 'A'; gradeClass = 'grade-a-plus'; color = 'var(--grade-a-plus)'; }
+  else if (score >= 85) { grade = 'A'; gradeClass = 'grade-a'; color = 'var(--grade-a)'; }
+  else if (score >= 70) { grade = 'B'; gradeClass = 'grade-b'; color = 'var(--grade-b)'; }
+  else if (score >= 50) { grade = 'C'; gradeClass = 'grade-c'; color = 'var(--grade-c)'; }
+  else if (score >= 30) { grade = 'D'; gradeClass = 'grade-d'; color = 'var(--grade-d)'; }
+  else { grade = 'F'; gradeClass = 'grade-f'; color = 'var(--grade-f)'; }
+
+  const plus = score >= 95 ? '+' : '';
+
+  return { score, grade, plus, gradeClass, color, issues, secResults };
+}
+
+function tagClass(type) { return `tag-${type}`; }
+function dotClass(type) { return `dot-${type}`; }
+
+function renderSecRows(secResults) {
+  return secResults.map(sh => {
+    const st = sh.result.status;
+    const dotCls = st === 'pass' ? 'dot-pass' : st === 'warn' ? 'dot-warn' : 'dot-fail';
+    const impactCls = `impact-${sh.impact.toLowerCase()}`;
+    return `
+    <div class="sec-header-row">
+      <div class="sec-status-dot ${dotCls}"></div>
+      <div>
+        <div class="sec-header-name">${sh.label}</div>
+        ${sh.value ? `<div class="sec-header-val">${escHtml(sh.value)}</div>` : ''}
+        <div class="sec-header-msg">${sh.result.msg}</div>
+        ${st !== 'pass' && sh.fix ? `<div class="sec-header-fix">Suggestion : <code>${escHtml(sh.fix)}</code></div>` : ''}
+      </div>
+      <div class="sec-impact ${impactCls}">${sh.impact}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderAllRows(headers) {
+  return headers.map((h, i) => {
+    const info = HEADER_DB[h.key];
+    const type = info ? info.type : 'misc';
+    const tag = info ? info.tag : 'Divers';
+    const shortVal = h.value.length > 60 ? h.value.slice(0, 57) + '…' : h.value;
+    const explanation = info ? info.explain(h.value) : `<code>${escHtml(h.name)}</code> : <code>${escHtml(h.value)}</code> — Cet en‑tête n’est pas dans la base de connaissances. Consultez MDN ou la RFC appropriée pour la documentation.`;
+
+    return `
+    <details class="hdr-item">
+      <summary>
+        <div class="hdr-type-dot ${dotClass(type)}"></div>
+        <div class="hdr-name-val">
+          <div class="hdr-name">${escHtml(h.name)}</div>
+          <div class="hdr-short-val">${escHtml(shortVal)}</div>
+        </div>
+        <div class="hdr-tag ${tagClass(type)}">${tag}</div>
+      </summary>
+      <div class="hdr-body">
+        <div class="hdr-full-val">${escHtml(h.value)}</div>
+        <div class="hdr-explanation">${explanation}</div>
+      </div>
+    </details>`;
+  }).join('');
+}
+
+function analyze() {
+  const raw = document.getElementById('headerInput').value.trim();
+  if (!raw) { showToast('Collez d’abord quelques en‑têtes HTTP'); return; }
+
+  const headers = parseHeaders(raw);
+  if (headers.length === 0) { showToast('Aucun en‑tête valide trouvé — vérifiez le format'); return; }
+
+  const map = headerMap(headers);
+  const { score, grade, plus, gradeClass, color, issues, secResults } = calcScore(map);
+
+  const circle = document.getElementById('gradeCircle');
+  circle.className = `grade-circle ${gradeClass}`;
+  document.getElementById('gradeLetter').textContent = grade;
+  document.getElementById('gradePlus').textContent = plus;
+
+  const bar = document.getElementById('scoreBar');
+  bar.style.width = score + '%';
+  bar.style.background = color;
+
+  const titles = { 'A+': 'Excellente configuration de sécurité', A: 'Bonne sécurité, lacunes mineures', B: 'Sécurité correcte, des améliorations possibles', C: 'En‑têtes de sécurité importants manquants', D: 'Mauvaise configuration de sécurité', F: 'En‑têtes de sécurité critiques absents' };
+  document.getElementById('scoreTitle').textContent = `Note de sécurité : ${grade}${plus}`;
+  document.getElementById('scoreSubtitle').textContent = titles[`${grade}${plus}`] || titles[grade] || '';
+
+  const fails = secResults.filter(s => s.result.status === 'fail').length;
+  const warns = secResults.filter(s => s.result.status === 'warn').length;
+  const passes = secResults.filter(s => s.result.status === 'pass').length;
+  document.getElementById('scoreStats').innerHTML = `<span><strong>${score}/100</strong> points</span><span><strong>${passes}</strong> réussis</span><span><strong>${warns}</strong> avertissements</span><span><strong>${fails}</strong> échecs</span>`;
+
+  document.getElementById('issuesGrid').innerHTML = `
+    <div class="issue-card ic-pass"><div class="issue-card-label">Réussis</div><div class="issue-card-value">${passes}</div><div class="issue-card-sub">contrôles de sécurité</div></div>
+    <div class="issue-card ic-warn"><div class="issue-card-label">Avertissements</div><div class="issue-card-value">${warns}</div><div class="issue-card-sub">à examiner</div></div>
+    <div class="issue-card ic-fail"><div class="issue-card-label">Échecs</div><div class="issue-card-value">${fails}</div><div class="issue-card-sub">problèmes critiques</div></div>
+    <div class="issue-card"><div class="issue-card-label" style="color:var(--text3)">Total en‑têtes</div><div class="issue-card-value">${headers.length}</div><div class="issue-card-sub">analysés</div></div>
+  `;
+
+  const badge = document.getElementById('secBadge');
+  if (fails > 0) { badge.className = 'badge badge-fail'; badge.textContent = `${fails} critique(s)`; }
+  else if (warns > 0) { badge.className = 'badge badge-warn'; badge.textContent = `${warns} avertissement(s)`; }
+  else { badge.className = 'badge badge-pass'; badge.textContent = 'Tout va bien'; }
+  document.getElementById('secRows').innerHTML = renderSecRows(secResults);
+
+  document.getElementById('totalBadge').textContent = `${headers.length} trouvé(s)`;
+  document.getElementById('allRows').innerHTML = renderAllRows(headers);
+
+  const results = document.getElementById('results');
+  results.style.display = 'block';
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function compareHeaders() {
+  const beforeRaw = document.getElementById('beforeInput').value.trim();
+  const afterRaw = document.getElementById('afterInput').value.trim();
+  if (!beforeRaw || !afterRaw) { showToast('Collez des en‑têtes dans les deux panneaux'); return; }
+
+  const beforeHdrs = parseHeaders(beforeRaw);
+  const afterHdrs = parseHeaders(afterRaw);
+  const beforeMap = headerMap(beforeHdrs);
+  const afterMap = headerMap(afterHdrs);
+
+  const scoreBefore = calcScore(beforeMap);
+  const scoreAfter = calcScore(afterMap);
+
+  renderMiniGrade('gradeCircleBefore', scoreBefore);
+  renderMiniGrade('gradeCircleAfter', scoreAfter);
+  document.getElementById('scoreBarBefore').style.cssText = `width:${scoreBefore.score}%;background:${scoreBefore.color}`;
+  document.getElementById('scoreBarAfter').style.cssText = `width:${scoreAfter.score}%;background:${scoreAfter.color}`;
+  document.getElementById('subtitleBefore').textContent = `${scoreBefore.score}/100 — Note ${scoreBefore.grade}${scoreBefore.plus}`;
+  document.getElementById('subtitleAfter').textContent = `${scoreAfter.score}/100 — Note ${scoreAfter.grade}${scoreAfter.plus}`;
+
+  const allKeys = new Set([...Object.keys(beforeMap), ...Object.keys(afterMap)]);
+  const beforeDiff = [], afterDiff = [];
+
+  allKeys.forEach(k => {
+    const bv = beforeMap[k], av = afterMap[k];
+    if (bv && !av) {
+      beforeDiff.push(`<div class="diff-row"><span class="diff-icon diff-removed">✕</span><div><strong style="font-family:var(--mono);font-size:.8rem">${escHtml(k)}</strong><br><span style="font-size:.75rem;color:var(--text3)">${escHtml(bv)}</span></div></div>`);
+      afterDiff.push(`<div class="diff-row"><span class="diff-icon" style="color:var(--text3)">—</span><div style="color:var(--text3);font-size:.8rem"><em>supprimé</em></div></div>`);
+    } else if (!bv && av) {
+      beforeDiff.push(`<div class="diff-row"><span class="diff-icon" style="color:var(--text3)">—</span><div style="color:var(--text3);font-size:.8rem"><em>non présent</em></div></div>`);
+      afterDiff.push(`<div class="diff-row"><span class="diff-icon diff-added">✓</span><div><strong style="font-family:var(--mono);font-size:.8rem">${escHtml(k)}</strong><br><span style="font-size:.75rem;color:var(--text3)">${escHtml(av)}</span></div></div>`);
+    } else if (bv !== av) {
+      beforeDiff.push(`<div class="diff-row"><span class="diff-icon diff-changed">~</span><div><strong style="font-family:var(--mono);font-size:.8rem">${escHtml(k)}</strong><br><span style="font-size:.75rem;color:var(--text3)">${escHtml(bv)}</span></div></div>`);
+      afterDiff.push(`<div class="diff-row"><span class="diff-icon diff-changed">~</span><div><strong style="font-family:var(--mono);font-size:.8rem">${escHtml(k)}</strong><br><span style="font-size:.75rem;color:var(--text3)">${escHtml(av)}</span></div></div>`);
+    }
+  });
+
+  document.getElementById('diffBefore').innerHTML = beforeDiff.join('') || '<p style="color:var(--text3);font-size:.85rem;padding:8px 0">Aucune différence</p>';
+  document.getElementById('diffAfter').innerHTML = afterDiff.join('') || '<p style="color:var(--text3);font-size:.85rem;padding:8px 0">Aucune différence</p>';
+
+  const cr = document.getElementById('compareResults');
+  cr.style.display = 'block';
+  cr.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderMiniGrade(elId, result) {
+  const el = document.getElementById(elId);
+  el.className = `grade-circle ${result.gradeClass}`;
+  el.innerHTML = `<div class="grade-letter">${result.grade}</div><div class="grade-plus">${result.plus}</div>`;
+}
+
+function switchMode(mode) {
+  document.getElementById('mode-single').style.display = mode === 'single' ? 'block' : 'none';
+  document.getElementById('mode-compare').style.display = mode === 'compare' ? 'block' : 'none';
+  document.getElementById('tab-single').classList.toggle('active', mode === 'single');
+  document.getElementById('tab-compare').classList.toggle('active', mode === 'compare');
+}
+
+function loadExample(key) {
+  document.getElementById('headerInput').value = EXAMPLES[key] || '';
+  analyze();
+}
+
+function loadCompareExample() {
+  document.getElementById('beforeInput').value = EXAMPLES.minimal;
+  document.getElementById('afterInput').value = EXAMPLES.secure;
+  compareHeaders();
+}
+
+function clearAll() {
+  document.getElementById('headerInput').value = '';
+  document.getElementById('results').style.display = 'none';
+}
+
+function clearCompare() {
+  document.getElementById('beforeInput').value = '';
+  document.getElementById('afterInput').value = '';
+  document.getElementById('compareResults').style.display = 'none';
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = isDark ? '☀️ Clair' : '🌙 Sombre';
+  localStorage.setItem('devtoolbox-theme', isDark ? 'dark' : 'light');
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (saved === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Clair';
+  }
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.header-textarea').forEach(ta => {
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const s = ta.selectionStart, end = ta.selectionEnd;
+        ta.value = ta.value.substring(0, s) + '  ' + ta.value.substring(end);
+        ta.selectionStart = ta.selectionEnd = s + 2;
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
