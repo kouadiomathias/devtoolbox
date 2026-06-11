@@ -1,1387 +1,1715 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur de Formes CSS en ligne | Clip-path, Blob, Border-radius</title>
-    <meta name="description" content="Créez des formes CSS complexes (clip-path, blobs, border-radius) visuellement avec édition par points. Code CSS, Tailwind, JSX. Présets, partage URL, simulateur daltonisme.">
-    <meta name="keywords" content="générateur clip-path, blob generator, border radius generator, formes css, css shapes, tailwind shapes, svg blob, perlin noise blob, éditeur visuel css">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="DevToolbox">
-    <meta name="theme-color" content="#2563eb">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Générateur de formes CSS en ligne (Clip-Path, Blob, Border Radius & SVG)</title>
+<meta name="description" content="Créez gratuitement des formes CSS : clip-path, blobs, border-radius et formes SVG en ligne. Exportez en CSS, Tailwind, React ou SVG. Aucun codage requis.">
+<meta name="keywords" content="générateur clip-path, générateur de blobs, générateur border radius, formes css, formes tailwind, blob svg, blob bruit de perlin, éditeur css visuel">
+<meta name="robots" content="index, follow">
+<meta name="author" content="DevToolbox">
+<meta name="theme-color" content="#2563eb">
 
-    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/css-shap-generator/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/css-shap-generator/">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/css-shap-generator/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/css-shap-generator/">
 
-    <meta property="og:title" content="Générateur de Formes CSS en ligne">
-    <meta property="og:description" content="Créez des formes CSS : clip-path, blobs, border-radius. Édition visuelle par points, bruit de Perlin, partage URL.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
-     <meta property="og:image" content="https://www.devstoolsbox.dev/generateur-forme-css.webp">
-    <meta property="og:site_name" content="DevToolbox">
-    <meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Générateur de formes CSS en ligne">
+<meta property="og:description" content="Créez des formes CSS : clip-path, blobs, border-radius. Édition visuelle des points, bruit de Perlin, partage d'URL.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/">
+<meta property="og:site_name" content="DevsToolsbox">
+<meta property="og:locale" content="fr_FR">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Générateur de Formes CSS">
-    <meta name="twitter:description" content="Clip-path, blobs, border-radius avec édition visuelle par points et simulateur daltonisme.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Générateur de formes CSS">
+<meta name="twitter:description" content="Clip-path, blobs, border-radius avec édition visuelle des points et simulateur de daltonisme.">
 
-    <!-- JSON-LD FAQ Schema -->
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                {
-                    "@type": "Question",
-                    "name": "Qu'est-ce qu'un clip-path en CSS ?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "La propriété CSS clip-path permet de découper un élément HTML selon une forme géométrique définie (polygone, cercle, ellipse, inset). Le générateur DevToolbox permet de créer ces formes visuellement en faisant glisser des points de contrôle directement sur l'aperçu, puis de copier le code CSS, Tailwind ou JSX correspondant."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Comment créer un blob organique avec ce générateur ?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Sélectionnez l'onglet 'Blob' pour accéder aux formes organiques. L'outil utilise un algorithme de bruit de Perlin/Simplex pour générer des contours naturels et fluides. Vous pouvez ajuster la complexité (nombre d'octaves du bruit), la graine aléatoire (seed) et l'échelle. Chaque blob est unique et peut être exporté en CSS (border-radius complexe ou clip-path) ou en SVG inline."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Puis-je modifier la forme directement sur l'aperçu ?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Oui, en mode 'Clip-Path', l'outil affiche des poignées de contrôle (handles) directement sur la forme dans la zone d'aperçu. Vous pouvez cliquer et faire glisser chaque point pour ajuster la forme en temps réel. Les coordonnées sont mises à jour instantanément dans le code CSS généré. Cette édition visuelle par glisser-déposer rend la création de polygones personnalisés extrêmement intuitive."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Comment fonctionne le simulateur de daltonisme ?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Le simulateur applique des filtres SVG basés sur des matrices de conversion LMS (Long, Medium, Short wavelengths) pour reproduire fidèlement la perception des couleurs par les personnes atteintes de protanopie (cécité au rouge), deutéranopie (cécité au vert) et tritanopie (cécité au bleu). Ces filtres utilisent des calculs de confusion colorimétrique conformes aux modèles de Brettel-Viénot, offrant une simulation réaliste de l'accessibilité visuelle."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Quels formats de code puis-je exporter ?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Le générateur exporte le code CSS natif (clip-path, border-radius), les classes Tailwind CSS avec la syntaxe des crochets ([clip-path:...]), et le style JSX pour React. Vous pouvez également copier le SVG inline pour les blobs. Un bouton 'Partager URL' encode tous les paramètres dans l'URL pour sauvegarder et partager vos créations sans base de données."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Le générateur de formes CSS est-il gratuit ?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Oui, cet outil est entièrement gratuit, sans inscription et sans publicité. Toutes les formes que vous créez vous appartiennent et peuvent être utilisées librement dans vos projets personnels ou professionnels. Il fait partie de la suite DevToolbox, une collection d'outils pour développeurs web."
-                    }
-                }
-            ]
-        }
-    </script>
-
-    <!-- JSON-LD BreadcrumbList -->
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
-                { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
-                { "@type": "ListItem", "position": 3, "name": "Générateur de Formes CSS", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/" }
-            ]
-        }
-    </script>
-
-    <!-- JSON-LD WebApplication -->
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Générateur de Formes CSS",
-            "url": "https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/",
-            "description": "Créez des formes CSS complexes visuellement avec édition par points et bruit de Perlin.",
-            "applicationCategory": "DeveloperApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
-        }
-    </script>
-   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Générateur de formes CSS",
+    "url": "https://www.devstoolsbox.dev/fr/outils/generateur-forme-css/",
+    "description": "Créez des formes CSS complexes visuellement avec des points déplaçables et des blobs de bruit de Perlin.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "All",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-JRBW78KE29');
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JRBW78KE29');
     </script>
+<style>
+/* ─── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --bg:     #08090C;
+  --s1:     #0E1015;
+  --s2:     #141720;
+  --s3:     #1B1F2B;
+  --s4:     #232838;
+  --border: #252A38;
+  --border2:#2E3446;
+  --a:      #E8A020;
+  --a-dim:  rgba(232,160,32,0.12);
+  --a-hover:#F0B535;
+  --cyan:   #22D3EE;
+  --green:  #34D399;
+  --red:    #F87171;
+  --purple: #A78BFA;
+  --t1:     #F0F0EC;
+  --t2:     #9A9B9E;
+  --t3:     #5A5C62;
+  --t4:     #35373C;
+  --r:      12px;
+  --r-sm:   8px;
+  --r-xs:   5px;
+  --trans:  0.18s cubic-bezier(0.4,0,0.2,1);
+  --font:   'Figtree', system-ui, sans-serif;
+  --mono:   'IBM Plex Mono', monospace;
+  --serif:  'DM Serif Display', serif;
+}
+body.light-theme {
+  --bg:     #F4F5F7;
+  --s1:     #FFFFFF;
+  --s2:     #F0F1F4;
+  --s3:     #E8EAF0;
+  --s4:     #DDE0EA;
+  --border: #DDE0EA;
+  --border2:#C8CCDA;
+  --t1:     #0E1015;
+  --t2:     #4A4D58;
+  --t3:     #8A8D98;
+  --t4:     #C0C3CE;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:var(--bg);color:var(--t1);
+  min-height:100vh;line-height:1.6;overflow-x:hidden;
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
 
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --surface2: #f1f5f9;
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: rgba(37, 99, 235, 0.12);
-            --text: #0f172a;
-            --text2: #334155;
-            --text3: #64748b;
-            --border: #e2e8f0;
-            --border2: #cbd5e1;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-            --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
-            --radius: 16px;
-            --radius-sm: 10px;
-            --success: #10b981;
-            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        body.dark {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --surface2: #273549;
-            --primary: #60a5fa;
-            --primary-dark: #3b82f6;
-            --primary-light: rgba(96, 165, 250, 0.15);
-            --text: #f1f5f9;
-            --text2: #cbd5e1;
-            --text3: #94a3b8;
-            --border: #334155;
-            --border2: #475569;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: background 0.3s, color 0.3s;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1400px;
-            width: 100%;
-            margin: 0 auto;
-        }
+/* ─── APP SHELL ─────────────────────────────────────────────── */
+.app{display:flex;flex-direction:column;height:100vh}
+.topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:0 18px;height:52px;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;flex-shrink:0;
+}
+.workspace{
+  display:grid;
+  grid-template-columns:264px 1fr 340px;
+  flex:1;overflow:hidden;
+}
+@media(max-width:1180px){.workspace{grid-template-columns:240px 1fr;}}
+@media(max-width:840px){.workspace{grid-template-columns:1fr;overflow:auto;height:auto;}}
 
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .logo {
-            font-weight: 800;
-            font-size: 1.4rem;
-            color: var(--primary);
-            text-decoration: none;
-            letter-spacing: -0.02em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .logo::before {
-            content: '🛠️';
-            font-size: 1.3rem;
-        }
-        .header-right {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .theme-toggle,
-        .lang-switch {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            padding: 4px;
-            box-shadow: var(--shadow);
-            display: flex;
-        }
-        .lang-btn,
-        .theme-btn {
-            padding: 8px 16px;
-            border: none;
-            background: transparent;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--text2);
-            border-radius: 32px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            transition: var(--transition);
-            white-space: nowrap;
-        }
-        .lang-btn.active,
-        .theme-btn.active {
-            background: var(--primary);
-            color: #fff;
-        }
+/* ─── TOPBAR ─────────────────────────────────────────────────── */
+.logo{
+  font-family:var(--serif);font-size:1.25rem;
+  color:var(--t1);text-decoration:none;
+  display:flex;align-items:center;gap:8px;margin-right:4px;
+}
+.logo-dot{width:8px;height:8px;background:var(--a);border-radius:50%;display:inline-block;box-shadow:0 0 8px var(--a);}
+.logo-sub{font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--t3);letter-spacing:0.05em;text-transform:uppercase;}
+.mode-tabs{display:flex;gap:2px;background:var(--s2);padding:3px;border-radius:9px;margin-left:8px;}
+.mode-tab{
+  padding:6px 13px;border:none;background:transparent;
+  font-family:var(--font);font-weight:600;font-size:0.775rem;
+  color:var(--t3);cursor:pointer;border-radius:7px;transition:var(--trans);white-space:nowrap;
+}
+.mode-tab.active{background:var(--s1);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,0.25);}
+.mode-tab:hover:not(.active){color:var(--t2);}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.icon-btn{
+  width:34px;height:34px;border-radius:8px;
+  border:1px solid var(--border);background:var(--s2);
+  color:var(--t2);cursor:pointer;font-size:0.95rem;
+  display:grid;place-items:center;transition:var(--trans);
+}
+.icon-btn:hover{background:var(--s3);color:var(--t1);}
+.icon-btn.on{background:var(--a-dim);color:var(--a);border-color:rgba(232,160,32,0.3);}
+.pill-btn{
+  padding:7px 14px;border-radius:20px;
+  border:1px solid var(--border);background:var(--s2);
+  font-family:var(--font);font-weight:600;font-size:0.75rem;
+  color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px;
+  transition:var(--trans);white-space:nowrap;
+}
+.pill-btn:hover{background:var(--s3);color:var(--t1);}
+.pill-btn.accent{background:var(--a);color:#000;border-color:var(--a);font-weight:700;}
+.pill-btn.accent:hover{background:var(--a-hover);}
 
-        /* Tool Card */
-        .tool-card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 28px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border);
-            margin-bottom: 24px;
-        }
-        h1 {
-            font-size: 1.9rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            margin-bottom: 6px;
-        }
-        .subhead {
-            color: var(--text3);
-            margin-bottom: 24px;
-            font-size: 0.95rem;
-        }
+/* ─── LEFT PANEL ─────────────────────────────────────────────── */
+.left-panel{
+  background:var(--s1);border-right:1px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.panel-section{border-bottom:1px solid var(--border);}
+.panel-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;cursor:pointer;
+  font-size:0.72rem;font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--t3);user-select:none;transition:var(--trans);
+}
+.panel-hdr:hover{color:var(--t2);}
+.panel-hdr .chev{font-size:0.7rem;transition:transform 0.2s;}
+.panel-hdr.col .chev{transform:rotate(-90deg);}
+.panel-body{padding:10px 14px;}
+.panel-body.hidden{display:none;}
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 4px;
-            background: var(--surface2);
-            padding: 4px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            background: transparent;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--text3);
-            transition: var(--transition);
-            white-space: nowrap;
-        }
-        .tab-btn.active {
-            background: var(--surface);
-            color: var(--text);
-            box-shadow: var(--shadow);
-        }
+.ctrl-row{margin-bottom:10px;}
+.ctrl-label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:0.755rem;font-weight:600;color:var(--t2);margin-bottom:5px;
+}
+.val-badge{
+  font-family:var(--mono);font-size:0.68rem;
+  color:var(--a);background:var(--a-dim);padding:1px 7px;border-radius:20px;
+}
+input[type=range]{width:100%;accent-color:var(--a);cursor:pointer;height:4px;}
+input[type=color]{
+  width:100%;height:30px;border:1px solid var(--border2);
+  border-radius:6px;cursor:pointer;padding:2px;background:var(--s2);
+}
+select,input[type=number]{
+  width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);
+  background:var(--s2);color:var(--t1);font-family:var(--font);font-size:0.78rem;outline:none;transition:border-color 0.15s;
+}
+select:focus,input[type=number]:focus{border-color:var(--a);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.four-col{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;}
 
-        /* Layout */
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            align-items: start;
-        }
-        @media (max-width: 1000px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-        }
+/* Point list */
+.point-list{display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto;}
+.point-row{
+  display:flex;align-items:center;gap:6px;
+  background:var(--s2);border-radius:6px;padding:5px 8px;
+  border:1px solid transparent;transition:var(--trans);cursor:pointer;
+}
+.point-row:hover,.point-row.active{border-color:var(--a);}
+.point-idx{font-family:var(--mono);font-size:0.62rem;color:var(--a);width:18px;flex-shrink:0;}
+.point-coords{display:flex;gap:4px;flex:1;}
+.point-coord-inp{
+  flex:1;padding:3px 6px;background:var(--s3);border:1px solid var(--border);
+  border-radius:4px;color:var(--t1);font-family:var(--mono);font-size:0.65rem;outline:none;
+}
+.point-coord-inp:focus{border-color:var(--a);}
+.pt-del{
+  width:18px;height:18px;border-radius:4px;border:none;
+  background:transparent;color:var(--t4);cursor:pointer;font-size:0.8rem;
+  display:grid;place-items:center;transition:var(--trans);flex-shrink:0;
+}
+.pt-del:hover{background:rgba(248,113,113,0.15);color:var(--red);}
 
-        /* Panels */
-        .panel {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-        }
-        .panel-label {
-            font-weight: 700;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text3);
-            margin-bottom: 10px;
-        }
+/* Presets */
+.preset-grid{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
+.preset-btn{
+  padding:5px 11px;border-radius:20px;
+  border:1px solid var(--border);background:var(--s2);
+  font-size:0.72rem;font-weight:600;color:var(--t3);cursor:pointer;transition:var(--trans);
+  text-transform:capitalize;
+}
+.preset-btn:hover{border-color:var(--a);color:var(--a);background:var(--a-dim);}
 
-        /* Preview Area */
-        .preview-area {
-            position: relative;
-            min-height: 350px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            border: 2px dashed var(--border2);
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-            cursor: default;
-            transition: filter 0.3s;
-        }
-        .preview-area.simulating {
-            filter: var(--sim-filter);
-        }
-        #shapeSvg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
-        }
-        #shapeSvg .drag-handle {
-            pointer-events: all;
-            cursor: grab;
-            transition: r 0.15s;
-        }
-        #shapeSvg .drag-handle:hover {
-            r: 9;
-            fill: #fff;
-            stroke: var(--primary);
-            stroke-width: 2.5;
-        }
-        #shapeSvg .drag-handle:active {
-            cursor: grabbing;
-            r: 10;
-        }
-        #shapeSvg .polygon-outline {
-            fill: none;
-            stroke: var(--primary);
-            stroke-width: 2;
-            stroke-dasharray: 6 3;
-            pointer-events: none;
-        }
-        .shape-display {
-            width: 220px;
-            height: 220px;
-            background: var(--primary);
-            transition: all 0.25s;
-            position: relative;
-            z-index: 1;
-        }
-        .shape-display.blob-mode {
-            background: transparent !important;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .shape-display.blob-mode svg {
-            width: 100%;
-            height: 100%;
-        }
+/* History */
+.history-strip{display:flex;gap:4px;overflow-x:auto;padding:8px 14px;scrollbar-width:thin;}
+.hist-thumb{
+  width:38px;height:28px;border-radius:5px;
+  border:1px solid var(--border);background:var(--s3);
+  cursor:pointer;flex-shrink:0;transition:var(--trans);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.55rem;color:var(--t4);
+}
+.hist-thumb.cur{border-color:var(--a);}
 
-        /* Simulator Bar */
-        .simulator-bar {
-            display: flex;
-            gap: 6px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .sim-btn {
-            padding: 7px 14px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text2);
-            transition: var(--transition);
-        }
-        .sim-btn.active {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
+/* Fill options */
+.fill-swatches{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.fill-swatch{
+  width:26px;height:26px;border-radius:5px;cursor:pointer;
+  border:2px solid transparent;transition:var(--trans);
+}
+.fill-swatch.active,.fill-swatch:hover{border-color:var(--a);transform:scale(1.1);}
 
-        /* Action Buttons Row */
-        .action-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
+/* ─── CENTER PANEL ───────────────────────────────────────────── */
+.center-panel{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.preview-toolbar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  background:var(--s1);flex-shrink:0;flex-wrap:wrap;
+}
+.divider-v{width:1px;height:20px;background:var(--border);flex-shrink:0;}
+.tool-btn{
+  padding:5px 10px;border-radius:7px;border:1px solid transparent;
+  background:transparent;color:var(--t3);font-size:0.72rem;cursor:pointer;
+  transition:var(--trans);display:flex;align-items:center;gap:5px;
+  font-family:var(--font);font-weight:600;
+}
+.tool-btn.active{background:var(--s2);border-color:var(--border);color:var(--t1);}
+.tool-btn:hover:not(.active){color:var(--t2);}
 
-        /* Controls */
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .control-group label {
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .value-display {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 0.8rem;
-            background: var(--primary-light);
-            padding: 2px 8px;
-            border-radius: 6px;
-        }
-        input[type="range"] {
-            width: 100%;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
+/* Stage */
+.preview-stage{flex:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;padding:20px;}
+.stage-bg-el{position:absolute;inset:0;transition:background 0.4s;}
+.grid-overlay{
+  position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity 0.3s;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size:20px 20px;
+}
+.grid-overlay.on{opacity:1;}
 
-        /* Presets */
-        .presets-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .preset-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 6px 14px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            color: var(--text2);
-            transition: var(--transition);
-            text-transform: capitalize;
-        }
-        .preset-btn:hover {
-            background: var(--primary-light);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
+/* Canvas wrapper */
+.canvas-wrap{
+  position:relative;z-index:2;
+  width:300px;height:300px;
+  display:flex;align-items:center;justify-content:center;
+  transition:filter 0.3s;
+}
+#shapeCanvas{width:300px;height:300px;}
+.handles-svg{position:absolute;inset:0;pointer-events:none;z-index:3;}
+.handle-circle{pointer-events:all;cursor:grab;transition:r 0.12s;}
+.handle-circle:hover{r:9;}
+.handle-circle:active{cursor:grabbing;}
+.outline-path{fill:none;stroke:var(--a);stroke-width:1.5;stroke-dasharray:5 3;pointer-events:none;opacity:0.5;}
 
-        /* Code Output */
-        .code-output {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 14px;
-            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin-top: 12px;
-            max-height: 160px;
-            overflow-y: auto;
-            color: var(--text);
-            line-height: 1.5;
-        }
-        .copy-btns {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
+/* Size badge */
+.size-badge{
+  position:absolute;bottom:10px;right:10px;
+  font-family:var(--mono);font-size:0.62rem;
+  background:rgba(0,0,0,0.5);color:var(--t2);
+  padding:3px 8px;border-radius:20px;backdrop-filter:blur(4px);
+  z-index:4;
+}
 
-        /* Buttons */
-        .btn {
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.82rem;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            white-space: nowrap;
-        }
-        .btn:hover {
-            background: var(--surface2);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary-dark);
-            font-weight: 700;
-        }
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-        .btn-sm {
-            padding: 5px 12px;
-            font-size: 0.75rem;
-        }
+/* Sim bar */
+.sim-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px;border-top:1px solid var(--border);
+  background:var(--s1);flex-shrink:0;flex-wrap:wrap;
+}
+.sim-label{font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--t4);}
+.sim-btn{
+  padding:4px 10px;border-radius:6px;border:1px solid var(--border);
+  background:transparent;font-family:var(--font);font-weight:600;font-size:0.7rem;
+  color:var(--t3);cursor:pointer;transition:var(--trans);
+}
+.sim-btn.active{background:var(--cyan);color:#000;border-color:var(--cyan);}
 
-        /* FAQ Section */
-        .faq-section {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 28px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
-        }
-        .faq-section h2 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-        }
-        .faq-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        @media (max-width: 768px) {
-            .faq-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .faq-item {
-            padding: 16px;
-            background: var(--surface2);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-        }
-        .faq-item h3 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        .faq-item p {
-            font-size: 0.85rem;
-            color: var(--text2);
-            line-height: 1.6;
-        }
+/* Morph progress */
+.morph-bar{
+  padding:10px 14px;border-top:1px solid var(--border);
+  background:var(--s1);flex-shrink:0;display:none;align-items:center;gap:10px;
+}
+.morph-bar.on{display:flex;}
+.morph-track{flex:1;height:4px;background:var(--s3);border-radius:4px;position:relative;cursor:pointer;}
+.morph-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--a),var(--cyan));transition:width 0.1s;}
+.morph-label{font-size:0.7rem;color:var(--t3);white-space:nowrap;font-weight:600;}
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--text3);
-            font-size: 0.8rem;
-            border-top: 1px solid var(--border);
-            margin-top: 16px;
-        }
-        .footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
+/* ─── RIGHT PANEL ────────────────────────────────────────────── */
+.right-panel{background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+@media(max-width:1180px){.right-panel{display:none;}}
+.right-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;font-size:0.72rem;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;color:var(--t3);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.right-body{padding:10px 14px;overflow-y:auto;}
 
-        /* Toast */
-        .toast-msg {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: var(--text);
-            color: var(--bg);
-            padding: 10px 22px;
-            border-radius: 40px;
-            opacity: 0;
-            z-index: 1000;
-            font-weight: 600;
-            font-size: 0.85rem;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-        }
-        .toast-msg.visible {
-            opacity: 1;
-        }
+.fmt-tabs{display:flex;gap:3px;margin-bottom:8px;}
+.fmt-btn{
+  padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;
+  font-family:var(--font);font-weight:600;font-size:0.7rem;
+  color:var(--t3);cursor:pointer;transition:var(--trans);
+}
+.fmt-btn.active{background:var(--a);color:#000;border-color:var(--a);}
+.fmt-btn:hover:not(.active){color:var(--t2);border-color:var(--border2);}
 
-        /* Hidden file input */
-        #bgImageInput {
-            display: none;
-        }
+.code-block{
+  background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:12px;font-family:var(--mono);font-size:11px;line-height:1.75;
+  white-space:pre-wrap;color:var(--t2);max-height:220px;overflow-y:auto;
+  word-break:break-all;
+}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.action-btn{
+  padding:8px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--border);background:var(--s2);
+  color:var(--t2);font-family:var(--font);font-weight:600;font-size:0.73rem;
+  cursor:pointer;display:flex;align-items:center;gap:6px;
+  transition:var(--trans);justify-content:center;
+}
+.action-btn:hover{background:var(--s3);color:var(--t1);border-color:var(--border2);}
+.action-btn.primary{background:var(--a);color:#000;border-color:var(--a);font-weight:700;}
+.action-btn.primary:hover{background:var(--a-hover);}
 
-        /* SVG filters for color blindness simulation */
-        .svg-filters {
-            position: absolute;
-            width: 0;
-            height: 0;
-        }
-    </style>
+/* Saved shapes */
+.saved-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.saved-card{
+  border-radius:var(--r-sm);overflow:hidden;
+  border:1px solid var(--border);cursor:pointer;transition:var(--trans);
+}
+.saved-card:hover{border-color:var(--border2);transform:translateY(-1px);}
+.saved-thumb{height:44px;background:var(--s3);display:flex;align-items:center;justify-content:center;}
+.saved-thumb svg{width:36px;height:36px;}
+.saved-name{font-size:0.62rem;font-weight:700;color:var(--t2);padding:4px 5px;background:var(--s2);display:flex;justify-content:space-between;}
+.saved-del{border:none;background:transparent;color:var(--t4);cursor:pointer;font-size:0.8rem;}
+.saved-del:hover{color:var(--red);}
+
+/* Morph section */
+.morph-shapes{display:flex;gap:6px;align-items:center;}
+.morph-slot{
+  flex:1;height:50px;border-radius:var(--r-sm);
+  border:1px dashed var(--border2);background:var(--s2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:0.68rem;color:var(--t4);transition:var(--trans);
+  font-weight:600;
+}
+.morph-slot:hover{border-color:var(--a);color:var(--a);}
+.morph-slot.set{border-style:solid;border-color:var(--border2);}
+.morph-slot svg{width:36px;height:36px;}
+.morph-arrow{color:var(--t4);font-size:1rem;}
+
+/* ─── MODALS ─────────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:var(--s1);border:1px solid var(--border);border-radius:16px;
+  padding:24px;width:500px;max-width:90vw;max-height:80vh;overflow-y:auto;
+  box-shadow:0 24px 60px rgba(0,0,0,0.5);animation:modalIn 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+.modal-title{font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--s2);color:var(--t2);cursor:pointer;font-size:0.9rem;display:grid;place-items:center;transition:var(--trans);}
+.modal-close:hover{background:var(--s3);color:var(--t1);}
+
+/* Gallery grid */
+.gallery-big{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.gal-card{
+  border-radius:var(--r-sm);padding:12px 8px;
+  border:1px solid var(--border);cursor:pointer;transition:var(--trans);
+  text-align:center;font-size:0.7rem;font-weight:700;color:var(--t2);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.gal-card:hover{border-color:var(--a);color:var(--a);transform:translateY(-2px);}
+.gal-icon{font-size:1.5rem;}
+.gal-preview{width:44px;height:44px;}
+
+/* Toast */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--t1);color:var(--bg);padding:10px 20px;border-radius:40px;
+  font-weight:600;font-size:0.78rem;box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  z-index:999;opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;
+  white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.kbd{font-family:var(--mono);font-size:0.62rem;background:var(--s3);border:1px solid var(--border2);border-radius:4px;padding:1px 5px;color:var(--t3);}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:600;background:var(--s3);color:var(--t3);border:1px solid var(--border);}
+.chip.new{background:rgba(52,211,153,0.1);color:var(--green);border-color:rgba(52,211,153,0.2);}
+
+/* Easing canvas */
+.easing-wrap{height:80px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;margin-top:6px;}
+#easingCanvas{width:100%;height:100%;cursor:crosshair;}
+
+/* Animated shape */
+@keyframes shapePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+@keyframes shapeRotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes shapeFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.animate-pulse{animation:shapePulse 2s ease-in-out infinite;}
+.animate-rotate{animation:shapeRotate 4s linear infinite;}
+.animate-float{animation:shapeFloat 3s ease-in-out infinite;}
+
+/* Add-point indicator */
+.add-point-mode .canvas-wrap{cursor:crosshair;}
+</style>
+
+<!-- Colorblind SVG filters -->
+<svg style="position:absolute;width:0;height:0;" aria-hidden="true">
+  <filter id="cb-prot"><feColorMatrix type="matrix" values="0.567,0.433,0,0,0 0.558,0.442,0,0,0 0,0.242,0.758,0,0 0,0,0,1,0"/></filter>
+  <filter id="cb-deut"><feColorMatrix type="matrix" values="0.625,0.375,0,0,0 0.7,0.3,0,0,0 0,0.3,0.7,0,0 0,0,0,1,0"/></filter>
+  <filter id="cb-trit"><feColorMatrix type="matrix" values="0.95,0.05,0,0,0 0,0.433,0.567,0,0 0,0.475,0.525,0,0 0,0,0,1,0"/></filter>
+</svg>
 </head>
 <body>
-    <!-- SVG Filters for Color Blindness Simulation (Brettel-Viénot model) -->
-    <svg class="svg-filters" xmlns="http://www.w3.org/2000/svg">
-        <filter id="protanopia-filter" color-interpolation-filters="sRGB">
-            <feColorMatrix type="matrix" values="
-            0.567, 0.433, 0, 0, 0,
-            0.558, 0.442, 0, 0, 0,
-            0, 0.242, 0.758, 0, 0,
-            0, 0, 0, 1, 0" />
-        </filter>
-        <filter id="deuteranopia-filter" color-interpolation-filters="sRGB">
-            <feColorMatrix type="matrix" values="
-            0.625, 0.375, 0, 0, 0,
-            0.7, 0.3, 0, 0, 0,
-            0, 0.3, 0.7, 0, 0,
-            0, 0, 0, 1, 0" />
-        </filter>
-        <filter id="tritanopia-filter" color-interpolation-filters="sRGB">
-            <feColorMatrix type="matrix" values="
-            0.95, 0.05, 0, 0, 0,
-            0, 0.433, 0.567, 0, 0,
-            0, 0.475, 0.525, 0, 0,
-            0, 0, 0, 1, 0" />
-        </filter>
-    </svg>
+  <h1 style="display:none;">
+Générateur de formes CSS en ligne – Créez facilement des formes Clip-Path, Blob et Border Radius
+</h1>
+<div class="app">
 
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <a href="/" class="logo" aria-label="DevToolbox - Accueil">DevToolbox</a>
-            <div class="header-right">
-                <div class="theme-toggle" role="radiogroup" aria-label="Thème">
-                    <button class="theme-btn active" data-theme="light" aria-checked="true"> Clair</button>
-                    <button class="theme-btn" data-theme="dark" aria-checked="false"> Sombre</button>
-                </div>
-                <nav class="lang-switch" aria-label="Langue">
-                    <a href="/tools/css-shap-generator/" class="lang-btn" hreflang="en">EN</a>
-                    <a href="/fr/outils/generateur-forme-css/" class="lang-btn active" hreflang="fr" aria-current="page">FR</a>
-                </nav>
-            </div>
-        </header>
+<!-- ═══ TOPBAR ═════════════════════════════════════════════════ -->
+<header class="topbar">
+  <a href="#" class="logo">
+    <span class="logo-dot"></span>devtoolbox
+    <span class="logo-sub">/ Générateur de formes CSS</span>
+  </a>
 
-        <main>
-            <!-- Main Tool -->
-            <article class="tool-card" aria-labelledby="main-title">
-                <h1 id="main-title">Générateur de Formes CSS</h1>
-                <p class="subhead">Créez des formes complexes visuellement : <strong>clip-path</strong> avec points déplaçables, <strong>blobs</strong> par bruit de Perlin, <strong>border-radius</strong>. Export CSS, Tailwind, JSX. Simulateur daltonisme intégré.</p>
+  <div class="mode-tabs" id="modeTabs">
+    <button class="mode-tab active" data-mode="clip">Clip-Path</button>
+    <button class="mode-tab" data-mode="blob">Blob</button>
+    <button class="mode-tab" data-mode="radius">Border-Radius</button>
+    <button class="mode-tab" data-mode="morph">Morphose</button>
+  </div>
 
-                <!-- Mode Tabs -->
-                <nav class="tabs" id="modeTabs" aria-label="Modes de forme">
-                    <button class="tab-btn active" data-mode="clip-path" aria-pressed="true">📐 Clip-Path</button>
-                    <button class="tab-btn" data-mode="blob" aria-pressed="false">🫧 Blob (Perlin)</button>
-                    <button class="tab-btn" data-mode="border-radius" aria-pressed="false"> Border-Radius</button>
-                </nav>
+  <div class="topbar-right">
+    <span class="chip new">✦ Nouveau : Morphose</span>
+    <button class="icon-btn" id="undoBtn" title="Annuler (Ctrl+Z)">↩</button>
+    <button class="icon-btn" id="redoBtn" title="Rétablir">↪</button>
+    <button class="icon-btn" id="gridBtn" title="Afficher la grille">⊞</button>
+    <button class="icon-btn" id="snapBtn" title="Aligner sur la grille">🧲</button>
+    <button class="icon-btn" id="symmetryBtn" title="Mode symétrie">⊞</button>
+    <button class="icon-btn" id="addPointBtn" title="Ajouter un point">✚</button>
+    <button class="pill-btn" id="randomBtn">🎲 Aléatoire</button>
+    <button class="pill-btn" id="galleryBtn">⊞ Galerie</button>
+    <button class="pill-btn accent" id="copyBtn">Copier CSS</button>
+    <button class="icon-btn" id="themeBtn" title="Changer le thème">◐</button>
+  </div>
+</header>
 
-                <div class="main-layout">
-                    <!-- Left: Preview -->
-                    <div class="panel">
-                        <div class="panel-label">Aperçu en direct</div>
-                        <div class="preview-area" id="previewArea">
-                            <svg id="shapeSvg" xmlns="http://www.w3.org/2000/svg"></svg>
-                            <div class="shape-display" id="shapeDisplay"></div>
-                        </div>
-                        <!-- Simulator -->
-                        <div class="simulator-bar" role="radiogroup" aria-label="Simulateur daltonisme">
-                            <button class="sim-btn active" data-sim="normal" aria-pressed="true"> Normal</button>
-                            <button class="sim-btn" data-sim="protanopia" aria-pressed="false">🔴 Protanopie</button>
-                            <button class="sim-btn" data-sim="deuteranopia" aria-pressed="false">🟢 Deutéranopie</button>
-                            <button class="sim-btn" data-sim="tritanopia" aria-pressed="false">🔵 Tritanopie</button>
-                        </div>
-                        <!-- Action Buttons -->
-                        <div class="action-row">
-                            <button class="btn btn-sm" id="uploadBgBtn"> Fond image</button>
-                            <input type="file" id="bgImageInput" accept="image/*">
-                            <button class="btn btn-sm" id="randomShapeBtn"> Aléatoire</button>
-                            <button class="btn btn-primary btn-sm" id="shareUrlBtn">🔗 Partager URL</button>
-                        </div>
-                    </div>
+<!-- ═══ WORKSPACE ═══════════════════════════════════════════════ -->
+<div class="workspace">
 
-                    <!-- Right: Controls -->
-                    <div class="panel">
-                        <div class="panel-label">Paramètres et code</div>
-                        <div class="controls" id="controlsContainer"></div>
-                        <div class="presets-grid" id="presetsContainer"></div>
-                        <div class="copy-btns">
-                            <button class="btn btn-primary btn-sm" id="copyCssBtn"> Copier CSS</button>
-                            <button class="btn btn-sm" id="copyTailwindBtn"> Copier Tailwind</button>
-                            <button class="btn btn-sm" id="copyJsxBtn"> Copier JSX</button>
-                        </div>
-                        <div class="code-output" id="codeOutput" aria-live="polite">/* Code CSS */</div>
-                    </div>
-                </div>
-            </article>
+  <!-- ── LEFT PANEL ────────────────────────────────────────────── -->
+  <aside class="left-panel">
 
-            <!-- FAQ Section -->
-            <section class="faq-section" aria-labelledby="faq-title">
-                <h2 id="faq-title">Questions fréquentes</h2>
-                <div class="faq-grid">
-                    <div class="faq-item">
-                        <h3>Qu'est-ce qu'un clip-path en CSS ?</h3>
-                        <p>La propriété <code>clip-path</code> découpe un élément HTML selon une forme géométrique. Cet outil permet de <strong>faire glisser les points</strong> directement sur l'aperçu pour un contrôle visuel total.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Comment sont générés les blobs ?</h3>
-                        <p>Les blobs utilisent un <strong>algorithme de bruit de Perlin/Simplex</strong> pour créer des contours organiques naturels. Ajustez la complexité et la graine (seed) pour des formes uniques.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Le simulateur de daltonisme est-il réaliste ?</h3>
-                        <p>Oui, il applique des <strong>filtres SVG basés sur le modèle de Brettel-Viénot</strong> avec des matrices LMS pour simuler fidèlement la protanopie, deutéranopie et tritanopie.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Puis-je exporter pour Tailwind ou React ?</h3>
-                        <p>Absolument. Les boutons dédiés génèrent le code <strong>Tailwind CSS</strong> (avec syntaxe [clip-path:...]) et <strong>JSX</strong> pour React. Le code CSS natif est toujours disponible.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Comment partager ma forme ?</h3>
-                        <p>Cliquez sur <strong>« Partager URL »</strong> : tous les paramètres sont encodés dans le hash de l'URL. Envoyez le lien, votre collègue retrouvera exactement la même configuration.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>L'outil est-il gratuit ?</h3>
-                        <p>Oui, <strong>100% gratuit</strong>, sans inscription et sans publicité. Toutes les formes créées vous appartiennent.</p>
-                        <p>Découvrez aussi notre <a href="/fr/outils/generateur-arriere-plans/">générateur d’arrière-plans CSS</a></p>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer class="footer">
-            <p>© 2025 <a href="/">DevToolbox</a> — Outils 100% côté client • Générateur de formes CSS</p>
-        </footer>
+    <!-- Mode settings -->
+    <div class="panel-section">
+      <div class="panel-hdr" data-target="settingsBody">
+        Paramètres de la forme <span class="chev">▾</span>
+      </div>
+      <div class="panel-body" id="settingsBody">
+        <div id="modeControls"></div>
+      </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+    <!-- Fill & style -->
+    <div class="panel-section">
+      <div class="panel-hdr" data-target="fillBody">
+        Remplissage et style <span class="chev">▾</span>
+      </div>
+      <div class="panel-body" id="fillBody">
+        <div class="ctrl-row">
+          <div class="ctrl-label">Type de remplissage</div>
+          <select id="fillType">
+            <option value="solid">Uni</option>
+            <option value="gradient">Dégradé</option>
+            <option value="pattern-dots">Motif — Points</option>
+            <option value="pattern-lines">Motif — Lignes</option>
+            <option value="transparent">Transparent</option>
+          </select>
+        </div>
+        <div class="two-col" id="fillColorRow">
+          <div class="ctrl-row">
+            <div class="ctrl-label">Couleur A</div>
+            <input type="color" id="fillColor1" value="#E8A020">
+          </div>
+          <div class="ctrl-row" id="fillColor2Row">
+            <div class="ctrl-label">Couleur B</div>
+            <input type="color" id="fillColor2" value="#22D3EE">
+          </div>
+        </div>
+        <div class="fill-swatches" id="fillSwatches"></div>
+        <div class="ctrl-row" style="margin-top:8px;">
+          <div class="ctrl-label">Profondeur d'ombre <span class="val-badge" id="shadowVal">0</span></div>
+          <input type="range" id="shadowDepth" min="0" max="40" value="0">
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-label">Animation</div>
+          <select id="animType">
+            <option value="none">Aucune</option>
+            <option value="animate-pulse">Pulsation</option>
+            <option value="animate-rotate">Rotation</option>
+            <option value="animate-float">Flottement</option>
+          </select>
+        </div>
+      </div>
+    </div>
 
-    <script>
-        (function() {
-            // ==================== THEME ====================
-            const themeBtns = document.querySelectorAll('.theme-btn');
+    <!-- Point editor -->
+    <div class="panel-section" id="pointEditorSection">
+      <div class="panel-hdr" data-target="pointsBody">
+        Éditeur de points <span class="chev">▾</span>
+      </div>
+      <div class="panel-body" id="pointsBody">
+        <div id="pointList"></div>
+        <button class="preset-btn" id="addPointManualBtn" style="margin-top:6px;width:100%;justify-content:center;display:flex;align-items:center;gap:5px;">+ Ajouter un point</button>
+      </div>
+    </div>
 
-            function setTheme(t) {
-                document.body.classList.toggle('dark', t === 'dark');
-                themeBtns.forEach(b => {
-                    b.classList.toggle('active', b.dataset.theme === t);
-                    b.setAttribute('aria-checked', b.dataset.theme === t ? 'true' : 'false');
-                });
-                localStorage.setItem('shape-theme', t);
-            }
-            themeBtns.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
-            const savedTheme = localStorage.getItem('shape-theme') || 'light';
-            setTheme(savedTheme);
+    <!-- Presets -->
+    <div class="panel-section">
+      <div class="panel-hdr" data-target="presetsBody">
+        Présélections rapides <span class="chev">▾</span>
+      </div>
+      <div class="panel-body" id="presetsBody">
+        <div class="preset-grid" id="presetGrid"></div>
+      </div>
+    </div>
 
-            // ==================== TOAST ====================
-            const toastEl = document.getElementById('toast');
-            let toastTimer;
+    <!-- History -->
+    <div class="panel-section">
+      <div class="panel-hdr" data-target="histBody">
+        Historique <span class="chev">▾</span>
+      </div>
+      <div class="panel-body" id="histBody" style="padding:0;">
+        <div class="history-strip" id="histStrip"></div>
+      </div>
+    </div>
 
-            function toast(msg) {
-                clearTimeout(toastTimer);
-                toastEl.textContent = msg;
-                toastEl.classList.add('visible');
-                toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 2000);
-            }
+    <!-- Saved shapes -->
+    <div class="panel-section">
+      <div class="panel-hdr" data-target="savedBody">
+        Formes sauvegardées <span class="chev">▾</span>
+      </div>
+      <div class="panel-body" id="savedBody">
+        <div class="saved-grid" id="savedGrid">
+          <div style="color:var(--t4);font-size:0.72rem;grid-column:1/-1;">Cliquez ♡ pour sauvegarder</div>
+        </div>
+      </div>
+    </div>
 
-            async function copyText(txt) {
-                try {
-                    await navigator.clipboard.writeText(txt);
-                    toast('✅ Copié !');
-                } catch {
-                    const ta = document.createElement('textarea');
-                    ta.value = txt;
-                    ta.style.cssText = 'position:fixed;opacity:0;';
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                    toast('✅ Copié (fallback)');
-                }
-            }
+  </aside>
 
-            // ==================== DOM REFS ====================
-            const previewArea = document.getElementById('previewArea');
-            const shapeDisplay = document.getElementById('shapeDisplay');
-            const shapeSvg = document.getElementById('shapeSvg');
-            const controlsContainer = document.getElementById('controlsContainer');
-            const codeOutput = document.getElementById('codeOutput');
-            const presetsContainer = document.getElementById('presetsContainer');
+  <!-- ── CENTER ─────────────────────────────────────────────────── -->
+  <main class="center-panel">
 
-            // ==================== SIMPLEX NOISE (Perlin-like) ====================
-            // Implementation of 2D simplex noise for blob generation
-            const SimplexNoise = (function() {
-                const grad3 = [
-                    [1, 1, 0],
-                    [-1, 1, 0],
-                    [1, -1, 0],
-                    [-1, -1, 0],
-                    [1, 0, 1],
-                    [-1, 0, 1],
-                    [1, 0, -1],
-                    [-1, 0, -1],
-                    [0, 1, 1],
-                    [0, -1, 1],
-                    [0, 1, -1],
-                    [0, -1, -1]
-                ];
-                const perm = new Uint8Array(512);
-                const permMod12 = new Uint8Array(512);
-                let _seed = 0;
+    <!-- Toolbar -->
+    <div class="preview-toolbar">
+      <div style="display:flex;gap:4px;" id="sizeBar">
+        <button class="tool-btn active" data-size="300">300px</button>
+        <button class="tool-btn" data-size="200">200px</button>
+        <button class="tool-btn" data-size="400">400px</button>
+      </div>
+      <div class="divider-v"></div>
+      <div style="display:flex;gap:4px;" id="bgBar">
+        <button class="tool-btn active" data-bg="dark">Sombre</button>
+        <button class="tool-btn" data-bg="gradient">Dégradé</button>
+        <button class="tool-btn" data-bg="photo">Photo</button>
+        <button class="tool-btn" data-bg="white">Blanc</button>
+      </div>
+      <div class="divider-v"></div>
+      <button class="tool-btn" id="saveShapeBtn">♡ Sauvegarder</button>
+      <button class="tool-btn" id="downloadSvgBtn">⬇ SVG</button>
+      <button class="tool-btn" id="shareBtn">🔗 Partager</button>
+      <div style="margin-left:auto;font-size:0.68rem;color:var(--t4);display:flex;gap:8px;align-items:center;">
+        <span class="kbd">Ctrl+Z</span> Annuler &nbsp;
+        <span class="kbd">Suppr</span> Supprimer le point
+      </div>
+    </div>
 
-                function seed(s) {
-                    _seed = s;
-                    for (let i = 0; i < 256; i++) {
-                        perm[i] = i;
-                    }
-                    // Fisher-Yates shuffle with seed
-                    let s2 = _seed;
-                    for (let i = 255; i > 0; i--) {
-                        s2 = (s2 * 16807 + 0) % 2147483647;
-                        const j = s2 % (i + 1);
-                        [perm[i], perm[j]] = [perm[j], perm[i]];
-                    }
-                    for (let i = 0; i < 512; i++) {
-                        perm[i] = perm[i & 255];
-                        permMod12[i] = perm[i] % 12;
-                    }
-                }
+    <!-- Stage -->
+    <div class="preview-stage" id="previewStage">
+      <div class="stage-bg-el" id="stageBg"></div>
+      <div class="grid-overlay" id="gridOverlay"></div>
 
-                function dot(g, x, y) {
-                    return g[0] * x + g[1] * y;
-                }
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="shapeCanvas" width="300" height="300"></canvas>
+        <svg class="handles-svg" id="handlesSvg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="size-badge" id="sizeBadge">300 × 300 px</div>
+      </div>
+    </div>
 
-                function noise(x, y) {
-                    const F2 = 0.5 * (Math.sqrt(3) - 1);
-                    const G2 = (3 - Math.sqrt(3)) / 6;
-                    const s = (x + y) * F2;
-                    const i = Math.floor(x + s);
-                    const j = Math.floor(y + s);
-                    const t = (i + j) * G2;
-                    const X0 = i - t;
-                    const Y0 = j - t;
-                    const x0 = x - X0;
-                    const y0 = y - Y0;
-                    let i1, j1;
-                    if (x0 > y0) { i1 = 1;
-                        j1 = 0; } else { i1 = 0;
-                        j1 = 1; }
-                    const x1 = x0 - i1 + G2;
-                    const y1 = y0 - j1 + G2;
-                    const x2 = x0 - 1 + 2 * G2;
-                    const y2 = y0 - 1 + 2 * G2;
-                    const ii = i & 255;
-                    const jj = j & 255;
-                    let n0 = 0,
-                        n1 = 0,
-                        n2 = 0;
-                    const gi0 = permMod12[ii + perm[jj]];
-                    const gi1 = permMod12[ii + i1 + perm[jj + j1]];
-                    const gi2 = permMod12[ii + 1 + perm[jj + 1]];
-                    let t0 = 0.5 - x0 * x0 - y0 * y0;
-                    if (t0 >= 0) { t0 *= t0;
-                        n0 = t0 * t0 * dot(grad3[gi0], x0, y0); }
-                    let t1 = 0.5 - x1 * x1 - y1 * y1;
-                    if (t1 >= 0) { t1 *= t1;
-                        n1 = t1 * t1 * dot(grad3[gi1], x1, y1); }
-                    let t2 = 0.5 - x2 * x2 - y2 * y2;
-                    if (t2 >= 0) { t2 *= t2;
-                        n2 = t2 * t2 * dot(grad3[gi2], x2, y2); }
-                    return 70 * (n0 + n1 + n2);
-                }
-                return { seed, noise };
-            })();
+    <!-- Simulator -->
+    <div class="sim-bar">
+      <span class="sim-label">Simulation visuelle :</span>
+      <button class="sim-btn active" data-sim="normal">Normale</button>
+      <button class="sim-btn" data-sim="prot">Protanopie</button>
+      <button class="sim-btn" data-sim="deut">Deutéranopie</button>
+      <button class="sim-btn" data-sim="trit">Tritanopie</button>
+    </div>
 
-            // ==================== STATE ====================
-            let currentMode = 'clip-path';
-            const shapeParams = {
-                'clip-path': { points: 5, roundness: 0, rotation: 0, customPoints: null },
-                'blob': { complexity: 4, seed: 42, scale: 1, octaves: 3 },
-                'border-radius': { tl: 30, tr: 70, bl: 20, br: 80 }
-            };
+    <!-- Morph bar -->
+    <div class="morph-bar" id="morphBar">
+      <span class="morph-label">Morphose</span>
+      <div class="morph-track" id="morphTrack">
+        <div class="morph-fill" id="morphFill" style="width:0%;"></div>
+      </div>
+      <span class="morph-label" id="morphPct">0%</span>
+      <button class="tool-btn" id="morphPlayBtn">▶ Lire</button>
+    </div>
 
-            // For drag handles
-            let dragPointIndex = -1;
-            let customClipPoints = null; // Array of {x, y} in percentage (0-100)
+  </main>
 
-            // ==================== CLIP-PATH POINTS ====================
-            function generateDefaultPolygonPoints(num, rotation) {
-                const pts = [];
-                const rotRad = rotation * Math.PI / 180;
-                for (let i = 0; i < num; i++) {
-                    const angle = (i / num) * Math.PI * 2 + rotRad;
-                    const x = 50 + 42 * Math.cos(angle);
-                    const y = 50 + 42 * Math.sin(angle);
-                    pts.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 });
-                }
-                return pts;
-            }
+  <!-- ── RIGHT PANEL ───────────────────────────────────────────── -->
+  <aside class="right-panel">
 
-            function getCurrentClipPoints() {
-                if (customClipPoints && customClipPoints.length >= 3) {
-                    return customClipPoints;
-                }
-                const params = shapeParams['clip-path'];
-                return generateDefaultPolygonPoints(params.points, params.rotation);
-            }
+    <!-- Code -->
+    <div style="border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div class="right-hdr">
+        Code généré
+        <div class="fmt-tabs" id="fmtTabs">
+          <button class="fmt-btn active" data-fmt="css">CSS</button>
+          <button class="fmt-btn" data-fmt="tailwind">Tailwind</button>
+          <button class="fmt-btn" data-fmt="react">React</button>
+          <button class="fmt-btn" data-fmt="svg">SVG</button>
+        </div>
+      </div>
+      <div class="right-body" style="padding-top:0;">
+        <div class="code-block" id="codeOutput"></div>
+        <div class="action-grid">
+          <button class="action-btn primary" id="copyCodeBtn">📋 Copier le code CSS</button>
+          <button class="action-btn" id="dlCssBtn">💾 .css</button>
+          <button class="action-btn" id="dlSvgBtn2">🖼 .svg</button>
+          <button class="action-btn" id="shareBtn2">🔗 Partager l'URL</button>
+        </div>
+      </div>
+    </div>
 
-            function setClipPoints(pts) {
-                customClipPoints = pts.map(p => ({ x: p.x, y: p.y }));
-            }
+    <!-- Shape measurements -->
+    <div style="border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div class="right-hdr">Mesures</div>
+      <div class="right-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="measureGrid">
+          <div style="background:var(--s2);border-radius:6px;padding:8px;">
+            <div style="font-size:0.65rem;color:var(--t4);margin-bottom:3px;">LARGEUR</div>
+            <div style="font-family:var(--mono);font-size:0.85rem;color:var(--cyan);" id="mWidth">—</div>
+          </div>
+          <div style="background:var(--s2);border-radius:6px;padding:8px;">
+            <div style="font-size:0.65rem;color:var(--t4);margin-bottom:3px;">HAUTEUR</div>
+            <div style="font-family:var(--mono);font-size:0.85rem;color:var(--cyan);" id="mHeight">—</div>
+          </div>
+          <div style="background:var(--s2);border-radius:6px;padding:8px;">
+            <div style="font-size:0.65rem;color:var(--t4);margin-bottom:3px;">POINTS</div>
+            <div style="font-family:var(--mono);font-size:0.85rem;color:var(--green);" id="mPoints">—</div>
+          </div>
+          <div style="background:var(--s2);border-radius:6px;padding:8px;">
+            <div style="font-size:0.65rem;color:var(--t4);margin-bottom:3px;">SURFACE</div>
+            <div style="font-family:var(--mono);font-size:0.85rem;color:var(--purple);" id="mArea">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            function clearCustomPoints() {
-                customClipPoints = null;
-            }
+    <!-- Morph section -->
+    <div style="border-bottom:1px solid var(--border);flex-shrink:0;" id="morphPanel">
+      <div class="right-hdr">Morphose de forme</div>
+      <div class="right-body">
+        <div class="morph-shapes">
+          <div class="morph-slot" id="morphSlotA">A : Actuelle</div>
+          <div class="morph-arrow">→</div>
+          <div class="morph-slot" id="morphSlotB">B : Définir la cible</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button class="action-btn" id="setMorphA" style="flex:1;">Définir A</button>
+          <button class="action-btn" id="setMorphB" style="flex:1;">Définir B</button>
+        </div>
+        <div class="ctrl-row" style="margin-top:10px;">
+          <div class="ctrl-label">Progression <span class="val-badge" id="morphSliderVal">0%</span></div>
+          <input type="range" id="morphSlider" min="0" max="100" value="0">
+        </div>
+      </div>
+    </div>
 
-            // ==================== BLOB GENERATION (Perlin noise) ====================
-            function generateBlobPath(complexity, seedVal, scale, octaves) {
-                SimplexNoise.seed(seedVal);
-                const numPoints = Math.min(100, 60 + complexity * 6);
-                const points = [];
-                const centerX = 100;
-                const centerY = 100;
-                const baseRadius = 85 * scale;
+    <!-- Saved shapes (right) -->
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+      <div class="right-hdr">Sauvegardes rapides</div>
+      <div class="right-body" style="flex:1;overflow-y:auto;">
+        <div class="saved-grid" id="savedGridRight">
+          <div style="color:var(--t4);font-size:0.72rem;grid-column:1/-1;">Aucune forme sauvegardée</div>
+        </div>
+      </div>
+    </div>
 
-                for (let i = 0; i < numPoints; i++) {
-                    const angle = (i / numPoints) * Math.PI * 2;
-                    const nx = Math.cos(angle) * 2.5;
-                    const ny = Math.sin(angle) * 2.5;
+  </aside>
+</div>
+</div>
 
-                    let noiseVal = 0;
-                    let amp = 1;
-                    let freq = 1;
-                    let maxVal = 0;
-                    for (let o = 0; o < octaves; o++) {
-                        noiseVal += SimplexNoise.noise(nx * freq + seedVal * 0.1, ny * freq + seedVal * 0.1) * amp;
-                        maxVal += Math.abs(amp);
-                        amp *= 0.55;
-                        freq *= 2.1;
-                    }
-                    noiseVal = noiseVal / (maxVal || 1);
+<!-- Toast -->
+<div id="toast"></div>
 
-                    const radiusVariation = 0.6 + 0.4 * ((noiseVal + 1) / 2);
-                    const r = baseRadius * radiusVariation;
-                    const x = centerX + r * Math.cos(angle);
-                    const y = centerY + r * Math.sin(angle);
-                    points.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 });
-                }
-                return points;
-            }
+<!-- Gallery Modal -->
+<div class="modal-overlay" id="galleryModal">
+  <div class="modal-box" style="width:580px;">
+    <div class="modal-title">
+      Galerie de formes
+      <button class="modal-close" data-modal="galleryModal">✕</button>
+    </div>
+    <div class="gallery-big" id="galleryGrid"></div>
+  </div>
+</div>
 
-            function pointsToSvgPath(points, close = true) {
-                if (points.length === 0) return '';
-                let d = `M ${points[0].x} ${points[0].y}`;
-                for (let i = 1; i < points.length; i++) {
-                    d += ` L ${points[i].x} ${points[i].y}`;
-                }
-                if (close) d += ' Z';
-                return d;
-            }
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════════════
+   ETHER — STUDIO DE FORMES CSS (FR)
+═══════════════════════════════════════════════════════════════ */
 
-            function pointsToClipPathPolygon(points) {
-                return `polygon(${points.map(p => `${p.x}% ${p.y}%`).join(', ')})`;
-            }
+const $ = id => document.getElementById(id);
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
-            // ==================== UPDATE SHAPE ====================
-            function updateShape(resetCustomPoints = false) {
-                if (resetCustomPoints) clearCustomPoints();
+// ── STATE ──────────────────────────────────────────────────────
+const state = {
+  mode: 'clip',       // clip | blob | radius | morph
+  canvasSize: 300,
+  snapEnabled: false,
+  symmetry: 'none',   // none | x | y | xy
+  addPointMode: false,
+  selectedPoint: -1,
+  fill: { type:'solid', color1:'#E8A020', color2:'#22D3EE' },
+  shadow: 0,
+  anim: 'none',
+  bgStyle: 'dark',
+  codeFmt: 'css',
+  // Clip-path
+  clip: { points: null },   // array of {x,y} in %
+  // Blob
+  blob: { complexity:5, seed:42, scale:1, octaves:3 },
+  // Border radius
+  radius: { tl:30, tr:70, bl:20, br:80 },
+  // Morph
+  morphA: null, morphB: null, morphT: 0,
+};
 
-                const mode = currentMode;
-                const params = shapeParams[mode];
-                let clipValue = '';
-                let borderRadius = '';
-                let svgBlobContent = '';
-                let displayPoints = [];
+let history = [], histIdx = -1;
+let savedShapes = JSON.parse(localStorage.getItem('ether-shapes') || '[]');
+let morphAnimId = null, morphDir = 1;
+let dragPtIdx = -1, dragOffset = {x:0,y:0};
 
-                shapeDisplay.classList.remove('blob-mode');
-                shapeDisplay.innerHTML = '';
-                shapeSvg.innerHTML = '';
+// ── SIMPLEX NOISE (for blobs) ──────────────────────────────────
+const SN = (function(){
+  const g=[[ 1,1,0],[-1,1,0],[ 1,-1,0],[-1,-1,0],[ 1,0,1],[-1,0,1],[ 1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+  const p=new Uint8Array(512),pm=new Uint8Array(512);
+  function seed(s){
+    for(let i=0;i<256;i++)p[i]=i;
+    let r=s||1;
+    for(let i=255;i>0;i--){r=(r*16807+0)%2147483647;const j=r%(i+1);[p[i],p[j]]=[p[j],p[i]];}
+    for(let i=0;i<512;i++){p[i]=p[i&255];pm[i]=p[i]%12;}
+  }
+  function dot(g,x,y){return g[0]*x+g[1]*y;}
+  function noise(x,y){
+    const F=0.5*(Math.sqrt(3)-1),G=(3-Math.sqrt(3))/6;
+    const s=(x+y)*F,i=Math.floor(x+s),j=Math.floor(y+s),t=(i+j)*G;
+    const x0=x-(i-t),y0=y-(j-t);
+    const i1=x0>y0?1:0,j1=x0>y0?0:1;
+    const x1=x0-i1+G,y1=y0-j1+G,x2=x0-1+2*G,y2=y0-1+2*G;
+    const ii=i&255,jj=j&255;
+    const gi0=pm[ii+p[jj]],gi1=pm[ii+i1+p[jj+j1]],gi2=pm[ii+1+p[jj+1]];
+    let n0=0,n1=0,n2=0;
+    let t0=0.5-x0*x0-y0*y0;if(t0>=0){t0*=t0;n0=t0*t0*dot(g[gi0],x0,y0);}
+    let t1=0.5-x1*x1-y1*y1;if(t1>=0){t1*=t1;n1=t1*t1*dot(g[gi1],x1,y1);}
+    let t2=0.5-x2*x2-y2*y2;if(t2>=0){t2*=t2;n2=t2*t2*dot(g[gi2],x2,y2);}
+    return 70*(n0+n1+n2);
+  }
+  return{seed,noise};
+})();
 
-                if (mode === 'clip-path') {
-                    const pts = getCurrentClipPoints();
-                    displayPoints = pts;
-                    clipValue = pointsToClipPathPolygon(pts);
-                    shapeDisplay.style.clipPath = clipValue;
-                    shapeDisplay.style.borderRadius = '';
-                    shapeDisplay.style.background = 'var(--primary)';
-                    // Draw SVG handles
-                    drawDragHandles(pts);
-                } else if (mode === 'blob') {
-                    const blobPts = generateBlobPath(params.complexity, params.seed, params.scale, params.octaves ||
-                        3);
-                    displayPoints = blobPts;
-                    const pathD = pointsToSvgPath(blobPts);
-                    svgBlobContent =
-                        `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="${pathD}" fill="currentColor"/></svg>`;
-                    shapeDisplay.classList.add('blob-mode');
-                    shapeDisplay.innerHTML = svgBlobContent;
-                    shapeDisplay.style.background = 'transparent';
-                    shapeDisplay.style.color = 'var(--primary)';
-                    shapeDisplay.style.clipPath = '';
-                    shapeDisplay.style.borderRadius = '';
-                    clipValue = pointsToClipPathPolygon(blobPts);
-                } else if (mode === 'border-radius') {
-                    const { tl, tr, bl, br } = params;
-                    borderRadius =
-                        `${tl}% ${100-tl}% ${100-br}% ${br}% / ${tl}% ${tr}% ${100-bl}% ${bl}%`;
-                    shapeDisplay.style.borderRadius = borderRadius;
-                    shapeDisplay.style.clipPath = '';
-                    shapeDisplay.style.background = 'var(--primary)';
-                    shapeDisplay.innerHTML = '';
-                }
+// ── UTILS ──────────────────────────────────────────────────────
+function toast(m,d=2000){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+async function copy(t){try{await navigator.clipboard.writeText(t);toast('✅ Copié !');}catch{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('✅ Copié !');}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const snapGrid=(v,enabled)=>enabled?Math.round(v/5)*5:v;
 
-                updateCodeOutput(clipValue, borderRadius, svgBlobContent);
-                updateControls();
-                updatePresets();
-            }
+function polyArea(pts){
+  let a=0;
+  for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length;a+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;}
+  return Math.abs(a/2);
+}
 
-            function drawDragHandles(points) {
-                if (currentMode !== 'clip-path') return;
-                shapeSvg.innerHTML = '';
-                // Draw outline
-                const pathD = pointsToSvgPath(points.map(p => ({ x: p.x * 2, y: p.y * 2 })));
-                const outline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                outline.setAttribute('d', pathD);
-                outline.setAttribute('class', 'polygon-outline');
-                shapeSvg.appendChild(outline);
+// ── DEFAULT POINTS ─────────────────────────────────────────────
+function defaultClipPoints(n=5, rot=0){
+  const pts=[];const r=42,cx=50,cy=50,rd=rot*Math.PI/180;
+  for(let i=0;i<n;i++){const a=(i/n)*Math.PI*2+rd;pts.push({x:+(cx+r*Math.cos(a)).toFixed(1),y:+(cy+r*Math.sin(a)).toFixed(1)});}
+  return pts;
+}
 
-                // Draw handles
-                points.forEach((pt, i) => {
-                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    circle.setAttribute('cx', pt.x * 2);
-                    circle.setAttribute('cy', pt.y * 2);
-                    circle.setAttribute('r', '7');
-                    circle.setAttribute('fill', '#fff');
-                    circle.setAttribute('stroke', 'var(--primary)');
-                    circle.setAttribute('stroke-width', '2');
-                    circle.setAttribute('class', 'drag-handle');
-                    circle.setAttribute('data-index', i);
-                    circle.addEventListener('mousedown', onDragStart);
-                    circle.addEventListener('touchstart', onDragStart, { passive: false });
-                    shapeSvg.appendChild(circle);
-                });
-            }
+function getBlobPoints(complexity,seed,scale,octaves){
+  SN.seed(seed);
+  const n=60+complexity*8,pts=[];
+  const cx=50,cy=50,br=42*scale;
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2;
+    const nx=Math.cos(a)*2.5,ny=Math.sin(a)*2.5;
+    let v=0,amp=1,freq=1,mx=0;
+    for(let o=0;o<octaves;o++){v+=SN.noise(nx*freq+seed*0.1,ny*freq+seed*0.1)*amp;mx+=amp;amp*=0.55;freq*=2.1;}
+    v/=(mx||1);const rv=0.6+0.4*((v+1)/2);const r=br*rv;
+    pts.push({x:+(cx+r*Math.cos(a)).toFixed(1),y:+(cy+r*Math.sin(a)).toFixed(1)});
+  }
+  return pts;
+}
 
-            // ==================== DRAG HANDLERS ====================
-            function onDragStart(e) {
-                if (currentMode !== 'clip-path') return;
-                e.preventDefault();
-                const index = parseInt(e.target.getAttribute('data-index'));
-                if (isNaN(index)) return;
-                dragPointIndex = index;
+function getRadiusString(){
+  const {tl,tr,bl,br}=state.radius;
+  return `${tl}% ${100-tl}% ${100-br}% ${br}% / ${tl}% ${tr}% ${100-bl}% ${bl}%`;
+}
 
-                // Ensure we are working with custom points
-                const currentPts = getCurrentClipPoints();
-                setClipPoints(currentPts);
+// ── GET CURRENT POINTS ─────────────────────────────────────────
+function getCurrentPoints(){
+  if(state.mode=='clip') return state.clip.points||(state.clip.points=defaultClipPoints(5));
+  if(state.mode=='blob') return getBlobPoints(state.blob.complexity,state.blob.seed,state.blob.scale,state.blob.octaves);
+  if(state.mode=='morph'){
+    if(state.morphA&&state.morphB) return interpolatePoints(state.morphA,state.morphB,state.morphT/100);
+    return state.morphA||state.clip.points||defaultClipPoints(5);
+  }
+  return [];
+}
 
-                document.addEventListener('mousemove', onDragMove);
-                document.addEventListener('mouseup', onDragEnd);
-                document.addEventListener('touchmove', onDragMove, { passive: false });
-                document.addEventListener('touchend', onDragEnd);
-            }
+function interpolatePoints(a,b,t){
+  const len=Math.max(a.length,b.length);
+  const resample=(pts,n)=>{
+    if(pts.length===n)return pts;
+    const out=[];
+    for(let i=0;i<n;i++){const idx=(i/n)*pts.length;const lo=Math.floor(idx)%pts.length;const hi=(lo+1)%pts.length;const f=idx-Math.floor(idx);out.push({x:pts[lo].x*(1-f)+pts[hi].x*f,y:pts[lo].y*(1-f)+pts[hi].y*f});}
+    return out;
+  };
+  const ar=resample(a,len),br2=resample(b,len);
+  return ar.map((p,i)=>({x:p.x*(1-t)+br2[i].x*t,y:p.y*(1-t)+br2[i].y*t}));
+}
 
-            function onDragMove(e) {
-                if (dragPointIndex < 0 || !customClipPoints) return;
-                e.preventDefault();
-                const rect = shapeSvg.getBoundingClientRect();
-                let clientX, clientY;
-                if (e.touches) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-                const svgX = ((clientX - rect.left) / rect.width) * 200;
-                const svgY = ((clientY - rect.top) / rect.height) * 200;
-                const percentX = Math.max(2, Math.min(98, svgX / 2));
-                const percentY = Math.max(2, Math.min(98, svgY / 2));
-                customClipPoints[dragPointIndex] = { x: Math.round(percentX * 10) / 10, y: Math.round(percentY * 10) /
-                        10 };
-                updateShape();
-            }
+// ── CANVAS RENDERING ───────────────────────────────────────────
+function renderCanvas(){
+  const canvas=$('shapeCanvas');
+  const ctx=canvas.getContext('2d');
+  const sz=state.canvasSize;
+  canvas.width=sz;canvas.height=sz;
+  canvas.style.width=sz+'px';canvas.style.height=sz+'px';
+  ctx.clearRect(0,0,sz,sz);
 
-            function onDragEnd() {
-                dragPointIndex = -1;
-                document.removeEventListener('mousemove', onDragMove);
-                document.removeEventListener('mouseup', onDragEnd);
-                document.removeEventListener('touchmove', onDragMove);
-                document.removeEventListener('touchend', onDragEnd);
-            }
+  if(state.mode=='radius'){
+    // Draw rounded rect
+    ctx.save();
+    const {tl,tr,bl,br}=state.radius;
+    const s=sz;
+    ctx.beginPath();
+    ctx.moveTo((tl/100)*s/2,0);
+    ctx.lineTo(s-(tr/100)*s/2,0);
+    ctx.quadraticCurveTo(s,0,s,(tr/100)*s/2);
+    ctx.lineTo(s,s-(br/100)*s/2);
+    ctx.quadraticCurveTo(s,s,s-(br/100)*s/2,s);
+    ctx.lineTo((bl/100)*s/2,s);
+    ctx.quadraticCurveTo(0,s,0,s-(bl/100)*s/2);
+    ctx.lineTo(0,(tl/100)*s/2);
+    ctx.quadraticCurveTo(0,0,(tl/100)*s/2,0);
+    ctx.closePath();
+    applyFill(ctx,sz);
+    applyShadow(ctx);
+    ctx.fill();
+    if(state.shadow>0){ctx.shadowColor='transparent';}
+    ctx.restore();
+  } else {
+    const pts=getCurrentPoints();
+    if(!pts||pts.length<2) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo((pts[0].x/100)*sz,(pts[0].y/100)*sz);
+    for(let i=1;i<pts.length;i++) ctx.lineTo((pts[i].x/100)*sz,(pts[i].y/100)*sz);
+    ctx.closePath();
+    applyFill(ctx,sz);
+    applyShadow(ctx);
+    ctx.fill();
+    if(state.shadow>0){ctx.shadowColor='transparent';}
+    ctx.restore();
+  }
 
-            // ==================== CODE OUTPUT ====================
-            function updateCodeOutput(clipValue, borderRadius, svgBlobContent) {
-                let css = '';
-                if (clipValue && currentMode !== 'border-radius') {
-                    css = `clip-path: ${clipValue};\n`;
-                }
-                if (borderRadius) {
-                    css = `border-radius: ${borderRadius};\n`;
-                }
-                if (svgBlobContent) {
-                    css += `\n/* SVG inline pour le blob : */\n${svgBlobContent}\n`;
-                    css += `\n/* Alternative CSS avec clip-path approximatif : */\n`;
-                    if (clipValue) css += `clip-path: ${clipValue};\n`;
-                }
-                if (!css.trim()) css = '/* Aucune propriété CSS */';
-                codeOutput.textContent = css.trim();
-            }
+  renderHandles();
+  updateMeasurements();
+}
 
-            // ==================== CONTROLS ====================
-            function sliderHTML(key, label, min, max, val, step = 1, unit = '') {
-                return `
-                <div class="control-group">
-                <label>${label} <span class="value-display" id="${key}Val">${val}${unit}</span></label>
-                <input type="range" class="shape-slider" data-key="${key}" min="${min}" max="${max}" value="${val}" step="${step}" aria-label="${label}">
-                </div>`;
-            }
+function applyFill(ctx,sz){
+  const {type,color1,color2}=state.fill;
+  if(type=='solid'){ctx.fillStyle=color1;}
+  else if(type=='gradient'){
+    const g=ctx.createLinearGradient(0,0,sz,sz);
+    g.addColorStop(0,color1);g.addColorStop(1,color2);
+    ctx.fillStyle=g;
+  } else if(type=='pattern-dots'){
+    const pat=document.createElement('canvas');pat.width=12;pat.height=12;
+    const pc=pat.getContext('2d');pc.fillStyle=color2;pc.beginPath();pc.arc(6,6,2.5,0,Math.PI*2);pc.fill();
+    ctx.fillStyle=color1;ctx.fill();
+    ctx.fillStyle=ctx.createPattern(pat,'repeat');
+  } else if(type=='pattern-lines'){
+    const pat=document.createElement('canvas');pat.width=10;pat.height=10;
+    const pc=pat.getContext('2d');pc.strokeStyle=color2;pc.lineWidth=1.5;pc.beginPath();pc.moveTo(0,0);pc.lineTo(10,10);pc.stroke();
+    ctx.fillStyle=color1;ctx.fill();
+    ctx.fillStyle=ctx.createPattern(pat,'repeat');
+  } else if(type=='transparent'){
+    ctx.fillStyle='rgba(255,255,255,0.15)';ctx.strokeStyle=color1;ctx.lineWidth=2;ctx.stroke();
+  }
+}
 
-            function updateControls() {
-                const mode = currentMode;
-                const params = shapeParams[mode];
-                let html = '';
+function applyShadow(ctx){
+  if(state.shadow>0){
+    ctx.shadowColor='rgba(0,0,0,0.4)';
+    ctx.shadowBlur=state.shadow;
+    ctx.shadowOffsetX=state.shadow/2;
+    ctx.shadowOffsetY=state.shadow/2;
+  }
+}
 
-                if (mode === 'clip-path') {
-                    if (!customClipPoints) {
-                        html += sliderHTML('points', 'Nombre de côtés', 3, 12, params.points);
-                    } else {
-                        html +=
-                            `<p style="font-size:0.8rem;color:var(--text3);margin-bottom:4px;">✨ Points personnalisés (glissez les poignées)</p>`;
-                        html +=
-                            `<button class="btn btn-sm" id="resetPointsBtn" style="margin-bottom:8px;">↩️ Réinitialiser les points</button>`;
-                    }
-                    html += sliderHTML('rotation', 'Rotation', 0, 360, params.rotation, 1, '°');
-                    html += sliderHTML('roundness', 'Arrondi (inset)', 0, 50, params.roundness, 1, '%');
-                } else if (mode === 'blob') {
-                    html += sliderHTML('complexity', 'Complexité', 1, 10, params.complexity);
-                    html += sliderHTML('seed', 'Graine (seed)', 1, 200, params.seed);
-                    html += sliderHTML('scale', 'Échelle', 0.3, 1.8, params.scale, 0.05);
-                    html += sliderHTML('octaves', 'Octaves de bruit', 1, 6, params.octaves || 3);
-                } else if (mode === 'border-radius') {
-                    html += sliderHTML('tl', 'Haut-gauche', 0, 100, params.tl, 1, '%');
-                    html += sliderHTML('tr', 'Haut-droit', 0, 100, params.tr, 1, '%');
-                    html += sliderHTML('bl', 'Bas-gauche', 0, 100, params.bl, 1, '%');
-                    html += sliderHTML('br', 'Bas-droit', 0, 100, params.br, 1, '%');
-                }
+function renderHandles(){
+  const svg=$('handlesSvg');
+  svg.innerHTML='';
+  const sz=state.canvasSize;
+  svg.setAttribute('viewBox',`0 0 ${sz} ${sz}`);
+  svg.style.width=sz+'px';svg.style.height=sz+'px';
 
-                controlsContainer.innerHTML = html;
+  const mode=state.mode;
+  if(mode!=='clip'&&mode!=='morph') return;
+  const pts=getCurrentPoints();
+  if(!pts||pts.length<2) return;
 
-                // Attach slider events
-                document.querySelectorAll('.shape-slider').forEach(s => {
-                    s.addEventListener('input', function() {
-                        const key = this.dataset.key;
-                        const val = parseFloat(this.value);
-                        shapeParams[mode][key] = val;
-                        const valDisplay = document.getElementById(key + 'Val');
-                        if (valDisplay) {
-                            const unit = (key === 'rotation') ? '°' : (['tl', 'tr', 'bl', 'br',
-                                'roundness'
-                            ].includes(key) ? '%' : '');
-                            valDisplay.textContent = val + unit;
-                        }
-                        if (key === 'points' || key === 'rotation') {
-                            clearCustomPoints();
-                        }
-                        updateShape();
-                    });
-                });
+  // Draw outline
+  const pathEl=document.createElementNS(SVG_NS,'polyline');
+  pathEl.setAttribute('points',pts.map(p=>`${(p.x/100)*sz},${(p.y/100)*sz}`).join(' '));
+  pathEl.setAttribute('class','outline-path');
+  // close path line
+  if(pts.length>2){
+    const ln=document.createElementNS(SVG_NS,'line');
+    ln.setAttribute('x1',(pts[pts.length-1].x/100)*sz);ln.setAttribute('y1',(pts[pts.length-1].y/100)*sz);
+    ln.setAttribute('x2',(pts[0].x/100)*sz);ln.setAttribute('y2',(pts[0].y/100)*sz);
+    ln.setAttribute('stroke','var(--a)');ln.setAttribute('stroke-width','1.5');ln.setAttribute('stroke-dasharray','5 3');ln.setAttribute('opacity','0.5');
+    svg.appendChild(ln);
+  }
+  svg.appendChild(pathEl);
 
-                // Reset points button
-                const resetBtn = document.getElementById('resetPointsBtn');
-                if (resetBtn) {
-                    resetBtn.addEventListener('click', () => {
-                        clearCustomPoints();
-                        updateShape(true);
-                    });
-                }
-            }
+  // Draw handles (only for clip/morph in clip mode)
+  if(mode=='clip'&&state.clip.points){
+    pts.forEach((pt,i)=>{
+      const c=document.createElementNS(SVG_NS,'circle');
+      c.setAttribute('cx',(pt.x/100)*sz);
+      c.setAttribute('cy',(pt.y/100)*sz);
+      c.setAttribute('r','7');
+      c.setAttribute('fill',i===state.selectedPoint?'var(--a)':'#fff');
+      c.setAttribute('stroke',i===state.selectedPoint?'#000':'var(--a)');
+      c.setAttribute('stroke-width','2');
+      c.setAttribute('class','handle-circle');
+      c.setAttribute('data-idx',i);
+      svg.appendChild(c);
+    });
+  }
+}
 
-            function updatePresets() {
-                const mode = currentMode;
-                let presets = [];
-                if (mode === 'clip-path') presets = ['triangle', 'pentagone', 'hexagone', 'étoile', 'flèche',
-                'losange'];
-                else if (mode === 'blob') presets = ['bulle', 'organique', 'vague', 'éclaboussure', 'galet'];
-                else presets = ['cercle', 'ellipse', 'goutte', 'feuille', 'amibe'];
+// ── DRAG HANDLES ───────────────────────────────────────────────
+let isDragging=false;
 
-                presetsContainer.innerHTML = presets.map(p =>
-                    `<button class="preset-btn" data-preset="${p}">${p}</button>`
-                ).join('');
+$('handlesSvg').addEventListener('mousedown',e=>{
+  const c=e.target.closest('.handle-circle');if(!c)return;
+  if(state.mode!=='clip'||!state.clip.points)return;
+  e.preventDefault();
+  dragPtIdx=parseInt(c.getAttribute('data-idx'));
+  state.selectedPoint=dragPtIdx;
+  isDragging=true;
+  renderHandles();
+});
 
-                document.querySelectorAll('.preset-btn').forEach(b => {
-                    b.addEventListener('click', () => applyPreset(b.dataset.preset));
-                });
-            }
+$('handlesSvg').addEventListener('click',e=>{
+  if(state.addPointMode&&state.mode=='clip'){
+    const rect=$('handlesSvg').getBoundingClientRect();
+    const x=((e.clientX-rect.left)/rect.width)*100;
+    const y=((e.clientY-rect.top)/rect.height)*100;
+    if(!state.clip.points) state.clip.points=defaultClipPoints(5);
+    state.clip.points.push({x:+snapGrid(x,state.snapEnabled).toFixed(1),y:+snapGrid(y,state.snapEnabled).toFixed(1)});
+    renderAll();pushHistory();toast('✚ Point ajouté');
+  }
+});
 
-            function applyPreset(preset) {
-                const mode = currentMode;
-                clearCustomPoints();
+document.addEventListener('mousemove',e=>{
+  if(!isDragging||dragPtIdx<0||!state.clip.points)return;
+  const rect=$('handlesSvg').getBoundingClientRect();
+  const raw_x=((e.clientX-rect.left)/rect.width)*100;
+  const raw_y=((e.clientY-rect.top)/rect.height)*100;
+  let sx=snapGrid(raw_x,state.snapEnabled);
+  let sy=snapGrid(raw_y,state.snapEnabled);
+  // Symmetry
+  const cx=50,cy=50;
+  const dx=sx-cx,dy=sy-cy;
+  if(state.symmetry=='x'||state.symmetry=='xy') sx=cx+dx; // reflect handled below
+  state.clip.points[dragPtIdx]={x:+clamp(sx,1,99).toFixed(1),y:+clamp(sy,1,99).toFixed(1)};
+  // Apply symmetry to mirror point
+  if(state.symmetry!=='none'){
+    const mirror=state.clip.points.length-1-dragPtIdx;
+    if(mirror!==dragPtIdx&&state.clip.points[mirror]){
+      if(state.symmetry=='x') state.clip.points[mirror]={x:+(100-sx).toFixed(1),y:+sy.toFixed(1)};
+      else if(state.symmetry=='y') state.clip.points[mirror]={x:+sx.toFixed(1),y:+(100-sy).toFixed(1)};
+      else if(state.symmetry=='xy') state.clip.points[mirror]={x:+(100-sx).toFixed(1),y:+(100-sy).toFixed(1)};
+    }
+  }
+  renderCanvas();renderPointList();updateCode();
+});
 
-                const presetsMap = {
-                    'triangle': { points: 3, rotation: 0, roundness: 0 },
-                    'pentagone': { points: 5, rotation: 0, roundness: 0 },
-                    'hexagone': { points: 6, rotation: 0, roundness: 0 },
-                    'étoile': { points: 5, rotation: 0, roundness: 25 },
-                    'flèche': { points: 3, rotation: 90, roundness: 5 },
-                    'losange': { points: 4, rotation: 45, roundness: 0 },
-                    'bulle': { complexity: 3, seed: 42, scale: 1, octaves: 3 },
-                    'organique': { complexity: 6, seed: 77, scale: 1.1, octaves: 4 },
-                    'vague': { complexity: 3, seed: 120, scale: 0.9, octaves: 2 },
-                    'éclaboussure': { complexity: 8, seed: 200, scale: 1, octaves: 5 },
-                    'galet': { complexity: 2, seed: 55, scale: 0.8, octaves: 2 },
-                    'cercle': { tl: 50, tr: 50, bl: 50, br: 50 },
-                    'ellipse': { tl: 65, tr: 65, bl: 35, br: 35 },
-                    'goutte': { tl: 75, tr: 25, bl: 25, br: 75 },
-                    'feuille': { tl: 20, tr: 80, bl: 80, br: 20 },
-                    'amibe': { tl: 40, tr: 60, bl: 55, br: 45 }
-                };
+document.addEventListener('mouseup',()=>{
+  if(isDragging){isDragging=false;dragPtIdx=-1;pushHistory();}
+});
 
-                const presetData = presetsMap[preset];
-                if (presetData) {
-                    Object.assign(shapeParams[mode], presetData);
-                }
-                updateShape();
-            }
+// Click canvas to add point in add-point mode
+$('shapeCanvas').addEventListener('click',e=>{
+  if(!state.addPointMode||state.mode!=='clip')return;
+  const rect=$('shapeCanvas').getBoundingClientRect();
+  const x=((e.clientX-rect.left)/rect.width)*100;
+  const y=((e.clientY-rect.top)/rect.height)*100;
+  if(!state.clip.points) state.clip.points=defaultClipPoints(5);
+  state.clip.points.push({x:+snapGrid(x,state.snapEnabled).toFixed(1),y:+snapGrid(y,state.snapEnabled).toFixed(1)});
+  renderAll();pushHistory();
+});
 
-            // ==================== SIMULATOR ====================
-            document.querySelectorAll('.sim-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.sim-btn').forEach(b => {
-                        b.classList.remove('active');
-                        b.setAttribute('aria-pressed', 'false');
-                    });
-                    btn.classList.add('active');
-                    btn.setAttribute('aria-pressed', 'true');
-                    const sim = btn.dataset.sim;
+// ── CODE GENERATION ────────────────────────────────────────────
+function ptsToClipPath(pts){
+  return 'polygon('+pts.map(p=>`${p.x}% ${p.y}%`).join(', ')+')';
+}
+function ptsToSvgPath(pts,sz=300){
+  if(!pts||pts.length<2)return'';
+  let d=`M ${(pts[0].x/100)*sz} ${(pts[0].y/100)*sz}`;
+  for(let i=1;i<pts.length;i++) d+=` L ${(pts[i].x/100)*sz} ${(pts[i].y/100)*sz}`;
+  return d+' Z';
+}
 
-                    const filterMap = {
-                        normal: 'none',
-                        protanopia: 'url(#protanopia-filter)',
-                        deuteranopia: 'url(#deuteranopia-filter)',
-                        tritanopia: 'url(#tritanopia-filter)'
-                    };
-                    previewArea.style.filter = filterMap[sim] || 'none';
-                });
-            });
+function generateCode(fmt){
+  const mode=state.mode;
+  if(mode=='radius'){
+    const r=getRadiusString();
+    if(fmt=='css') return `.forme {\n  border-radius: ${r};\n  width: 200px;\n  height: 200px;\n}`;
+    if(fmt=='tailwind') return `<div class="[border-radius:${r}] w-48 h-48 bg-amber-400" />`;
+    if(fmt=='react') return `const styles = {\n  borderRadius: '${r}',\n  width: 200, height: 200\n};\n\n<div style={styles} />`;
+    if(fmt=='svg') return `<rect rx="${state.radius.tl}" ry="${state.radius.tl}" width="200" height="200" />`;
+    return '';
+  }
+  const pts=getCurrentPoints();
+  if(!pts||pts.length<2) return '/* Aucune forme */';
+  const clip=ptsToClipPath(pts);
+  if(fmt=='css') return `.forme {\n  clip-path: ${clip};\n  /* Appliquer à n'importe quel élément */\n}`;
+  if(fmt=='tailwind') return `<div class="[clip-path:${clip}] w-48 h-48 bg-amber-400" />`;
+  if(fmt=='react') return `const styles = {\n  clipPath: '${clip}'\n};\n\n<div style={styles} />`;
+  if(fmt=='svg'){
+    const path=ptsToSvgPath(pts);
+    return `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">\n  <path d="${path}"\n    fill="${state.fill.color1}" />\n</svg>`;
+  }
+  return '';
+}
 
-            // ==================== EVENT LISTENERS ====================
-            // Mode tabs
-            document.querySelectorAll('#modeTabs .tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('#modeTabs .tab-btn').forEach(b => {
-                        b.classList.remove('active');
-                        b.setAttribute('aria-pressed', 'false');
-                    });
-                    btn.classList.add('active');
-                    btn.setAttribute('aria-pressed', 'true');
-                    currentMode = btn.dataset.mode;
-                    clearCustomPoints();
-                    updateShape();
-                });
-            });
+function updateCode(){
+  $('codeOutput').textContent=generateCode(state.codeFmt);
+}
 
-            // Random
-            document.getElementById('randomShapeBtn').addEventListener('click', () => {
-                clearCustomPoints();
-                const mode = currentMode;
-                if (mode === 'clip-path') {
-                    shapeParams[mode].points = Math.floor(Math.random() * 10) + 3;
-                    shapeParams[mode].rotation = Math.floor(Math.random() * 360);
-                    shapeParams[mode].roundness = Math.floor(Math.random() * 40);
-                } else if (mode === 'blob') {
-                    shapeParams[mode].complexity = Math.floor(Math.random() * 9) + 2;
-                    shapeParams[mode].seed = Math.floor(Math.random() * 200) + 1;
-                    shapeParams[mode].scale = Math.random() * 1.2 + 0.4;
-                    shapeParams[mode].octaves = Math.floor(Math.random() * 5) + 2;
-                } else {
-                    ['tl', 'tr', 'bl', 'br'].forEach(k => {
-                        shapeParams[mode][k] = Math.floor(Math.random() * 100);
-                    });
-                }
-                updateShape();
-            });
+// ── MEASUREMENTS ───────────────────────────────────────────────
+function updateMeasurements(){
+  const sz=state.canvasSize;
+  $('mWidth').textContent=sz+'px';
+  $('mHeight').textContent=sz+'px';
+  const pts=getCurrentPoints();
+  if(pts&&pts.length>0){
+    $('mPoints').textContent=pts.length;
+    const area=polyArea(pts.map(p=>({x:(p.x/100)*sz,y:(p.y/100)*sz})));
+    $('mArea').textContent=Math.round(area).toLocaleString()+'px²';
+  } else {
+    $('mPoints').textContent=state.mode=='radius'?'4 coins':'—';
+    $('mArea').textContent='—';
+  }
+}
 
-            // Image background
-            document.getElementById('uploadBgBtn').addEventListener('click', () => document.getElementById(
-                'bgImageInput').click());
-            document.getElementById('bgImageInput').addEventListener('change', function() {
-                const file = this.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = e => {
-                    previewArea.style.backgroundImage = `url(${e.target.result})`;
-                    previewArea.style.backgroundSize = 'cover';
-                    previewArea.style.backgroundPosition = 'center';
-                };
-                reader.readAsDataURL(file);
-            });
+// ── MODE CONTROLS ──────────────────────────────────────────────
+function renderModeControls(){
+  const m=state.mode;
+  const container=$('modeControls');
+  let h='';
+  if(m=='clip'){
+    h+=r('Côtés','clipSides',3,12,state.clip.points?.length||5,'',1);
+    h+=r('Rotation','clipRot',0,360,0,'°',1);
+    h+=`<div style="height:1px;background:var(--border);margin:8px 0;"></div>`;
+    h+=`<div style="font-size:0.72rem;color:var(--t4);margin-bottom:6px;">Mode symétrie</div>`;
+    h+=`<div style="display:flex;gap:5px;flex-wrap:wrap;">
+      <button class="preset-btn sym-btn ${state.symmetry=='none'?'active-sym':''}" data-sym="none">Aucune</button>
+      <button class="preset-btn sym-btn ${state.symmetry=='x'?'active-sym':''}" data-sym="x">Horiz</button>
+      <button class="preset-btn sym-btn ${state.symmetry=='y'?'active-sym':''}" data-sym="y">Vert</button>
+      <button class="preset-btn sym-btn ${state.symmetry=='xy'?'active-sym':''}" data-sym="xy">Les deux</button>
+    </div>`;
+  } else if(m=='blob'){
+    h+=r('Complexité','blobComp',1,10,state.blob.complexity);
+    h+=r('Graine','blobSeed',1,300,state.blob.seed);
+    h+=r('Échelle','blobScale',0.3,1.8,state.blob.scale,'',0.05);
+    h+=r('Octaves','blobOct',1,6,state.blob.octaves);
+    h+=`<button class="preset-btn" id="newSeedBtn" style="margin-top:8px;width:100%;display:flex;justify-content:center;">🎲 Nouvelle graine</button>`;
+  } else if(m=='radius'){
+    h+=r('Haut-gauche','radTL',0,100,state.radius.tl,'%');
+    h+=r('Haut-droite','radTR',0,100,state.radius.tr,'%');
+    h+=r('Bas-gauche','radBL',0,100,state.radius.bl,'%');
+    h+=r('Bas-droite','radBR',0,100,state.radius.br,'%');
+    h+=`<button class="preset-btn" id="radSymBtn" style="margin-top:8px;width:100%;display:flex;justify-content:center;">◎ Tous égaux</button>`;
+  } else if(m=='morph'){
+    h=`<div style="font-size:0.78rem;color:var(--t3);line-height:1.6;">
+      Définissez deux formes avec <strong style="color:var(--t1);">Définir A</strong> et <strong style="color:var(--t1);">Définir B</strong> dans le panneau de droite, puis faites glisser le curseur de morphose pour interpoler entre elles.
+    </div>
+    <div style="margin-top:10px;">
+      ${r('Morphose','morphCtrl',0,100,state.morphT,'%')}
+    </div>`;
+  }
+  container.innerHTML=h;
 
-            // Copy buttons
-            document.getElementById('copyCssBtn').addEventListener('click', () => copyText(codeOutput.textContent));
-            document.getElementById('copyTailwindBtn').addEventListener('click', () => {
-                const clip = shapeDisplay.style.clipPath;
-                const radius = shapeDisplay.style.borderRadius;
-                let tailwind = '';
-                if (clip && clip !== 'none') tailwind += `[clip-path:${clip}] `;
-                if (radius && radius !== '') tailwind += `[border-radius:${radius}]`;
-                if (!tailwind.trim()) tailwind = '/* Pas de classe Tailwind spécifique */';
-                copyText(tailwind.trim());
-            });
-            document.getElementById('copyJsxBtn').addEventListener('click', () => {
-                const clip = shapeDisplay.style.clipPath;
-                const radius = shapeDisplay.style.borderRadius;
-                let jsx = '';
-                if (clip && clip !== 'none') jsx += `clipPath: "${clip}"`;
-                if (radius && radius !== '') jsx += (jsx ? ', ' : '') + `borderRadius: "${radius}"`;
-                if (!jsx) jsx = '/* Pas de style JSX */';
-                copyText(`style={{ ${jsx} }}`);
-            });
+  // Attach events
+  container.querySelectorAll('input[type=range]').forEach(el=>{
+    el.addEventListener('input',function(){
+      const v=parseFloat(this.value),id=this.id,u=this.dataset.unit||'';
+      const badge=document.getElementById(id+'Val');if(badge)badge.textContent=v+u;
+      handleSlider(id,v);
+    });
+    el.addEventListener('change',()=>pushHistory());
+  });
+  container.querySelectorAll('.sym-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      state.symmetry=b.dataset.sym;
+      renderModeControls();
+      toast(`Symétrie : ${b.dataset.sym}`);
+    });
+  });
+  // Active style
+  container.querySelectorAll('.active-sym').forEach(b=>b.style.cssText='border-color:var(--a);color:var(--a);background:var(--a-dim);');
 
-            // Share URL
-            document.getElementById('shareUrlBtn').addEventListener('click', () => {
-                const state = {
-                    mode: currentMode,
-                    params: JSON.parse(JSON.stringify(shapeParams[currentMode])),
-                    customPoints: customClipPoints
-                };
-                const hash = btoa(encodeURIComponent(JSON.stringify(state)));
-                window.location.hash = hash;
-                const url = window.location.origin + window.location.pathname + '#' + hash;
-                copyText(url);
-                toast('🔗 URL copiée ! Partagez cette forme.');
-            });
+  const nsb=$('newSeedBtn');if(nsb) nsb.onclick=()=>{state.blob.seed=Math.floor(Math.random()*300)+1;renderAll();pushHistory();};
+  const rsb=$('radSymBtn');if(rsb) rsb.onclick=()=>{const v=state.radius.tl;state.radius={tl:v,tr:v,bl:v,br:v};renderAll();pushHistory();};
+}
 
-            // Load from hash
-            function loadFromHash() {
-                if (!window.location.hash) return;
-                try {
-                    const hash = window.location.hash.slice(1);
-                    const json = decodeURIComponent(atob(hash));
-                    const state = JSON.parse(json);
-                    if (state.mode) {
-                        currentMode = state.mode;
-                        document.querySelectorAll('#modeTabs .tab-btn').forEach(b => {
-                            b.classList.toggle('active', b.dataset.mode === currentMode);
-                            b.setAttribute('aria-pressed', b.dataset.mode === currentMode ?
-                                'true' : 'false');
-                        });
-                    }
-                    if (state.params) {
-                        shapeParams[currentMode] = { ...shapeParams[currentMode], ...state.params };
-                    }
-                    if (state.customPoints && currentMode === 'clip-path') {
-                        customClipPoints = state.customPoints;
-                    } else {
-                        clearCustomPoints();
-                    }
-                    updateShape();
-                    toast('📂 Forme restaurée depuis l\'URL');
-                } catch (e) {
-                    console.warn('Impossible de restaurer depuis le hash:', e);
-                }
-            }
+function r(label,id,min,max,val,unit='',step=1){
+  return `<div class="ctrl-row">
+    <div class="ctrl-label">${label} <span class="val-badge" id="${id}Val">${val}${unit}</span></div>
+    <input type="range" id="${id}" min="${min}" max="${max}" value="${val}" step="${step}" data-unit="${unit}">
+  </div>`;
+}
 
-            // ==================== INIT ====================
-            updateShape();
-            loadFromHash();
-        })();
-    </script>
+function handleSlider(id,v){
+  if(id=='clipSides'){
+    state.clip.points=defaultClipPoints(v);renderAll();return;
+  }
+  if(id=='clipRot'){state.clip.points=defaultClipPoints(state.clip.points?.length||5,v);renderAll();return;}
+  if(id=='blobComp') state.blob.complexity=v;
+  if(id=='blobSeed') state.blob.seed=v;
+  if(id=='blobScale') state.blob.scale=v;
+  if(id=='blobOct') state.blob.octaves=v;
+  if(id=='radTL') state.radius.tl=v;
+  if(id=='radTR') state.radius.tr=v;
+  if(id=='radBL') state.radius.bl=v;
+  if(id=='radBR') state.radius.br=v;
+  if(id=='morphCtrl'){state.morphT=v;$('morphSlider').value=v;$('morphSliderVal').textContent=v+'%';$('morphFill').style.width=v+'%';$('morphPct').textContent=v+'%';}
+  renderCanvas();updateCode();
+}
+
+// ── POINT LIST ─────────────────────────────────────────────────
+function renderPointList(){
+  const list=$('pointList');
+  const sec=$('pointEditorSection');
+  if(state.mode!=='clip'){sec.style.display='none';return;}
+  sec.style.display='block';
+  const pts=state.clip.points||[];
+  list.innerHTML='';
+  pts.forEach((pt,i)=>{
+    const row=document.createElement('div');
+    row.className='point-row'+(i===state.selectedPoint?' active':'');
+    row.innerHTML=`<span class="point-idx">${String(i+1).padStart(2,'0')}</span>
+      <div class="point-coords">
+        <input class="point-coord-inp" type="number" min="0" max="100" step="0.1" value="${pt.x}" data-axis="x" data-idx="${i}" title="X%">
+        <input class="point-coord-inp" type="number" min="0" max="100" step="0.1" value="${pt.y}" data-axis="y" data-idx="${i}" title="Y%">
+      </div>
+      <button class="pt-del" data-idx="${i}" title="Supprimer le point">✕</button>`;
+    row.addEventListener('click',(e)=>{if(e.target.tagName=='BUTTON'||e.target.tagName=='INPUT')return;state.selectedPoint=i;renderHandles();renderPointList();});
+    row.querySelectorAll('.point-coord-inp').forEach(inp=>{
+      inp.addEventListener('change',function(){
+        const idx=parseInt(this.dataset.idx),axis=this.dataset.axis,val=clamp(parseFloat(this.value)||0,0,100);
+        if(!state.clip.points[idx])return;
+        state.clip.points[idx][axis]=+val.toFixed(1);
+        renderCanvas();updateCode();pushHistory();
+      });
+    });
+    row.querySelector('.pt-del').onclick=(e)=>{
+      e.stopPropagation();
+      if(pts.length<=3){toast('⚠️ Besoin d\'au moins 3 points');return;}
+      state.clip.points.splice(i,1);
+      if(state.selectedPoint>=state.clip.points.length) state.selectedPoint=-1;
+      renderAll();pushHistory();
+    };
+    list.appendChild(row);
+  });
+}
+
+$('addPointManualBtn').onclick=()=>{
+  if(state.mode!=='clip'){toast('Passez en mode Clip-Path');return;}
+  if(!state.clip.points) state.clip.points=defaultClipPoints(5);
+  state.clip.points.push({x:50,y:50});
+  renderAll();pushHistory();toast('✚ Point ajouté au centre');
+};
+
+// ── PRESETS ────────────────────────────────────────────────────
+// Mapping français -> clé anglaise interne
+const PRESET_LABELS_FR = {
+  'triangle':'Triangle', 'square':'Carré', 'pentagon':'Pentagone', 'hexagon':'Hexagone',
+  'octagon':'Octogone', 'star4':'Étoile 4', 'star6':'Étoile 6', 'arrow':'Flèche',
+  'cross':'Croix', 'heart-ish':'Cœur', 'chevron':'Chevron', 'diamond':'Losange',
+  'bubble':'Bulle', 'organic':'Organique', 'cloud':'Nuage', 'splash':'Éclaboussure',
+  'pebble':'Galet', 'wave':'Vague',
+  'circle':'Cercle', 'pill':'Pilule', 'squircle':'Carré arrondi', 'drop':'Goutte',
+  'leaf':'Feuille', 'amoeba':'Amibe', 'sharp':'Tranchant', 'rounded':'Arrondi'
+};
+
+const PRESETS_BY_MODE={
+  clip:['triangle','square','pentagon','hexagon','octagon','star4','star6','arrow','cross','heart-ish','chevron','diamond'],
+  blob:['bubble','organic','cloud','splash','pebble','wave'],
+  radius:['circle','pill','squircle','drop','leaf','amoeba','sharp','rounded'],
+  morph:['try A→B']
+};
+
+const PRESET_SHAPES={
+  triangle:()=>{state.clip.points=[{x:50,y:8},{x:92,y:92},{x:8,y:92}];},
+  square:()=>{state.clip.points=[{x:8,y:8},{x:92,y:8},{x:92,y:92},{x:8,y:92}];},
+  pentagon:()=>{state.clip.points=defaultClipPoints(5,-90);},
+  hexagon:()=>{state.clip.points=defaultClipPoints(6,0);},
+  octagon:()=>{state.clip.points=defaultClipPoints(8,0);},
+  star4:()=>{
+    const pts=[];const r1=42,r2=20,cx=50,cy=50;
+    for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2-Math.PI/2;const r=i%2===0?r1:r2;pts.push({x:+(cx+r*Math.cos(a)).toFixed(1),y:+(cy+r*Math.sin(a)).toFixed(1)});}
+    state.clip.points=pts;
+  },
+  star6:()=>{
+    const pts=[];const r1=42,r2=20,cx=50,cy=50;
+    for(let i=0;i<12;i++){const a=(i/12)*Math.PI*2-Math.PI/2;const r=i%2===0?r1:r2;pts.push({x:+(cx+r*Math.cos(a)).toFixed(1),y:+(cy+r*Math.sin(a)).toFixed(1)});}
+    state.clip.points=pts;
+  },
+  arrow:()=>{state.clip.points=[{x:0,y:30},{x:60,y:30},{x:60,y:8},{x:100,y:50},{x:60,y:92},{x:60,y:70},{x:0,y:70}];},
+  cross:()=>{state.clip.points=[{x:35,y:0},{x:65,y:0},{x:65,y:35},{x:100,y:35},{x:100,y:65},{x:65,y:65},{x:65,y:100},{x:35,y:100},{x:35,y:65},{x:0,y:65},{x:0,y:35},{x:35,y:35}];},
+  'heart-ish':()=>{
+    const pts=[];for(let i=0;i<60;i++){const t=(i/60)*Math.PI*2;const x=16*Math.pow(Math.sin(t),3);const y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));pts.push({x:+(50+x*2.4).toFixed(1),y:+(50+y*2.4).toFixed(1)});}
+    state.clip.points=pts;
+  },
+  chevron:()=>{state.clip.points=[{x:0,y:0},{x:75,y:0},{x:100,y:50},{x:75,y:100},{x:0,y:100},{x:25,y:50}];},
+  diamond:()=>{state.clip.points=[{x:50,y:5},{x:95,y:50},{x:50,y:95},{x:5,y:50}];},
+  // Blob presets
+  bubble:()=>{state.blob={complexity:3,seed:42,scale:1,octaves:3};},
+  organic:()=>{state.blob={complexity:6,seed:77,scale:1.1,octaves:4};},
+  cloud:()=>{state.blob={complexity:4,seed:120,scale:0.95,octaves:2};},
+  splash:()=>{state.blob={complexity:9,seed:200,scale:1,octaves:5};},
+  pebble:()=>{state.blob={complexity:2,seed:55,scale:0.8,octaves:2};},
+  wave:()=>{state.blob={complexity:3,seed:88,scale:0.9,octaves:2};},
+  // Radius presets
+  circle:()=>{state.radius={tl:50,tr:50,bl:50,br:50};},
+  pill:()=>{state.radius={tl:80,tr:80,bl:80,br:80};},
+  squircle:()=>{state.radius={tl:30,tr:30,bl:30,br:30};},
+  drop:()=>{state.radius={tl:80,tr:20,bl:20,br:80};},
+  leaf:()=>{state.radius={tl:0,tr:80,bl:80,br:0};},
+  amoeba:()=>{state.radius={tl:40,tr:60,bl:55,br:30};},
+  sharp:()=>{state.radius={tl:0,tr:0,bl:0,br:0};},
+  rounded:()=>{state.radius={tl:20,tr:20,bl:20,br:20};},
+};
+
+function renderPresets(){
+  const grid=$('presetGrid');
+  const presets=PRESETS_BY_MODE[state.mode]||[];
+  grid.innerHTML=presets.map(p=>{
+    const label=PRESET_LABELS_FR[p] || p;
+    return `<button class="preset-btn" data-preset="${p}">${label}</button>`;
+  }).join('');
+  grid.querySelectorAll('.preset-btn').forEach(b=>{
+    b.onclick=()=>{
+      const fn=PRESET_SHAPES[b.dataset.preset];
+      if(fn){fn();renderAll();pushHistory();toast(`✦ ${PRESET_LABELS_FR[b.dataset.preset] || b.dataset.preset}`);}
+    };
+  });
+}
+
+// ── HISTORY ────────────────────────────────────────────────────
+function pushHistory(){
+  const snap=JSON.stringify({clip:JSON.parse(JSON.stringify(state.clip)),blob:{...state.blob},radius:{...state.radius},morphA:state.morphA?JSON.parse(JSON.stringify(state.morphA)):null,morphB:state.morphB?JSON.parse(JSON.stringify(state.morphB)):null,morphT:state.morphT,fill:{...state.fill},shadow:state.shadow,mode:state.mode});
+  history=history.slice(0,histIdx+1);
+  history.push(snap);
+  if(history.length>60)history.shift();
+  histIdx=history.length-1;
+  renderHistStrip();
+}
+function applySnap(snap){
+  const s=JSON.parse(snap);
+  Object.assign(state,{clip:s.clip,blob:s.blob,radius:s.radius,morphA:s.morphA,morphB:s.morphB,morphT:s.morphT,fill:s.fill,shadow:s.shadow,mode:s.mode});
+  syncModeTab();renderAll();
+}
+function undo(){if(histIdx>0){histIdx--;applySnap(history[histIdx]);}}
+function redo(){if(histIdx<history.length-1){histIdx++;applySnap(history[histIdx]);}}
+function renderHistStrip(){
+  const strip=$('histStrip');strip.innerHTML='';
+  history.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='hist-thumb'+(i===histIdx?' cur':'');
+    d.textContent=i+1;d.onclick=()=>{histIdx=i;applySnap(history[i]);};
+    strip.appendChild(d);
+  });
+  strip.scrollLeft=strip.scrollWidth;
+}
+
+// ── SAVED SHAPES ───────────────────────────────────────────────
+function saveShape(){
+  const name=prompt('Nom de la forme :',`Forme ${savedShapes.length+1}`);
+  if(!name)return;
+  const pts=getCurrentPoints();
+  const svgPath=pts?ptsToSvgPath(pts):null;
+  savedShapes.push({name,mode:state.mode,clip:JSON.parse(JSON.stringify(state.clip)),blob:{...state.blob},radius:{...state.radius},svgPath,ts:Date.now()});
+  localStorage.setItem('ether-shapes',JSON.stringify(savedShapes));
+  renderSavedShapes();toast(`♡ "${name}" sauvegardée`);
+}
+function renderSavedShapes(){
+  [$('savedGrid'),$('savedGridRight')].forEach(grid=>{
+    if(!grid)return;
+    if(!savedShapes.length){grid.innerHTML='<div style="color:var(--t4);font-size:0.72rem;grid-column:1/-1;">Aucune forme sauvegardée</div>';return;}
+    grid.innerHTML='';
+    savedShapes.forEach((s,i)=>{
+      const card=document.createElement('div');card.className='saved-card';
+      const svgPreview=s.svgPath?`<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><path d="${s.svgPath}" fill="var(--a)" opacity="0.8"/></svg>`:'<span style="font-size:0.6rem;color:var(--t4);">R</span>';
+      card.innerHTML=`<div class="saved-thumb">${svgPreview}</div><div class="saved-name">${s.name}<button class="saved-del" data-i="${i}">✕</button></div>`;
+      card.onclick=(e)=>{if(e.target.classList.contains('saved-del')){savedShapes.splice(i,1);localStorage.setItem('ether-shapes',JSON.stringify(savedShapes));renderSavedShapes();return;}
+        if(s.mode=='clip') state.clip=JSON.parse(JSON.stringify(s.clip));
+        else if(s.mode=='blob') Object.assign(state.blob,s.blob);
+        else if(s.mode=='radius') Object.assign(state.radius,s.radius);
+        state.mode=s.mode;syncModeTab();renderAll();pushHistory();toast(`📂 "${s.name}" chargée`);
+      };
+      grid.appendChild(card);
+    });
+  });
+}
+
+// ── BACKGROUND ─────────────────────────────────────────────────
+const BG_FILLS=[
+  {c1:'#E8A020',c2:'#22D3EE'},{c1:'#A78BFA',c2:'#F87171'},
+  {c1:'#34D399',c2:'#3B82F6'},{c1:'#F97316',c2:'#EF4444'},
+  {c1:'#EC4899',c2:'#8B5CF6'},{c1:'#ffffff',c2:'#E0E0E0'},
+];
+
+function renderFillSwatches(){
+  const wrap=$('fillSwatches');wrap.innerHTML='';
+  BG_FILLS.forEach(f=>{
+    const d=document.createElement('div');d.className='fill-swatch';
+    d.style.background=`linear-gradient(135deg,${f.c1},${f.c2})`;
+    d.onclick=()=>{$('fillColor1').value=f.c1;$('fillColor2').value=f.c2;state.fill.color1=f.c1;state.fill.color2=f.c2;renderCanvas();updateCode();};
+    wrap.appendChild(d);
+  });
+}
+
+function updateStageBg(){
+  const bg=$('stageBg');
+  const s=state.bgStyle;
+  if(s=='dark') bg.style.background='linear-gradient(135deg,#08090C,#141720)';
+  else if(s=='gradient') bg.style.background='linear-gradient(135deg,#667eea,#764ba2)';
+  else if(s=='photo') bg.style.background='linear-gradient(135deg,#1a472a,#2d6a4f)';
+  else if(s=='white') bg.style.background='#ffffff';
+}
+
+// ── MORPH ──────────────────────────────────────────────────────
+function setMorphA(){
+  const pts=getCurrentPoints();if(!pts){toast('Générez d\'abord une forme');return;}
+  state.morphA=JSON.parse(JSON.stringify(pts));
+  const svg=ptsToSvgPath(pts);
+  $('morphSlotA').innerHTML=`<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><path d="${svg}" fill="var(--a)"/></svg>`;
+  $('morphSlotA').classList.add('set');toast('✦ Forme A définie');
+}
+function setMorphB(){
+  const pts=getCurrentPoints();if(!pts){toast('Générez d\'abord une forme');return;}
+  state.morphB=JSON.parse(JSON.stringify(pts));
+  const svg=ptsToSvgPath(pts);
+  $('morphSlotB').innerHTML=`<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><path d="${svg}" fill="var(--cyan)"/></svg>`;
+  $('morphSlotB').classList.add('set');toast('✦ Forme B définie');
+}
+
+let morphPlaying=false;
+function toggleMorphPlay(){
+  if(!state.morphA||!state.morphB){toast('Définissez les formes A et B d\'abord');return;}
+  morphPlaying=!morphPlaying;
+  $('morphPlayBtn').textContent=morphPlaying?'⏹ Arrêter':'▶ Lire';
+  if(morphPlaying) morphLoop();
+}
+function morphLoop(){
+  if(!morphPlaying)return;
+  state.morphT=clamp(state.morphT+0.5*morphDir,0,100);
+  if(state.morphT>=100||state.morphT<=0) morphDir*=-1;
+  $('morphSlider').value=state.morphT;
+  $('morphSliderVal').textContent=Math.round(state.morphT)+'%';
+  $('morphFill').style.width=state.morphT+'%';
+  $('morphPct').textContent=Math.round(state.morphT)+'%';
+  renderCanvas();updateCode();
+  requestAnimationFrame(morphLoop);
+}
+
+// ── GALLERY ────────────────────────────────────────────────────
+const GALLERY=[
+  {name:'Triangle',icon:'△',preset:'triangle'},{name:'Hexagone',icon:'⬡',preset:'hexagon'},
+  {name:'Étoile 4',icon:'✦',preset:'star4'},{name:'Étoile 6',icon:'✶',preset:'star6'},
+  {name:'Flèche',icon:'→',preset:'arrow'},{name:'Croix',icon:'✚',preset:'cross'},
+  {name:'Cœur',icon:'♡',preset:'heart-ish'},{name:'Chevron',icon:'⟩',preset:'chevron'},
+  {name:'Losange',icon:'◆',preset:'diamond'},{name:'Octogone',icon:'⬡',preset:'octagon'},
+  {name:'Bulle',icon:'🫧',preset:'bubble',mode:'blob'},{name:'Organique',icon:'🌿',preset:'organic',mode:'blob'},
+  {name:'Cercle',icon:'○',preset:'circle',mode:'radius'},{name:'Pilule',icon:'💊',preset:'pill',mode:'radius'},
+  {name:'Goutte',icon:'💧',preset:'drop',mode:'radius'},{name:'Feuille',icon:'🍃',preset:'leaf',mode:'radius'},
+];
+
+function renderGallery(){
+  const grid=$('galleryGrid');grid.innerHTML='';
+  GALLERY.forEach(g=>{
+    const card=document.createElement('div');card.className='gal-card';
+    card.innerHTML=`<div class="gal-icon">${g.icon}</div><div>${g.name}</div>`;
+    card.onclick=()=>{
+      if(g.mode) state.mode=g.mode;
+      else if(PRESET_SHAPES[g.preset]) state.mode='clip';
+      syncModeTab();
+      const fn=PRESET_SHAPES[g.preset];
+      if(fn){fn();renderAll();pushHistory();toast(`✦ ${g.name}`);}
+      closeModal('galleryModal');
+    };
+    grid.appendChild(card);
+  });
+}
+
+// ── RANDOM ─────────────────────────────────────────────────────
+function randomShape(){
+  const modes=['clip','blob','radius'];
+  state.mode=modes[Math.floor(Math.random()*modes.length)];
+  syncModeTab();
+  if(state.mode=='clip'){
+    const n=Math.floor(Math.random()*10)+3;
+    const rot=Math.random()*360;
+    // Sometimes use polygon, sometimes star
+    if(Math.random()>0.6&&n>=6){
+      const pts=[];const r1=42,r2=Math.random()*20+10,cx=50,cy=50;
+      for(let i=0;i<n*2;i++){const a=(i/(n*2))*Math.PI*2-Math.PI/2;const rr=i%2===0?r1:r2;pts.push({x:+(cx+rr*Math.cos(a)).toFixed(1),y:+(cy+rr*Math.sin(a)).toFixed(1)});}
+      state.clip.points=pts;
+    } else {
+      state.clip.points=defaultClipPoints(n,rot);
+    }
+  } else if(state.mode=='blob'){
+    state.blob={complexity:Math.floor(Math.random()*8)+2,seed:Math.floor(Math.random()*300)+1,scale:Math.random()*1.2+0.4,octaves:Math.floor(Math.random()*4)+2};
+  } else {
+    state.radius={tl:Math.floor(Math.random()*90),tr:Math.floor(Math.random()*90),bl:Math.floor(Math.random()*90),br:Math.floor(Math.random()*90)};
+  }
+  state.fill.color1='#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0');
+  renderAll();pushHistory();toast('🎲 Forme aléatoire générée !');
+}
+
+// ── SVG DOWNLOAD ───────────────────────────────────────────────
+function downloadSvg(){
+  const sz=state.canvasSize;
+  let svgContent='';
+  if(state.mode=='radius'){
+    const {tl,tr,bl,br}=state.radius;
+    svgContent=`<rect x="0" y="0" width="${sz}" height="${sz}" rx="${(tl/100)*sz}" ry="${(tl/100)*sz}" fill="${state.fill.color1}"/>`;
+  } else {
+    const pts=getCurrentPoints();
+    if(!pts||pts.length<2)return;
+    const path=ptsToSvgPath(pts,sz);
+    svgContent=`<path d="${path}" fill="${state.fill.color1}"/>`;
+  }
+  const full=`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}">\n  ${svgContent}\n</svg>`;
+  const blob=new Blob([full],{type:'image/svg+xml'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='forme.svg';a.click();
+  toast('⬇ SVG téléchargé');
+}
+
+// ── SHARE URL ──────────────────────────────────────────────────
+function shareUrl(){
+  const snap={mode:state.mode,clip:state.clip,blob:state.blob,radius:state.radius,fill:state.fill,shadow:state.shadow};
+  const h=btoa(encodeURIComponent(JSON.stringify(snap)));
+  window.location.hash=h;copy(location.href);toast('🔗 URL copiée !');
+}
+function loadFromHash(){
+  const h=location.hash.slice(1);if(!h)return;
+  try{
+    const s=JSON.parse(decodeURIComponent(atob(h)));
+    if(s.mode) state.mode=s.mode;
+    if(s.clip) state.clip=s.clip;
+    if(s.blob) Object.assign(state.blob,s.blob);
+    if(s.radius) Object.assign(state.radius,s.radius);
+    if(s.fill) Object.assign(state.fill,s.fill);
+    if(s.shadow!=null) state.shadow=s.shadow;
+    syncModeTab();renderAll();toast('📂 Forme restaurée depuis l\'URL');
+  }catch(e){}
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+function syncModeTab(){
+  document.querySelectorAll('.mode-tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));
+  $('morphPanel').style.display=state.mode=='morph'?'block':'none';
+  $('morphBar').classList.toggle('on',state.mode=='morph');
+}
+
+function renderAll(){
+  syncModeTab();
+  renderModeControls();
+  renderPresets();
+  renderCanvas();
+  renderPointList();
+  updateCode();
+}
+
+// ── MODAL ──────────────────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-close').forEach(b=>b.onclick=()=>closeModal(b.dataset.modal));
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
+
+// ── PANEL COLLAPSING ──────────────────────────────────────────
+document.querySelectorAll('.panel-hdr[data-target]').forEach(h=>{
+  h.addEventListener('click',()=>{
+    const body=document.getElementById(h.dataset.target);if(!body)return;
+    body.classList.toggle('hidden');h.classList.toggle('col',body.classList.contains('hidden'));
+  });
+});
+
+// ── EVENT BINDINGS ─────────────────────────────────────────────
+// Mode tabs
+$('modeTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('.mode-tab');if(!btn)return;
+  state.mode=btn.dataset.mode;syncModeTab();renderAll();pushHistory();
+});
+// Undo/Redo
+$('undoBtn').onclick=undo;
+$('redoBtn').onclick=redo;
+// Grid
+$('gridBtn').onclick=()=>{const g=$('gridOverlay');g.classList.toggle('on');$('gridBtn').classList.toggle('on',g.classList.contains('on'));};
+// Snap
+$('snapBtn').onclick=()=>{state.snapEnabled=!state.snapEnabled;$('snapBtn').classList.toggle('on',state.snapEnabled);toast(`Aligner : ${state.snapEnabled?'Activé':'Désactivé'}`);};
+// Symmetry
+$('symmetryBtn').onclick=()=>{
+  const modes=['none','x','y','xy'];
+  const idx=modes.indexOf(state.symmetry);state.symmetry=modes[(idx+1)%modes.length];
+  $('symmetryBtn').classList.toggle('on',state.symmetry!=='none');
+  toast(`Symétrie : ${state.symmetry}`);renderModeControls();
+};
+// Add point mode
+$('addPointBtn').onclick=()=>{
+  state.addPointMode=!state.addPointMode;
+  $('addPointBtn').classList.toggle('on',state.addPointMode);
+  $('previewStage').classList.toggle('add-point-mode',state.addPointMode);
+  toast(state.addPointMode?'✚ Cliquez sur le canevas pour ajouter un point':'Mode ajout de point désactivé');
+};
+// Random
+$('randomBtn').onclick=randomShape;
+// Gallery
+$('galleryBtn').onclick=()=>{renderGallery();openModal('galleryModal');};
+// Copy CSS
+$('copyBtn').onclick=()=>copy(generateCode('css'));
+// Theme
+$('themeBtn').onclick=()=>document.body.classList.toggle('light-theme');
+// Save shape
+$('saveShapeBtn').onclick=saveShape;
+// Download SVG
+$('downloadSvgBtn').onclick=downloadSvg;
+$('dlSvgBtn2').onclick=downloadSvg;
+// Share
+$('shareBtn').onclick=$('shareBtn2').onclick=shareUrl;
+// Copy code
+$('copyCodeBtn').onclick=()=>copy($('codeOutput').textContent);
+// Download CSS
+$('dlCssBtn').onclick=()=>{
+  const blob=new Blob([generateCode('css')],{type:'text/css'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='forme.css';a.click();
+};
+// Format tabs
+$('fmtTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('.fmt-btn');if(!btn)return;
+  document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');state.codeFmt=btn.dataset.fmt;updateCode();
+});
+// Size bar
+$('sizeBar').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-size]');if(!btn)return;
+  document.querySelectorAll('[data-size]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');state.canvasSize=parseInt(btn.dataset.size);
+  $('canvasWrap').style.width=state.canvasSize+'px';$('canvasWrap').style.height=state.canvasSize+'px';
+  $('sizeBadge').textContent=`${state.canvasSize} × ${state.canvasSize} px`;
+  renderCanvas();
+});
+// BG bar
+$('bgBar').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-bg]');if(!btn)return;
+  document.querySelectorAll('[data-bg]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');state.bgStyle=btn.dataset.bg;updateStageBg();
+});
+// Fill controls
+$('fillType').onchange=function(){state.fill.type=this.value;renderCanvas();updateCode();};
+$('fillColor1').oninput=function(){state.fill.color1=this.value;renderCanvas();updateCode();};
+$('fillColor2').oninput=function(){state.fill.color2=this.value;renderCanvas();updateCode();};
+$('shadowDepth').oninput=function(){state.shadow=parseInt(this.value);$('shadowVal').textContent=this.value;renderCanvas();};
+$('shadowDepth').onchange=pushHistory;
+$('animType').onchange=function(){
+  state.anim=this.value;
+  $('canvasWrap').className='canvas-wrap '+this.value;
+};
+// Sim bar
+document.querySelector('.sim-bar').addEventListener('click',e=>{
+  const btn=e.target.closest('.sim-btn');if(!btn)return;
+  document.querySelectorAll('.sim-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const f={normal:'none',prot:'url(#cb-prot)',deut:'url(#cb-deut)',trit:'url(#cb-trit)'};
+  $('canvasWrap').style.filter=f[btn.dataset.sim]||'none';
+});
+// Morph
+$('setMorphA').onclick=setMorphA;
+$('setMorphB').onclick=setMorphB;
+$('morphPlayBtn').onclick=toggleMorphPlay;
+$('morphSlider').oninput=function(){
+  state.morphT=parseInt(this.value);
+  $('morphSliderVal').textContent=this.value+'%';
+  $('morphFill').style.width=this.value+'%';
+  $('morphPct').textContent=this.value+'%';
+  if(state.mode=='morph') renderCanvas();
+};
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key=='z'&&!e.shiftKey){e.preventDefault();undo();}
+  if((e.ctrlKey||e.metaKey)&&(e.key=='y'||(e.key=='z'&&e.shiftKey))){e.preventDefault();redo();}
+  if((e.key=='Delete'||e.key=='Backspace')&&state.selectedPoint>=0&&state.mode=='clip'){
+    const pts=state.clip.points;if(!pts||pts.length<=3)return;
+    pts.splice(state.selectedPoint,1);state.selectedPoint=-1;renderAll();pushHistory();
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+state.clip.points=defaultClipPoints(5,-90);
+renderFillSwatches();
+updateStageBg();
+renderSavedShapes();
+loadFromHash();
+renderAll();
+pushHistory();
+
+// Set morph panel initial visibility
+$('morphPanel').style.display='none';
+$('morphBar').classList.remove('on');
+</script>
+
+<section style="max-width:900px;margin:60px auto;padding:20px;color:#ccc;font-size:14px;line-height:1.7;">
+  <h2>Générateur de formes CSS gratuit en ligne</h2>
+  <p>
+    Ce générateur de formes CSS vous permet de créer des formes personnalisées en utilisant <strong>clip-path</strong>, 
+    un <strong>générateur de blobs</strong> et des <strong>outils de border-radius</strong>. 
+    Vous pouvez concevoir visuellement des formes et les exporter instantanément en code CSS, SVG, Tailwind ou React.
+  </p>
+
+  <h3>Fonctionnalités de cet outil de formes CSS</h3>
+  <ul>
+    <li>Créez visuellement des polygones clip-path personnalisés</li>
+    <li>Générez des formes organiques de type blob à l'aide d'algorithmes de bruit</li>
+    <li>Concevez des formes avancées avec border-radius</li>
+    <li>Exportez les formes en CSS, SVG, Tailwind ou React</li>
+    <li>Animez les formes avec des transitions de morphose</li>
+  </ul>
+
+  <h3>Cas d'usage</h3>
+  <ul>
+    <li>Créer des formes UI pour le design web moderne</li>
+    <li>Générer des éléments SVG pour les sites web</li>
+    <li>Concevoir des boutons, cartes et arrière-plans</li>
+    <li>Construire des animations à l'aide de clip-path CSS</li>
+  </ul>
+
+  <h3>Pourquoi utiliser cet outil ?</h3>
+  <p>
+    Contrairement à d'autres outils, ce générateur fonctionne entièrement dans votre navigateur, sans serveur. 
+    Il est rapide, sécurisé et idéal pour les développeurs, designers et débutants.
+  </p>
+</section>
 </body>
 </html>
