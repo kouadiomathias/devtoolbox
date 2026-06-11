@@ -1,625 +1,1088 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- SEO Meta (English) -->
-    <title>Unix Timestamp Converter Online | Date and Time Tools</title>
-    <meta name="description" content="Convert Unix timestamps to human-readable dates and vice versa. Real-time clock, IANA timezones, interval calculator. 100% client-side.">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/unix-timestamp-converter/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/unix-timestamp-converter/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/convertisseur-timestamp/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/unix-timestamp-converter/">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unix Timestamp Converter — All Formats, UUID Decoder, Timezones | DevToolbox</title>
+<meta name="description" content="Convert Unix timestamps to every format at once: ISO 8601, RFC 3339, UTC, Excel, Windows FILETIME, NTP. Decode UUID v1, UUID v7 and MongoDB ObjectID timestamps. IANA timezones. 100% client-side.">
+<meta name="keywords" content="unix timestamp converter, epoch converter, timestamp to date, date to timestamp, uuid v1 timestamp, uuid v7 timestamp, mongodb objectid timestamp, iso 8601 converter, windows filetime">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/unix-timestamp-converter/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/unix-timestamp-converter/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/convertisseur-timestamp/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/unix-timestamp-converter/">
 
-    gtag('config', 'G-JRBW78KE29');
-    </script>
-    <style>
-        /* ----- Variables & Reset (consistent with the suite) ----- */
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --radius: 16px;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
-        }
+<meta property="og:title" content="Unix Timestamp Converter — All Formats, UUID Decoder, Timezones">
+<meta property="og:description" content="The most complete timestamp converter: all formats at once, UUID v1/v7 decoder, MongoDB ObjectID, relative time. 100% client-side.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/unix-timestamp-converter/">
+<meta property="og:site_name" content="DevToolbox">
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"WebApplication",
+  "name":"Unix Timestamp Converter",
+  "url":"https://www.devstoolsbox.dev/tools/unix-timestamp-converter/",
+  "description":"Convert Unix timestamps to all formats: ISO 8601, RFC 3339, UTC, Excel, Windows FILETIME, NTP. Decode UUID v1/v7 and MongoDB ObjectID timestamps. IANA timezones.",
+  "applicationCategory":"DeveloperApplication","operatingSystem":"Any",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+  "author":{"@type":"Person","name":"Mathias Kouadio"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"What is a Unix timestamp?","acceptedAnswer":{"@type":"Answer","text":"A Unix timestamp is the number of seconds elapsed since January 1, 1970, 00:00:00 UTC (the Unix epoch). It is timezone-independent and used universally in databases, APIs, and logs."}},
+    {"@type":"Question","name":"How do I tell if a timestamp is in seconds or milliseconds?","acceptedAnswer":{"@type":"Answer","text":"A 10-digit number is almost certainly seconds (valid until year 2286). A 13-digit number is milliseconds. This tool auto-detects: values above 10,000,000,000 are treated as milliseconds."}},
+    {"@type":"Question","name":"Can I extract a date from a UUID v1?","acceptedAnswer":{"@type":"Answer","text":"Yes. UUID v1 encodes a 60-bit timestamp counting 100-nanosecond intervals since October 15, 1582. This tool decodes that timestamp and converts it to any date format."}},
+    {"@type":"Question","name":"What is the Year 2038 problem?","acceptedAnswer":{"@type":"Answer","text":"On 32-bit systems, Unix timestamps are stored as signed 32-bit integers with a maximum value of 2,147,483,647, which corresponds to January 19, 2038 at 03:14:07 UTC. After that, the value overflows. Modern 64-bit systems are not affected."}},
+    {"@type":"Question","name":"What is Windows FILETIME?","acceptedAnswer":{"@type":"Answer","text":"Windows FILETIME is a 64-bit integer counting 100-nanosecond intervals since January 1, 1601. To convert from Unix timestamp (seconds): FILETIME = (unixSeconds + 11644473600) × 10,000,000."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Tools","item":"https://www.devstoolsbox.dev/tools/"},
+    {"@type":"ListItem","position":3,"name":"Unix Timestamp Converter","item":"https://www.devstoolsbox.dev/tools/unix-timestamp-converter/"}
+  ]
+}
+</script>
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+<style>
+/* ── tokens ── */
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;--surface3:#e8edf3;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;--surface3:#252e3f;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--code-bg:#0f172a;--code-color:#cbd5e1;
+  --shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:980px;margin:0 auto}
 
-        .container { max-width: 1200px; width: 100%; margin: 0 auto; }
+/* ── header ── */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px;align-items:center}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); }
-        .lang-switch { display: flex; gap: 8px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); }
-        .lang-btn {
-            padding: 8px 16px; border-radius: 32px; border: none; background: transparent;
-            font-weight: 500; cursor: pointer; transition: all 0.2s; color: var(--text-light);
-            text-decoration: none;
-        }
-        .lang-btn.active { background: var(--primary); color: white; }
+/* ── breadcrumb ── */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:18px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
 
-        /* Tool Card */
-        .tool-card {
-            background: var(--surface); border-radius: var(--radius); padding: 32px;
-            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
-        }
-        h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
-        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1.1rem; }
+/* ── hero ── */
+.tool-hero{margin-bottom:24px}
+.tool-hero h1{font-size:1.85rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:6px}
+.tool-hero p{color:var(--text2);font-size:.95rem;max-width:640px}
 
-        /* Real-time clock */
-        .live-clock {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-            color: white;
-            padding: 24px 32px;
-            border-radius: 24px;
-            margin-bottom: 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .current-timestamp h3 {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            font-weight: 400;
-            margin-bottom: 8px;
-        }
-        .timestamp-value {
-            font-size: 3rem;
-            font-weight: 700;
-            font-family: 'SF Mono', 'Menlo', monospace;
-            letter-spacing: -0.02em;
-        }
-        .timestamp-ms {
-            font-size: 1.5rem;
-            font-weight: 400;
-            opacity: 0.8;
-            margin-left: 8px;
-        }
-        .clock-actions {
-            display: flex;
-            gap: 12px;
-        }
+/* ── live clock ── */
+.live-banner{
+  background:linear-gradient(135deg,#5b21b6 0%,var(--primary) 100%);
+  color:#fff;padding:20px 28px;border-radius:var(--radius);margin-bottom:22px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+}
+body.dark .live-banner{background:linear-gradient(135deg,#3b0764 0%,#5b21b6 100%)}
+.live-ts-label{font-size:.78rem;opacity:.85;font-weight:500;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.live-ts-num{font-family:var(--mono);font-size:2.6rem;font-weight:800;letter-spacing:-.04em;line-height:1}
+.live-ts-ms{font-size:1.3rem;font-weight:400;opacity:.75}
+.live-ts-date{font-size:.88rem;opacity:.85;margin-top:4px}
+.live-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-live{padding:8px 16px;border-radius:40px;font-weight:600;font-size:.8rem;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.18s}
+.btn-live-solid{background:rgba(255,255,255,.2);color:#fff}
+.btn-live-solid:hover{background:rgba(255,255,255,.3)}
+.btn-live-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+.btn-live-outline:hover{background:rgba(255,255,255,.1)}
 
-        /* Conversion sections */
-        .conversion-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        @media (max-width: 700px) {
-            .conversion-grid { grid-template-columns: 1fr; }
-        }
-        .conversion-panel {
-            background: var(--bg);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border);
-        }
-        .conversion-panel h2 {
-            font-size: 1.3rem;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .input-group {
-            margin-bottom: 16px;
-        }
-        .input-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-        }
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            font-family: 'SF Mono', 'Menlo', monospace;
-            font-size: 1rem;
-            background: white;
-        }
-        .result-box {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            font-family: 'SF Mono', 'Menlo', monospace;
-            margin-top: 16px;
-        }
+/* ── main grid ── */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+@media(max-width:680px){.main-grid{grid-template-columns:1fr}}
 
-        /* Interval calculator */
-        .interval-calculator {
-            background: var(--bg);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            margin-bottom: 24px;
-        }
-        .interval-inputs {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .interval-result {
-            margin-top: 20px;
-            font-size: 1.2rem;
-            background: white;
-            padding: 16px 20px;
-            border-radius: 40px;
-            display: inline-block;
-        }
+/* ── panels ── */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.panel-title{font-size:.82rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
 
-        /* Buttons */
-        .button-group { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-        .btn {
-            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
-            cursor: pointer; transition: all 0.2s; background: white; color: var(--text);
-            border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-            display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-outline:hover { background: var(--bg); border-color: var(--primary); }
+/* ── inputs ── */
+.field{margin-bottom:14px}
+.field label{display:block;font-weight:600;font-size:.82rem;color:var(--text2);margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 14px;
+  font-family:var(--mono);font-size:.9rem;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+  color:var(--text);outline:none;transition:border-color .2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary)}
+.field textarea{resize:vertical;min-height:70px;font-size:.83rem}
 
-        /* Article Section */
-        .article-section {
-            background: var(--surface); border-radius: var(--radius); padding: 32px;
-            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
-        }
-        .article-section h2 { font-size: 1.8rem; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
-        .article-section h3 { margin-top: 24px; margin-bottom: 12px; }
-        .faq-item { margin-bottom: 24px; }
-        .faq-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+/* ── formats output table ── */
+.formats-list{display:flex;flex-direction:column;gap:0}
+.fmt-row{display:grid;grid-template-columns:110px 1fr 34px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.fmt-row:last-child{border-bottom:none}
+.fmt-label{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.fmt-val{font-family:var(--mono);font-size:.8rem;color:var(--text);word-break:break-all}
+.fmt-val.highlight{color:var(--primary);font-weight:700}
+.fmt-val.muted{color:var(--text3)}
+.copy-mini{width:28px;height:28px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.78rem;color:var(--text3);transition:.15s;flex-shrink:0}
+.copy-mini:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 
-        .footer { text-align: center; color: var(--text-light); margin-top: 24px; }
-        .toast-msg {
-            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: white;
-            padding: 10px 20px; border-radius: 40px; font-size: 0.9rem; opacity: 0;
-            transition: opacity 0.3s; pointer-events: none; box-shadow: var(--shadow); z-index: 1000;
-        }
-    </style>
+/* ── relative time badge ── */
+.relative-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:.78rem;font-weight:700;margin-top:6px}
+.rel-past{background:var(--pass-bg);color:var(--pass)}
+.rel-future{background:var(--primary-light);color:var(--primary)}
+.rel-now{background:var(--warn-bg);color:var(--warn)}
+
+/* ── full-width panels ── */
+.full-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
+
+/* ── special decoders ── */
+.decoder-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.dtab{padding:6px 14px;border-radius:40px;border:1px solid var(--border);background:var(--surface2);font-weight:600;font-size:.78rem;cursor:pointer;color:var(--text2);transition:.15s;font-family:inherit}
+.dtab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.decoder-panel{display:none}
+.decoder-panel.visible{display:block}
+.decode-result{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:12px}
+.decode-result .fmt-row{padding:5px 0}
+
+/* ── interval calculator ── */
+.interval-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+@media(max-width:500px){.interval-grid{grid-template-columns:1fr}}
+.interval-output{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:.9rem;color:var(--text2);display:none}
+.interval-output strong{color:var(--text)}
+.interval-breakdown{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.interval-unit{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 12px;text-align:center}
+.interval-unit .iu-val{font-size:1.4rem;font-weight:800;font-family:var(--mono);color:var(--primary);line-height:1}
+.interval-unit .iu-label{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+
+/* ── buttons ── */
+.btn{padding:9px 20px;border-radius:40px;font-weight:600;font-size:.85rem;border:none;cursor:pointer;transition:all .18s;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover);transform:translateY(-1px)}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ── code snippets ── */
+.code-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.ctab{padding:5px 14px;border-radius:40px;border:1px solid var(--border);background:var(--surface2);font-weight:600;font-size:.78rem;cursor:pointer;color:var(--text2);transition:.15s;font-family:inherit}
+.ctab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.code-block{display:none}
+.code-block.visible{display:block}
+.code-block pre{background:var(--code-bg);color:var(--code-color);padding:16px;border-radius:10px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.7;margin:0}
+
+/* ── article ── */
+.article-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:28px}
+.article-section h2{font-size:1.3rem;font-weight:800;margin-top:28px;margin-bottom:10px}
+.article-section h2:first-of-type{margin-top:0}
+.article-section h3{font-size:1.05rem;font-weight:700;margin-top:18px;margin-bottom:6px}
+.article-section p{color:var(--text2);font-size:.9rem;margin-bottom:10px;line-height:1.8}
+.article-section code{background:var(--code-bg);color:var(--code-color);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.85em}
+.article-section a{color:var(--primary);text-decoration:none}
+.article-section a:hover{text-decoration:underline}
+.fmt-ref-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0}
+.fmt-ref-table th,.fmt-ref-table td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+.fmt-ref-table th{background:var(--surface2);font-weight:700}
+.fmt-ref-table code{font-size:.8em}
+
+/* ── faq ── */
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.88rem;line-height:1.8}
+
+/* ── toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--surface);padding:10px 20px;border-radius:40px;font-size:.85rem;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);z-index:1000}
+body.dark .toast{background:var(--surface);color:var(--text)}
+
+/* ── footer ── */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+
+/* ── error state ── */
+.error-msg{color:var(--fail);font-size:.8rem;margin-top:4px;display:none}
+.field.has-error input,.field.has-error select{border-color:var(--fail)}
+</style>
 </head>
 <body>
+<div class="page">
 
-<div class="container">
-    <header class="header">
-        <span class="logo"> DevToolbox</span>
-        <div class="lang-switch">
-            <a href="/tools/unix-timestamp-converter" class="lang-btn active" aria-current="page">EN</a>
-            <a href="/fr/outils/convertisseur-timestamp" class="lang-btn">FR</a>
-        </div>
-    </header>
+<!-- HEADER -->
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/unix-timestamp-converter/" class="pill-btn active">EN</a>
+      <a href="/fr/outils/convertisseur-timestamp/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
 
-    <main>
-        <div class="tool-card">
-            <h1> Unix Timestamp Converter</h1>
-            <div class="subhead">Instant conversion between Unix timestamps and human-readable dates. Real-time clock, timezone support, interval calculator.</div>
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tools/">Tools</a></li>
+    <li aria-current="page">Unix Timestamp Converter</li>
+  </ol>
+</nav>
 
-            <!-- Real-time clock -->
-            <div class="live-clock">
-                <div>
-                    <h3>Current timestamp (seconds):</h3>
-                    <div>
-                        <span class="timestamp-value" id="liveTimestampSeconds">1734567890</span>
-                        <span class="timestamp-ms" id="liveTimestampMs">.123</span>
-                    </div>
-                    <div style="margin-top: 8px; opacity:0.9;" id="liveDateTime"></div>
-                </div>
-                <div class="clock-actions">
-                    <button class="btn btn-primary" id="copyLiveTimestampBtn"> Copy Timestamp</button>
-                    <button class="btn btn-outline" id="copyLiveDateTimeBtn"> Copy Date</button>
-                </div>
-            </div>
-
-            <!-- Bidirectional conversion -->
-            <div class="conversion-grid">
-                <!-- Timestamp → Date -->
-                <div class="conversion-panel">
-                    <h2> Timestamp → Date</h2>
-                    <div class="input-group">
-                        <label>Timestamp (seconds or ms):</label>
-                        <input type="text" id="timestampInput" placeholder="e.g. 1734567890" value="1734567890">
-                    </div>
-                    <div class="input-group">
-                        <label>Timezone:</label>
-                        <select id="timezoneSelect"></select>
-                    </div>
-                    <div class="input-group">
-                        <label>Output format:</label>
-                        <select id="outputFormatSelect">
-                            <option value="full">Full Date</option>
-                            <option value="iso" selected>ISO 8601</option>
-                            <option value="utc">UTC</option>
-                            <option value="local">Local</option>
-                        </select>
-                    </div>
-                    <div class="result-box" id="timestampToDateResult">Loading...</div>
-                </div>
-
-                <!-- Date → Timestamp -->
-                <div class="conversion-panel">
-                    <h2> Date → Timestamp</h2>
-                    <div class="input-group">
-                        <label>Date and time:</label>
-                        <input type="datetime-local" id="dateInput" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Date timezone:</label>
-                        <select id="dateTimezoneSelect"></select>
-                    </div>
-                    <div class="result-box" id="dateToTimestampResult">Select a date</div>
-                </div>
-            </div>
-
-            <!-- Interval calculator -->
-            <div class="interval-calculator">
-                <h2 style="margin-bottom: 16px;"> Interval Calculator</h2>
-                <div class="interval-inputs">
-                    <div style="flex:1;">
-                        <label>Timestamp 1:</label>
-                        <input type="text" id="intervalTs1" placeholder="1734567890" value="1734567890">
-                    </div>
-                    <div style="flex:1;">
-                        <label>Timestamp 2:</label>
-                        <input type="text" id="intervalTs2" placeholder="1734654290" value="1734654290">
-                    </div>
-                    <button class="btn btn-primary" id="calculateIntervalBtn">Calculate</button>
-                </div>
-                <div id="intervalResult" class="interval-result">Difference: --</div>
-            </div>
-
-            <div class="button-group">
-                <button class="btn btn-outline" id="useCurrentTimestampBtn"> Use Current Timestamp</button>
-            </div>
-        </div>
-
-        <!-- EXPLANATION & FAQ SECTION -->
-        <section class="article-section">
-            <h2>What is a Unix Timestamp?</h2>
-            <p>The Unix timestamp (or Unix time) is the number of seconds elapsed since <strong>January 1, 1970, 00:00:00 UTC</strong>, not counting leap seconds. It is a universal format used in computer systems to store and compare dates easily, independent of time zones.</p>
-            
-            <h3>Why use timestamps?</h3>
-            <ul style="margin-left: 20px; margin-bottom: 20px;">
-                <li><strong>Database storage</strong>: an integer takes less space than a formatted date.</li>
-                <li><strong>Calculations and comparisons</strong>: easy duration calculations and sorting.</li>
-                <li><strong>APIs and logs</strong>: standard for event timestamping.</li>
-                <li><strong>Time zone independent</strong>: always UTC.</li>
-            </ul>
-
-            <h3>Seconds or milliseconds?</h3>
-            <p>The classic Unix timestamp is in seconds. However, many languages (JavaScript, Java) use milliseconds. Our tool automatically handles both: if you enter a number ≥ 1000000000000, it is interpreted as milliseconds.</p>
-
-            <h3>The Year 2038 problem</h3>
-            <p>On 32-bit systems, the Unix timestamp is stored in a signed 32-bit integer, whose maximum value is 2,147,483,647 (January 19, 2038, at 03:14:07 UTC). After this date, an overflow may occur. Modern systems use 64-bit integers, pushing the problem far into the future.</p>
-
-            <h3>Frequently Asked Questions</h3>
-            <div class="faq-item">
-                <div class="faq-question"> What is the difference between UTC and GMT?</div>
-                <p>UTC (Coordinated Universal Time) is the modern successor to GMT. For everyday use, they are equivalent. UTC does not change with seasons, unlike local times.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question"> How do I convert a timestamp to an Excel date?</div>
-                <p>Excel uses January 1, 1900 as the reference. The formula is: <code>= (timestamp / 86400) + 25569</code> (for seconds).</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question"> Does this tool handle leap seconds?</div>
-                <p>No, the Unix timestamp ignores leap seconds. Each day is considered to have exactly 86,400 seconds.</p>
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <p>© 2025 DevToolbox — 100% client-side tools for developers.</p>
-    </footer>
+<main>
+<!-- HERO -->
+<div class="tool-hero">
+  <h1>Unix Timestamp Converter</h1>
+  <p>Convert to every format at once. Decode UUID v1, UUID v7 and MongoDB ObjectID timestamps. IANA timezones, relative time, interval calculator. 100% client-side.</p>
 </div>
 
-<div id="toast" class="toast-msg">Copied!</div>
+<!-- LIVE CLOCK -->
+<div class="live-banner">
+  <div>
+    <div class="live-ts-label">Current Unix timestamp</div>
+    <div>
+      <span class="live-ts-num" id="liveSec">—</span><span class="live-ts-ms" id="liveMs"></span>
+    </div>
+    <div class="live-ts-date" id="liveDate"></div>
+  </div>
+  <div class="live-actions">
+    <button class="btn-live btn-live-solid" onclick="copyLiveTs()">Copy timestamp</button>
+    <button class="btn-live btn-live-outline" onclick="useCurrentTs()">Use in converter</button>
+  </div>
+</div>
 
-<!-- JSON-LD -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Unix Timestamp Converter",
-  "url": "https://www.devstoolsbox.dev/tools/unix-timestamp-converter/",
-  "description": "Convert Unix timestamps to human-readable dates and vice versa. Real-time clock, IANA timezones, interval calculator. 100% client-side.",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Any",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Home",
-      "item": "https://www.devstoolsbox.dev/"
-    },
-    {
-      "@type": "ListItem",
-      "position": 2,
-      "name": "Tools",
-      "item": "https://www.devstoolsbox.dev/tools/"
-    },
-    {
-      "@type": "ListItem",
-      "position": 3,
-      "name": "Unix Timestamp Converter",
-      "item": "https://www.devstoolsbox.dev/tools/unix-timestamp-converter/"
-    }
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What is the difference between UTC and GMT?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "UTC (Coordinated Universal Time) is the modern successor to GMT. For everyday use, they are equivalent. UTC does not change with seasons, unlike local times."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How do I convert a timestamp to an Excel date?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Excel uses January 1, 1900 as the reference. The formula is: (timestamp / 86400) + 25569 for timestamps in seconds."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this tool handle leap seconds?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No, the Unix timestamp ignores leap seconds. Each day is considered to have exactly 86400 seconds."
-    }
-    }
-  ]
-}
-</script>
+<!-- MAIN CONVERSION GRID -->
+<div class="main-grid">
+
+  <!-- LEFT: Timestamp → Formats -->
+  <div class="panel">
+    <div class="panel-title">Timestamp → All formats</div>
+    <div class="field" id="tsInputField">
+      <label for="tsInput">Unix timestamp (seconds or ms)</label>
+      <input type="text" id="tsInput" placeholder="e.g. 1749376800" value="1749376800" autocomplete="off" spellcheck="false">
+      <div class="error-msg" id="tsError">Invalid timestamp</div>
+    </div>
+    <div class="field">
+      <label for="tzSelect">Timezone</label>
+      <select id="tzSelect"></select>
+    </div>
+    <div id="formatsOutput"></div>
+  </div>
+
+  <!-- RIGHT: Date → Timestamp -->
+  <div class="panel">
+    <div class="panel-title">Date → Timestamp</div>
+    <div class="field">
+      <label for="dateInput">Date and time</label>
+      <input type="datetime-local" id="dateInput" step="1">
+    </div>
+    <div class="field">
+      <label for="dateTzSelect">Timezone of the date above</label>
+      <select id="dateTzSelect"></select>
+    </div>
+    <div id="dateOutput"></div>
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost" onclick="setNow()" style="font-size:.78rem">Use current time</button>
+    </div>
+  </div>
+
+</div><!-- /main-grid -->
+
+<!-- SPECIAL DECODERS -->
+<div class="full-panel">
+  <div class="panel-title">Special identifier decoders</div>
+  <div class="decoder-tabs">
+    <button class="dtab active" onclick="switchDecoder('v1')">UUID v1</button>
+    <button class="dtab" onclick="switchDecoder('v7')">UUID v7</button>
+    <button class="dtab" onclick="switchDecoder('oid')">MongoDB ObjectID</button>
+  </div>
+
+  <!-- UUID v1 -->
+  <div class="decoder-panel visible" id="dec-v1">
+    <div class="field">
+      <label for="uuidV1Input">Paste a UUID version 1</label>
+      <input type="text" id="uuidV1Input" placeholder="6ba7b810-9dad-11d1-80b4-00c04fd430c8" spellcheck="false" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="decodeV1()">Decode timestamp</button>
+    <div class="decode-result" id="res-v1" style="display:none"></div>
+  </div>
+
+  <!-- UUID v7 -->
+  <div class="decoder-panel" id="dec-v7">
+    <div class="field">
+      <label for="uuidV7Input">Paste a UUID version 7</label>
+      <input type="text" id="uuidV7Input" placeholder="018f4d1a-3b2c-7def-9abc-123456789abc" spellcheck="false" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="decodeV7()">Decode timestamp</button>
+    <div class="decode-result" id="res-v7" style="display:none"></div>
+  </div>
+
+  <!-- ObjectID -->
+  <div class="decoder-panel" id="dec-oid">
+    <div class="field">
+      <label for="oidInput">Paste a MongoDB ObjectID (24 hex chars)</label>
+      <input type="text" id="oidInput" placeholder="507f1f77bcf86cd799439011" spellcheck="false" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="decodeOID()">Decode timestamp</button>
+    <div class="decode-result" id="res-oid" style="display:none"></div>
+    <p style="margin-top:10px;font-size:.8rem;color:var(--text3)">The first 4 bytes of a MongoDB ObjectID encode the Unix creation timestamp in seconds.</p>
+  </div>
+</div>
+
+<!-- INTERVAL CALCULATOR -->
+<div class="full-panel">
+  <div class="panel-title">Interval calculator</div>
+  <div class="interval-grid">
+    <div class="field" style="margin:0">
+      <label for="iTs1">Timestamp 1</label>
+      <input type="text" id="iTs1" placeholder="1749376800" spellcheck="false">
+    </div>
+    <div class="field" style="margin:0">
+      <label for="iTs2">Timestamp 2</label>
+      <input type="text" id="iTs2" placeholder="1749463200" spellcheck="false">
+    </div>
+    <button class="btn btn-primary" onclick="calcInterval()">Calculate</button>
+  </div>
+  <div class="interval-output" id="intervalOut"></div>
+</div>
+
+<!-- CODE SNIPPETS -->
+<div class="full-panel">
+  <div class="panel-title">Code snippets</div>
+  <div class="code-tabs">
+    <button class="ctab active" onclick="switchCode('js')">JavaScript</button>
+    <button class="ctab" onclick="switchCode('python')">Python</button>
+    <button class="ctab" onclick="switchCode('go')">Go</button>
+    <button class="ctab" onclick="switchCode('java')">Java</button>
+    <button class="ctab" onclick="switchCode('sql')">SQL</button>
+  </div>
+
+  <div class="code-block visible" id="code-js">
+    <pre>// Current Unix timestamp in seconds
+const nowSeconds = Math.floor(Date.now() / 1000);
+
+// Current Unix timestamp in milliseconds (JavaScript native)
+const nowMs = Date.now();
+
+// Unix seconds → Date object
+const date = new Date(nowSeconds * 1000);
+
+// Date → ISO 8601
+console.log(date.toISOString()); // "2025-06-08T10:00:00.000Z"
+
+// Date → RFC 2822
+console.log(date.toUTCString());
+
+// Timezone-aware formatting (IANA timezone)
+const formatter = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Europe/Paris',
+  dateStyle: 'full',
+  timeStyle: 'long'
+});
+console.log(formatter.format(date));
+
+// Relative time ("3 hours ago")
+const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+const diffHours = Math.round((Date.now() - nowMs) / 3600000);
+console.log(rtf.format(diffHours, 'hour')); // "now"
+
+// Date object → Unix seconds
+const d = new Date('2025-06-08T10:00:00Z');
+const unix = Math.floor(d.getTime() / 1000); // 1749376800</pre>
+  </div>
+
+  <div class="code-block" id="code-python">
+    <pre>import time
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo  # Python 3.9+
+
+# Current Unix timestamp in seconds
+now_seconds = int(time.time())
+
+# Current Unix timestamp in milliseconds
+now_ms = int(time.time() * 1000)
+
+# Unix seconds → datetime (UTC)
+dt_utc = datetime.fromtimestamp(now_seconds, tz=timezone.utc)
+
+# Unix seconds → datetime (specific timezone)
+paris_tz = ZoneInfo("Europe/Paris")
+dt_paris = datetime.fromtimestamp(now_seconds, tz=paris_tz)
+
+# Format as ISO 8601
+print(dt_utc.isoformat())              # "2025-06-08T10:00:00+00:00"
+print(dt_paris.isoformat())            # "2025-06-08T12:00:00+02:00"
+
+# Format as custom string
+print(dt_paris.strftime("%Y-%m-%d %H:%M:%S %Z"))
+
+# datetime → Unix timestamp
+dt = datetime(2025, 6, 8, 10, 0, 0, tzinfo=timezone.utc)
+unix = int(dt.timestamp())  # 1749376800
+
+# Windows FILETIME from Unix timestamp
+filetime = (now_seconds + 11644473600) * 10_000_000
+print(f"FILETIME: {filetime}")
+
+# Excel serial date from Unix timestamp
+excel_date = (now_seconds / 86400) + 25569
+print(f"Excel: {excel_date:.5f}")</pre>
+  </div>
+
+  <div class="code-block" id="code-go">
+    <pre>package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    // Current Unix timestamp in seconds
+    nowSeconds := time.Now().Unix()
+
+    // Current Unix timestamp in nanoseconds
+    nowNano := time.Now().UnixNano()
+
+    // Current Unix timestamp in milliseconds
+    nowMs := time.Now().UnixMilli() // Go 1.17+
+
+    // Unix seconds → time.Time (UTC)
+    t := time.Unix(nowSeconds, 0).UTC()
+
+    // Format as ISO 8601 (RFC3339)
+    fmt.Println(t.Format(time.RFC3339))       // "2025-06-08T10:00:00Z"
+    fmt.Println(t.Format(time.RFC3339Nano))   // With nanoseconds
+
+    // Format as RFC 2822 (email standard)
+    fmt.Println(t.Format(time.RFC1123Z))
+
+    // Timezone-aware
+    paris, _ := time.LoadLocation("Europe/Paris")
+    tParis := t.In(paris)
+    fmt.Println(tParis.Format("2006-01-02 15:04:05 MST"))
+
+    // time.Time → Unix timestamp
+    d := time.Date(2025, 6, 8, 10, 0, 0, 0, time.UTC)
+    fmt.Println(d.Unix())  // 1749376800
+
+    _ = nowNano
+    _ = nowMs
+}</pre>
+  </div>
+
+  <div class="code-block" id="code-java">
+    <pre>import java.time.*;
+import java.time.format.*;
+
+// Current Unix timestamp in seconds
+long nowSeconds = Instant.now().getEpochSecond();
+
+// Current Unix timestamp in milliseconds
+long nowMs = System.currentTimeMillis();
+
+// Unix seconds → Instant
+Instant instant = Instant.ofEpochSecond(nowSeconds);
+
+// Format as ISO 8601 (UTC)
+System.out.println(instant.toString()); // "2025-06-08T10:00:00Z"
+
+// Timezone-aware formatting
+ZoneId paris = ZoneId.of("Europe/Paris");
+ZonedDateTime zdt = instant.atZone(paris);
+System.out.println(zdt.format(DateTimeFormatter.RFC_1123_DATE_TIME));
+
+// Custom format
+DateTimeFormatter fmt = DateTimeFormatter
+    .ofPattern("yyyy-MM-dd HH:mm:ss z")
+    .withZone(paris);
+System.out.println(fmt.format(instant));
+
+// LocalDateTime → Unix timestamp (UTC)
+LocalDateTime ldt = LocalDateTime.of(2025, 6, 8, 10, 0, 0);
+long unix = ldt.toEpochSecond(ZoneOffset.UTC); // 1749376800</pre>
+  </div>
+
+  <div class="code-block" id="code-sql">
+    <pre>-- PostgreSQL --
+
+-- Current Unix timestamp
+SELECT EXTRACT(EPOCH FROM NOW())::BIGINT;           -- seconds
+SELECT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT;  -- milliseconds
+
+-- Unix seconds → timestamp
+SELECT TO_TIMESTAMP(1749376800);
+SELECT TO_TIMESTAMP(1749376800) AT TIME ZONE 'Europe/Paris';
+
+-- timestamp → Unix seconds
+SELECT EXTRACT(EPOCH FROM '2025-06-08 10:00:00+00'::TIMESTAMPTZ)::BIGINT;
+
+-- MySQL --
+
+-- Current Unix timestamp
+SELECT UNIX_TIMESTAMP();          -- seconds
+SELECT UNIX_TIMESTAMP() * 1000;   -- milliseconds
+
+-- Unix seconds → datetime
+SELECT FROM_UNIXTIME(1749376800);
+SELECT CONVERT_TZ(FROM_UNIXTIME(1749376800), 'UTC', 'Europe/Paris');
+
+-- datetime → Unix seconds
+SELECT UNIX_TIMESTAMP('2025-06-08 10:00:00');
+
+-- SQLite --
+SELECT strftime('%s', 'now');                          -- current Unix seconds
+SELECT datetime(1749376800, 'unixepoch');               -- seconds → datetime
+SELECT datetime(1749376800, 'unixepoch', 'localtime');  -- with local timezone</pre>
+  </div>
+</div>
+
+<!-- ARTICLE -->
+<section class="article-section" itemscope itemtype="https://schema.org/Article">
+  <meta itemprop="author" content="Mathias Kouadio">
+  <meta itemprop="datePublished" content="2026-06-08">
+
+  <h2>What is a Unix timestamp?</h2>
+  <p>A Unix timestamp (also called Unix time or POSIX time) is the number of seconds elapsed since <strong>January 1, 1970 at 00:00:00 UTC</strong> — a reference point called the Unix epoch. It is timezone-independent, making it the universal standard for storing and comparing dates in databases, APIs, logs, and distributed systems.</p>
+  <p>Two formats coexist in practice: seconds (a 10-digit number like <code>1749376800</code>) and milliseconds (a 13-digit number like <code>1749376800000</code>). JavaScript's <code>Date.now()</code> and Java's <code>System.currentTimeMillis()</code> return milliseconds. Python's <code>time.time()</code> and most Unix system calls return seconds. This tool auto-detects both.</p>
+
+  <h2>Format reference table</h2>
+  <table class="fmt-ref-table">
+    <thead><tr><th>Format</th><th>Example</th><th>Use case</th></tr></thead>
+    <tbody>
+      <tr><td>Unix (seconds)</td><td><code>1749376800</code></td><td>Databases, APIs, logs</td></tr>
+      <tr><td>Unix (milliseconds)</td><td><code>1749376800000</code></td><td>JavaScript, Java, browser APIs</td></tr>
+      <tr><td>ISO 8601</td><td><code>2025-06-08T10:00:00.000Z</code></td><td>REST APIs, JSON payloads</td></tr>
+      <tr><td>RFC 3339</td><td><code>2025-06-08T10:00:00+00:00</code></td><td>Internet protocols, Atom feeds</td></tr>
+      <tr><td>RFC 2822</td><td><code>Sun, 08 Jun 2025 10:00:00 +0000</code></td><td>Email headers (SMTP)</td></tr>
+      <tr><td>UTC</td><td><code>Sun, 08 Jun 2025 10:00:00 GMT</code></td><td>HTTP headers (Date, Last-Modified)</td></tr>
+      <tr><td>Windows FILETIME</td><td><code>133680516000000000</code></td><td>Windows API, .NET DateTime, LDAP</td></tr>
+      <tr><td>NTP timestamp</td><td><code>3955348800</code></td><td>Network Time Protocol (epoch: 1900-01-01)</td></tr>
+      <tr><td>Excel serial</td><td><code>45816.41667</code></td><td>Excel/LibreOffice date cells</td></tr>
+      <tr><td>Java Date (ms)</td><td><code>1749376800000</code></td><td>Java <code>System.currentTimeMillis()</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>UUID timestamps explained</h2>
+  <h3>UUID v1 — timestamp + MAC address</h3>
+  <p>UUID v1 encodes a <strong>60-bit timestamp</strong> counting 100-nanosecond intervals since <strong>October 15, 1582</strong> (the start of the Gregorian calendar). The timestamp is stored in three non-contiguous fields: <code>time_low</code> (32 bits), <code>time_mid</code> (16 bits), and <code>time_hi</code> (12 bits + version nibble). Reassembling them requires reversing this layout. The UUID v1 decoder above handles this automatically.</p>
+  <h3>UUID v7 — Unix timestamp in the first 48 bits</h3>
+  <p>UUID v7 (RFC 9562, May 2024) uses a much simpler approach: the first 48 bits directly encode the Unix timestamp in <strong>milliseconds</strong>. This makes UUIDs naturally sortable by creation time, and extraction is trivial — just read the first 12 hex characters and convert from hexadecimal.</p>
+
+  <h2>The Year 2038 problem</h2>
+  <p>On 32-bit systems, Unix timestamps are stored as signed 32-bit integers with a maximum of <code>2,147,483,647</code>, corresponding to <strong>January 19, 2038 at 03:14:07 UTC</strong>. After that point, the value overflows to a large negative number. Most modern systems use 64-bit integers (valid until the year 292,277,026,596), but embedded systems and legacy code may still be affected.</p>
+
+  <h2>Windows FILETIME conversion</h2>
+  <p>Windows FILETIME is a 64-bit integer counting 100-nanosecond intervals since <strong>January 1, 1601</strong>. The offset between the Windows epoch and the Unix epoch is exactly 11,644,473,600 seconds (or 116,444,736,000,000,000 in 100ns units).</p>
+  <p>Conversion: <code>FILETIME = (unixSeconds + 11644473600) × 10,000,000</code></p>
+  <p>In .NET: <code>DateTime.FromFileTimeUtc(filetime)</code> or <code>DateTimeOffset.FromUnixTimeSeconds(unixSeconds)</code></p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is a Unix timestamp?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">A Unix timestamp is the number of seconds elapsed since January 1, 1970 at 00:00:00 UTC. It is timezone-independent and used universally in databases, APIs, and logs to store and compare dates without ambiguity.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I tell if a timestamp is in seconds or milliseconds?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">A 10-digit number is almost certainly seconds (valid until year 2286). A 13-digit number is milliseconds. This tool auto-detects: values above 10,000,000,000 are treated as milliseconds. When in doubt, check the number of digits.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Can I extract a date from a UUID v1?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Yes. UUID v1 encodes a 60-bit timestamp counting 100-nanosecond intervals since October 15, 1582. The "Special identifier decoders" section above extracts this timestamp and converts it to every date format. It also detects whether the MAC address in the UUID is real or randomly generated.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the difference between UTC and GMT?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">UTC (Coordinated Universal Time) is the modern international standard maintained by atomic clocks. GMT (Greenwich Mean Time) is a timezone. For most practical purposes they are equivalent — UTC+0 and GMT represent the same time. However, UTC is the precise scientific standard, while GMT is a timezone designation that does not adjust for DST.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is Windows FILETIME?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Windows FILETIME is a 64-bit integer counting 100-nanosecond intervals since January 1, 1601. It is used throughout the Windows API, .NET DateTime, and LDAP. Convert from Unix seconds: FILETIME = (unixSeconds + 11,644,473,600) × 10,000,000.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I convert a Unix timestamp to an Excel date?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Excel counts days since January 1, 1900. Formula for seconds: <code>= A1 / 86400 + 25569</code>. Format the result as a date cell. For milliseconds: <code>= A1 / 86400000 + 25569</code>. This tool shows the Excel serial value in the output formats table.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3 style="margin-top:28px">Related tools</h3>
+  <ul style="margin-left:20px;color:var(--text2);font-size:.88rem;line-height:2.2">
+    <li><a href="/tools/uuid-generator/">UUID Generator</a> — generate UUID v1, v4, v7 and ULID</li>
+    <li><a href="/tools/uuid-v1-mac-extractor/">UUID v1 MAC Extractor</a> — extract MAC address and full timestamp analysis from UUID v1</li>
+    <li><a href="/tools/uuid-predictability-checker/">UUID Predictability Checker</a> — audit UUID v1 predictability and IDOR risk</li>
+    <li><a href="/tools/json-formatter/">JSON Formatter</a> — inspect API responses that contain timestamps</li>
+    <li><a href="/tools/http-header-analyzer/">HTTP Header Analyzer</a> — analyze Date and Cache-Control headers</li>
+  </ul>
+</section>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Free client-side tools for developers.
+  <a href="/fr/blog/">Blog</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script>
-    (function(){
-        // --- DOM Elements ---
-        const liveTimestampSeconds = document.getElementById('liveTimestampSeconds');
-        const liveTimestampMs = document.getElementById('liveTimestampMs');
-        const liveDateTime = document.getElementById('liveDateTime');
-        const copyLiveTimestampBtn = document.getElementById('copyLiveTimestampBtn');
-        const copyLiveDateTimeBtn = document.getElementById('copyLiveDateTimeBtn');
-        const timestampInput = document.getElementById('timestampInput');
-        const timezoneSelect = document.getElementById('timezoneSelect');
-        const outputFormatSelect = document.getElementById('outputFormatSelect');
-        const timestampToDateResult = document.getElementById('timestampToDateResult');
-        const dateInput = document.getElementById('dateInput');
-        const dateTimezoneSelect = document.getElementById('dateTimezoneSelect');
-        const dateToTimestampResult = document.getElementById('dateToTimestampResult');
-        const intervalTs1 = document.getElementById('intervalTs1');
-        const intervalTs2 = document.getElementById('intervalTs2');
-        const calculateIntervalBtn = document.getElementById('calculateIntervalBtn');
-        const intervalResult = document.getElementById('intervalResult');
-        const useCurrentTimestampBtn = document.getElementById('useCurrentTimestampBtn');
-        const toast = document.getElementById('toast');
+/* ═════════════════════════════════════════
+   TIMEZONE SETUP
+═════════════════════════════════════════ */
+function populateTz(selId) {
+  const sel = document.getElementById(selId);
+  try {
+    const tzs = Intl.supportedValuesOf('timeZone');
+    sel.innerHTML = tzs.map(tz => `<option value="${tz}">${tz}</option>`).join('');
+  } catch {
+    ['UTC','America/New_York','America/Los_Angeles','Europe/London','Europe/Paris','Europe/Berlin','Asia/Tokyo','Asia/Shanghai','Australia/Sydney'].forEach(tz => {
+      const o = document.createElement('option'); o.value = o.textContent = tz; sel.appendChild(o);
+    });
+  }
+  const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (local) sel.value = local;
+}
+populateTz('tzSelect');
+populateTz('dateTzSelect');
 
-        // --- Populate IANA timezone lists ---
-        function populateTimezones() {
-            const timezones = Intl.supportedValuesOf('timeZone');
-            const options = timezones.map(tz => `<option value="${tz}">${tz}</option>`).join('');
-            timezoneSelect.innerHTML = options;
-            dateTimezoneSelect.innerHTML = options;
-            // Set local timezone as default
-            const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            if (localTz) {
-                timezoneSelect.value = localTz;
-                dateTimezoneSelect.value = localTz;
-            }
-        }
-        populateTimezones();
+/* ═════════════════════════════════════════
+   LIVE CLOCK
+═════════════════════════════════════════ */
+let liveSecVal = 0;
+function tickClock() {
+  const now = new Date();
+  liveSecVal = Math.floor(now.getTime() / 1000);
+  const ms = now.getMilliseconds();
+  document.getElementById('liveSec').textContent = liveSecVal;
+  document.getElementById('liveMs').textContent = '.' + String(ms).padStart(3,'0');
+  document.getElementById('liveDate').textContent = now.toUTCString();
+}
+tickClock();
+setInterval(tickClock, 100);
 
-        // --- Real-time clock ---
-        function updateLiveClock() {
-            const now = new Date();
-            const seconds = Math.floor(now.getTime() / 1000);
-            const ms = now.getMilliseconds();
-            liveTimestampSeconds.textContent = seconds;
-            liveTimestampMs.textContent = '.' + ms.toString().padStart(3, '0');
-            
-            // Human-readable local format
-            const formatted = now.toLocaleString('en-US', { 
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', second: '2-digit',
-                timeZoneName: 'short'
-            });
-            liveDateTime.textContent = formatted;
-        }
-        updateLiveClock();
-        setInterval(updateLiveClock, 100);
+function copyLiveTs() {
+  navigator.clipboard.writeText(String(liveSecVal)).then(() => toast('Timestamp copied!')).catch(() => toast('Copy failed'));
+}
+function useCurrentTs() {
+  document.getElementById('tsInput').value = liveSecVal;
+  updateFormats();
+}
 
-        // --- Timestamp → Date conversion ---
-        function updateTimestampToDate() {
-            let tsValue = timestampInput.value.trim();
-            if (!tsValue) {
-                timestampToDateResult.textContent = 'Please enter a timestamp';
-                return;
-            }
-            let ts = Number(tsValue);
-            if (isNaN(ts)) {
-                timestampToDateResult.textContent = 'Invalid timestamp';
-                return;
-            }
-            // Auto-detect ms vs seconds
-            if (ts > 1000000000000) { // likely milliseconds
-                ts = ts;
-            } else {
-                ts = ts * 1000;
-            }
-            const date = new Date(ts);
-            if (isNaN(date.getTime())) {
-                timestampToDateResult.textContent = 'Invalid date';
-                return;
-            }
+/* ═════════════════════════════════════════
+   TIMESTAMP → ALL FORMATS
+═════════════════════════════════════════ */
+function tsToMs(raw) {
+  const n = Number(raw.trim());
+  if (isNaN(n)) return null;
+  // Auto-detect: > 10 trillion = milliseconds
+  return n >= 10_000_000_000 ? n : n * 1000;
+}
 
-            const tz = timezoneSelect.value;
-            const format = outputFormatSelect.value;
-            let resultStr = '';
-            try {
-                if (format === 'iso') {
-                    resultStr = date.toISOString();
-                } else if (format === 'utc') {
-                    resultStr = date.toUTCString();
-                } else if (format === 'local') {
-                    resultStr = date.toLocaleString('en-US', { timeZone: tz });
-                } else { // full
-                    resultStr = date.toLocaleString('en-US', { 
-                        timeZone: tz, 
-                        dateStyle: 'full', 
-                        timeStyle: 'long' 
-                    });
-                }
-            } catch(e) {
-                resultStr = date.toString();
-            }
-            timestampToDateResult.textContent = resultStr;
-        }
+function formatAll(ms, tz) {
+  const d = new Date(ms);
+  if (isNaN(d.getTime())) return null;
 
-        // --- Date → Timestamp conversion ---
-        function updateDateToTimestamp() {
-            const dateStr = dateInput.value;
-            if (!dateStr) {
-                dateToTimestampResult.textContent = 'Select a date';
-                return;
-            }
-            const tz = dateTimezoneSelect.value;
-            const localDate = new Date(dateStr);
-            const tzOffset = getTimezoneOffset(tz, localDate);
-            const timestampMs = localDate.getTime() - tzOffset * 60 * 1000;
-            const seconds = Math.floor(timestampMs / 1000);
-            dateToTimestampResult.innerHTML = `<strong>Seconds:</strong> ${seconds}<br><strong>Milliseconds:</strong> ${timestampMs}`;
-        }
+  const unixS = Math.floor(ms / 1000);
+  const unixMs = ms;
 
-        function getTimezoneOffset(tz, date) {
-            const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-            const tzDate = new Date(date.toLocaleString('en-US', { timeZone: tz }));
-            return (tzDate - utcDate) / 60000;
-        }
+  // ISO 8601
+  const iso = d.toISOString();
 
-        // --- Interval calculator ---
-        function calculateInterval() {
-            const ts1 = Number(intervalTs1.value);
-            const ts2 = Number(intervalTs2.value);
-            if (isNaN(ts1) || isNaN(ts2)) {
-                intervalResult.textContent = 'Invalid timestamps';
-                return;
-            }
-            let diff = Math.abs(ts1 - ts2);
-            const isSeconds = (ts1 < 1000000000000 && ts2 < 1000000000000);
-            if (isSeconds) diff *= 1000;
-            
-            const days = Math.floor(diff / 86400000);
-            const hours = Math.floor((diff % 86400000) / 3600000);
-            const minutes = Math.floor((diff % 3600000) / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
-            
-            intervalResult.innerHTML = `Difference: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
-        }
+  // RFC 3339 with offset
+  const rfc3339 = (() => {
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
+        hour:'2-digit', minute:'2-digit', second:'2-digit',
+        hour12: false, timeZoneName:'shortOffset'
+      }).formatToParts(d);
+      const get = t => (parts.find(p=>p.type===t)||{value:''}).value;
+      const yr=get('year'),mo=get('month'),dy=get('day');
+      const hr=get('hour')==='24'?'00':get('hour'),mi=get('minute'),se=get('second');
+      const tzn = get('timeZoneName'); // e.g. "GMT+2"
+      const offset = tzn.replace('GMT','').replace('UTC','') || '+00:00';
+      const fmtOff = offset === '' ? '+00:00' : offset.length === 3 ? offset + ':00' : offset.replace(/([+-]\d{2})(\d{2})/, '$1:$2');
+      return `${yr}-${mo}-${dy}T${hr}:${mi}:${se}${fmtOff}`;
+    } catch { return iso.replace('Z', '+00:00'); }
+  })();
 
-        // --- Event listeners ---
-        timestampInput.addEventListener('input', updateTimestampToDate);
-        timezoneSelect.addEventListener('change', updateTimestampToDate);
-        outputFormatSelect.addEventListener('change', updateTimestampToDate);
-        dateInput.addEventListener('change', updateDateToTimestamp);
-        dateTimezoneSelect.addEventListener('change', updateDateToTimestamp);
-        calculateIntervalBtn.addEventListener('click', calculateInterval);
-        
-        useCurrentTimestampBtn.addEventListener('click', () => {
-            const nowSeconds = Math.floor(Date.now() / 1000);
-            timestampInput.value = nowSeconds;
-            updateTimestampToDate();
-            intervalTs1.value = nowSeconds;
-        });
+  // RFC 2822
+  const rfc2822 = d.toUTCString();
 
-        // Initialize datepicker with current date/time
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        dateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-        
-        // Initial conversions
-        updateTimestampToDate();
-        updateDateToTimestamp();
-        calculateInterval();
+  // Human readable in chosen tz
+  let human = '';
+  try {
+    human = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, dateStyle:'full', timeStyle:'long'
+    }).format(d);
+  } catch { human = d.toLocaleString('en-US', { timeZone: tz }); }
 
-        // --- Copy functions ---
-        function showToast(msg) {
-            toast.textContent = msg;
-            toast.style.opacity = '1';
-            setTimeout(() => toast.style.opacity = '0', 2000);
-        }
+  // Short local in tz
+  let short = '';
+  try {
+    short = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+    }).format(d);
+  } catch { short = d.toLocaleString(); }
 
-        copyLiveTimestampBtn.addEventListener('click', async () => {
-            const ts = liveTimestampSeconds.textContent;
-            try {
-                await navigator.clipboard.writeText(ts);
-                showToast('Timestamp copied!');
-            } catch { showToast('Copy failed'); }
-        });
+  // Windows FILETIME (100ns intervals since 1601-01-01)
+  const filetime = BigInt(unixS + 11644473600) * 10000000n;
 
-        copyLiveDateTimeBtn.addEventListener('click', async () => {
-            const dt = liveDateTime.textContent;
-            try {
-                await navigator.clipboard.writeText(dt);
-                showToast('Date copied!');
-            } catch { showToast('Copy failed'); }
-        });
-    })();
+  // NTP (seconds since 1900-01-01)
+  const ntp = unixS + 2208988800;
+
+  // Excel serial date (days since 1900-01-01, with Lotus 1-2-3 bug)
+  const excel = (unixMs / 86400000 + 25569).toFixed(5);
+
+  // Java Date = same as Unix ms
+  const javaDate = unixMs;
+
+  // Relative time
+  const rel = relTime(ms);
+
+  return { unixS, unixMs, iso, rfc3339, rfc2822, human, short, filetime: filetime.toString(), ntp, excel, javaDate, rel };
+}
+
+function relTime(ms) {
+  const diff = ms - Date.now();
+  const abs = Math.abs(diff);
+  try {
+    const rtf = new Intl.RelativeTimeFormat('en', { numeric:'auto' });
+    if (abs < 5000)    return { text:'just now', cls:'rel-now' };
+    if (abs < 60000)   return { text: rtf.format(Math.round(diff/1000), 'second'), cls: diff<0?'rel-past':'rel-future' };
+    if (abs < 3600000) return { text: rtf.format(Math.round(diff/60000), 'minute'), cls: diff<0?'rel-past':'rel-future' };
+    if (abs < 86400000)return { text: rtf.format(Math.round(diff/3600000), 'hour'), cls: diff<0?'rel-past':'rel-future' };
+    if (abs < 2592000000)return { text: rtf.format(Math.round(diff/86400000), 'day'), cls: diff<0?'rel-past':'rel-future' };
+    return { text: rtf.format(Math.round(diff/2592000000), 'month'), cls: diff<0?'rel-past':'rel-future' };
+  } catch { return { text: diff < 0 ? 'in the past' : 'in the future', cls:'rel-now' }; }
+}
+
+function fmtRow(label, val, copyVal, highlight) {
+  const cv = copyVal !== undefined ? copyVal : val;
+  return `<div class="fmt-row">
+    <div class="fmt-label">${label}</div>
+    <div class="fmt-val${highlight?' highlight':''}">${escHtml(String(val))}</div>
+    <button class="copy-mini" onclick="cp('${escHtml(String(cv))}')">⧉</button>
+  </div>`;
+}
+
+function updateFormats() {
+  const raw = document.getElementById('tsInput').value.trim();
+  const tz = document.getElementById('tzSelect').value;
+  const out = document.getElementById('formatsOutput');
+  const errEl = document.getElementById('tsError');
+  const field = document.getElementById('tsInputField');
+
+  if (!raw) { out.innerHTML = ''; return; }
+
+  const ms = tsToMs(raw);
+  if (ms === null) {
+    errEl.style.display = 'block';
+    field.classList.add('has-error');
+    out.innerHTML = '';
+    return;
+  }
+  errEl.style.display = 'none';
+  field.classList.remove('has-error');
+
+  const f = formatAll(ms, tz);
+  if (!f) { out.innerHTML = '<p style="color:var(--fail);font-size:.85rem">Date out of range</p>'; return; }
+
+  const rel = f.rel;
+  const html = `
+    <div class="formats-list">
+      ${fmtRow('Unix (sec)', f.unixS, f.unixS, true)}
+      ${fmtRow('Unix (ms)', f.unixMs)}
+      ${fmtRow('ISO 8601', f.iso)}
+      ${fmtRow('RFC 3339', f.rfc3339)}
+      ${fmtRow('RFC 2822', f.rfc2822)}
+      ${fmtRow('UTC', 'see RFC 2822')}
+      ${fmtRow('Timezone', f.short)}
+      ${fmtRow('Human', f.human)}
+      ${fmtRow('FILETIME', f.filetime)}
+      ${fmtRow('NTP', f.ntp)}
+      ${fmtRow('Excel', f.excel)}
+      ${fmtRow('Java ms', f.javaDate)}
+    </div>
+    <div class="relative-badge ${rel.cls}" style="margin-top:10px">${escHtml(rel.text)}</div>`;
+  out.innerHTML = html;
+}
+
+document.getElementById('tsInput').addEventListener('input', updateFormats);
+document.getElementById('tzSelect').addEventListener('change', updateFormats);
+updateFormats();
+
+/* ═════════════════════════════════════════
+   DATE → TIMESTAMP
+═════════════════════════════════════════ */
+function getTimezoneOffsetMs(tz, date) {
+  // Correct DST-safe method using Intl.DateTimeFormat formatToParts
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+  const parts = Object.fromEntries(fmt.formatToParts(date).map(p=>[p.type,p.value]));
+  const hr = parts.hour === '24' ? '00' : parts.hour;
+  const tzLocal = new Date(`${parts.year}-${parts.month}-${parts.day}T${hr}:${parts.minute}:${parts.second}Z`);
+  return date.getTime() - tzLocal.getTime();
+}
+
+function updateDateToTs() {
+  const dv = document.getElementById('dateInput').value;
+  const tz = document.getElementById('dateTzSelect').value;
+  const out = document.getElementById('dateOutput');
+  if (!dv) { out.innerHTML = ''; return; }
+
+  const localDate = new Date(dv);
+  if (isNaN(localDate.getTime())) { out.innerHTML = '<p style="color:var(--fail);font-size:.85rem">Invalid date</p>'; return; }
+
+  try {
+    const offsetMs = getTimezoneOffsetMs(tz, localDate);
+    const unixMs = localDate.getTime() + offsetMs;
+    const unixS = Math.floor(unixMs / 1000);
+    out.innerHTML = `<div class="formats-list">
+      ${fmtRow('Unix (sec)', unixS, unixS, true)}
+      ${fmtRow('Unix (ms)', unixMs)}
+    </div>`;
+  } catch(e) {
+    out.innerHTML = `<p style="color:var(--fail);font-size:.85rem">Timezone error: ${escHtml(e.message)}</p>`;
+  }
+}
+
+document.getElementById('dateInput').addEventListener('change', updateDateToTs);
+document.getElementById('dateTzSelect').addEventListener('change', updateDateToTs);
+
+function setNow() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const v = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  document.getElementById('dateInput').value = v;
+  updateDateToTs();
+}
+setNow();
+
+/* ═════════════════════════════════════════
+   UUID v1 DECODER
+═════════════════════════════════════════ */
+function decodeV1() {
+  const raw = document.getElementById('uuidV1Input').value.trim();
+  const out = document.getElementById('res-v1');
+  const hex = raw.replace(/-/g,'').toLowerCase();
+
+  if (!/^[0-9a-f]{32}$/.test(hex)) { out.style.display='block'; out.innerHTML='<p style="color:var(--fail);font-size:.85rem">Not a valid UUID format (32 hex chars expected)</p>'; return; }
+  const ver = parseInt(hex[12], 16);
+  if (ver !== 1) { out.style.display='block'; out.innerHTML=`<p style="color:var(--fail);font-size:.85rem">This is UUID v${ver}, not v1. UUID v1 required.</p>`; return; }
+
+  try {
+    const timeHi  = BigInt(parseInt(hex.slice(12,16), 16) & 0x0fff);
+    const timeMid  = BigInt(parseInt(hex.slice(8,12), 16));
+    const timeLow  = BigInt(parseInt(hex.slice(0,8), 16));
+    const ts100ns = timeHi * 281474976710656n + timeMid * 4294967296n + timeLow;
+    const GREG_OFFSET = 122192928000000000n;
+    const unixMs = Number((ts100ns - GREG_OFFSET) / 10000n);
+
+    const macHex = hex.slice(20);
+    const mac = macHex.match(/../g).join(':').toUpperCase();
+    const isRandMac = (parseInt(macHex.slice(0,2),16) & 0x01) === 1;
+
+    const f = formatAll(unixMs, document.getElementById('tzSelect').value);
+    out.style.display = 'block';
+    out.innerHTML = `
+      <div class="formats-list">
+        <div class="fmt-row"><div class="fmt-label">MAC</div><div class="fmt-val" style="font-family:var(--mono)">${mac} ${isRandMac?'<span style="color:var(--warn);font-size:.75rem">(random node)</span>':'<span style="color:var(--fail);font-size:.75rem">(real MAC ⚠️)</span>'}</div><button class="copy-mini" onclick="cp('${mac}')">⧉</button></div>
+        ${fmtRow('Unix (sec)', f.unixS, f.unixS, true)}
+        ${fmtRow('ISO 8601', f.iso)}
+        ${fmtRow('RFC 3339', f.rfc3339)}
+        ${fmtRow('Human', f.human)}
+      </div>
+      <div class="relative-badge ${f.rel.cls}" style="margin-top:8px">${escHtml(f.rel.text)}</div>`;
+  } catch(e) { out.style.display='block'; out.innerHTML=`<p style="color:var(--fail);font-size:.85rem">Decode error: ${escHtml(e.message)}</p>`; }
+}
+
+/* ═════════════════════════════════════════
+   UUID v7 DECODER
+═════════════════════════════════════════ */
+function decodeV7() {
+  const raw = document.getElementById('uuidV7Input').value.trim();
+  const out = document.getElementById('res-v7');
+  const hex = raw.replace(/-/g,'').toLowerCase();
+
+  if (!/^[0-9a-f]{32}$/.test(hex)) { out.style.display='block'; out.innerHTML='<p style="color:var(--fail);font-size:.85rem">Not a valid UUID format</p>'; return; }
+  const ver = parseInt(hex[12], 16);
+  if (ver !== 7) { out.style.display='block'; out.innerHTML=`<p style="color:var(--fail);font-size:.85rem">This is UUID v${ver}, not v7.</p>`; return; }
+
+  try {
+    const unixMs = parseInt(hex.slice(0,12), 16);
+    const f = formatAll(unixMs, document.getElementById('tzSelect').value);
+    out.style.display = 'block';
+    out.innerHTML = `
+      <div class="formats-list">
+        ${fmtRow('Unix (ms)', unixMs, unixMs, true)}
+        ${fmtRow('Unix (sec)', f.unixS)}
+        ${fmtRow('ISO 8601', f.iso)}
+        ${fmtRow('RFC 3339', f.rfc3339)}
+        ${fmtRow('Human', f.human)}
+      </div>
+      <div class="relative-badge ${f.rel.cls}" style="margin-top:8px">${escHtml(f.rel.text)}</div>
+      <p style="font-size:.75rem;color:var(--text3);margin-top:6px">UUID v7 encodes Unix milliseconds in the first 48 bits — no Gregorian offset conversion needed.</p>`;
+  } catch(e) { out.style.display='block'; out.innerHTML=`<p style="color:var(--fail);font-size:.85rem">Decode error: ${escHtml(e.message)}</p>`; }
+}
+
+/* ═════════════════════════════════════════
+   MONGODB OBJECTID DECODER
+═════════════════════════════════════════ */
+function decodeOID() {
+  const raw = document.getElementById('oidInput').value.trim();
+  const out = document.getElementById('res-oid');
+
+  if (!/^[0-9a-fA-F]{24}$/.test(raw)) { out.style.display='block'; out.innerHTML='<p style="color:var(--fail);font-size:.85rem">ObjectID must be exactly 24 hex characters</p>'; return; }
+
+  try {
+    const unixS = parseInt(raw.slice(0,8), 16);
+    const unixMs = unixS * 1000;
+    const f = formatAll(unixMs, document.getElementById('tzSelect').value);
+    out.style.display = 'block';
+    out.innerHTML = `
+      <div class="formats-list">
+        ${fmtRow('Unix (sec)', unixS, unixS, true)}
+        ${fmtRow('Unix (ms)', unixMs)}
+        ${fmtRow('ISO 8601', f.iso)}
+        ${fmtRow('RFC 3339', f.rfc3339)}
+        ${fmtRow('Human', f.human)}
+      </div>
+      <div class="relative-badge ${f.rel.cls}" style="margin-top:8px">${escHtml(f.rel.text)}</div>
+      <p style="font-size:.75rem;color:var(--text3);margin-top:6px">ObjectID resolution is 1 second (not milliseconds like UUID v7).</p>`;
+  } catch(e) { out.style.display='block'; out.innerHTML=`<p style="color:var(--fail);font-size:.85rem">Decode error: ${escHtml(e.message)}</p>`; }
+}
+
+/* ═════════════════════════════════════════
+   INTERVAL CALCULATOR
+═════════════════════════════════════════ */
+function calcInterval() {
+  const v1 = Number(document.getElementById('iTs1').value.trim());
+  const v2 = Number(document.getElementById('iTs2').value.trim());
+  const out = document.getElementById('intervalOut');
+
+  if (isNaN(v1) || isNaN(v2)) { out.style.display='block'; out.innerHTML='<span style="color:var(--fail)">Invalid timestamps</span>'; return; }
+
+  let ms1 = v1 >= 10_000_000_000 ? v1 : v1 * 1000;
+  let ms2 = v2 >= 10_000_000_000 ? v2 : v2 * 1000;
+  const diffMs = Math.abs(ms1 - ms2);
+
+  const days  = Math.floor(diffMs / 86400000);
+  const hours = Math.floor((diffMs % 86400000) / 3600000);
+  const mins  = Math.floor((diffMs % 3600000) / 60000);
+  const secs  = Math.floor((diffMs % 60000) / 1000);
+  const totalHours = (diffMs / 3600000).toFixed(2);
+  const totalMins  = Math.floor(diffMs / 60000);
+  const totalSecs  = Math.floor(diffMs / 1000);
+
+  out.style.display = 'block';
+  out.innerHTML = `
+    <div><strong>Total:</strong> ${days}d ${hours}h ${mins}m ${secs}s</div>
+    <div class="interval-breakdown">
+      <div class="interval-unit"><div class="iu-val">${days}</div><div class="iu-label">days</div></div>
+      <div class="interval-unit"><div class="iu-val">${hours}</div><div class="iu-label">hours</div></div>
+      <div class="interval-unit"><div class="iu-val">${mins}</div><div class="iu-label">minutes</div></div>
+      <div class="interval-unit"><div class="iu-val">${secs}</div><div class="iu-label">seconds</div></div>
+    </div>
+    <div style="margin-top:10px;font-size:.82rem;color:var(--text3)">
+      ${totalHours} hours total &nbsp;·&nbsp; ${totalMins.toLocaleString()} minutes &nbsp;·&nbsp; ${totalSecs.toLocaleString()} seconds &nbsp;·&nbsp; ${diffMs.toLocaleString()} milliseconds
+    </div>`;
+}
+
+/* ═════════════════════════════════════════
+   UI HELPERS
+═════════════════════════════════════════ */
+function switchDecoder(key) {
+  ['v1','v7','oid'].forEach(k => {
+    document.getElementById(`dec-${k}`).classList.toggle('visible', k === key);
+  });
+  document.querySelectorAll('.dtab').forEach((t,i) => {
+    t.classList.toggle('active', ['v1','v7','oid'][i] === key);
+  });
+}
+
+function switchCode(key) {
+  ['js','python','go','java','sql'].forEach(k => {
+    document.getElementById(`code-${k}`).classList.toggle('visible', k === key);
+  });
+  document.querySelectorAll('.ctab').forEach(t => {
+    t.classList.toggle('active', t.textContent.toLowerCase().replace(/[^a-z]/g,'') === key.toLowerCase().replace(/[^a-z]/g,''));
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTid;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(toastTid);
+  toastTid = setTimeout(() => { el.style.opacity = '0'; }, 2200);
+}
+
+function cp(val) {
+  navigator.clipboard.writeText(val).then(() => toast('Copied!')).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = val; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Copied!');
+  });
+}
+
+/* ── Theme ── */
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') { document.body.classList.add('dark'); document.getElementById('themeBtn').textContent = '☀️ Light'; }
+})();
 </script>
 </body>
 </html>
