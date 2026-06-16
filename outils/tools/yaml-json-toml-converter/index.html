@@ -1,483 +1,980 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YAML ↔ JSON ↔ TOML Converter | Validation, typing, style</title>
-    <meta name="description" content="Multi‑format YAML, JSON, TOML converter with strict typing, validation, YAML anchors, semantic comparison and formatting control. 100% client‑side.">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/convertisseur-yaml-json-toml/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAML ↔ JSON ↔ TOML Converter — Validation, Type Safety, Semantic Diff | DevToolbox</title>
+<meta name="description" content="Convert between YAML, JSON and TOML with strong typing, format auto-detection, YAML anchor support, semantic comparison and full style control. 100% client-side.">
+<meta name="keywords" content="yaml to json, json to yaml, yaml to toml, toml to json, yaml converter online, json yaml toml converter, yaml validator, toml parser online">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/convertisseur-yaml-json-toml/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
 
-    <meta property="og:title" content="YAML ↔ JSON ↔ TOML Converter | Validation, typing, style">
-    <meta property="og:description" content="Convert between YAML, JSON and TOML with strong typing, validation and style control. 100% client‑side.">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<meta property="og:title" content="YAML ↔ JSON ↔ TOML Converter — Validation, Type Safety, Semantic Diff">
+<meta property="og:description" content="Convert between YAML, JSON and TOML with auto-detection, strong typing and semantic comparison. 100% client-side.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"WebApplication",
+  "name":"YAML ↔ JSON ↔ TOML Converter",
+  "url":"https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/",
+  "description":"Convert between YAML, JSON and TOML with auto-detection, strong typing, YAML anchors, semantic comparison and style control. 100% client-side.",
+  "applicationCategory":"DeveloperApplication","operatingSystem":"Any",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+  "author":{"@type":"Person","name":"Mathias Kouadio"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Tools","item":"https://www.devstoolsbox.dev/tools/"},
+    {"@type":"ListItem","position":3,"name":"YAML JSON TOML Converter","item":"https://www.devstoolsbox.dev/tools/yaml-json-toml-converter/"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Why does YAML convert dates to unexpected values?","acceptedAnswer":{"@type":"Answer","text":"By default, js-yaml parses bare dates like 2024-01-01 as JavaScript Date objects, which then serialize to a timestamp in JSON. Enable the 'Dates as strings' option to keep them as plain text strings."}},
+    {"@type":"Question","name":"What is a YAML anchor and alias?","acceptedAnswer":{"@type":"Answer","text":"A YAML anchor (&name) marks a value so it can be reused elsewhere via an alias (*name). This avoids repeating the same data. This converter resolves anchors correctly during conversion and optionally removes them from the output."}},
+    {"@type":"Question","name":"What is the difference between YAML and TOML?","acceptedAnswer":{"@type":"Answer","text":"YAML is a superset of JSON focused on human-readable data serialization, often used for configuration (Kubernetes, Ansible, GitHub Actions). TOML is simpler and more explicit, focused on config files without the ambiguity of YAML — used by Rust (Cargo.toml), Go modules, Python pyproject.toml, and Hugo."}},
+    {"@type":"Question","name":"Can TOML represent all data that JSON can?","acceptedAnswer":{"@type":"Answer","text":"Almost. TOML cannot represent null values (JSON null has no TOML equivalent), and TOML does not support mixed-type arrays. If your JSON contains null values, conversion to TOML will fail. Convert JSON to YAML instead, which handles null natively."}}
+  ]
+}
+</script>
+
+<!-- Libraries — loaded async for performance -->
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/smol-toml@1.1.4/dist/index.umd.min.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-JRBW78KE29');
     </script>
+<style>
+/* ── tokens ── */
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;--surface3:#e8edf3;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+  --yaml-color:#ec4899;--json-color:#7c3aed;--toml-color:#10b981;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;--surface3:#252e3f;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:1300px;margin:0 auto}
 
-    <!-- Librairies -->
-    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/smol-toml@1.1.4/dist/index.umd.min.js"></script>
+/* ── header ── */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px;align-items:center}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --radius: 16px;
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
-            --yaml: #ec4899;
-            --json: #3b82f6;
-            --toml: #10b981;
-            --code-bg: #f9f9fb;
-            --input-bg: #f8fafc;
-        }
+/* ── breadcrumb ── */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:18px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0f172a;
-                --surface: #1e293b;
-                --primary: #60a5fa;
-                --primary-dark: #3b82f6;
-                --text: #f1f5f9;
-                --text-light: #94a3b8;
-                --border: #334155;
-                --success: #34d399;
-                --warning: #fbbf24;
-                --error: #f87171;
-                --shadow: 0 10px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.3);
-                --code-bg: #0f172a;
-                --input-bg: #0f172a;
-            }
-        }
-        .dark-forced {
-            --bg: #0f172a; --surface: #1e293b; --primary: #60a5fa; --primary-dark: #3b82f6;
-            --text: #f1f5f9; --text-light: #94a3b8; --border: #334155;
-            --success: #34d399; --warning: #fbbf24; --error: #f87171;
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.4);
-            --code-bg: #0f172a; --input-bg: #0f172a;
-        }
-        .light-forced {
-            --bg: #f8fafc; --surface: #ffffff; --primary: #3b82f6; --primary-dark: #2563eb;
-            --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
-            --success: #10b981; --warning: #f59e0b; --error: #ef4444;
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-            --code-bg: #f9f9fb; --input-bg: #f8fafc;
-        }
+/* ── hero ── */
+.tool-hero{margin-bottom:18px}
+.tool-hero h1{font-size:1.85rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:6px}
+.tool-hero p{color:var(--text2);font-size:.95rem;max-width:700px}
+.auto-badge{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;color:var(--pass);padding:3px 10px;background:var(--pass-bg);border-radius:20px;margin-left:8px;vertical-align:middle}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--pass);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
 
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg); color: var(--text); line-height: 1.5; padding: 24px;
-            display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s;
-        }
-        .container { max-width: 1300px; width: 100%; margin: 0 auto; }
+/* ── tool card ── */
+.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
-        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); }
-        .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .theme-toggle, .lang-btn {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 40px;
-            padding: 6px 14px; cursor: pointer; font-size: 0.85rem; font-weight: 500;
-            color: var(--text-light); transition: all 0.2s; box-shadow: var(--shadow);
-            display: flex; align-items: center; gap: 6px; text-decoration: none;
-        }
-        .theme-toggle:hover, .lang-btn:hover { color: var(--text); border-color: var(--primary); }
-        .lang-switch { display: flex; gap: 8px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .lang-btn.active { background: var(--primary); color: white; }
+/* ── format selector tabs ── */
+.format-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.fmt-tab{padding:7px 16px;border-radius:40px;border:1.5px solid var(--border);background:var(--surface2);font-weight:700;font-size:.8rem;cursor:pointer;color:var(--text2);transition:.18s;font-family:inherit;letter-spacing:.03em}
+.fmt-tab:hover{border-color:var(--primary);color:var(--primary)}
+.fmt-tab.active-yaml{background:var(--yaml-color);color:#fff;border-color:var(--yaml-color)}
+.fmt-tab.active-json{background:var(--json-color);color:#fff;border-color:var(--json-color)}
+.fmt-tab.active-toml{background:var(--toml-color);color:#fff;border-color:var(--toml-color)}
 
-        .tool-card {
-            background: var(--surface); border-radius: var(--radius); padding: 32px;
-            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
-        }
-        h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
-        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1.05rem; }
+/* ── conversion grid ── */
+.conv-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:start;margin-bottom:16px}
+@media(max-width:760px){.conv-grid{grid-template-columns:1fr}}
+.conv-arrow{display:flex;align-items:center;justify-content:center;padding-top:48px;color:var(--text3);font-size:1.4rem;cursor:pointer;transition:.18s}
+.conv-arrow:hover{color:var(--primary);transform:scale(1.15)}
+@media(max-width:760px){.conv-arrow{padding-top:0;transform:rotate(90deg)}}
 
-        .convert-panels { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
-        .panel { flex: 1; min-width: 300px; display: flex; flex-direction: column; }
-        .panel-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
-            font-weight: 600; font-size: 0.9rem; color: var(--text);
-        }
-        .format-select {
-            padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);
-            background: var(--surface); color: var(--text); font-weight: 500; font-size: 0.85rem;
-            cursor: pointer; outline: none;
-        }
-        textarea {
-            width: 100%; flex: 1; min-height: 280px; padding: 16px;
-            font-family: 'SF Mono', 'Menlo', 'Cascadia Code', monospace; font-size: 13px;
-            border: 1.5px solid var(--border); border-radius: 12px;
-            background: var(--input-bg); color: var(--text); resize: vertical;
-            transition: border 0.2s, background 0.3s, color 0.3s;
-        }
-        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
-        .error-msg { color: var(--error); font-size: 0.85rem; min-height: 20px; margin: 4px 0; }
-        .button-group { display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap; align-items: center; }
-        .btn {
-            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
-            cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--text);
-            border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-            display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
-        .btn-outline:hover { background: var(--bg); border-color: var(--primary); }
-        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+.panel-wrap{}
+.panel-label{font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.panel-label-text{display:flex;align-items:center;gap:8px}
+.detect-badge{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;letter-spacing:.04em}
+.badge-yaml{background:rgba(236,72,153,.12);color:var(--yaml-color)}
+.badge-json{background:var(--primary-light);color:var(--json-color)}
+.badge-toml{background:var(--pass-bg);color:var(--toml-color)}
 
-        .options-bar {
-            background: var(--bg); border-radius: 12px; padding: 12px 16px; margin: 16px 0;
-            display: flex; flex-wrap: wrap; gap: 16px; align-items: center; border: 1px solid var(--border);
-            font-size: 0.85rem;
-        }
-        .options-bar label { display: flex; align-items: center; gap: 6px; color: var(--text-light); }
-        .options-bar input[type="number"], .options-bar select {
-            width: 70px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border);
-            background: var(--surface); color: var(--text); font-size: 0.85rem;
-        }
-        .compare-section { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
-        .compare-result {
-            padding: 8px 16px; border-radius: 20px; font-weight: 600; display: inline-block;
-        }
-        .equal { background: rgba(16,185,129,0.1); color: var(--success); }
-        .different { background: rgba(245,158,11,0.1); color: var(--warning); }
+.code-area{width:100%;min-height:280px;padding:14px;font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);outline:none;resize:vertical;transition:border-color .2s}
+.code-area:focus{border-color:var(--primary)}
+.code-area.has-error{border-color:var(--fail)}
+.code-area.has-success{border-color:var(--pass)}
+.code-area[readonly]{background:var(--surface2);cursor:default}
 
-        .faq-section {
-            background: var(--surface); border-radius: var(--radius); padding: 32px;
-            box-shadow: var(--shadow); border: 1px solid var(--border); margin-top: 32px;
-        }
-        .faq-section h2 { font-size: 1.7rem; margin-bottom: 20px; }
-        .faq-item { margin-bottom: 24px; }
-        .faq-question { font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
-        .footer { text-align: center; color: var(--text-light); margin-top: 24px; font-size: 0.9rem; }
-        .toast {
-            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--surface);
-            padding: 10px 20px; border-radius: 40px; opacity: 0; transition: opacity 0.3s;
-            pointer-events: none; z-index: 1000; box-shadow: var(--shadow);
-        }
-    </style>
+.error-line{min-height:20px;margin-top:5px;font-size:.78rem;font-family:var(--mono);line-height:1.5}
+.err-msg{color:var(--fail)}
+.ok-msg{color:var(--pass)}
+
+/* ── action row ── */
+.action-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.btn{padding:7px 16px;border-radius:40px;font-weight:600;font-size:.82rem;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-hover);color:#fff;transform:translateY(-1px)}
+.btn-sm{padding:5px 12px;font-size:.75rem}
+
+/* ── output actions overlay ── */
+.output-wrap{position:relative}
+.output-actions{position:absolute;top:8px;right:8px;display:flex;gap:6px;opacity:0;transition:opacity .2s}
+.output-wrap:hover .output-actions{opacity:1}
+.icon-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:var(--text3);transition:.15s}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+
+/* ── format options ── */
+.fmt-options{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:12px;display:none;flex-wrap:wrap;gap:14px;align-items:center;font-size:.82rem}
+.fmt-options.visible{display:flex}
+.opt-group{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.opt-group label{color:var(--text2);font-weight:500}
+.opt-group input[type="number"]{width:60px;padding:4px 8px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:.8rem}
+.opt-group select{padding:4px 8px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.8rem;font-family:inherit}
+.opt-group input[type="checkbox"]{accent-color:var(--primary);cursor:pointer}
+.opt-sep{width:1px;height:18px;background:var(--border)}
+
+/* ── semantic compare panel ── */
+.compare-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px;display:none}
+.compare-panel.visible{display:block}
+.compare-panel h3{font-size:.9rem;font-weight:800;margin-bottom:14px;color:var(--text)}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:600px){.cmp-grid{grid-template-columns:1fr}}
+.cmp-result{padding:10px 16px;border-radius:10px;font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:8px}
+.cmp-equal{background:var(--pass-bg);color:var(--pass)}
+.cmp-diff{background:var(--warn-bg);color:#b45309}
+.cmp-error{background:var(--fail-bg);color:var(--fail)}
+body.dark .cmp-diff{background:var(--warn-bg);color:#fcd34d}
+.cmp-diff-list{margin-top:10px;padding-left:16px;font-size:.82rem;color:var(--text2);list-style:disc}
+.cmp-diff-list li{margin-bottom:4px;font-family:var(--mono)}
+
+/* ── type info panel ── */
+.type-panel{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px;font-size:.78rem;font-family:var(--mono);max-height:120px;overflow:auto;line-height:1.7;display:none}
+.type-panel.visible{display:block}
+.type-str{color:#86efac}.type-num{color:#fca5a5}.type-bool{color:#c4b5fd}
+.type-null{color:#94a3b8}.type-date{color:var(--warn)}.type-arr{color:#93c5fd}
+.type-obj{color:var(--primary)}
+
+/* ── article section ── */
+.article-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:28px}
+.article-section h2{font-size:1.3rem;font-weight:800;margin-top:28px;margin-bottom:10px}
+.article-section h2:first-of-type{margin-top:0}
+.article-section h3{font-size:1.05rem;font-weight:700;margin-top:18px;margin-bottom:6px}
+.article-section p{color:var(--text2);font-size:.9rem;margin-bottom:10px;line-height:1.8}
+.article-section code{background:var(--code-bg);color:var(--code-color);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.85em}
+.article-section pre{background:var(--code-bg);color:var(--code-color);padding:14px;border-radius:10px;overflow-x:auto;margin:10px 0;font-family:var(--mono);font-size:.8rem;line-height:1.6}
+.article-section a{color:var(--primary);text-decoration:none}
+.article-section a:hover{text-decoration:underline}
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:12px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 12px;color:var(--text2);font-size:.88rem;line-height:1.8}
+.dec-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0}
+.dec-table th,.dec-table td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+.dec-table th{background:var(--surface2);font-weight:700}
+
+/* ── toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--surface);padding:10px 20px;border-radius:40px;font-size:.85rem;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);z-index:1000}
+body.dark .toast{background:var(--surface);color:var(--text)}
+
+/* ── footer ── */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <span class="logo">📦 DevToolbox</span>
-        <div class="header-actions">
-            <button class="theme-toggle" id="themeToggle">
-                <span id="themeIcon">🌙</span> <span id="themeLabel">Dark</span>
-            </button>
-            <div class="lang-switch">
-                <a href="/tools/yaml-json-toml-converter/" class="lang-btn active">EN</a>
-                <a href="/fr/outils/convertisseur-yaml-json-toml/" class="lang-btn">FR</a>
-            </div>
-        </div>
-    </header>
+<div class="page">
 
-    <main>
-        <div class="tool-card">
-            <h1>🔄 YAML ↔ JSON ↔ TOML Converter</h1>
-            <div class="subhead">
-                Precise conversion with strong typing, validation, YAML anchors, semantic comparison and style control. 100% client‑side.
-            </div>
+<!-- HEADER -->
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/yaml-json-toml-converter/" class="pill-btn active">EN</a>
+      <a href="/fr/outils/convertisseur-yaml-json-toml/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
 
-            <div class="convert-panels">
-                <div class="panel">
-                    <div class="panel-header">
-                        <span>Source</span>
-                        <select class="format-select" id="sourceFormat">
-                            <option value="yaml" selected>YAML</option>
-                            <option value="json">JSON</option>
-                            <option value="toml">TOML</option>
-                        </select>
-                    </div>
-                    <textarea id="sourceInput" placeholder="Paste your YAML, JSON or TOML content here..."></textarea>
-                    <div class="error-msg" id="sourceError"></div>
-                </div>
-                <div class="panel">
-                    <div class="panel-header">
-                        <span>Result</span>
-                        <select class="format-select" id="targetFormat">
-                            <option value="json" selected>JSON</option>
-                            <option value="yaml">YAML</option>
-                            <option value="toml">TOML</option>
-                        </select>
-                    </div>
-                    <textarea id="targetOutput" readonly placeholder="The result will appear here..."></textarea>
-                    <div class="error-msg" id="targetError"></div>
-                </div>
-            </div>
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tools/">Tools</a></li>
+    <li aria-current="page">YAML ↔ JSON ↔ TOML Converter</li>
+  </ol>
+</nav>
 
-            <div class="button-group">
-                <button class="btn btn-primary" id="convertBtn">🚀 Convert</button>
-                <button class="btn btn-outline" id="swapBtn">⇄ Swap</button>
-                <button class="btn btn-outline" id="copyResultBtn">📋 Copy result</button>
-                <button class="btn btn-outline" id="compareBtn">🔍 Semantic compare</button>
-            </div>
-
-            <div class="options-bar" id="yamlOptions" style="display: none;">
-                <span style="font-weight:600;">⚙️ YAML Style</span>
-                <label>Indent <input type="number" id="yamlIndent" value="2" min="1" max="8"></label>
-                <label>Line width <input type="number" id="yamlLineWidth" value="80" min="20" max="200"></label>
-                <label>Quotes <select id="yamlQuotes">
-                    <option value="auto">Auto</option>
-                    <option value="single">Single</option>
-                    <option value="double">Double</option>
-                </select></label>
-                <label><input type="checkbox" id="yamlNoRefs"> No anchors</label>
-                <label><input type="checkbox" id="yamlTypeSafe"> Strict typing (dates → string)</label>
-            </div>
-            <div class="options-bar" id="jsonOptions" style="display: none;">
-                <span style="font-weight:600;">⚙️ JSON Style</span>
-                <label>Indent <input type="number" id="jsonIndent" value="2" min="0" max="8"></label>
-                <label><input type="checkbox" id="jsonSortKeys"> Sort keys</label>
-            </div>
-
-            <div class="compare-section" id="compareSection" style="display: none;">
-                <h4 style="margin-bottom:8px;">🔍 Semantic comparison (normalisation)</h4>
-                <textarea id="compareInputA" placeholder="First document..." style="min-height:120px; margin-bottom:8px;"></textarea>
-                <textarea id="compareInputB" placeholder="Second document..." style="min-height:120px; margin-bottom:8px;"></textarea>
-                <div class="button-group">
-                    <select id="compareFormat" class="format-select">
-                        <option value="yaml">YAML</option>
-                        <option value="json">JSON</option>
-                    </select>
-                    <button class="btn btn-outline btn-sm" id="runCompareBtn">Compare</button>
-                    <span id="compareStatus"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- FAQ -->
-        <div class="faq-section">
-            <h2>Frequently Asked Questions</h2>
-            <div class="faq-item">
-                <div class="faq-question">Why a different YAML/JSON/TOML converter?</div>
-                <p>Unlike basic tools, this one preserves types (dates remain strings if desired), handles YAML anchors, validates input rigorously and provides fine control over the output format.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">How to enable strict typing?</div>
-                <p>Check “Strict typing (dates → string)” in the YAML options. Dates like 2024-01-01 will be kept as strings rather than being converted to JavaScript Date objects.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">What is semantic comparison?</div>
-                <p>Two YAML documents can be syntactically different but represent the same structure. Our comparator parses both, normalises key order and checks deep equality.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">Is my data sent to a server?</div>
-                <p>No. All processing (parsing, conversion, comparison) runs inside your browser. No data leaves your machine.</p>
-            </div>
-        </div>
-    </main>
-    <footer class="footer">© 2025 DevToolbox — 100% client‑side tools for developers.</footer>
-    <div class="toast" id="toast">Copied!</div>
+<main>
+<!-- HERO -->
+<div class="tool-hero">
+  <h1>YAML ↔ JSON ↔ TOML Converter
+    <span class="auto-badge"><span class="pulse"></span>Auto-detects format</span>
+  </h1>
+  <p>Convert between YAML, JSON and TOML with strong typing, YAML anchor support, semantic comparison and full style control. 100% client-side — nothing leaves your browser.</p>
 </div>
 
+<!-- MAIN TOOL -->
+<div class="tool-card">
+
+  <!-- CONVERSION GRID -->
+  <div class="conv-grid">
+
+    <!-- LEFT: INPUT -->
+    <div class="panel-wrap">
+      <div class="panel-label">
+        <div class="panel-label-text">
+          <span style="font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Input</span>
+          <span class="detect-badge" id="detectBadge" style="display:none"></span>
+        </div>
+        <div class="format-tabs" id="srcTabs">
+          <button class="fmt-tab active-yaml" data-fmt="yaml" onclick="setSrcFmt('yaml')">YAML</button>
+          <button class="fmt-tab" data-fmt="json" onclick="setSrcFmt('json')">JSON</button>
+          <button class="fmt-tab" data-fmt="toml" onclick="setSrcFmt('toml')">TOML</button>
+        </div>
+      </div>
+      <textarea class="code-area" id="srcInput" spellcheck="false" autocomplete="off"
+        placeholder="Paste YAML, JSON or TOML — format is auto-detected"></textarea>
+      <div class="error-line" id="srcError"></div>
+    </div>
+
+    <!-- ARROW / SWAP -->
+    <div class="conv-arrow" title="Swap input and output" onclick="swapPanels()">⇄</div>
+
+    <!-- RIGHT: OUTPUT -->
+    <div class="panel-wrap">
+      <div class="panel-label">
+        <span style="font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Output</span>
+        <div class="format-tabs" id="tgtTabs">
+          <button class="fmt-tab" data-fmt="yaml" onclick="setTgtFmt('yaml')">YAML</button>
+          <button class="fmt-tab active-json" data-fmt="json" onclick="setTgtFmt('json')">JSON</button>
+          <button class="fmt-tab" data-fmt="toml" onclick="setTgtFmt('toml')">TOML</button>
+        </div>
+      </div>
+      <div class="output-wrap">
+        <textarea class="code-area" id="tgtOutput" readonly spellcheck="false"
+          placeholder="Converted output will appear here…"></textarea>
+        <div class="output-actions">
+          <button class="icon-btn" onclick="copyOutput()" title="Copy output">⧉</button>
+          <button class="icon-btn" onclick="downloadOutput()" title="Download file">↓</button>
+        </div>
+      </div>
+      <div class="error-line" id="tgtError"></div>
+    </div>
+  </div>
+
+  <!-- FORMAT-SPECIFIC OPTIONS -->
+  <div class="fmt-options" id="optYamlOut">
+    <span style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">YAML Options</span>
+    <div class="opt-sep"></div>
+    <div class="opt-group"><label>Indent</label><input type="number" id="oYamlIndent" value="2" min="1" max="8"></div>
+    <div class="opt-group"><label>Line width</label><input type="number" id="oYamlWidth" value="80" min="20" max="200"></div>
+    <div class="opt-group"><label>Quotes</label>
+      <select id="oYamlQuotes">
+        <option value="auto">Auto</option>
+        <option value="single">Single</option>
+        <option value="double">Double</option>
+      </select>
+    </div>
+    <div class="opt-sep"></div>
+    <div class="opt-group"><input type="checkbox" id="oYamlNoRefs"><label for="oYamlNoRefs">Resolve anchors</label></div>
+    <div class="opt-group"><input type="checkbox" id="oYamlBlock"><label for="oYamlBlock">Force block style</label></div>
+  </div>
+
+  <div class="fmt-options" id="optJsonOut">
+    <span style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">JSON Options</span>
+    <div class="opt-sep"></div>
+    <div class="opt-group"><label>Indent</label><input type="number" id="oJsonIndent" value="2" min="0" max="8"></div>
+    <div class="opt-group"><input type="checkbox" id="oJsonSort"><label for="oJsonSort">Sort keys</label></div>
+    <div class="opt-group"><input type="checkbox" id="oJsonMinify"><label for="oJsonMinify">Minify</label></div>
+  </div>
+
+  <div class="fmt-options" id="optYamlIn">
+    <span style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">YAML Parse Options</span>
+    <div class="opt-sep"></div>
+    <div class="opt-group"><input type="checkbox" id="iYamlTypeSafe"><label for="iYamlTypeSafe">Dates as strings</label></div>
+    <div class="opt-group"><input type="checkbox" id="iYamlStrict"><label for="iYamlStrict">Strict schema</label></div>
+  </div>
+
+  <!-- ACTION ROW -->
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="runConvert()">Convert</button>
+    <button class="btn" onclick="copyOutput()">⧉ Copy output</button>
+    <button class="btn" onclick="downloadOutput()">↓ Download</button>
+    <button class="btn" id="btnCompare" onclick="toggleCompare()">⊕ Semantic compare</button>
+    <button class="btn" id="btnTypeInfo" onclick="toggleTypeInfo()">ⓘ Type info</button>
+    <button class="btn" onclick="loadExample()">Load example</button>
+    <button class="btn" onclick="clearAll()">Clear</button>
+  </div>
+
+  <!-- TYPE INFO -->
+  <div class="type-panel" id="typePanel"></div>
+
+</div><!-- /tool-card -->
+
+<!-- SEMANTIC COMPARE PANEL -->
+<div class="compare-panel" id="comparePanel">
+  <h3>🔍 Semantic comparison — are two documents structurally identical?</h3>
+  <p style="font-size:.83rem;color:var(--text3);margin-bottom:12px">Two documents can be formatted differently but represent the same data structure. This comparison normalises key order and checks deep equality.</p>
+  <div class="cmp-grid">
+    <div>
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Document A</div>
+      <textarea class="code-area" id="cmpA" style="min-height:150px" spellcheck="false" placeholder="Paste first document (YAML, JSON or TOML)…"></textarea>
+    </div>
+    <div>
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Document B</div>
+      <textarea class="code-area" id="cmpB" style="min-height:150px" spellcheck="false" placeholder="Paste second document…"></textarea>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="runCompare()">Compare</button>
+    <button class="btn btn-sm" onclick="useCurrent()">Use current input/output</button>
+    <div id="cmpResult" style="flex:1"></div>
+  </div>
+  <ul class="cmp-diff-list" id="cmpDiffList" style="display:none"></ul>
+</div>
+
+<!-- ARTICLE -->
+<section class="article-section" itemscope itemtype="https://schema.org/Article">
+  <meta itemprop="author" content="Mathias Kouadio">
+  <meta itemprop="datePublished" content="2026-06-08">
+
+  <h2>YAML, JSON, TOML — when to use which</h2>
+  <p>All three formats exist to solve the same problem: serializing structured data in a human-readable text format. But they were designed with different priorities, and choosing the wrong one causes real friction.</p>
+
+  <table class="dec-table">
+    <thead><tr><th>Format</th><th>Best for</th><th>Not great for</th><th>Used by</th></tr></thead>
+    <tbody>
+      <tr><td><strong>JSON</strong></td><td>API payloads, data exchange, web storage</td><td>Long human-edited config files (no comments)</td><td>REST APIs, npm, package.json</td></tr>
+      <tr><td><strong>YAML</strong></td><td>Complex configuration, multi-line strings, anchors</td><td>Large data payloads (parsing is slow), beginner teams</td><td>Kubernetes, GitHub Actions, Ansible, Docker Compose</td></tr>
+      <tr><td><strong>TOML</strong></td><td>Simple config files, explicit typing, beginner-friendly</td><td>Complex nested structures, null values</td><td>Cargo.toml (Rust), pyproject.toml, Hugo, Go modules</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The YAML date problem — and how this tool handles it</h2>
+  <p>YAML's default schema automatically parses bare dates. A value like <code>2024-01-15</code> is parsed as a JavaScript <code>Date</code> object, not a string. When you then convert it to JSON, you get a UTC timestamp string (<code>"2024-01-15T00:00:00.000Z"</code>) — not the string you put in. This trips up developers constantly when converting Kubernetes manifests or GitHub Actions workflows.</p>
+  <p>Enable <strong>"Dates as strings"</strong> in the parse options to use <code>JSON_SCHEMA</code> instead of the default schema, which keeps date-like values as plain strings throughout the conversion.</p>
+
+  <pre><code># YAML input
+release_date: 2024-01-15
+version: "2.1.0"
+
+# ❌ Default behavior — JSON output
+{ "release_date": "2024-01-15T00:00:00.000Z", "version": "2.1.0" }
+
+# ✅ With "Dates as strings" — JSON output
+{ "release_date": "2024-01-15", "version": "2.1.0" }</code></pre>
+
+  <h2>YAML anchors and aliases — what they are and what happens to them</h2>
+  <p>YAML anchors let you define a value once and reference it multiple times, avoiding repetition. This is very common in CI/CD pipelines where you want to reuse environment definitions or step configurations.</p>
+
+  <pre><code># YAML with anchors
+defaults: &default-settings
+  timeout: 30
+  retries: 3
+  log_level: info
+
+service_a:
+  <<: *default-settings
+  port: 8080
+
+service_b:
+  <<: *default-settings
+  port: 9090</code></pre>
+
+  <p>During conversion, anchors are resolved — the alias is replaced with the actual value. The <strong>"Resolve anchors"</strong> option makes this explicit in the YAML output (removes <code>&amp;</code> and <code>*</code> references). JSON and TOML do not support anchors, so they always receive resolved values.</p>
+
+  <h2>TOML limitations — what cannot be converted</h2>
+  <p>TOML is less expressive than JSON and YAML in some areas. If your source data contains any of the following, conversion to TOML will fail:</p>
+  <ul style="margin-left:20px;color:var(--text2);font-size:.9rem;line-height:2">
+    <li><strong>null values</strong> — TOML has no concept of null. Convert to YAML instead.</li>
+    <li><strong>Mixed-type arrays</strong> — TOML arrays must contain values of the same type. <code>[1, "two", true]</code> is invalid TOML.</li>
+    <li><strong>Non-string keys</strong> — TOML keys must be strings (which JSON always uses, but some YAML documents may have integer keys).</li>
+    <li><strong>Deeply nested anonymous arrays</strong> — TOML's array-of-tables syntax has limits on how structures can be nested.</li>
+  </ul>
+
+  <h2>Semantic comparison — why string equality is not enough</h2>
+  <p>Two YAML files that represent the same configuration can look completely different as text: different key ordering, different indentation, different quote styles. A diff tool would show hundreds of changes. The semantic comparison in this tool normalises both documents — parses them, sorts all keys recursively, then compares the resulting structures. Two documents that are semantically identical produce the same normalised structure regardless of formatting.</p>
+
+  <p>This is particularly useful when verifying that a configuration migration preserved all values, or confirming that two auto-generated files from different tools are equivalent.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why does YAML convert dates to unexpected values?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">By default, js-yaml parses bare dates like <code>2024-01-01</code> as JavaScript <code>Date</code> objects, which then serialize to UTC timestamp strings in JSON. Enable <strong>Dates as strings</strong> in the parse options. This uses <code>JSON_SCHEMA</code> instead of the full YAML schema, keeping date-like values as plain text throughout the conversion pipeline.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is a YAML anchor and alias?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">A YAML anchor (<code>&amp;name</code>) marks a value so it can be reused elsewhere via an alias (<code>*name</code>). Anchors avoid repeating the same block across a config file. This converter resolves anchors during parsing — JSON and TOML outputs always contain the resolved values. In YAML output, enabling "Resolve anchors" replaces all aliases with their actual values.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the difference between YAML and TOML?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">YAML is a flexible superset of JSON focused on human-readable data serialization, often used for complex configuration (Kubernetes, GitHub Actions, Ansible). TOML is simpler and more explicit, designed specifically for config files where clarity is more important than expressive power — it's used by Rust (Cargo.toml), Python (pyproject.toml), Hugo, and Go. TOML is less ambiguous than YAML but also less capable (no null, no mixed-type arrays).</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Can TOML represent all data that JSON can?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">No. TOML cannot represent <code>null</code> values — JSON null has no TOML equivalent. TOML also requires arrays to be homogeneous (all elements of the same type). If your JSON contains <code>null</code> or mixed-type arrays, conversion to TOML will fail. In those cases, convert to YAML instead, which supports null and mixed arrays natively.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Is my data sent to a server?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">No. All parsing, conversion, validation, and comparison runs entirely in your browser using js-yaml and smol-toml. Your configuration files, secrets, and data never leave your machine. This is particularly important for files that may contain API keys, database credentials, or internal hostnames.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why does my YAML convert differently depending on the sort keys option?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">JSON objects and YAML mappings do not guarantee key order, so the order in the output depends on how the parser built the object. The "Sort keys" option in JSON output applies a recursive alphabetical sort to all object keys. This is useful for producing deterministic output for diffs and version control, but the sorted output is semantically identical to the unsorted one.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3 style="margin-top:28px">Related tools</h3>
+  <ul style="margin-left:20px;color:var(--text2);font-size:.88rem;line-height:2.2">
+    <li><a href="/tools/json-formatter/">JSON Formatter</a> — format, validate and minify JSON before converting</li>
+    <li><a href="/tools/text-diff/">Text Diff Tool</a> — compare two config files before and after conversion</li>
+    <li><a href="/tools/sql-formatter/">SQL Formatter</a> — format SQL queries that reference YAML/JSON configs</li>
+  </ul>
+</section>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Free client-side tools for developers.
+  <a href="/tools/blog/">Blog</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
 <script>
-(function() {
-    // DOM refs
-    const sourceInput = document.getElementById('sourceInput');
-    const targetOutput = document.getElementById('targetOutput');
-    const sourceFormat = document.getElementById('sourceFormat');
-    const targetFormat = document.getElementById('targetFormat');
-    const convertBtn = document.getElementById('convertBtn');
-    const swapBtn = document.getElementById('swapBtn');
-    const copyResultBtn = document.getElementById('copyResultBtn');
-    const compareBtn = document.getElementById('compareBtn');
-    const sourceError = document.getElementById('sourceError');
-    const targetError = document.getElementById('targetError');
-    const yamlOptions = document.getElementById('yamlOptions');
-    const jsonOptions = document.getElementById('jsonOptions');
-    const yamlIndent = document.getElementById('yamlIndent');
-    const yamlLineWidth = document.getElementById('yamlLineWidth');
-    const yamlQuotes = document.getElementById('yamlQuotes');
-    const yamlNoRefs = document.getElementById('yamlNoRefs');
-    const yamlTypeSafe = document.getElementById('yamlTypeSafe');
-    const jsonIndent = document.getElementById('jsonIndent');
-    const jsonSortKeys = document.getElementById('jsonSortKeys');
-    const compareSection = document.getElementById('compareSection');
-    const compareInputA = document.getElementById('compareInputA');
-    const compareInputB = document.getElementById('compareInputB');
-    const runCompareBtn = document.getElementById('runCompareBtn');
-    const compareStatus = document.getElementById('compareStatus');
-    const compareFormat = document.getElementById('compareFormat');
-    const toast = document.getElementById('toast');
+/* ═════════════════════════════════════════
+   STATE
+═════════════════════════════════════════ */
+let srcFmt = 'yaml';
+let tgtFmt = 'json';
+let autoTimer = null;
 
-    // Theme
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const themeLabel = document.getElementById('themeLabel');
-    let currentTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
-    function applyTheme(t) {
-        document.body.classList.remove('dark-forced', 'light-forced');
-        if (t === 'dark') { document.body.classList.add('dark-forced'); themeIcon.textContent='☀️'; themeLabel.textContent='Light'; }
-        else if (t === 'light') { document.body.classList.add('light-forced'); themeIcon.textContent='🌙'; themeLabel.textContent='Dark'; }
-        else {
-            const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            themeIcon.textContent = prefers ? '☀️' : '🌙';
-            themeLabel.textContent = prefers ? 'Light' : 'Dark';
-        }
-        localStorage.setItem('devtoolbox-theme', t);
-        currentTheme = t;
+/* ═════════════════════════════════════════
+   FORMAT DETECTION
+═════════════════════════════════════════ */
+function detectFormat(text) {
+  const t = text.trim();
+  if (!t) return null;
+  // JSON: starts with { or [
+  if (t[0] === '{' || t[0] === '[') return 'json';
+  // TOML: has [section] headers or key = value at top level
+  if (/^\s*\[[\w.\-"]+\]/m.test(t)) return 'toml';
+  if (/^\s*[\w\-"'.]+\s*=/m.test(t) && !/^[\s\-*#]/.test(t.split('\n')[0])) return 'toml';
+  // Default: YAML
+  return 'yaml';
+}
+
+function updateDetectBadge(fmt) {
+  const b = document.getElementById('detectBadge');
+  if (!fmt) { b.style.display='none'; return; }
+  b.style.display = 'inline-flex';
+  b.className = `detect-badge badge-${fmt}`;
+  b.textContent = 'Detected: ' + fmt.toUpperCase();
+}
+
+/* ═════════════════════════════════════════
+   PARSE
+═════════════════════════════════════════ */
+function parse(text, fmt) {
+  const t = text.trim();
+  if (!t) return { ok: false, data: null, err: '' };
+
+  try {
+    let data;
+    if (fmt === 'json') {
+      data = JSON.parse(t);
+    } else if (fmt === 'yaml') {
+      const useSafe = document.getElementById('iYamlTypeSafe').checked;
+      const useStrict = document.getElementById('iYamlStrict').checked;
+      const schema = useSafe ? jsyaml.JSON_SCHEMA : useStrict ? jsyaml.CORE_SCHEMA : jsyaml.DEFAULT_SCHEMA;
+      data = jsyaml.load(t, { schema });
+    } else if (fmt === 'toml') {
+      data = smolToml.parse(t);
     }
-    themeToggle.addEventListener('click', ()=> applyTheme(currentTheme==='dark' ? 'light' : 'dark'));
-    applyTheme(currentTheme);
+    return { ok: true, data, err: '' };
+  } catch(e) {
+    return { ok: false, data: null, err: e.message };
+  }
+}
 
-    // Show/hide options based on target format
-    function updateOptionsVisibility() {
-        const tgt = targetFormat.value;
-        yamlOptions.style.display = tgt === 'yaml' ? 'flex' : 'none';
-        jsonOptions.style.display = tgt === 'json' ? 'flex' : 'none';
+/* ═════════════════════════════════════════
+   STRINGIFY
+═════════════════════════════════════════ */
+function sortKeysDeep(obj) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(sortKeysDeep);
+  const out = {};
+  Object.keys(obj).sort().forEach(k => { out[k] = sortKeysDeep(obj[k]); });
+  return out;
+}
+
+function stringify(data, fmt) {
+  try {
+    if (fmt === 'json') {
+      const minify  = document.getElementById('oJsonMinify').checked;
+      const sort    = document.getElementById('oJsonSort').checked;
+      const indent  = parseInt(document.getElementById('oJsonIndent').value, 10) || 2;
+      const obj = sort ? sortKeysDeep(data) : data;
+      return { ok: true, text: JSON.stringify(obj, null, minify ? 0 : indent) };
     }
-    targetFormat.addEventListener('change', updateOptionsVisibility);
-    updateOptionsVisibility();
-
-    // Conversion
-    function parseSource(text, format) {
-        if (format === 'yaml') {
-            const schema = yamlTypeSafe.checked ? jsyaml.JSON_SCHEMA : jsyaml.DEFAULT_SCHEMA;
-            return jsyaml.load(text, { schema });
-        } else if (format === 'json') {
-            return JSON.parse(text);
-        } else if (format === 'toml') {
-            return smolToml.parse(text);
-        }
+    if (fmt === 'yaml') {
+      const indent    = parseInt(document.getElementById('oYamlIndent').value, 10) || 2;
+      const lineWidth = parseInt(document.getElementById('oYamlWidth').value, 10) || 80;
+      const noRefs    = document.getElementById('oYamlNoRefs').checked;
+      const block     = document.getElementById('oYamlBlock').checked;
+      const qtype     = document.getElementById('oYamlQuotes').value;
+      const quotingType = qtype === 'single' ? "'" : qtype === 'double' ? '"' : undefined;
+      return { ok: true, text: jsyaml.dump(data, {
+        indent, lineWidth, noRefs,
+        flowLevel: block ? -1 : undefined,
+        quotingType,
+        forceQuotes: !!quotingType,
+        schema: jsyaml.DEFAULT_SCHEMA
+      }) };
     }
-    function stringifyTarget(obj, format) {
-        if (format === 'yaml') {
-            const indent = parseInt(yamlIndent.value, 10) || 2;
-            const lineWidth = parseInt(yamlLineWidth.value, 10) || 80;
-            const noRefs = yamlNoRefs.checked;
-            const quotingType = yamlQuotes.value === 'single' ? "'" : yamlQuotes.value === 'double' ? '"' : null;
-            return jsyaml.dump(obj, {
-                indent,
-                lineWidth,
-                noRefs,
-                quotingType,
-                forceQuotes: quotingType ? true : false,
-                schema: jsyaml.DEFAULT_SCHEMA
-            });
-        } else if (format === 'json') {
-            const indent = parseInt(jsonIndent.value, 10) || 2;
-            const sortKeys = jsonSortKeys.checked;
-            return JSON.stringify(obj, sortKeys ? Object.keys(obj).sort() : null, indent);
-        } else if (format === 'toml') {
-            return smolToml.stringify(obj);
-        }
+    if (fmt === 'toml') {
+      // smol-toml stringify — catches unsupported types
+      return { ok: true, text: smolToml.stringify(data) };
     }
+  } catch(e) {
+    return { ok: false, text: '', err: e.message };
+  }
+}
 
-    function doConvert() {
-        sourceError.textContent = '';
-        targetError.textContent = '';
-        targetOutput.value = '';
-        const srcText = sourceInput.value.trim();
-        if (!srcText) return;
-        try {
-            const data = parseSource(srcText, sourceFormat.value);
-            const result = stringifyTarget(data, targetFormat.value);
-            targetOutput.value = result;
-        } catch (e) {
-            sourceError.textContent = 'Conversion error: ' + e.message;
-        }
+/* ═════════════════════════════════════════
+   MAIN CONVERT
+═════════════════════════════════════════ */
+function runConvert() {
+  const raw = document.getElementById('srcInput').value;
+  const srcErr = document.getElementById('srcError');
+  const tgtErr = document.getElementById('tgtError');
+  const tgtOut = document.getElementById('tgtOutput');
+  srcErr.innerHTML = '';
+  tgtErr.innerHTML = '';
+  tgtOut.value = '';
+  tgtOut.classList.remove('has-error','has-success');
+  document.getElementById('srcInput').classList.remove('has-error','has-success');
+
+  if (!raw.trim()) { hideTypeInfo(); return; }
+
+  // Auto-detect
+  const detected = detectFormat(raw);
+  updateDetectBadge(detected);
+
+  // Parse
+  const { ok, data, err } = parse(raw, srcFmt);
+  if (!ok) {
+    srcErr.innerHTML = `<span class="err-msg">⚠ ${escHtml(err)}</span>`;
+    document.getElementById('srcInput').classList.add('has-error');
+    hideTypeInfo();
+    return;
+  }
+  document.getElementById('srcInput').classList.add('has-success');
+
+  // Check same format
+  if (srcFmt === tgtFmt) {
+    const { ok: ok2, text, err: err2 } = stringify(data, tgtFmt);
+    if (!ok2) { tgtErr.innerHTML = `<span class="err-msg">⚠ ${escHtml(err2)}</span>`; return; }
+    tgtOut.value = text;
+    tgtOut.classList.add('has-success');
+    renderTypeInfo(data);
+    return;
+  }
+
+  // Stringify
+  const { ok: ok2, text, err: err2 } = stringify(data, tgtFmt);
+  if (!ok2) {
+    tgtErr.innerHTML = `<span class="err-msg">⚠ ${escHtml(err2)}</span>`;
+    tgtOut.classList.add('has-error');
+    hideTypeInfo();
+    return;
+  }
+  tgtOut.value = text;
+  tgtOut.classList.add('has-success');
+  tgtErr.innerHTML = `<span class="ok-msg">✓ Converted successfully — ${countNodes(data)} values</span>`;
+  renderTypeInfo(data);
+}
+
+/* ═════════════════════════════════════════
+   TYPE INFO
+═════════════════════════════════════════ */
+function countNodes(obj, n = 0) {
+  if (obj === null || typeof obj !== 'object') return n + 1;
+  if (Array.isArray(obj)) return obj.reduce((a, v) => countNodes(v, a), n);
+  return Object.values(obj).reduce((a, v) => countNodes(v, a), n);
+}
+
+function typeColor(v) {
+  if (v === null) return 'type-null';
+  if (typeof v === 'string') return 'type-str';
+  if (typeof v === 'number') return 'type-num';
+  if (typeof v === 'boolean') return 'type-bool';
+  if (v instanceof Date) return 'type-date';
+  if (Array.isArray(v)) return 'type-arr';
+  return 'type-obj';
+}
+
+function renderTypeInfo(obj, depth = 0, max = 12) {
+  const panel = document.getElementById('typePanel');
+  if (!panel.classList.contains('visible')) return;
+  let html = '';
+  let count = 0;
+  function walk(o, d, prefix) {
+    if (count > max) return;
+    if (o === null || typeof o !== 'object') {
+      const cls = typeColor(o);
+      html += `<div style="padding-left:${d*12}px"><span class="${cls}">${escHtml(prefix)}: ${o instanceof Date ? '📅 ' + o.toISOString() : escHtml(String(o))}</span></div>`;
+      count++;
+    } else if (Array.isArray(o)) {
+      html += `<div style="padding-left:${d*12}px"><span class="type-arr">${escHtml(prefix)}: Array[${o.length}]</span></div>`;
+      count++;
+    } else {
+      if (d > 0) { html += `<div style="padding-left:${d*12}px"><span class="type-obj">${escHtml(prefix)}: {…}</span></div>`; count++; }
+      if (d < 3) Object.entries(o).slice(0, 8).forEach(([k,v]) => walk(v, d+1, k));
     }
+  }
+  walk(obj, 0, 'root');
+  if (count >= max) html += `<div style="color:var(--text3);font-style:italic">…and more</div>`;
+  panel.innerHTML = html;
+}
 
-    convertBtn.addEventListener('click', doConvert);
-    // Auto-convert after 800ms of inactivity
-    let autoTimer;
-    sourceInput.addEventListener('input', ()=>{
-        clearTimeout(autoTimer);
-        autoTimer = setTimeout(doConvert, 800);
-    });
-    // Reconvert when options change
-    document.querySelectorAll('#yamlOptions input, #yamlOptions select, #jsonOptions input, #jsonOptions select')
-        .forEach(el => el.addEventListener('change', doConvert));
+function toggleTypeInfo() {
+  const p = document.getElementById('typePanel');
+  p.classList.toggle('visible');
+  const raw = document.getElementById('srcInput').value;
+  if (p.classList.contains('visible') && raw.trim()) {
+    const { ok, data } = parse(raw, srcFmt);
+    if (ok) renderTypeInfo(data);
+  }
+}
+function hideTypeInfo() { document.getElementById('typePanel').classList.remove('visible'); }
 
-    // Swap
-    swapBtn.addEventListener('click', ()=>{
-        const tmpFormat = sourceFormat.value;
-        sourceFormat.value = targetFormat.value;
-        targetFormat.value = tmpFormat;
-        const tmpText = sourceInput.value;
-        sourceInput.value = targetOutput.value;
-        targetOutput.value = tmpText;
-        updateOptionsVisibility();
-        doConvert();
-    });
+/* ═════════════════════════════════════════
+   SEMANTIC COMPARE
+═════════════════════════════════════════ */
+function toggleCompare() {
+  document.getElementById('comparePanel').classList.toggle('visible');
+}
 
-    // Copy result
-    copyResultBtn.addEventListener('click', ()=>{
-        if (!targetOutput.value) return;
-        navigator.clipboard.writeText(targetOutput.value).then(()=>{
-            showToast('Result copied!');
-        });
-    });
+function useCurrent() {
+  document.getElementById('cmpA').value = document.getElementById('srcInput').value;
+  document.getElementById('cmpB').value = document.getElementById('tgtOutput').value;
+}
 
-    // Semantic comparison
-    compareBtn.addEventListener('click', ()=>{
-        compareSection.style.display = compareSection.style.display === 'none' ? 'block' : 'none';
-    });
-    runCompareBtn.addEventListener('click', ()=>{
-        const fmt = compareFormat.value;
-        const a = compareInputA.value.trim();
-        const b = compareInputB.value.trim();
-        if (!a || !b) { compareStatus.innerHTML = '<span class="compare-result different">Please fill both fields.</span>'; return; }
-        try {
-            const dataA = parseSource(a, fmt);
-            const dataB = parseSource(b, fmt);
-            // Normalise: recursive key sort
-            const normalize = (obj) => {
-                if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
-                    const sorted = {};
-                    Object.keys(obj).sort().forEach(k => { sorted[k] = normalize(obj[k]); });
-                    return sorted;
-                } else if (Array.isArray(obj)) {
-                    return obj.map(normalize);
-                }
-                return obj;
-            };
-            const normA = normalize(dataA);
-            const normB = normalize(dataB);
-            const equal = JSON.stringify(normA) === JSON.stringify(normB);
-            compareStatus.innerHTML = equal
-                ? '<span class="compare-result equal">✅ Identical structures (semantically equal)</span>'
-                : '<span class="compare-result different">❌ Different structures</span>';
-        } catch (e) {
-            compareStatus.innerHTML = `<span class="compare-result different">Error: ${e.message}</span>`;
-        }
-    });
+function normalizeDeep(o) {
+  if (o === null) return null;
+  if (o instanceof Date) return o.toISOString();
+  if (Array.isArray(o)) return o.map(normalizeDeep);
+  if (typeof o === 'object') {
+    const out = {};
+    Object.keys(o).sort().forEach(k => { out[k] = normalizeDeep(o[k]); });
+    return out;
+  }
+  return o;
+}
 
-    function showToast(msg) {
-        toast.textContent = msg;
-        toast.style.opacity = '1';
-        setTimeout(()=> toast.style.opacity = '0', 2200);
-    }
+function deepDiff(a, b, path = '') {
+  const diffs = [];
+  if (typeof a !== typeof b || (a === null) !== (b === null)) {
+    diffs.push(`${path || 'root'}: type changed (${a === null ? 'null' : typeof a} → ${b === null ? 'null' : typeof b})`);
+    return diffs;
+  }
+  if (a === null) return diffs;
+  if (typeof a !== 'object') {
+    if (String(a) !== String(b)) diffs.push(`${path || 'root'}: ${JSON.stringify(a)} → ${JSON.stringify(b)}`);
+    return diffs;
+  }
+  if (Array.isArray(a) !== Array.isArray(b)) {
+    diffs.push(`${path}: array vs object`); return diffs;
+  }
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) diffs.push(`${path}: array length ${a.length} → ${b.length}`);
+    const len = Math.min(a.length, b.length);
+    for (let i = 0; i < len; i++) diffs.push(...deepDiff(a[i], b[i], `${path}[${i}]`));
+    return diffs;
+  }
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  keys.forEach(k => {
+    if (!(k in a)) diffs.push(`${path}.${k}: missing in A`);
+    else if (!(k in b)) diffs.push(`${path}.${k}: missing in B`);
+    else diffs.push(...deepDiff(a[k], b[k], `${path}.${k}`));
+  });
+  return diffs;
+}
 
-    // Example placeholder (optional)
-    sourceInput.value = `name: "Example"
-age: 30
-birthday: 1995-07-20
-address:
-  street: "123 Main St"
-  city: "Montreal"
-tags:
-  - dev
-  - yaml
-`;
-    // Initial auto-convert after load
-    setTimeout(doConvert, 300);
+function runCompare() {
+  const ta = document.getElementById('cmpA').value.trim();
+  const tb = document.getElementById('cmpB').value.trim();
+  const res = document.getElementById('cmpResult');
+  const dl  = document.getElementById('cmpDiffList');
+  dl.style.display = 'none';
+  dl.innerHTML = '';
+
+  if (!ta || !tb) { res.innerHTML = '<div class="cmp-error">⚠ Please paste content in both panels.</div>'; return; }
+
+  const fmtA = detectFormat(ta) || 'yaml';
+  const fmtB = detectFormat(tb) || 'yaml';
+
+  const pA = parse(ta, fmtA);
+  const pB = parse(tb, fmtB);
+
+  if (!pA.ok) { res.innerHTML = `<div class="cmp-error">⚠ Document A: ${escHtml(pA.err)}</div>`; return; }
+  if (!pB.ok) { res.innerHTML = `<div class="cmp-error">⚠ Document B: ${escHtml(pB.err)}</div>`; return; }
+
+  const normA = normalizeDeep(pA.data);
+  const normB = normalizeDeep(pB.data);
+  const equal = JSON.stringify(normA) === JSON.stringify(normB);
+
+  if (equal) {
+    res.innerHTML = '<div class="cmp-result cmp-equal">✅ Identical structures — semantically equal</div>';
+  } else {
+    const diffs = deepDiff(normA, normB).slice(0, 20);
+    res.innerHTML = `<div class="cmp-result cmp-diff">⚠ ${diffs.length} difference${diffs.length>1?'s':''} found</div>`;
+    dl.style.display = 'block';
+    dl.innerHTML = diffs.map(d => `<li>${escHtml(d)}</li>`).join('');
+  }
+}
+
+/* ═════════════════════════════════════════
+   FORMAT TABS
+═════════════════════════════════════════ */
+function setSrcFmt(fmt) {
+  srcFmt = fmt;
+  document.querySelectorAll('#srcTabs .fmt-tab').forEach(t => {
+    t.className = 'fmt-tab' + (t.dataset.fmt === fmt ? ` active-${fmt}` : '');
+  });
+  updateSrcOptions();
+  scheduleConvert();
+}
+
+function setTgtFmt(fmt) {
+  tgtFmt = fmt;
+  document.querySelectorAll('#tgtTabs .fmt-tab').forEach(t => {
+    t.className = 'fmt-tab' + (t.dataset.fmt === fmt ? ` active-${fmt}` : '');
+  });
+  updateTgtOptions();
+  scheduleConvert();
+}
+
+function updateSrcOptions() {
+  document.getElementById('optYamlIn').classList.toggle('visible', srcFmt === 'yaml');
+}
+
+function updateTgtOptions() {
+  document.getElementById('optYamlOut').classList.toggle('visible', tgtFmt === 'yaml');
+  document.getElementById('optJsonOut').classList.toggle('visible', tgtFmt === 'json');
+}
+
+/* ═════════════════════════════════════════
+   SWAP
+═════════════════════════════════════════ */
+function swapPanels() {
+  const inVal  = document.getElementById('srcInput').value;
+  const outVal = document.getElementById('tgtOutput').value;
+  document.getElementById('srcInput').value = outVal;
+  const tmp = srcFmt;
+  setSrcFmt(tgtFmt);
+  setTgtFmt(tmp);
+  document.getElementById('srcInput').value = outVal;
+  scheduleConvert();
+}
+
+/* ═════════════════════════════════════════
+   COPY / DOWNLOAD
+═════════════════════════════════════════ */
+function copyOutput() {
+  const text = document.getElementById('tgtOutput').value;
+  if (!text) { toast('Nothing to copy'); return; }
+  navigator.clipboard.writeText(text).then(() => toast('Output copied!')).catch(() => toast('Copy failed'));
+}
+
+function downloadOutput() {
+  const text = document.getElementById('tgtOutput').value;
+  if (!text) { toast('Nothing to download'); return; }
+  const ext = { yaml: 'yaml', json: 'json', toml: 'toml' }[tgtFmt] || 'txt';
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `converted.${ext}`; a.click();
+  URL.revokeObjectURL(url);
+  toast(`Downloaded as converted.${ext}`);
+}
+
+/* ═════════════════════════════════════════
+   EXAMPLES
+═════════════════════════════════════════ */
+const EXAMPLE_YAML = `# Docker Compose-style example with YAML anchors
+version: "3.8"
+
+x-common: &common-settings
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+
+services:
+  api:
+    <<: *common-settings
+    image: myapp/api:latest
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://db:5432/myapp
+      REDIS_URL: redis://cache:6379
+      DEBUG: false
+      MAX_CONNECTIONS: 100
+
+  worker:
+    <<: *common-settings
+    image: myapp/worker:latest
+    environment:
+      QUEUE_URL: redis://cache:6379/1
+      CONCURRENCY: 4
+
+  db:
+    image: postgres:16
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: myapp
+      POSTGRES_USER: admin
+
+volumes:
+  pgdata: {}`;
+
+function loadExample() {
+  setSrcFmt('yaml');
+  document.getElementById('srcInput').value = EXAMPLE_YAML;
+  scheduleConvert();
+}
+
+function clearAll() {
+  document.getElementById('srcInput').value = '';
+  document.getElementById('tgtOutput').value = '';
+  document.getElementById('srcError').innerHTML = '';
+  document.getElementById('tgtError').innerHTML = '';
+  document.getElementById('srcInput').classList.remove('has-error','has-success');
+  document.getElementById('tgtOutput').classList.remove('has-error','has-success');
+  document.getElementById('detectBadge').style.display = 'none';
+  hideTypeInfo();
+}
+
+/* ═════════════════════════════════════════
+   AUTO CONVERT
+═════════════════════════════════════════ */
+function scheduleConvert() {
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(runConvert, 700);
+}
+
+document.getElementById('srcInput').addEventListener('input', () => {
+  // Auto-detect and switch source tab
+  const raw = document.getElementById('srcInput').value;
+  const detected = detectFormat(raw);
+  if (detected && detected !== srcFmt) setSrcFmt(detected);
+  scheduleConvert();
+});
+
+// Re-convert when options change
+['oYamlIndent','oYamlWidth','oYamlQuotes','oYamlNoRefs','oYamlBlock',
+ 'oJsonIndent','oJsonSort','oJsonMinify',
+ 'iYamlTypeSafe','iYamlStrict'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', scheduleConvert);
+});
+
+/* ═════════════════════════════════════════
+   HELPERS
+═════════════════════════════════════════ */
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTid;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(toastTid); toastTid = setTimeout(() => { el.style.opacity = '0'; }, 2200);
+}
+
+/* ── Theme ── */
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function initTheme() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Light';
+  }
 })();
+
+/* ── Init ── */
+updateSrcOptions();
+updateTgtOptions();
+loadExample();
 </script>
 </body>
 </html>
