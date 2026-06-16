@@ -1,344 +1,809 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparer Deux Textes en Ligne — Outil Text Diff Gratuit</title>
-    <meta name="description" content="Comparez deux textes, fichiers ou codes en ligne avec notre outil Text Diff gratuit. Diff ligne par ligne, vue unifiée, coloration syntaxique et partage sécurisé.">
-    <meta name="keywords" content="comment comparer deux textes, outil diff en ligne, différence entre deux fichiers texte, text diff tool, comparateur de texte, diff ligne par ligne, diff unifié, partager diff url, diff commande, git diff, diff mot à mot, algorithme diff">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="DevsToolsbox">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/how-to-compare-two-texts/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/how-to-compare-two-texts/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comment comparer deux textes : Outils de diff, algorithme LCS et guide complet de git diff (2026)</title>
+<meta name="description" content="Tout sur la comparaison de textes : l'algorithme LCS qui alimente les outils de diff, vue fractionnée vs unifiée, diff mot à mot, guide complet de git diff, lecture d'un diff unifié. Par Mathias Kouadio.">
+<meta name="keywords" content="comment comparer deux textes en ligne, outil de diff texte, diff unifié expliqué, tutoriel git diff, algorithme lcs expliqué, diff mot à mot, comparer deux fichiers en ligne, vue fractionnée diff unifié">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/how-to-compare-two-texts/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/how-to-compare-two-texts/">
 
-    <meta property="og:title" content="Repérez chaque modification entre deux fichiers texte avec l'outil Text Diff en ligne (gratuit et sécurisé)">
-    <meta property="og:description" content="Outil Text Diff de DevsToolsbox : comparez deux textes, codes ou fichiers en ligne. Diff ligne par ligne, coloration syntaxique, partage URL. 100% client.">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/">
-    <meta property="og:site_name" content="DevsToolsbox">
+<meta property="og:title" content="Comment comparer deux textes : Outils de diff, algorithme LCS et guide git diff (2026)">
+<meta property="og:description" content="L'algorithme LCS, vue fractionnée vs unifiée, guide git diff, lecture d'un diff unifié. Tout sur la comparaison de textes en un seul article.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/">
+<meta property="og:site_name" content="DevToolbox">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Repérez chaque modification entre deux fichiers texte avec l'outil Text Diff en ligne">
-    <meta name="twitter:description" content="Diff ligne par ligne, coloration syntaxique, ignorez la casse, partage par URL. 100% gratuit et sécurisé.">
-
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Repérez chaque modification entre deux fichiers texte avec l'outil Text Diff en ligne (gratuit et sécurisé)",
-            "author": { "@type": "Person", "name": "L'équipe DevsToolsbox" },
-            "datePublished": "2026-05-03",
-            "dateModified": "2026-05-18",
-            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/",
-            "publisher": { "@type": "Organization", "name": "DevsToolsbox", "url": "https://www.devstoolsbox.dev/" }
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                { "@type": "Question", "name": "Puis-je comparer des fichiers de code avec coloration syntaxique ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, l'outil détecte automatiquement le langage (JSON, SQL, Python, etc.) ou vous pouvez le choisir manuellement. La coloration s'applique au résultat du diff." } },
-                { "@type": "Question", "name": "Qu'est-ce qu'un diff ligne par ligne et quand utiliser un diff mot à mot ?", "acceptedAnswer": { "@type": "Answer", "text": "Le diff ligne par ligne montre les lignes entièrement modifiées. Le diff mot à mot surligne exactement les mots ou caractères qui changent à l'intérieur d'une ligne – idéal pour les modifications fines dans des configurations ou du texte long." } }
-            ]
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
-                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
-                { "@type": "ListItem", "position": 3, "name": "Comment comparer deux textes", "item": "https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/" }
-            ]
-        }
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Comment comparer deux textes : Outils de diff, algorithme LCS et guide complet de git diff (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/about/"},
+  "datePublished":"2026-06-10",
+  "dateModified":"2026-06-10",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"Guide complet de la comparaison de textes : algorithme LCS, vue fractionnée vs unifiée, diff mot à mot, guide git diff, lecture d'un fichier patch, et quel outil utiliser selon la situation."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Quelle est la différence entre la vue fractionnée et la vue unifiée dans un outil de diff ?","acceptedAnswer":{"@type":"Answer","text":"La vue fractionnée montre les deux textes côte à côte avec les différences alignées sur la même ligne. La vue unifiée (comme git diff) montre un flux unique avec les lignes ajoutées précédées de + et les lignes supprimées par -. La vue fractionnée est plus facile à lire pour les petits changements ; la vue unifiée est plus compacte et est le format utilisé pour les fichiers de patch."}},
+    {"@type":"Question","name":"Pourquoi deux outils de diff affichent-ils parfois des résultats différents pour le même changement ?","acceptedAnswer":{"@type":"Answer","text":"Lorsque plusieurs sous-séquences communes les plus longues (LCS) valides existent pour une paire de textes donnée, différents algorithmes de diff en choisissent différentes. L'algorithme de Myers (utilisé par git et la plupart des outils modernes) choisit la LCS qui minimise la longueur du script d'édition, mais il peut y avoir des égalités qui sont départagées différemment."}},
+    {"@type":"Question","name":"Qu'est-ce que le diff mot à mot et quand dois-je l'utiliser ?","acceptedAnswer":{"@type":"Answer","text":"Le diff mot à mot met en évidence les mots exacts qui diffèrent à l'intérieur d'une ligne modifiée, au lieu de marquer toute la ligne comme modifiée. Utilisez-le pour les fichiers de configuration, la documentation et tout contenu où les lignes sont longues mais seuls quelques mots ont changé. Il équivaut à git diff --word-diff."}},
+    {"@type":"Question","name":"Comment fonctionne la fonctionnalité de partage d'URL ?","acceptedAnswer":{"@type":"Answer","text":"Le bouton Partager encode les deux textes et toutes les options dans le fragment d'URL (#). Rien n'est stocké sur un serveur. Envoyez l'URL et le destinataire voit exactement le même diff, décodé localement dans son navigateur en JavaScript."}},
+    {"@type":"Question","name":"Qu'est-ce que l'algorithme LCS en comparaison de textes ?","acceptedAnswer":{"@type":"Answer","text":"LCS signifie Longest Common Subsequence (plus longue sous-séquence commune). Il trouve la plus longue séquence de lignes qui apparaît dans les deux textes dans le même ordre. Tout ce qui est en dehors de la LCS est soit un ajout, soit une suppression. L'outil de diff produit la LCS comme contexte inchangé et marque tout le reste comme ajouté ou supprimé."}},
+    {"@type":"Question","name":"Comment appliquer un fichier patch à partir d'un diff unifié ?","acceptedAnswer":{"@type":"Answer","text":"Utilisez la commande patch : patch original.txt < changements.patch. Pour un répertoire : patch -p1 < changements.patch (depuis la racine du projet). Le -p1 supprime le préfixe de chemin que git diff ajoute. Pour inverser un patch : patch -R original.txt < changements.patch."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/fr/blog/"},
+    {"@type":"ListItem","position":3,"name":"Comment comparer deux textes","item":"https://www.devstoolsbox.dev/fr/blog/comment-comparer-deux-textes/"}
+  ]
+}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-JRBW78KE29');
     </script>
-    <style>
-        :root {
-            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
-            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08); --text: #0f172a;
-            --text2: #374151; --text3: #64748b; --border: #e2e8f0;
-            --shadow: 0 4px 16px rgba(0,0,0,0.06); --radius: 16px; --code-bg: #1e293b;
-            --code-color: #e2e8f0;
-        }
-        body.dark {
-            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
-            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
-            --border: #2d3548; --code-bg: #0f172a;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg); color: var(--text); line-height:1.7; padding:20px;
-            transition: background 0.3s, color 0.3s;
-        }
-        .container { max-width:900px; margin:0 auto; }
+<style>
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+  --diff-add:#e6ffec;--diff-del:#ffebe9;
+  --diff-add-word:#acf2bd;--diff-del-word:#fdb8c0;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+  --diff-add:#1a4a2e;--diff-del:#5a2a2a;
+  --diff-add-word:#1f5c36;--diff-del-word:#7a3030;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
-        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
-        .logo::before { content:'🛠️'; }
-        .header-right { display:flex; gap:8px; align-items:center; }
-        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
-        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
-        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        .article-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
-        }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
-        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
-        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
-        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
-        p { margin-bottom:16px; color:var(--text2); }
-        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
-        li { margin-bottom:8px; }
-        strong { color:var(--text); }
-        code {
-            background:var(--code-bg); color:var(--code-color);
-            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
-        }
-        pre {
-            background:var(--code-bg); color:var(--code-color);
-            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
-            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
-        }
-        .btn-tool {
-            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
-            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
-        }
-        .btn-tool:hover { background:var(--primary-hover); }
-        .footer {
-            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
-            color:var(--text3); font-size:0.8rem;
-        }
-        .footer a { color:var(--primary); text-decoration:none; }
-        @media (max-width:600px) {
-            h1 { font-size:1.6rem; }
-            .article-card { padding:20px; }
-        }
-        table {
-            width:100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem;
-        }
-        th, td {
-            border: 1px solid var(--border); padding: 10px 14px; text-align: left;
-        }
-        th {
-            background: var(--surface2); font-weight: 600; color: var(--text);
-        }
-        .ai-summary {
-            background: var(--primary-light); padding: 14px 18px; border-radius: 12px;
-            margin-bottom: 24px; font-size: 0.95rem; color: var(--text2);
-            border-left: 4px solid var(--primary);
-        }
-        .decision-table td:first-child { font-weight: 600; color: var(--text); }
-    </style>
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:480px}
+.dec-table{background:var(--pass-bg);border:2px solid var(--pass);border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+
+/* LCS matrix visualization */
+.lcs-box{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin:16px 0;overflow-x:auto}
+.lcs-title{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:12px}
+.lcs-grid{display:grid;gap:2px;font-family:var(--mono);font-size:.82rem}
+.lcs-row{display:flex;gap:2px}
+.lcs-cell{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-weight:600;flex-shrink:0}
+.lcs-header{background:var(--surface3,#e8edf3);color:var(--text3);font-weight:800}
+body.dark .lcs-header{background:var(--surface3,#252e3f)}
+.lcs-zero{background:var(--surface);color:var(--text3)}
+.lcs-val{background:var(--primary-light);color:var(--primary)}
+.lcs-match{background:var(--primary);color:#fff}
+
+/* Diff annotation boxes */
+.diff-annotated{background:var(--code-bg);color:var(--code-color);border-radius:12px;padding:18px;margin:16px 0;font-family:var(--mono);font-size:.82rem;line-height:2}
+.da-line{display:flex;gap:10px;align-items:baseline}
+.da-prefix{flex-shrink:0;width:16px;text-align:center}
+.da-add{background:rgba(16,185,129,.15);border-radius:3px;padding:1px 4px;color:#86efac}
+.da-del{background:rgba(239,68,68,.15);border-radius:3px;padding:1px 4px;color:#fca5a5}
+.da-ctx{opacity:.6}
+.da-comment{color:#64748b;font-style:italic;padding-left:26px;font-size:.78rem;line-height:1.5}
+.da-header{color:#c4b5fd}
+
+/* Inline diff example */
+.diff-inline{font-family:var(--mono);font-size:.88rem;background:var(--surface2);border-radius:10px;padding:14px 16px;margin:14px 0;line-height:2}
+.di-add{background:var(--diff-add-word);border-radius:3px;padding:0 3px}
+.di-del{background:var(--diff-del-word);border-radius:3px;padding:0 3px;text-decoration:line-through}
+body.dark .di-add{background:var(--diff-add-word)}
+body.dark .di-del{background:var(--diff-del-word)}
+
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <a href="/" class="logo">DevToolbox</a>
-        <div class="header-right">
-            <div class="theme-toggle">
-                <button class="theme-btn active" data-theme="light"> Clair</button>
-                <button class="theme-btn" data-theme="dark"> Sombre</button>
-            </div>
-            <div class="lang-switch">
-                <a href="/fr/blog/comment-comparer-deux-textes/" class="lang-btn active">FR</a>
-                <a href="/tools/blog/how-to-compare-two-texts/" class="lang-btn">EN</a>
-            </div>
-        </div>
-    </header>
+<div class="page">
 
-    <main>
-        <article itemscope itemtype="https://schema.org/Article" class="article-card">
-            <meta itemprop="datePublished" content="2026-05-03">
-            <meta itemprop="dateModified" content="2026-05-18">
-            <meta itemprop="author" content="L'équipe DevsToolsbox">
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/how-to-compare-two-texts/" class="pill-btn">EN</a>
+      <a href="/fr/blog/comment-comparer-deux-textes/" class="pill-btn active">FR</a>
+    </div>
+  </div>
+</header>
 
-            <h1>Comparer Deux Textes en Ligne</h1>
-            <div class="meta">Publié le 3 mai 2026 · Mis à jour le 18 mai 2026 — Lecture 9 min</div>
+<nav class="breadcrumb" aria-label="Fil d'Ariane">
+  <ol>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/fr/blog/">Blog</a></li>
+    <li aria-current="page">Comment comparer deux textes</li>
+  </ol>
+</nav>
 
-            <div class="ai-summary">
-                 Notre comparateur de texte (Text Diff) affiche instantanément les différences entre deux contenus : lignes ajoutées en vert, supprimées en rouge. Il fonctionne entièrement dans votre navigateur, sans inscription, et permet même de partager un lien unique de votre diff. <strong>Aucune donnée n'est transmise à un serveur.</strong>
-            </div>
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-06-10">
+  <meta itemprop="dateModified" content="2026-06-10">
 
-            <div itemprop="articleBody">
-                <p>La commande indique que le build est propre. Le serveur, lui, dit le contraire. Quelque part entre la configuration que vous croyez avoir déployée et celle qui s'exécute réellement, une ligne a changé — et la repérer à l'œil nu prend plus de temps qu'il ne le devrait.</p>
+  <h1 itemprop="headline">Comment comparer deux textes : Outils de diff, algorithme LCS et guide complet de git diff (2026)</h1>
 
-                <!-- Image placeholder -->
-                <figure style="margin: 28px 0; text-align: center;">
-                    <img
-                        src="/comparateur-texte.webp"
-                        alt="Interface du comparateur de texte DevToolbox avec deux textes JSON côte à côte et les différences surlignées"
-                        loading="lazy"
-                        decoding="async"
-                        style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
-                    >
-                    <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
-                        Le comparateur en action : lignes modifiées, vue fractionnée et coloration syntaxique.
-                    </figcaption>
-                </figure>
+  <div class="article-meta">
+    <time datetime="2026-06-10">10 juin 2026</time>
+    <span>·</span>
+    <span>18 min de lecture</span>
+    <span>·</span>
+    <span>Par <a href="/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
 
-                <h2>Comment comparer deux textes pas à pas</h2>
-                <ol>
-                    <li><strong>Accédez à l'outil :</strong> rendez-vous sur la page <a href="https://www.devstoolsbox.dev/fr/outils/comparateur-texte/">Comparateur de texte</a>.</li>
-                    <li><strong>Collez vos deux versions :</strong> dans la zone de gauche, placez le texte original ; à droite, la version modifiée. Vous pouvez aussi glisser-déposer un fichier ou utiliser les boutons « Coller ».</li>
-                    <li><strong>Réglez les options (facultatif) :</strong> choisissez d'ignorer la casse, les espaces en fin de ligne ou les lignes vides. Sélectionnez un langage pour la coloration syntaxique (JSON, SQL, Python…), ou laissez l'auto‑détection.</li>
-                    <li><strong>Lancez la comparaison :</strong> cliquez sur <strong>Comparer</strong>. Le résultat s'affiche immédiatement dans le panneau inférieur.</li>
-                    <li><strong>Lisez le résultat :</strong> les lignes ajoutées apparaissent en vert, les supprimées en rouge. Dans la vue fractionnée, les deux textes sont côte à côte ; dans la vue unifiée (comme <code>git diff</code>), un seul flux avec des marqueurs <code>+</code> et <code>-</code>.</li>
-                    <li><strong>Partagez ou copiez :</strong> utilisez le bouton <strong>Partager URL</strong> pour générer un lien unique que vous pouvez envoyer à un collègue. Il retrouvera exactement le même diff.</li>
-                </ol>
+  <nav class="toc" aria-label="Table des matières">
+    <div class="toc-title">Dans cet article</div>
+    <ol>
+      <li><a href="#why-different-results">Pourquoi deux outils de diff affichent des résultats différents pour le même changement</a></li>
+      <li><a href="#decision-table">Table de décision rapide — quel outil pour votre situation</a></li>
+      <li><a href="#lcs">L'algorithme LCS — comment fonctionne réellement le diff</a></li>
+      <li><a href="#split-vs-unified">Vue fractionnée vs vue unifiée</a></li>
+      <li><a href="#word-diff">Diff mot à mot — précision à l'intérieur d'une ligne</a></li>
+      <li><a href="#cli-diff">La commande diff — référence complète</a></li>
+      <li><a href="#git-diff">git diff — les commandes que les développeurs utilisent quotidiennement</a></li>
+      <li><a href="#by-content-type">Diff par type de contenu : JSON, SQL, YAML, prose</a></li>
+      <li><a href="#reading-patch">Lire un diff unifié (fichier patch)</a></li>
+      <li><a href="#faq">Foire aux questions</a></li>
+    </ol>
+  </nav>
 
-                <p><strong>Temps d'exécution :</strong> inférieur à 100 ms pour des textes de quelques centaines de lignes.<br>
-                <strong>Taille maximale recommandée :</strong> 5 Mo (au‑delà, utilisez un outil en ligne de commande).<br>
-                <strong>Formats de sortie :</strong> affichage HTML interactif (avec surlignage), possibilité de copier le texte brut ou de partager l'URL.</p>
+  <div itemprop="articleBody">
 
-                <h2>Astuces de pro</h2>
-                <ul>
-                    <li><strong>Avant de comparer, formatez :</strong> si vous comparez du JSON, utilisez d'abord notre <a href="/fr/outils/formateur-json/">formateur JSON</a> pour indenter les deux versions de manière cohérente. Le diff sera bien plus lisible.</li>
-                    <li><strong>Utilisez la vue unifiée pour les patchs :</strong> si vous devez appliquer les modifications à un fichier de code, la vue unifiée (onglet « unifié ») vous donne un format proche de celui de <code>git apply</code>.</li>
-                    <li><strong>Partagez sans risque :</strong> le lien de partage encode tout dans l'URL. Aucune donnée n'est stockée sur un serveur. Vous pouvez envoyer le lien même sur un réseau non sécurisé.</li>
-                </ul>
+  <!-- ══════════════════════════════════
+       SECTION 1 — INTRO
+  ══════════════════════════════════ -->
+  <h2 id="why-different-results">Pourquoi deux outils de diff affichent des résultats différents pour le même changement</h2>
 
-                <h2>Diff ligne par ligne ou mot à mot : lequel choisir ?</h2>
-                <p>La plupart des outils, y compris la commande <code>diff</code> et Git, comparent les textes ligne par ligne. Mais quand une seule ligne contient une petite modification — par exemple une adresse IP corrigée ou une faute de frappe dans un long paragraphe — un <strong>diff mot à mot</strong> devient bien plus utile. Il surligne uniquement les caractères ou mots qui ont changé à l'intérieur de la ligne, plutôt que de marquer toute la ligne comme modifiée.</p>
-                <p>Notre comparateur propose les deux modes. Passez en <strong>diff mot à mot</strong> quand vous relisez des fichiers de configuration, de la documentation, ou tout contenu où une même ligne peut contenir plusieurs modifications indépendantes. C'est l'équivalent du <code>git diff --word-diff</code>, directement dans votre navigateur.</p>
+  <p>J'ai remarqué cela pour la première fois lors d'une revue de code. Un collègue m'a envoyé un diff de notre fichier de configuration. J'ai ouvert les deux mêmes fichiers dans mon outil de diff. Nous regardions le même changement, mais les diffs étaient différents — le mien montrait trois lignes modifiées, le sien cinq. Nous avions tous les deux raison.</p>
 
-                <h2>Que se passe-t-il en coulisses ? Un aperçu des algorithmes de diff</h2>
-                <p>Quand vous comparez deux textes, l'outil ne se contente pas de les aligner mot à mot. Il résout un problème classique d'informatique : trouver la <strong>plus longue sous-séquence commune (LCS)</strong>. La LCS est la plus longue séquence de lignes (ou de mots) qui apparaît dans les deux textes dans le même ordre, en autorisant des sauts. Une fois cette séquence commune identifiée, tout ce qui se trouve en dehors est marqué comme ajout ou suppression.</p>
-                <p>Différents outils peuvent produire des diffs légèrement différents car la LCS n'est pas toujours unique. Par exemple, si vous supprimez une ligne et en ajoutez une similaire ailleurs, l'algorithme peut interpréter le changement comme une modification plutôt qu'une suppression suivie d'une insertion — selon la façon dont il a été paramétré. C'est pourquoi <code>git diff</code>, VS Code et un outil en ligne peuvent afficher la même modification de manière différente. Notre comparateur utilise une variante qui a tendance à mieux aligner les blocs de code, mais pour les patchs de versionnage, la vue unifiée respecte le comportement attendu.</p>
+  <p>Cela se produit parce que la comparaison de textes n'est pas une opération déterministe unique. Lorsque vous demandez « qu'est-ce qui a changé entre ces deux fichiers ? », la réponse dépend de l'algorithme utilisé et, lorsque plusieurs réponses valides existent, de la manière dont les égalités sont départagées. Deux fichiers peuvent avoir plusieurs <em>sous-séquences communes les plus longues</em> valides différentes — et en choisir différentes conduit à des diffs différents.</p>
 
-                <h2>Au‑delà du texte : quand un simple diff ne suffit pas</h2>
-                <p>Les diffs textuels fonctionnent parfaitement pour le code source, les fichiers de configuration et la prose. Mais ils atteignent leurs limites avec les données structurées ou binaires. Voici comment réagir quand une comparaison ligne à ligne ne convient plus :</p>
-                <ul>
-                    <li><strong>Diff sémantique JSON :</strong> les objets JSON sont des dictionnaires non ordonnés. Deux fichiers JSON identiques avec un ordre de clés différent apparaîtront comme complètement modifiés dans un diff textuel. Utilisez un <strong>comparateur JSON sémantique</strong> comme <code>jq</code> associé à <code>diff</code> sur une version triée, ou notre propre <a href="/fr/outils/formateur-json/">formateur JSON</a> après avoir ordonné les clés.</li>
-                    <li><strong>Diff d'images :</strong> des outils comme <code>imagemagick</code> (commande <code>compare</code>) ou des comparateurs d'images en ligne superposent les pixels différents. Exemple en ligne de commande : <code>magick compare image1.png image2.png diff.png</code>.</li>
-                    <li><strong>Diff de PDF :</strong> les PDF ne sont pas des fichiers texte. Utilisez <code>diffpdf</code> (interface graphique) ou <code>pdftotext</code> suivi de <code>diff</code> pour extraire le texte, ou encore la fonction de comparaison d'Adobe Acrobat.</li>
-                    <li><strong>Diff de bases de données :</strong> pour comparer des schémas ou des données, tournez-vous vers <code>mysqldiff</code> (MySQL), <code>pgdiff</code> (PostgreSQL) ou des outils graphiques comme DBeaver.</li>
-                </ul>
-                <p>Pour le quotidien du développement, un diff textuel couvre 90 % des besoins. Mais savoir quand passer à un comparateur plus approprié fait gagner du temps et évite bien des confusions.</p>
+  <p>Comprendre pourquoi cela se produit fait de vous un bien meilleur utilisateur des outils de diff. Cela explique également certains comportements qui ressemblent à des bugs mais qui sont en réalité corrects : un changement attribué à une ligne différente de celle attendue, des lignes de contexte qui apparaissent ou disparaissent, ou deux diffs équivalents qui semblent complètement différents en tant que texte.</p>
 
-                <h2>La commande diff en ligne de commande : la boîte à outils du power user</h2>
-                <p>Quand vous êtes déjà dans un terminal, ou que les fichiers sont trop volumineux pour le navigateur, la commande <code>diff</code> est votre meilleure alliée. Voici les options que j'utilise tous les jours :</p>
-                <pre><code># Comparaison simple
+  <div class="callout callout-info">
+    <strong>Essayez-le maintenant :</strong> Le <a href="/fr/outils/comparateur-texte/">Comparateur de texte DevToolbox</a> montre les différences ligne par ligne et mot par mot avec une URL partageable. Collez vos textes et obtenez une comparaison instantanée — fonctionne entièrement dans votre navigateur.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2 — DECISION TABLE
+  ══════════════════════════════════ -->
+  <h2 id="decision-table">Table de décision rapide — quel outil pour votre situation</h2>
+
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>Votre situation</th><th>Outil recommandé</th><th>Pourquoi</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Comparaison rapide dans le navigateur, pas de données sensibles</td><td>Comparateur de texte DevToolbox</td><td>Instantané, URL partageable, diff mot à mot</td></tr>
+        <tr><td>Fichiers dans un dépôt Git</td><td><code>git diff</code></td><td>Intégré à l'historique, aux branches, à l'index</td></tr>
+        <tr><td>Deux fichiers locaux en ligne de commande</td><td><code>diff -u fichier1 fichier2</code></td><td>Rapide, scriptable, produit des patches standard</td></tr>
+        <tr><td>JSON avec des clés réordonnées (mêmes données, ordre différent)</td><td>Formatez d'abord avec le <a href="/fr/outils/formateur-json/">Formateur JSON</a>, puis diff</td><td>L'égalité sémantique ≠ l'égalité textuelle</td></tr>
+        <tr><td>Fichiers de plus de 5 Mo</td><td>Commande <code>diff</code> ou WinMerge</td><td>Les navigateurs peinent avec des entrées très volumineuses</td></tr>
+        <tr><td>Comparaison d'arborescences entières de répertoires</td><td><code>diff -r rep1/ rep2/</code></td><td>Support récursif natif</td></tr>
+        <tr><td>Partager un diff avec un collègue non technique</td><td>Comparateur de texte DevToolbox avec URL de partage</td><td>Pas d'installation, lisible dans n'importe quel navigateur</td></tr>
+        <tr><td>Appliquer un changement d'un fichier à un autre</td><td><code>patch original < changements.patch</code></td><td>Le flux de travail standard des patches Unix</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 3 — LCS ALGORITHM
+  ══════════════════════════════════ -->
+  <h2 id="lcs">L'algorithme LCS — comment fonctionne réellement le diff</h2>
+
+  <p>Le problème que résout le diff est de trouver la <strong>plus longue sous-séquence commune</strong> (LCS, pour Longest Common Subsequence) entre deux séquences de lignes. La LCS est la plus longue séquence de lignes qui apparaît dans les deux textes dans le même ordre relatif — pas nécessairement contiguës, juste dans l'ordre. Chaque ligne de la LCS est « inchangée ». Tout ce qui n'est pas dans la LCS est soit un ajout (uniquement dans la nouvelle version), soit une suppression (uniquement dans l'ancienne version).</p>
+
+  <p>Voici un exemple minimal. Supposons que le fichier original comporte quatre lignes :</p>
+  <pre><code>A
+B
+C
+D</code></pre>
+
+  <p>Et que le nouveau fichier comporte quatre lignes :</p>
+  <pre><code>A
+X
+C
+D</code></pre>
+
+  <p>La LCS est <strong>A, C, D</strong>. Ces trois lignes sont inchangées. <strong>B</strong> est supprimée (elle était dans l'original, pas dans la nouvelle version). <strong>X</strong> est ajoutée (elle est dans la nouvelle version, pas dans l'original).</p>
+
+  <p>Pour trouver la LCS efficacement, l'algorithme construit une matrice. Chaque cellule <code>(i,j)</code> contient la longueur de la LCS entre les <code>i</code> premières lignes de l'original et les <code>j</code> premières lignes de la nouvelle version.</p>
+
+  <div class="lcs-box">
+    <div class="lcs-title">Matrice LCS pour notre exemple</div>
+    <div class="lcs-grid">
+      <!-- Header row -->
+      <div class="lcs-row">
+        <div class="lcs-cell lcs-header"></div>
+        <div class="lcs-cell lcs-header">ε</div>
+        <div class="lcs-cell lcs-header">A</div>
+        <div class="lcs-cell lcs-header">X</div>
+        <div class="lcs-cell lcs-header">C</div>
+        <div class="lcs-cell lcs-header">D</div>
+      </div>
+      <div class="lcs-row">
+        <div class="lcs-cell lcs-header">ε</div>
+        <div class="lcs-cell lcs-zero">0</div>
+        <div class="lcs-cell lcs-zero">0</div>
+        <div class="lcs-cell lcs-zero">0</div>
+        <div class="lcs-cell lcs-zero">0</div>
+        <div class="lcs-cell lcs-zero">0</div>
+      </div>
+      <div class="lcs-row">
+        <div class="lcs-cell lcs-header">A</div>
+        <div class="lcs-cell lcs-zero">0</div>
+        <div class="lcs-cell lcs-match">1</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-val">1</div>
+      </div>
+      <div class="lcs-row">
+        <div class="lcs-cell lcs-header">B</div>
+        <div class="lcs-cell lcs-zero">0</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-val">1</div>
+      </div>
+      <div class="lcs-row">
+        <div class="lcs-cell lcs-header">C</div>
+        <div class="lcs-cell lcs-zero">0</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-match">2</div>
+        <div class="lcs-cell lcs-val">2</div>
+      </div>
+      <div class="lcs-row">
+        <div class="lcs-cell lcs-header">D</div>
+        <div class="lcs-cell lcs-zero">0</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-val">1</div>
+        <div class="lcs-cell lcs-val">2</div>
+        <div class="lcs-cell lcs-match">3</div>
+      </div>
+    </div>
+    <p style="font-size:.78rem;color:var(--text3);margin-top:10px">
+      Cellules violettes = correspondances (même ligne dans les deux textes). La valeur en bas à droite (3) est la longueur de la LCS — trois lignes sont inchangées. En remontant depuis cette cellule, on obtient la LCS : A, C, D.
+    </p>
+  </div>
+
+  <h3>Pourquoi cela explique le problème des « diffs différents »</h3>
+
+  <p>Considérez un exemple légèrement différent où le mot « erreur » apparaît trois fois dans les deux fichiers, et où une occurrence passe de la ligne 12 à la ligne 15. La LCS pourrait faire correspondre la <em>première</em> et la <em>troisième</em> occurrence (montrant celle du milieu comme supprimée et réajoutée), ou la <em>deuxième</em> et la <em>troisième</em> (montrant la première comme supprimée et réajoutée). Les deux sont des solutions LCS valides de même longueur. Des algorithmes différents, ou des règles de départage différentes dans le même algorithme, choisiront différemment — et le diff résultant aura l'air complètement différent alors que les deux sont corrects.</p>
+
+  <p>L'<strong>algorithme de Myers</strong>, publié en 1986 et utilisé par Git, GNU diff et la plupart des outils modernes, minimise le nombre d'opérations d'édition (insertions + suppressions). Il est rapide et produit des diffs d'aspect naturel pour le code. Mais même Myers peut avoir des égalités dans certains cas limites.</p>
+
+  <!-- ══════════════════════════════════
+       SECTION 4 — SPLIT VS UNIFIED
+  ══════════════════════════════════ -->
+  <h2 id="split-vs-unified">Vue fractionnée vs vue unifiée — quand utiliser chacune</h2>
+
+  <p>Tout outil de diff sérieux propose deux modes d'affichage. Comprendre quand chacun est approprié fait gagner du temps lors de la revue de code et du débogage.</p>
+
+  <h3>Vue fractionnée (côte à côte)</h3>
+  <p>Les deux versions apparaissent côte à côte. Les lignes modifiées sont placées sur la même ligne avec une surbrillance visuelle. Les lignes qui existent dans une version mais pas dans l'autre affichent un emplacement vide du côté opposé. Cela permet de voir facilement <em>exactement à quoi ressemblait une ligne avant et après</em> un changement, sans la charge mentale de suivre les préfixes + et -.</p>
+  <p>La vue fractionnée est idéale pour : les petits changements dans de longs fichiers, les changements où la comparaison avant/après importe (renommage, réécriture, correction), et les relecteurs non techniques qui n'ont pas internalisé la syntaxe du diff unifié.</p>
+
+  <h3>Vue unifiée (style git)</h3>
+  <p>Un flux unique de lignes. Les lignes de contexte inchangées n'ont pas de préfixe. Les lignes ajoutées sont préfixées par <code>+</code>. Les lignes supprimées sont préfixées par <code>-</code>. Une ligne d'en-tête (<code>@@ -1,7 +1,8 @@</code>) marque chaque « hunk » — un bloc contigu de changements avec quelques lignes de contexte autour.</p>
+  <p>La vue unifiée est idéale pour : les fichiers de patch (le format produit par <code>diff -u</code> et <code>git diff</code>), la revue de code par email, la copie de modifications à appliquer ailleurs, et l'affichage compact de nombreux petits changements dans de nombreux fichiers.</p>
+
+  <!-- ══════════════════════════════════
+       SECTION 5 — WORD DIFF
+  ══════════════════════════════════ -->
+  <h2 id="word-diff">Diff mot à mot — précision à l'intérieur d'une ligne</h2>
+
+  <p>Le diff au niveau des lignes marque toute une ligne comme modifiée même si un seul mot a changé. Sur de longues lignes — une requête SQL, une phrase dans la documentation, une valeur de configuration — cela n'est pas utile. Vous savez que <em>quelque chose</em> a changé sur cette ligne, mais vous devez quand même lire toute la ligne attentivement pour trouver le changement.</p>
+
+  <p>Le diff mot à mot va plus loin : il exécute un second algorithme de diff à l'intérieur de la ligne modifiée, trouvant exactement quels mots ont été ajoutés et lesquels ont été supprimés.</p>
+
+  <p>Avant (diff mot à mot appliqué à une ligne SQL modifiée) :</p>
+
+  <div class="diff-inline">
+    WHERE <span class="di-del">created_at</span><span class="di-add">updated_at</span> &gt; '2024-01-01' AND status = <span class="di-del">'en_attente'</span><span class="di-add">'actif'</span>
+  </div>
+
+  <p>C'est l'équivalent de <code>git diff --word-diff</code>, qui affiche des marqueurs <code>{-ancien-}</code> et <code>{+nouveau+}</code> autour des mots exacts qui ont changé. C'est particulièrement utile pour :</p>
+  <ul>
+    <li><strong>Fichiers de configuration</strong> — une valeur est passée de <code>true</code> à <code>false</code> dans une ligne de 60 caractères</li>
+    <li><strong>Documentation</strong> — un seul mot corrigé dans un long paragraphe</li>
+    <li><strong>Migrations SQL</strong> — un nom de colonne changé dans une instruction ALTER TABLE</li>
+    <li><strong>Valeurs JSON/YAML</strong> — une valeur de champ modifiée mais la clé et la structure sont restées les mêmes</li>
+  </ul>
+
+  <!-- ══════════════════════════════════
+       SECTION 6 — CLI DIFF
+  ══════════════════════════════════ -->
+  <h2 id="cli-diff">La commande diff — référence complète</h2>
+
+  <p>La commande Unix <code>diff</code> est disponible sur tous les systèmes Linux et macOS, et sur Windows via Git Bash ou WSL. C'est le moyen le plus fiable de comparer de gros fichiers, d'intégrer des diffs dans des scripts et de produire des fichiers de patch pour la distribution.</p>
+
+  <pre><code># Diff de base — format de sortie par défaut (difficile à lire)
 diff fichier1.txt fichier2.txt
 
-# Ignorer la casse
-diff -i fichier1.txt fichier2.txt
-
-# Ignorer les changements d'espaces
-diff -w fichier1.txt fichier2.txt
-
-# Sortie unifiée (comme git diff)
+# Format unifié — lisible, compatible git, standard pour les patches
 diff -u fichier1.txt fichier2.txt
 
-# Comparer récursivement deux dossiers
-diff -r dossier1/ dossier2/</code></pre>
-                <p>L'option <code>-u</code> produit un diff unifié, exactement celui qu'affiche Git. Il est plus lisible et peut servir de patch. Si vous comparez des dossiers entiers, <code>diff -r</code> vous indique rapidement quels fichiers ont changé.</p>
+# Unifié avec nombre de lignes de contexte personnalisé (3 par défaut)
+diff -U5 fichier1.txt fichier2.txt     # 5 lignes de contexte autour de chaque changement
 
-                <h2>Git diff avancé : au‑delà des basiques</h2>
-                <p>Les utilisateurs de Git emploient souvent <code>git diff</code> sans en exploiter toutes les possibilités. Voici quelques commandes qui vont plus loin que la vue ligne à ligne par défaut :</p>
-                <pre><code># Afficher les changements mot à mot
+# Ignorer les différences de casse
+diff -i fichier1.txt fichier2.txt
+
+# Ignorer les différences d'espaces
+diff -w fichier1.txt fichier2.txt      # Tous les espaces
+diff -b fichier1.txt fichier2.txt      # Uniquement les espaces de début/fin
+
+# Ignorer les lignes vides
+diff -B fichier1.txt fichier2.txt
+
+# Récursif — comparer des arborescences entières de répertoires
+diff -r rep1/ rep2/
+
+# Récursif + unifié + liste brève des fichiers modifiés d'abord
+diff -rq rep1/ rep2/             # Liste simplement les fichiers qui diffèrent
+
+# Produire un fichier de patch
+diff -u original.txt modifie.txt > changements.patch
+
+# Appliquer un patch
+patch original.txt < changements.patch
+
+# Appliquer en sens inverse (annuler le patch)
+patch -R original.txt < changements.patch
+
+# Appliquer un patch au style git (supprimer un composant de chemin)
+patch -p1 < changements.patch
+
+# Vérifier si le patch s'appliquerait proprement (simulation)
+patch --dry-run -p1 < changements.patch</code></pre>
+
+  <h3>Combinaison avec d'autres outils</h3>
+
+  <pre><code># Comparer deux fichiers JSON après formatage pour plus de lisibilité
+diff <(python3 -m json.tool fichier1.json) <(python3 -m json.tool fichier2.json)
+
+# Comparer deux fichiers YAML après normalisation
+diff <(python3 -c "import yaml,sys; print(yaml.dump(yaml.safe_load(open('f1.yaml'))))") \
+     <(python3 -c "import yaml,sys; print(yaml.dump(yaml.safe_load(open('f2.yaml'))))")
+
+# Afficher uniquement les fichiers qui diffèrent dans une arborescence
+diff -rq rep1/ rep2/ | grep "diffèrent"
+
+# Compter les lignes modifiées
+diff -u ancien.sql nouveau.sql | grep -c "^[+-]"
+
+# Sortie en couleur dans le terminal
+diff --color=always -u fichier1.txt fichier2.txt | less -R</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 7 — GIT DIFF
+  ══════════════════════════════════ -->
+  <h2 id="git-diff">git diff — les commandes que les développeurs utilisent quotidiennement</h2>
+
+  <p><code>git diff</code> est l'outil de diff le plus utilisé au monde. Il s'intègre profondément avec la zone d'index, les branches et l'historique de Git. Voici les commandes qui couvrent 95 % de l'utilisation quotidienne.</p>
+
+  <h3>Utilisation de base</h3>
+
+  <pre><code># Changements dans le répertoire de travail non encore indexés
+git diff
+
+# Changements indexés pour le prochain commit (ce qui sera commité)
+git diff --staged
+# ou de manière équivalente :
+git diff --cached
+
+# Tous les changements depuis le dernier commit (indexés + non indexés)
+git diff HEAD
+
+# Changements dans un fichier spécifique
+git diff -- chemin/vers/fichier.js
+
+# Changements dans un répertoire spécifique
+git diff -- src/</code></pre>
+
+  <h3>Comparaison de branches et de commits</h3>
+
+  <pre><code># Comparer deux branches (ce qui a changé de main vers branche-fonctionnalite)
+git diff main..branche-fonctionnalite
+
+# Équivalent : quels commits sont dans branche-fonctionnalite mais pas dans main
+git diff main...branche-fonctionnalite   # trois points = point de divergence
+
+# Comparer deux commits spécifiques
+git diff abc1234..def5678
+
+# Comparer un commit au répertoire de travail actuel
+git diff abc1234
+
+# Ce qui a changé dans un fichier spécifique entre deux branches
+git diff main..branche-fonctionnalite -- src/api/users.js
+
+# Comparer une branche à un tag
+git diff v2.0.0..main</code></pre>
+
+  <h3>Options de format de sortie</h3>
+
+  <pre><code># Diff mot à mot — surligne les mots exacts modifiés dans une ligne
 git diff --word-diff
 
-# Ignorer uniquement les espaces
+# Diff mot à mot en couleur (plus visuel)
+git diff --word-diff=color
+
+# Résumé : juste la liste des fichiers modifiés avec des statistiques
+git diff --stat
+git diff --stat main..branche-fonctionnalite
+
+# Noms seulement — juste les noms de fichiers, pas le contenu
+git diff --name-only main..branche-fonctionnalite
+
+# Ignorer les changements d'espaces
 git diff --ignore-all-space
+git diff -w
 
-# Comparer avec le commit précédent
-git diff HEAD~1
+# Afficher chaque changement comme un commit séparé dans la sortie
+git diff -p
 
-# Comparer deux branches
-git diff main..feature-branch
+# Condensé : afficher uniquement les noms des fichiers qui diffèrent
+git diff --diff-filter=M --name-only   # M = fichiers modifiés uniquement
+# Filtres : A=ajouté, D=supprimé, M=modifié, R=renommé, C=copié</code></pre>
 
-# Voir ce qui a changé pour un fichier spécifique entre deux branches
-git diff main..feature-branch -- chemin/vers/fichier</code></pre>
-                <p>Le diff mot à mot est particulièrement précieux pour les revues de code : il identifie exactement la variable ou le paramètre modifié, sans encombrer le diff avec les parties inchangées de la ligne. Et comparer deux branches vous permet d'examiner toute une branche de fonctionnalité d'un seul coup — vous pouvez ensuite utiliser notre outil en ligne pour isoler un fichier précis.</p>
+  <h3>Flux de travail utiles</h3>
 
-                <h2>Notre Text Diff face aux alternatives</h2>
-                <table>
-                    <thead>
-                        <tr><th>Fonctionnalité</th><th>DevToolbox Text Diff</th><th>Diffchecker</th><th>WinMerge (local)</th><th>diff CLI</th><th>GitHub compare</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>En ligne, sans installation</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
-                        <tr><td>100 % côté client</td><td>✅</td><td>✅ (web)</td><td>✅</td><td>✅</td><td>❌ (serveur)</td></tr>
-                        <tr><td>Vue unifiée (git diff)</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                        <tr><td>Coloration syntaxique auto</td><td>✅</td><td>❌</td><td>✅ (plugins)</td><td>❌</td><td>✅</td></tr>
-                        <tr><td>Partage par URL unique</td><td>✅</td><td>✅ (payant)</td><td>❌</td><td>❌</td><td>✅</td></tr>
-                        <tr><td>Ignore casse / espaces</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                        <tr><td>Diff mot à mot</td><td>✅</td><td>❌</td><td>❌</td><td>✅ (git)</td><td>❌</td></tr>
-                        <tr><td>Diff de dossiers</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td></tr>
-                    </tbody>
-                </table>
+  <pre><code># Voir ce qui a changé dans le dernier commit
+git diff HEAD~1 HEAD
 
-                <h2>Quand utiliser quel outil — un petit guide de décision</h2>
-                <table class="decision-table">
-                    <thead>
-                        <tr><th>Situation</th><th>Outil recommandé</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Comparaison rapide en ligne, sans données sensibles</td><td>DevToolbox Text Diff</td></tr>
-                        <tr><td>Fichiers de plus de 5 Mo</td><td><code>diff</code> en ligne de commande</td></tr>
-                        <tr><td>Diffs dans un projet Git</td><td><code>git diff</code> ou VS Code</td></tr>
-                        <tr><td>JSON avec clés réordonnées</td><td><code>jq</code> + <code>diff</code> ou comparateur JSON sémantique</td></tr>
-                        <tr><td>Fichiers binaires (images, PDF)</td><td>Outils spécialisés (ImageMagick, diffpdf)</td></tr>
-                        <tr><td>Comparaison de dossiers entiers</td><td><code>diff -r</code> ou WinMerge</td></tr>
-                        <tr><td>Collaboration sur un diff avec l'équipe</td><td>DevToolbox Text Diff avec URL partagée</td></tr>
-                    </tbody>
-                </table>
-                <p>En bref : utilisez notre outil en ligne pour des comparaisons de textes de taille modérée, surtout si vous avez besoin d'un diff visuel et partageable sans ouvrir de terminal. Pour les fichiers volumineux ou les flux de travail complexes, la ligne de commande ou Git restent vos alliés.</p>
+# Voir ce qui a changé sur les N derniers commits
+git diff HEAD~5 HEAD
 
-                <h2>Cas d'usage concrets</h2>
-                <p>Notre comparateur est utilisé quotidiennement par des développeurs pour relire une pull request, par des administrateurs système pour vérifier deux fichiers de configuration <code>.env</code>, ou par des rédacteurs techniques pour suivre l'évolution d'un article. Je l'utilise personnellement pour vérifier que ma dernière mise à jour d'un script d'automatisation n'a pas modifié de ligne critique, sans avoir à ouvrir un terminal.</p>
-                <p>Autre exemple : un collègue data analyst compare deux exports CSV de sa base client avant et après migration. Il repère immédiatement les colonnes ajoutées ou les valeurs modifiées sans avoir à lancer Excel.</p>
+# Trouver quand une ligne spécifique a été introduite
+git log -S "chaîne à rechercher" --source --all
 
-                <h2>Confiance et sécurité des données</h2>
-                <p>Le comparateur de texte fonctionne intégralement dans votre navigateur. Aucune ligne de texte n'est transmise à un serveur distant. Même la fonction de partage d'URL encode toutes les informations dans l'URL elle‑même, sans jamais les stocker. Vous pouvez utiliser l'outil pour des documents confidentiels en toute tranquillité, car rien ne quitte votre machine.</p>
+# Générer un patch à partir du dernier commit pour l'envoyer à un collègue
+git format-patch -1 HEAD
 
-                <h2>Essayez-le maintenant</h2>
-                <p>Prêt à comparer vos deux textes sans perdre de temps ? Ouvrez l'outil, collez vos données et obtenez votre diff en un clin d'œil.</p>
-                <p style="text-align: center;"><a href="https://www.devstoolsbox.dev/fr/outils/comparateur-texte/" class="btn-tool">🔧 Comparer deux textes gratuitement</a></p>
+# Appliquer un patch d'un collègue
+git am < 0001-leur-changement.patch
 
-                <h3 style="margin-top: 32px;">Ces outils peuvent aussi vous intéresser</h3>
-                <ul>
-                    <li><a href="https://www.devstoolsbox.dev/fr/outils/formateur-json/">Formateur JSON</a> — pour indenter vos données avant comparaison</li>
-                    <li><a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">Convertisseur JSON ⇄ CSV</a> — transformer vos diffs en tableaux exploitables</li>
-                    <li><a href="https://www.devstoolsbox.dev/fr/outils/testeur-regex/">Testeur Regex</a> — valider des motifs dans vos textes</li>
-                </ul>
-            </div>
-        </article>
-    </main>
+# Indexation interactive — n'indexer que des modifications spécifiques dans un fichier
+git add -p fichier.js   # Parcourir chaque hunk et choisir oui/non/diviser</code></pre>
 
-    <footer class="footer">
-        <p>&copy; 2025 <a href="/">DevToolbox</a> — Outils en ligne gratuits pour développeurs. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
-    </footer>
+  <!-- ══════════════════════════════════
+       SECTION 8 — BY CONTENT TYPE
+  ══════════════════════════════════ -->
+  <h2 id="by-content-type">Diff par type de contenu — la bonne approche pour chaque format</h2>
+
+  <h3>Fichiers JSON</h3>
+
+  <p>Le diff texte brut de JSON est souvent trompeur. Deux fichiers JSON peuvent représenter exactement les mêmes données mais avoir l'air complètement différents en tant que texte : ordre des clés différent, indentation différente, guillemets différents. Un diff au niveau des lignes montrerait des centaines de changements alors que rien n'a changé structurellement.</p>
+
+  <p>Le flux de travail correct : formatez d'abord les deux fichiers de manière cohérente, puis diff le résultat formaté. Utilisez le <a href="/fr/outils/formateur-json/">Formateur JSON DevToolbox</a> ou la ligne de commande :</p>
+
+  <pre><code># Formater les deux fichiers, puis diff
+diff <(python3 -m json.tool --sort-keys fichier1.json) \
+     <(python3 -m json.tool --sort-keys fichier2.json)
+
+# Alternative Node.js
+diff <(node -e "console.log(JSON.stringify(require('./fichier1.json'),null,2))") \
+     <(node -e "console.log(JSON.stringify(require('./fichier2.json'),null,2))")</code></pre>
+
+  <p>Pour les vérifications d'égalité sémantique (en ignorant totalement le formatage), utilisez le score de similarité du <a href="/fr/outils/comparateur-texte/">Comparateur de texte DevToolbox</a> ou comparez les sorties formatées — si le diff est vide, les données sont identiques.</p>
+
+  <h3>Fichiers SQL (migrations)</h3>
+
+  <p>Lors de la revue de migrations SQL avant déploiement, formatez d'abord les deux scripts. Le <a href="/fr/outils/formateur-sql/">Formateur SQL DevToolbox</a> normalise les espaces, la casse des mots-clés et l'indentation. Après formatage, un diff ne montre que les changements structurels — pas le bruit de formatage.</p>
+
+  <pre><code># Comparer deux scripts de migration dans le terminal
+diff -u --label "original" --label "modifié" \
+    migration_v1.sql migration_v2.sql
+
+# Dans Git, toujours visualiser les diffs SQL avec le diff mot à mot
+git diff --word-diff -- migrations/</code></pre>
+
+  <h3>Fichiers de configuration YAML</h3>
+
+  <p>Les ancres YAML et les chaînes multi-lignes peuvent rendre les diffs texte brut confus. Le même principe s'applique : normalisez d'abord. Analysez et ré-affichez les deux fichiers avec un formatage cohérent avant de diff.</p>
+
+  <pre><code># Normaliser et diff des fichiers YAML
+diff <(python3 -c "import yaml; print(yaml.dump(yaml.safe_load(open('config-v1.yaml')), sort_keys=True))") \
+     <(python3 -c "import yaml; print(yaml.dump(yaml.safe_load(open('config-v2.yaml')), sort_keys=True))")</code></pre>
+
+  <h3>Prose et documentation</h3>
+
+  <p>Pour les documents textuels, le diff mot à mot est presque toujours plus utile que le diff ligne par ligne. Une seule phrase de 80 caractères contient de nombreux mots — marquer toute la ligne comme modifiée vous en dit moins que de montrer exactement quel mot a été corrigé.</p>
+
+  <p>Dans le terminal, <code>git diff --word-diff</code> fonctionne bien pour Markdown. Pour les fichiers texte brut, le mode diff mot à mot du Comparateur de texte DevToolbox est l'option la plus visuelle.</p>
+
+  <!-- ══════════════════════════════════
+       SECTION 9 — READING A PATCH
+  ══════════════════════════════════ -->
+  <h2 id="reading-patch">Lire un diff unifié — annoté ligne par ligne</h2>
+
+  <p>Le format de diff unifié est la sortie standard de <code>diff -u</code> et <code>git diff</code>. C'est le format utilisé dans les fichiers de patch, les diffs de pull request et les outils de revue de code. Une fois que vous savez le lire, cela devient une seconde nature.</p>
+
+  <div class="diff-annotated">
+    <div class="da-line"><span class="da-prefix" style="color:#fca5a5">---</span> <span class="da-del">a/src/config.js</span><span style="color:#94a3b8">&nbsp;&nbsp;&nbsp;&nbsp;2025-06-07 09:00:00</span></div>
+    <div class="da-comment">← Fichier original (préfixe a/ ajouté par git)</div>
+    <div class="da-line"><span class="da-prefix" style="color:#86efac">+++</span> <span class="da-add">b/src/config.js</span><span style="color:#94a3b8">&nbsp;&nbsp;&nbsp;&nbsp;2025-06-08 14:23:00</span></div>
+    <div class="da-comment">← Fichier modifié</div>
+    <br>
+    <div class="da-line"><span class="da-prefix da-header">@@</span> <span class="da-header">-12,7 +12,8 @@</span> <span style="color:#94a3b8">function loadConfig() {</span></div>
+    <div class="da-comment">← En-tête de hunk : lignes originales 12-18 → nouvelles lignes 12-19. Nom de la fonction affiché comme contexte.</div>
+    <br>
+    <div class="da-line"><span class="da-prefix da-ctx"> </span> <span class="da-ctx">const host = process.env.HOST || 'localhost';</span></div>
+    <div class="da-line"><span class="da-prefix da-ctx"> </span> <span class="da-ctx">const port = process.env.PORT || 3000;</span></div>
+    <div class="da-comment">← Lignes de contexte (espace en tête) : inchangées, affichées pour orientation</div>
+    <br>
+    <div class="da-line"><span class="da-prefix" style="color:#fca5a5">-</span> <span class="da-del">const timeout = 5000;</span></div>
+    <div class="da-comment">← Ligne supprimée (préfixe -) : était dans l'original, pas dans la nouvelle version</div>
+    <div class="da-line"><span class="da-prefix" style="color:#86efac">+</span> <span class="da-add">const timeout = parseInt(process.env.TIMEOUT) || 5000;</span></div>
+    <div class="da-line"><span class="da-prefix" style="color:#86efac">+</span> <span class="da-add">const maxRetries = parseInt(process.env.MAX_RETRIES) || 3;</span></div>
+    <div class="da-comment">← Lignes ajoutées (préfixe +) : dans la nouvelle version, pas dans l'original</div>
+    <br>
+    <div class="da-line"><span class="da-prefix da-ctx"> </span> <span class="da-ctx">return { host, port, timeout };</span></div>
+    <div class="da-comment">← Ligne de contexte : inchangée. Note : maxRetries devrait probablement être ajouté ici aussi.</div>
+    <div class="da-line"><span class="da-prefix da-ctx"> </span> <span class="da-ctx">}</span></div>
+  </div>
+
+  <h3>L'en-tête de hunk expliqué</h3>
+
+  <p>L'en-tête <code>@@ -12,7 +12,8 @@</code> est la partie la plus cryptique pour les nouveaux venus. Voici ce que chaque nombre signifie :</p>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead><tr><th>Partie</th><th>Signification</th><th>Dans notre exemple</th></tr></thead>
+      <tbody>
+        <tr><td><code>-12,7</code></td><td>Dans le fichier <em>original</em> : commence à la ligne 12, s'étend sur 7 lignes</td><td>Lignes 12–18 de l'original</td></tr>
+        <tr><td><code>+12,8</code></td><td>Dans le <em>nouveau</em> fichier : commence à la ligne 12, s'étend sur 8 lignes</td><td>Lignes 12–19 de la nouvelle version (une ligne ajoutée)</td></tr>
+        <tr><td>Texte après <code>@@</code></td><td>La fonction ou la section la plus proche (contexte optionnel)</td><td><code>function loadConfig() {</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>La différence de nombre de lignes (7 vs 8 dans notre exemple) vous indique immédiatement combien de lignes ont été ajoutées ou supprimées : <code>nouveau_compte - ancien_compte = lignes nettes ajoutées</code>. Un nombre négatif signifie que plus de lignes ont été supprimées qu'ajoutées dans ce hunk.</p>
+
+  <h3>Appliquer et inverser un patch</h3>
+
+  <pre><code># Enregistrer un diff dans un fichier de patch
+git diff main..branche-fonctionnalite > fonctionnalite.patch
+# ou
+diff -u original.conf nouveau.conf > changements.patch
+
+# Appliquer le patch
+patch original.conf < changements.patch
+
+# Vérifier que le patch s'appliquerait proprement avant de le faire réellement
+patch --dry-run original.conf < changements.patch
+
+# Inverser le patch (annuler les modifications)
+patch -R original.conf < changements.patch
+
+# Appliquer une sortie de git format-patch (format différent, inclut le message de commit)
+git am < 0001-ajout-configuration-timeout.patch</code></pre>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/fr/outils/comparateur-texte/" class="btn-cta">📄 Ouvrir le Comparateur de texte — URL partageable, diff mot à mot, gratuit</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 10 — FAQ
+  ══════════════════════════════════ -->
+  <h2 id="faq">Foire aux questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Quelle est la différence entre la vue fractionnée et la vue unifiée ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">La vue fractionnée montre les deux textes côte à côte avec les différences alignées sur la même ligne. La vue unifiée montre un flux unique avec les lignes ajoutées précédées de <code>+</code> et les lignes supprimées par <code>-</code>, ce qui est le format produit par <code>diff -u</code> et <code>git diff</code>. La vue fractionnée est plus facile à lire pour les petits changements ciblés ; la vue unifiée est plus compacte, est le format standard pour les fichiers de patch et est nécessaire pour appliquer des patches avec la commande <code>patch</code>.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Pourquoi deux outils de diff affichent-ils des résultats différents pour le même changement ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">La comparaison de textes trouve la plus longue sous-séquence commune (LCS) entre deux fichiers — la plus longue séquence de lignes qui apparaît dans les deux dans le même ordre. Lorsque plusieurs solutions LCS de longueur égale existent, différents algorithmes les départagent différemment. L'algorithme de Myers (utilisé par Git, GNU diff et la plupart des outils modernes) minimise le nombre d'opérations d'édition, mais certains textes ont plusieurs solutions minimales équivalentes qui semblent complètement différentes en sortie. Les deux sont correctes ; aucune n'est « plus juste » que l'autre.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Qu'est-ce que le diff mot à mot et quand dois-je l'utiliser ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Le diff mot à mot (aussi appelé « word diff ») exécute une seconde comparaison à l'intérieur de chaque ligne modifiée pour mettre en évidence exactement quels mots ont été ajoutés ou supprimés, au lieu de marquer toute la ligne comme modifiée. Utilisez-le pour les fichiers de configuration avec de longues lignes, la documentation, les migrations SQL et tout contenu où une ligne a changé mais où la majeure partie est restée la même. Dans git : <code>git diff --word-diff</code>. Dans le Comparateur de texte DevToolbox, cela se fait automatiquement dans les lignes modifiées.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Comment fonctionne la fonctionnalité de partage d'URL ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Le bouton Partager du Comparateur de texte DevToolbox encode les deux textes et toutes les options (ignorer la casse, ignorer les espaces, mode d'affichage, langage) dans le fragment d'URL en utilisant un encodage Base64. Rien n'est stocké sur un serveur — l'état complet est dans l'URL elle-même. Envoyez le lien à un collègue et il verra exactement le même diff, décodé et rendu localement dans son navigateur. Cela fonctionne également pour mettre en signet une comparaison spécifique.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Qu'est-ce que l'algorithme LCS ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">LCS signifie Longest Common Subsequence (plus longue sous-séquence commune). Il trouve la plus longue séquence d'éléments (des lignes, dans le contexte du diff texte) qui apparaît dans les deux entrées dans le même ordre relatif, mais pas nécessairement de manière contiguë. L'algorithme de diff utilise la LCS pour identifier les lignes inchangées — elles forment la LCS. Tout ce qui n'est pas dans la LCS est soit un ajout, soit une suppression. L'algorithme de Myers, publié en 1986 et utilisé par Git, calcule un script d'édition minimal efficacement en utilisant un chemin diagonal à travers le graphe d'édition.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Comment appliquer un fichier patch à partir d'un diff unifié ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Utilisez la commande <code>patch</code> : <code>patch original.txt &lt; changements.patch</code>. Pour un patch au style git qui inclut un préfixe de chemin : <code>patch -p1 &lt; changements.patch</code> (le <code>-p1</code> supprime le préfixe <code>a/</code> que git ajoute). Pour tester sans modifier les fichiers : <code>patch --dry-run -p1 &lt; changements.patch</code>. Pour inverser un patch : <code>patch -R original.txt &lt; changements.patch</code>. Pour les patches créés avec <code>git format-patch</code> (qui incluent les messages de commit), utilisez <code>git am &lt; fichier_patch</code> à la place.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════
+       REFERENCES
+  ══════════════════════════════════ -->
+  <section class="references">
+    <h3>Sources et références</h3>
+    <ul class="ref-list">
+      <li><a href="https://dl.acm.org/doi/10.1007/BF01840446" target="_blank" rel="noopener noreferrer">Eugene W. Myers — An O(ND) Difference Algorithm and Its Variations (Algorithmica, 1986)</a> — l'article original décrivant l'algorithme de diff de Myers utilisé par Git et GNU diff.</li>
+      <li><a href="https://www.gnu.org/software/diffutils/manual/diffutils.html" target="_blank" rel="noopener noreferrer">Manuel GNU Diffutils</a> — référence complète pour les outils en ligne de commande <code>diff</code>, <code>patch</code> et associés.</li>
+      <li><a href="https://git-scm.com/docs/git-diff" target="_blank" rel="noopener noreferrer">Documentation Git — git-diff</a> — référence officielle pour toutes les options et formats de sortie de <code>git diff</code>.</li>
+      <li><a href="https://www.gnu.org/software/patch/manual/patch.html" target="_blank" rel="noopener noreferrer">Manuel GNU patch</a> — référence pour l'application et la création de fichiers de patch.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc7396" target="_blank" rel="noopener noreferrer">RFC 7396 — JSON Merge Patch (IETF, 2014)</a> — le standard pour exprimer des modifications de documents JSON sous forme d'objet JSON.</li>
+      <li><a href="https://fr.wikipedia.org/wiki/Plus_longue_sous-s%C3%A9quence_commune" target="_blank" rel="noopener noreferrer">Wikipédia — Problème de la plus longue sous-séquence commune</a> — explication accessible de l'algorithme LCS avec analyse de complexité.</li>
+      <li><a href="https://git-scm.com/book/fr/v2/Utilitaires-Git-Fusion-avanc%C3%A9e" target="_blank" rel="noopener noreferrer">Livre Pro Git — Fusion avancée (Chacon & Straub)</a> — comment Git utilise le diff pour la fusion et la résolution de conflits.</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════
+       RELATED TOOLS
+  ══════════════════════════════════ -->
+  <div class="related-tools">
+    <h3>Outils DevToolbox associés</h3>
+    <ul>
+      <li><a href="/fr/outils/comparateur-textes/">→ Comparateur de texte</a> — l'outil décrit dans cet article : vue fractionnée/unifiée, diff mot à mot, URL partageable, coloration syntaxique pour 12 langages</li>
+      <li><a href="/fr/outils/formateur-json/">→ Formateur JSON</a> — formatez le JSON avant de diff pour éliminer le bruit de formatage</li>
+      <li><a href="/fr/outils/formateur-sql/">→ Formateur SQL</a> — formatez et normalisez les migrations SQL avant de les comparer</li>
+      <li><a href="/fr/outils/convertisseur-yaml-json-toml/">→ Convertisseur YAML ↔ JSON ↔ TOML</a> — normalisez les fichiers de configuration avant de diff avec comparaison sémantique</li>
+      <li><a href="/fr/blog/anti-patterns-sql/">→ Guide des anti-patterns SQL</a> — comparez les scripts de migration SQL et repérez les motifs dangereux</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour les développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/fr/a-propos/">À propos</a> | <a href="/fr/contact/">Contact</a></p>
+</footer>
 </div>
 
 <script>
-    (function() {
-        const btns = document.querySelectorAll('.theme-btn');
-        btns.forEach(b => b.addEventListener('click', () => {
-            const t = b.dataset.theme;
-            document.body.classList.toggle('dark', t === 'dark');
-            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
-            localStorage.setItem('theme', t);
-        }));
-        const saved = localStorage.getItem('theme') || 'light';
-        document.body.classList.toggle('dark', saved === 'dark');
-        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
-    })();
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Clair' : '🌙 Sombre';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Clair';
+  }
+})();
 </script>
 </body>
 </html>
