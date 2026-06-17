@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>En-têtes de réponse HTTP : Le guide complet de sécurité (2026)</title>
+<meta name="description" content="Guide développeur des en-têtes de réponse HTTP : score de sécurité, clickjacking, CSP, HSTS, CORS, Cache-Control. Configs Nginx et Apache prêtes à copier. Par Mathias Kouadio.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/guide-headers-http/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/guide-headers-http/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/http-response-headers-guide/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/http-response-headers-guide/">
+
+<meta property="og:title" content="En-têtes de réponse HTTP : Le guide complet de sécurité (2026)">
+<meta property="og:description" content="Les en-têtes de sécurité expliqués avec des scénarios d'attaque réels, des configurations serveur prêtes à copier et une analyse approfondie du CORS. 100% pratique.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/guide-headers-http/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"En-têtes de réponse HTTP : Le guide complet de sécurité (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/fr/a-propos/"},
+  "datePublished":"2026-06-10",
+  "dateModified":"2026-06-10",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/fr/blog/guide-headers-http/",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"Guide développeur des en-têtes de réponse HTTP : à quoi sert chacun, que se passe-t-il quand il est absent, et des configurations prêtes à copier pour Nginx et Apache."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Dois-je mettre tous les en-têtes de sécurité sur chaque page ?","acceptedAnswer":{"@type":"Answer","text":"Les en-têtes HSTS, X-Content-Type-Options, Referrer-Policy et Permissions-Policy doivent être sur chaque page. CSP et X-Frame-Options sont également fortement recommandés. Les en-têtes Server et X-Powered-By doivent être supprimés globalement."}},
+    {"@type":"Question","name":"Est-ce que Content-Security-Policy casse mon site web ?","acceptedAnswer":{"@type":"Answer","text":"Un CSP mal configuré peut bloquer des ressources légitimes. Commencez par Content-Security-Policy-Report-Only pour tester sans appliquer, surveillez les rapports, puis renforcez progressivement la politique. Évitez unsafe-inline autant que possible — utilisez des nonces à la place."}},
+    {"@type":"Question","name":"X-Frame-Options est-il encore nécessaire si j'ai CSP frame-ancestors ?","acceptedAnswer":{"@type":"Answer","text":"Si vous avez un CSP avec frame-ancestors, X-Frame-Options est techniquement redondant dans les navigateurs modernes. Mais conserver les deux offre une défense en profondeur pour les anciens navigateurs qui ne supportent pas CSP. Le coût est d'une ligne de configuration."}},
+    {"@type":"Question","name":"Quelle est la différence entre no-cache et no-store dans Cache-Control ?","acceptedAnswer":{"@type":"Answer","text":"no-cache signifie que le navigateur peut stocker la réponse mais doit revalider auprès du serveur avant de la servir à nouveau. no-store signifie que le navigateur ne doit jamais stocker la réponse, même temporairement. Utilisez no-store pour les données sensibles comme les pages bancaires."}},
+    {"@type":"Question","name":"Puis-je définir Access-Control-Allow-Origin: * tout en autorisant les credentials ?","acceptedAnswer":{"@type":"Answer","text":"Non. Les navigateurs refusent cette combinaison par conception. Lorsque Access-Control-Allow-Credentials est true, la spécification CORS exige une origine spécifique dans Access-Control-Allow-Origin. Utiliser * avec les credentials est bloqué par tous les navigateurs modernes."}},
+    {"@type":"Question","name":"Comment tester mes en-têtes de sécurité ?","acceptedAnswer":{"@type":"Answer","text":"Utilisez l'Analyseur d'en-têtes HTTP de DevToolbox : collez vos en-têtes de réponse et obtenez une note de sécurité instantanée avec des explications. Vous pouvez aussi utiliser curl -I https://votresite.com dans le terminal, ou l'onglet Réseau des DevTools du navigateur."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/blog/"},
+    {"@type":"ListItem","position":3,"name":"Guide des en-têtes HTTP","item":"https://www.devstoolsbox.dev/fr/blog/guide-headers-http/"}
+  ]
+}
+</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-JRBW78KE29');
+    </script>
+<style>
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
+
+/* header */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+/* breadcrumb */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+/* article card */
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+/* typography */
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+/* note/warning callouts */
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+/* decision table */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+.dec-table{background:var(--pass-bg);border:2px solid var(--pass);border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+body.dark .dec-table{background:var(--pass-bg)}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+
+/* security header rows */
+.sec-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:16px 0}
+.sec-card-name{font-family:var(--mono);font-weight:800;color:var(--primary);font-size:.95rem;margin-bottom:6px}
+.sec-card-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-left:8px;vertical-align:middle}
+.badge-crit{background:var(--fail-bg);color:var(--fail)}
+.badge-high{background:#fff0e8;color:#c2410c}
+.badge-med{background:var(--warn-bg);color:#b45309}
+.badge-low{background:var(--pass-bg);color:var(--pass)}
+body.dark .badge-high{background:#4a1a00;color:#fb923c}
+.sec-card-rec{font-family:var(--mono);font-size:.82rem;color:var(--text3);margin-top:8px;padding:7px 10px;background:var(--bg);border-radius:7px;border:1px solid var(--border)}
+
+/* CTA button */
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+/* FAQ */
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+/* references */
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+/* related tools */
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+/* footer */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+
+/* toc */
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/http-response-headers-guide/" class="pill-btn">EN</a>
+      <a href="/fr/blog/guide-headers-http/" class="pill-btn active">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Fil d'Ariane">
+  <ol>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/blog/">Blog</a></li>
+    <li aria-current="page">Guide des en-têtes HTTP</li>
+  </ol>
+</nav>
+
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-06-10">
+  <meta itemprop="dateModified" content="2026-06-10">
+
+  <h1 itemprop="headline">En-têtes de réponse HTTP : Le guide complet de sécurité (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-06-10">10 juin 2026</time>
+    <span>·</span>
+    <span>18 min de lecture</span>
+    <span>·</span>
+    <span>Par <a href="/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <!-- TABLE DES MATIÈRES -->
+  <nav class="toc" aria-label="Table des matières">
+    <div class="toc-title">Dans cet article</div>
+    <ol>
+      <li><a href="#incident">L'incident de production qui a tout déclenché</a></li>
+      <li><a href="#decision-table">Table de décision rapide</a></li>
+      <li><a href="#security-headers">Les 8 en-têtes de sécurité indispensables</a></li>
+      <li><a href="#cache-control">Cache-Control : chaque directive expliquée</a></li>
+      <li><a href="#information-leakage">Les en-têtes qui en révèlent trop</a></li>
+      <li><a href="#cors">CORS : la partie la plus mal comprise</a></li>
+      <li><a href="#server-configs">Configurations serveur prêtes à copier</a></li>
+      <li><a href="#faq">Foire aux questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- ═══════════════════════════════════════
+       SECTION 1 — INCIDENT
+  ═══════════════════════════════════════ -->
+  <h2 id="incident">L'incident de production qui a tout déclenché</h2>
+
+  <p>En 2015, des chercheurs ont découvert une vulnérabilité affectant une application bancaire majeure au Royaume-Uni. L'attaque était simple : un réseau publicitaire tiers avait été compromis et diffusait une page qui chargeait l'écran de confirmation de virement de la banque à l'intérieur d'un <code>&lt;iframe&gt;</code> transparent. Lorsqu'un utilisateur visitait la page malveillante, il pensait cliquer sur un bouton « Gagnez un iPhone ». Il cliquait en réalité sur « Confirmer le virement » sur une page bancaire qu'il ne pouvait pas voir.</p>
+
+  <p>La correction aurait tenu en deux lignes de configuration sur le serveur de la banque. Deux lignes qui auraient ajouté <code>X-Frame-Options: DENY</code> à chaque réponse. Elles n'étaient pas là. Ce schéma d'attaque — le clickjacking — est documenté par la fondation OWASP depuis 2008, et il fonctionne encore sur les sites qui n'ont pas ajouté cet en-tête.</p>
+
+  <p>Ce n'est pas un cas isolé. Les chercheurs en sécurité de <a href="https://securityheaders.com" target="_blank" rel="noopener noreferrer">SecurityHeaders.com</a> effectuent des scans automatisés du top million de sites Alexa. Dans leur dernière analyse, environ 3 % seulement des sites web ont obtenu une note A ou A+. Les 97 % restants ne possédaient pas au moins un en-tête de sécurité critique. Sur la plupart d'entre eux, la mauvaise configuration n'était pas complexe — elle était simplement absente.</p>
+
+  <p>Les en-têtes de réponse HTTP sont invisibles en navigation normale. Ils n'apparaissent pas dans le code source de la page. Ils vivent dans l'onglet Réseau des DevTools, dans la sortie de <code>curl -I</code>, dans les fichiers de configuration Nginx. La plupart des développeurs ne les regardent jamais jusqu'à ce que quelque chose casse. Cet article change cela.</p>
+
+  <div class="callout callout-info">
+    <strong>Vérifiez vos en-têtes maintenant :</strong> Collez vos en-têtes de réponse HTTP dans l'<a href="/fr/outils/analyseur-headers-http/">Analyseur d'en-têtes HTTP de DevToolbox</a> et obtenez une note de sécurité instantanée avec des explications en langage clair. Tout fonctionne dans votre navigateur — rien n'est envoyé à un serveur.
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 2 — TABLE DE DÉCISION
+  ═══════════════════════════════════════ -->
+  <h2 id="decision-table">Table de décision rapide — quoi ajouter et pourquoi</h2>
+
+  <p>Si vous êtes pressé, voici la réponse. Si vous voulez comprendre chaque élément en profondeur — ce que vous devriez faire, car le diable est dans la configuration — le reste de cet article couvre chaque ligne en détail.</p>
+
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>En-tête</th><th>Risque si absent</th><th>Valeur recommandée</th><th>Priorité</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Strict-Transport-Security</code></td><td>Attaques de rétrogradation HTTP, vol de cookies sur HTTP</td><td><code>max-age=31536000; includeSubDomains</code></td><td>Critique</td></tr>
+        <tr><td><code>Content-Security-Policy</code></td><td>XSS via scripts injectés</td><td><code>default-src 'self'; object-src 'none'</code></td><td>Critique</td></tr>
+        <tr><td><code>X-Frame-Options</code></td><td>Clickjacking</td><td><code>DENY</code> ou <code>SAMEORIGIN</code></td><td>Élevée</td></tr>
+        <tr><td><code>X-Content-Type-Options</code></td><td>MIME-sniffing → exécution de fichier</td><td><code>nosniff</code></td><td>Élevée</td></tr>
+        <tr><td><code>Referrer-Policy</code></td><td>Fuite d'URL (jetons dans les paramètres de requête)</td><td><code>strict-origin-when-cross-origin</code></td><td>Moyenne</td></tr>
+        <tr><td><code>Permissions-Policy</code></td><td>Scripts compromis accèdent à la caméra/micro/géolocalisation</td><td><code>camera=(), microphone=(), geolocalisation=()</code></td><td>Moyenne</td></tr>
+        <tr><td><code>Server</code> (supprimer la version)</td><td>Prise d'empreinte → exploitation CVE ciblée</td><td>Valeur générique ou absent</td><td>Moyenne</td></tr>
+        <tr><td><code>X-Powered-By</code> (supprimer)</td><td>Prise d'empreinte du framework</td><td>Absent</td><td>Faible</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 3 — LES 8 EN-TÊTES
+  ═══════════════════════════════════════ -->
+  <h2 id="security-headers">Les 8 en-têtes de sécurité dont chaque serveur de production a besoin</h2>
+
+  <h3>1. Strict-Transport-Security (HSTS)</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Strict-Transport-Security <span class="sec-card-badge badge-crit">Critique</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Indique au navigateur de <strong>toujours utiliser HTTPS</strong> pour ce domaine, même si l'utilisateur tape <code>http://</code> ou clique sur un lien HTTP.</p>
+    <div class="sec-card-rec">max-age=31536000; includeSubDomains; preload</div>
+  </div>
+
+  <p>Sans HSTS, voici ce qui se passe sur un Wi-Fi public : un utilisateur tape <em>mabanque.com</em> dans la barre d'adresse. Le navigateur envoie la première requête en HTTP — il n'a aucun moyen de savoir qu'il devrait utiliser HTTPS avant d'établir le contact. Un attaquant réseau sur le même réseau intercepte cette requête HTTP et ne la transmet jamais au vrai serveur. Il sert sa propre page à la place. C'est une <strong>attaque de rétrogradation de protocole</strong>, et HSTS l'empêche en faisant en sorte que le navigateur refuse d'établir des connexions HTTP vers le domaine après la première visite HTTPS réussie.</p>
+
+  <p>La valeur <code>max-age</code> est en secondes. <code>31536000</code> correspond à un an — la recommandation standard. <code>includeSubDomains</code> étend la protection à tous les sous-domaines. <code>preload</code> soumet votre domaine à <a href="https://hstspreload.org" target="_blank" rel="noopener noreferrer">la liste de préchargement HSTS</a> maintenue par Google et incluse dans tous les principaux navigateurs, ce qui signifie que HTTPS est appliqué avant même la première visite — aucune première requête non protégée.</p>
+
+  <div class="callout callout-warn">
+    <strong>Une mise en garde importante :</strong> n'ajoutez pas <code>preload</code> à moins d'être certain que chaque sous-domaine sert du HTTPS valide et le fera toujours. Retirer un domaine de la liste de préchargement prend des semaines et nécessite une révision manuelle.
+  </div>
+
+  <h3>2. Content-Security-Policy (CSP)</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Content-Security-Policy <span class="sec-card-badge badge-crit">Critique</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Définit une <strong>liste blanche de sources de confiance</strong> pour les scripts, styles, images et autres ressources. Le navigateur l'applique — tout ce qui n'est pas dans la liste est bloqué.</p>
+    <div class="sec-card-rec">default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'</div>
+  </div>
+
+  <p>Le CSP est votre défense principale contre le Cross-Site Scripting (XSS). Si un attaquant parvient à injecter un script dans votre page — via un champ de commentaire, une réponse d'API rendue sans assainissement, ou une bibliothèque tierce compromise — un CSP bien configuré empêchera ce script de s'exécuter.</p>
+
+  <p>L'erreur la plus fréquente que je vois dans les projets réels est l'utilisation de <code>unsafe-inline</code> pour autoriser les scripts et styles en ligne. Cette seule directive désactive complètement la protection XSS pour les scripts. Si vous avez des scripts en ligne, l'approche moderne consiste à utiliser des nonces : une valeur aléatoire générée par requête, ajoutée à l'en-tête CSP et à chaque balise de script légitime.</p>
+
+  <pre><code># Avec CSP basé sur les nonces (recommandé pour les applis avec scripts en ligne)
+Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{aleatoire_par_requete}'; object-src 'none'</code></pre>
+
+  <p>Si vous ne savez pas par où commencer, utilisez d'abord <code>Content-Security-Policy-Report-Only</code>. Cela envoie des rapports de violation à une URL que vous spécifiez sans rien bloquer réellement. Cela vous permet de comprendre ce que votre politique casserait avant de l'appliquer.</p>
+
+  <pre><code># Tester sans appliquer — ajoutez report-uri pour collecter les violations
+Content-Security-Policy-Report-Only: default-src 'self'; report-uri https://votreapp.com/csp-report</code></pre>
+
+  <h3>3. X-Frame-Options</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">X-Frame-Options <span class="sec-card-badge badge-high">Élevée</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Empêche votre page d'être chargée dans un <code>&lt;iframe&gt;</code> sur une autre origine. La défense principale contre le clickjacking.</p>
+    <div class="sec-card-rec">DENY</div>
+  </div>
+
+  <p>Le scénario de clickjacking est simple : un attaquant construit une page qui superpose un iframe transparent chargeant votre application. L'utilisateur interagit avec ce qu'il croit être la page de l'attaquant mais envoie en réalité des clics à votre application en dessous. Des actions sensibles — confirmer des transactions, changer des mots de passe, accorder des permissions — peuvent être déclenchées à l'insu de l'utilisateur.</p>
+
+  <p><code>DENY</code> bloque complètement le cadrage, sur tous les domaines, y compris le vôtre. <code>SAMEORIGIN</code> autorise le cadrage uniquement depuis la même origine. Le paramètre obsolète <code>ALLOW-FROM origin</code> est ignoré par les navigateurs modernes — si vous devez autoriser une origine spécifique, utilisez plutôt la directive CSP <code>frame-ancestors</code>.</p>
+
+  <div class="callout callout-info">
+    <strong>CSP vs X-Frame-Options :</strong> La directive CSP <code>frame-ancestors</code> est plus flexible et remplace X-Frame-Options dans les navigateurs qui la supportent. Mais X-Frame-Options couvre encore les navigateurs plus anciens. Conserver les deux coûte une ligne de configuration et ne coûte rien en performance.
+  </div>
+
+  <h3>4. X-Content-Type-Options</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">X-Content-Type-Options <span class="sec-card-badge badge-high">Élevée</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Empêche le navigateur de deviner le type de contenu d'une réponse. La seule valeur valide est <code>nosniff</code>.</p>
+    <div class="sec-card-rec">nosniff</div>
+  </div>
+
+  <p>Sans cet en-tête, les navigateurs essaient d'être utiles en « reniflant » le type de contenu lorsque le type déclaré semble incorrect. Un attaquant peut téléverser un fichier avec une extension <code>.txt</code> qui contient du JavaScript. Si une balise script pointe vers ce fichier, un navigateur plus ancien pourrait l'exécuter quand même, indépendamment de ce que le serveur déclare comme Content-Type. <code>nosniff</code> dit au navigateur : « Faites confiance au Content-Type que je déclare. Ne devinez pas. »</p>
+
+  <p>C'est l'un des en-têtes les plus simples à ajouter — une ligne de configuration, zéro effet secondaire si vos en-têtes Content-Type sont corrects. Il n'y a aucune raison valable de ne pas l'avoir en production.</p>
+
+  <h3>5. Referrer-Policy</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Referrer-Policy <span class="sec-card-badge badge-med">Moyenne</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Contrôle la quantité d'informations d'URL incluse dans l'en-tête <code>Referer</code> lors de la navigation vers d'autres sites.</p>
+    <div class="sec-card-rec">strict-origin-when-cross-origin</div>
+  </div>
+
+  <p>Considérez une URL comme <code>https://votreapp.com/reinitialiser-motdepasse?jeton=abc123</code>. Sans Referrer-Policy, si un utilisateur clique sur un lien de cette page vers un autre site, les logs du serveur de destination reçoivent l'URL complète — y compris le jeton de réinitialisation. Ce jeton est maintenant dans les logs d'un serveur tiers, potentiellement accessible à leurs ingénieurs, et peut-être collecté par des services d'analyse.</p>
+
+  <p>La même chose s'applique aux paramètres de recherche, aux identifiants internes, aux jetons de session passés dans les URL, et à toute autre donnée dans votre structure d'URL. <code>strict-origin-when-cross-origin</code> envoie l'URL complète aux destinations de même origine mais seulement l'origine (pas de chemin, pas de paramètres) aux destinations cross-origin. C'est le paramètre par défaut du navigateur depuis Chrome 85, mais le définir explicitement garantit un comportement cohérent sur tous les navigateurs.</p>
+
+  <h3>6. Permissions-Policy</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Permissions-Policy <span class="sec-card-badge badge-med">Moyenne</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Restreint l'accès aux API du navigateur pour votre page — caméra, microphone, géolocalisation, paiement, et plus.</p>
+    <div class="sec-card-rec">camera=(), microphone=(), geolocalisation=(), payment=()</div>
+  </div>
+
+  <p>Si votre application n'utilise pas la caméra, il n'y a aucune raison pour qu'un script sur votre page puisse y accéder — y compris une bibliothèque tierce compromise ou une charge XSS réussie. Permissions-Policy applique cela au niveau du navigateur. Même si un attaquant parvient à exécuter du code sur votre page, le navigateur refusera d'accorder l'accès à la caméra si votre politique dit <code>camera=()</code>.</p>
+
+  <p>Cet en-tête a remplacé l'ancien en-tête <code>Feature-Policy</code> en 2020. Le successeur est supporté par tous les navigateurs modernes. Listez uniquement les API que votre application utilise réellement, et refusez explicitement tout le reste.</p>
+
+  <h3>7. Cross-Origin Opener Policy (COOP)</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Cross-Origin-Opener-Policy <span class="sec-card-badge badge-med">Moyenne</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Isole votre contexte de navigation des fenêtres cross-origin, requis pour les minuteurs haute résolution et <code>SharedArrayBuffer</code>.</p>
+    <div class="sec-card-rec">same-origin</div>
+  </div>
+
+  <p>Après la découverte de la vulnérabilité CPU Spectre en 2018, les navigateurs ont restreint l'accès aux API de chronométrage précis qui pouvaient être utilisées pour des attaques par canal auxiliaire. Pour réactiver des fonctionnalités comme <code>SharedArrayBuffer</code> et <code>performance.now()</code> haute résolution, votre site doit être dans un contexte isolé cross-origin — ce qui nécessite à la fois COOP et COEP (<code>Cross-Origin-Embedder-Policy: require-corp</code>). Si vous n'utilisez pas SharedArrayBuffer, COOP <code>same-origin</code> reste un bon en-tête de défense en profondeur qui empêche votre page d'être référencée par des fenêtres cross-origin.</p>
+
+  <h3>8. Cross-Origin Resource Policy (CORP)</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Cross-Origin-Resource-Policy <span class="sec-card-badge badge-low">Faible</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Contrôle quelles origines peuvent charger cette ressource, protégeant contre les attaques de type Spectre via des lectures cross-origin.</p>
+    <div class="sec-card-rec">same-origin (pour les ressources sensibles)</div>
+  </div>
+
+  <p>Cet en-tête est particulièrement pertinent pour les API et les ressources qui renvoient des données sensibles. <code>same-origin</code> signifie que seuls les documents de même origine peuvent charger la ressource. Utilisez <code>cross-origin</code> pour les ressources intentionnellement partagées (comme un CDN public). Définissez-le sur les API qui ne devraient jamais être intégrées ou chargées en cross-origin.</p>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 4 — CACHE-CONTROL
+  ═══════════════════════════════════════ -->
+  <h2 id="cache-control">Cache-Control : chaque directive expliquée</h2>
+
+  <p>Cache-Control est l'en-tête que la plupart des développeurs comprennent à moitié. Ils savent que <code>no-cache</code> signifie « ne pas mettre en cache » — sauf que ce n'est pas le cas. Se tromper sur ce point a des conséquences réelles : les utilisateurs voient des données périmées, des pages sensibles sont mises en cache par les CDN, ou votre application fait des requêtes inutiles au serveur d'origine à chaque chargement. Permettez-moi de détailler chaque directive correctement.</p>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead>
+        <tr><th>Directive</th><th>Ce qu'elle signifie réellement</th><th>Quand l'utiliser</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>max-age=N</code></td><td>Mettre en cache pendant N secondes. Après cela, le navigateur revalide auprès du serveur.</td><td>Assets statiques, pages qui changent peu fréquemment</td></tr>
+        <tr><td><code>no-store</code></td><td>Ne jamais stocker cette réponse nulle part — même temporairement. Chaque requête va au serveur.</td><td>Pages bancaires, données personnelles, pages avec infos sensibles</td></tr>
+        <tr><td><code>no-cache</code></td><td>Le navigateur <em>peut</em> la stocker, mais <em>doit</em> revalider auprès du serveur avant de la servir. Utilise ETag ou Last-Modified pour vérifier si elle est fraîche.</td><td>Pages qui changent fréquemment mais bénéficient de la validation ETag</td></tr>
+        <tr><td><code>private</code></td><td>Seul le cache du navigateur de l'utilisateur peut stocker ceci. Les CDN et proxies partagés ne le peuvent pas.</td><td>Pages authentifiées, contenu spécifique à l'utilisateur</td></tr>
+        <tr><td><code>public</code></td><td>Les CDN, proxies et caches partagés peuvent stocker ceci.</td><td>Assets statiques, réponses d'API publiques, images</td></tr>
+        <tr><td><code>s-maxage=N</code></td><td>max-age spécifique au CDN. Remplace max-age pour les caches partagés uniquement.</td><td>Quand vous voulez des TTL différents pour les navigateurs vs les CDN</td></tr>
+        <tr><td><code>stale-while-revalidate=N</code></td><td>Servir la version périmée en cache pendant jusqu'à N secondes tout en récupérant une copie fraîche en arrière-plan.</td><td>Pages UI où une réponse légèrement périmée est acceptable</td></tr>
+        <tr><td><code>immutable</code></td><td>La ressource ne changera jamais. Le navigateur saute la revalidation pendant max-age, même en cas de rafraîchissement forcé.</td><td>Assets avec hash de contenu (app.a3b1c2d4.js, logo.png?v=3)</td></tr>
+        <tr><td><code>must-revalidate</code></td><td>Une fois périmée, le navigateur doit revalider auprès du serveur d'origine avant de servir. Ne peut pas servir de contenu périmé même si le serveur est inaccessible.</td><td>Données où servir du contenu périmé est inacceptable</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>La confusion la plus courante : <code>no-cache</code> ≠ « pas de mise en cache ». Cela signifie « mettre en cache, mais toujours vérifier auprès du serveur d'abord ». Si vous ne voulez vraiment aucune mise en cache, utilisez <code>no-store</code>. La confusion vient du nom, qui était sans doute un mauvais choix des auteurs de la spécification HTTP.</p>
+
+  <p>Une stratégie pratique pour les applications web modernes : utilisez <code>Cache-Control: public, max-age=31536000, immutable</code> pour les assets statiques avec hash de contenu (votre bundler ajoute un hash au nom de fichier à chaque build), et <code>Cache-Control: no-cache</code> pour vos fichiers HTML (qui sont courts et peu coûteux à revalider, et doivent référencer les derniers assets).</p>
+
+  <pre><code># Nginx — différentes stratégies de cache par type de ressource
+
+# Fichiers HTML : toujours revalider (ils référencent les derniers assets)
+location ~* \.html$ {
+    add_header Cache-Control "no-cache";
+}
+
+# Assets avec hash de contenu : mettre en cache indéfiniment, ne jamais revalider
+location ~* \.(js|css|woff2)$ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+}
+
+# Réponses d'API : privé, 60 secondes max
+location /api/ {
+    add_header Cache-Control "private, max-age=60";
+}
+
+# Pages sensibles : ne jamais stocker
+location /compte/ {
+    add_header Cache-Control "no-store";
+}</code></pre>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 5 — FUITE D'INFORMATIONS
+  ═══════════════════════════════════════ -->
+  <h2 id="information-leakage">Les en-têtes qui révèlent trop d'informations</h2>
+
+  <p>Certains en-têtes ne devraient pas être là du tout. Ils sont ajoutés par défaut par les serveurs web et les frameworks, et ils fournissent gratuitement aux attaquants des renseignements sur votre infrastructure.</p>
+
+  <h3>Server: Apache/2.4.51 (Ubuntu)</h3>
+
+  <p>Cet en-tête de réponse indique à un attaquant exactement quoi chercher sur la <a href="https://nvd.nist.gov" target="_blank" rel="noopener noreferrer">NVD (National Vulnerability Database)</a> ou sur <a href="https://www.exploit-db.com" target="_blank" rel="noopener noreferrer">Exploit-DB</a>. Apache 2.4.49 avait une traversée de chemin CVE (CVE-2021-41773) qui a été activement exploitée dans les jours suivant sa divulgation. Un serveur qui affiche sa version dit essentiellement : « Voici une liste de mes vulnérabilités connues. »</p>
+
+  <p>Supprimer la version est trivial. Supprimer entièrement le nom du serveur est légèrement plus complexe mais possible sur tous les serveurs majeurs.</p>
+
+  <pre><code># Nginx — masquer le numéro de version
+server_tokens off;
+# Résultat : Server: nginx (version supprimée)
+
+# Apache — httpd.conf ou .htaccess
+ServerTokens Prod
+ServerSignature Off
+# Résultat : Server: Apache (seulement le nom du produit, pas de version)</code></pre>
+
+  <h3>X-Powered-By: PHP/8.1.0 ou X-Powered-By: Express</h3>
+
+  <p>Ajouté par défaut par PHP et Express.js. Même problème : vous annoncez votre framework et sa version. Pour le supprimer :</p>
+
+  <pre><code># Express.js — désactiver complètement l'en-tête
+app.disable('x-powered-by');
+
+# Ou utiliser Helmet, qui gère cela et d'autres en-têtes de sécurité automatiquement
+const helmet = require('helmet');
+app.use(helmet());
+
+# PHP — php.ini
+expose_php = Off</code></pre>
+
+  <h3>X-AspNet-Version et X-AspNetMvc-Version</h3>
+
+  <p>Ajoutés par défaut dans les anciennes configurations ASP.NET. Aucun de ces en-têtes n'a de fonction légitime en production.</p>
+
+  <pre><code><!-- web.config -->
+&lt;system.web&gt;
+  &lt;httpRuntime enableVersionHeader="false" /&gt;
+&lt;/system.web&gt;</code></pre>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 6 — CORS
+  ═══════════════════════════════════════ -->
+  <h2 id="cors">CORS : le mécanisme de sécurité le plus mal compris</h2>
+
+  <p>Le Cross-Origin Resource Sharing (CORS) est le mécanisme qui contrôle quelles origines peuvent faire des requêtes cross-origin vers votre serveur. Il est appliqué par les navigateurs — pas par votre serveur lui-même. Comprendre cette distinction est crucial, car CORS <strong>ne protège pas</strong> votre serveur contre les requêtes serveur-à-serveur ou contre les clients non-navigateur comme <code>curl</code>.</p>
+
+  <h3>L'erreur classique : wildcard + credentials</h3>
+
+  <p>Un motif que j'ai vu en production à plusieurs reprises :</p>
+
+  <pre><code># ❌ Cette combinaison est rejetée par tous les navigateurs modernes
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true</code></pre>
+
+  <p>La spécification CORS interdit explicitement cette combinaison. Lorsque <code>Access-Control-Allow-Credentials: true</code>, le navigateur n'inclura les cookies et les en-têtes d'autorisation dans la requête cross-origin que si le serveur spécifie une origine concrète — pas un wildcard. La logique : un wildcard signifie « n'importe quelle origine », ce qui est acceptable pour des ressources vraiment publiques, mais vous ne voudriez jamais envoyer vos cookies d'authentification à une requête provenant d'une origine inconnue.</p>
+
+  <p>Si vous avez besoin de credentials, vous devez renvoyer l'origine spécifique de la requête (après l'avoir validée par rapport à votre liste d'autorisation) :</p>
+
+  <pre><code># ✅ Correct pour les requêtes cross-origin avec credentials
+# (Définir dynamiquement dans votre code serveur après validation de l'en-tête Origin)
+Access-Control-Allow-Origin: https://app.votresociete.com
+Access-Control-Allow-Credentials: true
+Vary: Origin  # ← Indique aux caches que les réponses diffèrent selon l'Origine</code></pre>
+
+  <div class="callout callout-warn">
+    <strong>Ajoutez toujours Vary: Origin</strong> quand vous définissez Access-Control-Allow-Origin dynamiquement. Sans cela, un CDN pourrait mettre en cache la réponse avec l'en-tête d'une origine et la servir à une origine différente — soit en exposant votre politique de credentials, soit en faisant échouer des requêtes légitimes.
+  </div>
+
+  <h3>Référence des en-têtes CORS</h3>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead>
+        <tr><th>En-tête</th><th>Qui l'envoie</th><th>Ce qu'il contrôle</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Access-Control-Allow-Origin</code></td><td>Serveur (réponse)</td><td>Quelle origine peut lire la réponse</td></tr>
+        <tr><td><code>Access-Control-Allow-Methods</code></td><td>Serveur (réponse preflight)</td><td>Quelles méthodes HTTP sont autorisées</td></tr>
+        <tr><td><code>Access-Control-Allow-Headers</code></td><td>Serveur (réponse preflight)</td><td>Quels en-têtes de requête sont permis</td></tr>
+        <tr><td><code>Access-Control-Allow-Credentials</code></td><td>Serveur (réponse)</td><td>Si les cookies/en-têtes d'auth peuvent être envoyés</td></tr>
+        <tr><td><code>Access-Control-Max-Age</code></td><td>Serveur (réponse preflight)</td><td>Combien de temps mettre en cache le résultat preflight (secondes)</td></tr>
+        <tr><td><code>Origin</code></td><td>Navigateur (requête)</td><td>L'origine de la page qui fait la requête</td></tr>
+        <tr><td><code>Access-Control-Request-Method</code></td><td>Navigateur (preflight)</td><td>La méthode que la requête réelle utilisera</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Requêtes simples vs requêtes pré-vérifiées</h3>
+
+  <p>Toutes les requêtes cross-origin ne déclenchent pas une requête OPTIONS preflight. Les requêtes « simples » — GET et POST avec des types de contenu standards comme <code>application/x-www-form-urlencoded</code> — passent directement. Les requêtes complexes — celles avec des en-têtes personnalisés, des types de contenu non standards (comme <code>application/json</code>), ou des méthodes autres que GET/POST — déclenchent d'abord un preflight. Le navigateur envoie une requête OPTIONS pour vérifier les permissions, et votre serveur doit répondre avec les en-têtes appropriés avant que la vraie requête ne soit envoyée.</p>
+
+  <p>Utilisez <code>Access-Control-Max-Age</code> pour mettre en cache les résultats preflight et éviter l'aller-retour supplémentaire à chaque requête. Une valeur de 86400 (un jour) est raisonnable pour la plupart des API.</p>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 7 — CONFIGS SERVEUR
+  ═══════════════════════════════════════ -->
+  <h2 id="server-configs">Configurations serveur prêtes à copier</h2>
+
+  <p>Ces configurations vous donnent une base de sécurité solide. Elles ne sont pas exhaustives — votre CSP en particulier doit être adapté aux sources réelles de votre application — mais elles couvrent les en-têtes les plus critiques et vous feront passer immédiatement d'un F à un B ou mieux.</p>
+
+  <h3>Nginx — bloc complet d'en-têtes de sécurité</h3>
+
+  <pre><code>server {
+    listen 443 ssl http2;
+    server_name exemple.com;
+
+    # ── En-têtes de sécurité ──────────────────────────────────
+
+    # Forcer HTTPS pendant 1 an, y compris les sous-domaines
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Empêcher le clickjacking
+    add_header X-Frame-Options "DENY" always;
+
+    # Empêcher le MIME sniffing
+    add_header X-Content-Type-Options "nosniff" always;
+
+    # Contrôler les informations de référent
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Restreindre l'accès aux API du navigateur
+    add_header Permissions-Policy "camera=(), microphone=(), geolocalisation=(), payment=()" always;
+
+    # Content Security Policy — à adapter pour votre application
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; object-src 'none'; base-uri 'self';" always;
+
+    # ── Masquer les informations du serveur ──────────────────
+    server_tokens off;
+
+    # ── Vos blocs SSL, location, etc. ────────────────────────
+}</code></pre>
+
+  <h3>Apache — .htaccess ou VirtualHost</h3>
+
+  <pre><code># Nécessite que mod_headers soit activé : a2enmod headers
+
+&lt;IfModule mod_headers.c&gt;
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocalisation=()"
+    Header always set Content-Security-Policy "default-src 'self'; object-src 'none';"
+&lt;/IfModule&gt;
+
+# Masquer la version d'Apache
+ServerTokens Prod
+ServerSignature Off</code></pre>
+
+  <h3>Express.js (Node.js) — avec Helmet</h3>
+
+  <pre><code>const express = require('express');
+const helmet = require('helmet');
+
+const app = express();
+
+// Helmet configure automatiquement tous les en-têtes de sécurité importants
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  permissionsPolicy: {
+    camera: [],
+    microphone: [],
+    geolocalisation: [],
+  },
+}));
+
+// Supprimer X-Powered-By (Helmet le fait aussi, mais explicite c'est mieux)
+app.disable('x-powered-by');</code></pre>
+
+  <h3>Vercel / Netlify — next.config.js ou netlify.toml</h3>
+
+  <pre><code>// next.config.js (Next.js)
+const securityHeaders = [
+  { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocalisation=()' },
+];
+
+module.exports = {
+  async headers() {
+    return [{ source: '/(.*)', headers: securityHeaders }];
+  },
+};</code></pre>
+
+  <pre><code># netlify.toml
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocalisation=()"</code></pre>
+
+  <div style="text-align:center;margin:28px 0">
+    <a href="/fr/outils/analyseur-headers-http/" class="btn-cta">🔍 Analysez vos en-têtes maintenant — gratuit, instantané, côté client</a>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 8 — FAQ
+  ═══════════════════════════════════════ -->
+  <h2 id="faq">Foire aux questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Dois-je mettre tous les en-têtes de sécurité sur chaque page ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">HSTS, X-Content-Type-Options, Referrer-Policy et Permissions-Policy doivent être définis globalement sur chaque réponse. CSP et X-Frame-Options sont fortement recommandés partout mais peuvent nécessiter une personnalisation par page si vous intégrez des iframes légitimes ou chargez des scripts tiers. Les en-têtes Server et X-Powered-By doivent être supprimés ou neutralisés globalement — ils n'ont aucune utilité pour l'utilisateur en production.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Un CSP strict va-t-il casser mon site web ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Un CSP mal configuré peut bloquer des ressources légitimes — vos propres scripts, Google Analytics, les polices intégrées. La bonne approche consiste à utiliser d'abord Content-Security-Policy-Report-Only. Ce mode envoie des rapports de violation à une URL que vous spécifiez sans rien appliquer. Surveillez les rapports pendant une semaine, ajoutez les sources nécessaires à votre politique, puis passez à l'application. Évitez également unsafe-inline pour les scripts — utilisez des nonces à la place, qui autorisent des scripts en ligne légitimes spécifiques tout en bloquant ceux qui sont injectés.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">X-Frame-Options est-il encore nécessaire si j'utilise CSP frame-ancestors ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Strictement parlant, non — CSP frame-ancestors remplace X-Frame-Options dans les navigateurs qui supportent CSP Level 2 (tous les navigateurs modernes). Mais conserver les deux en-têtes offre une défense en profondeur pour les navigateurs plus anciens et les extensions de navigateur qui pourraient ne pas implémenter complètement CSP. Le coût est d'une ligne de configuration supplémentaire. Le bénéfice est une couverture légèrement plus large. À moins d'avoir une raison spécifique de le supprimer, gardez les deux.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Quelle est la différence entre no-cache et no-store ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">C'est la confusion la plus courante sur Cache-Control. no-cache signifie que le navigateur peut stocker la réponse localement mais doit vérifier auprès du serveur avant de la servir — en utilisant la validation ETag ou Last-Modified. Si le serveur dit que rien n'a changé, il renvoie 304 Not Modified et le navigateur sert la copie en cache. no-store signifie ne jamais stocker la réponse nulle part. Utilisez no-cache pour le contenu qui change fréquemment mais où la logique de cache est utile. Utilisez no-store pour le contenu vraiment sensible comme les sessions bancaires ou les données médicales personnelles.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Puis-je combiner Access-Control-Allow-Origin: * avec les credentials ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Non, et le navigateur bloquera cette combinaison indépendamment de ce que votre serveur envoie. La spécification CORS exige que lorsque Access-Control-Allow-Credentials est true, l'en-tête Access-Control-Allow-Origin doit contenir une origine spécifique, pas un wildcard. C'est intentionnel : les credentials ne doivent jamais être envoyés en cross-origin à une origine inconnue arbitraire. Pour prendre en charge les requêtes cross-origin avec credentials, validez l'en-tête Origin de la requête par rapport à votre liste d'autorisation et renvoyez-le dans la réponse, avec un en-tête Vary: Origin pour éviter les problèmes de cache.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Comment vérifier mes en-têtes de sécurité actuels ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Trois méthodes. La plus rapide : ouvrez les DevTools du navigateur, allez dans l'onglet Réseau, cliquez sur n'importe quelle requête vers votre serveur, et regardez la section En-têtes de réponse. Depuis le terminal : curl -I https://votresite.com affiche tous les en-têtes de réponse. Ou utilisez l'Analyseur d'en-têtes HTTP de DevToolbox — collez les en-têtes et obtenez une note de sécurité instantanée avec des explications pour chacun, ce qui manque, et quelle est la valeur recommandée.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       RÉFÉRENCES
+  ═══════════════════════════════════════ -->
+  <section class="references">
+    <h3>Sources et références</h3>
+    <ul class="ref-list">
+      <li><a href="https://owasp.org/www-project-secure-headers/" target="_blank" rel="noopener noreferrer">OWASP Secure Headers Project</a> — référence canonique pour les recommandations d'en-têtes de sécurité, mise à jour régulièrement par la communauté de la sécurité.</li>
+      <li><a href="https://developer.mozilla.org/fr/docs/Web/HTTP/Headers" target="_blank" rel="noopener noreferrer">MDN Web Docs — En-têtes HTTP</a> — la documentation la plus précise et à jour pour les spécifications individuelles des en-têtes.</li>
+      <li><a href="https://developer.mozilla.org/fr/docs/Web/HTTP/CSP" target="_blank" rel="noopener noreferrer">MDN — Content Security Policy</a> — référence complète des directives CSP avec compatibilité des navigateurs.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noopener noreferrer">RFC 9110 — Sémantique HTTP (IETF, 2022)</a> — la spécification faisant autorité pour la sémantique HTTP/1.1 et HTTP/2, y compris Cache-Control.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc6797" target="_blank" rel="noopener noreferrer">RFC 6797 — HTTP Strict Transport Security (IETF, 2012)</a> — la spécification HSTS originale.</li>
+      <li><a href="https://fetch.spec.whatwg.org/#http-cors-protocol" target="_blank" rel="noopener noreferrer">WHATWG Fetch Standard — Protocole CORS</a> — le standard vivant implémenté par tous les navigateurs modernes, faisant autorité pour le comportement CORS.</li>
+      <li><a href="https://csp.withgoogle.com/docs/strict-csp.html" target="_blank" rel="noopener noreferrer">Google — Recommandation CSP strict</a> — le guide interne de Google pour déployer un CSP strict basé sur les nonces à grande échelle.</li>
+      <li><a href="https://hstspreload.org" target="_blank" rel="noopener noreferrer">HSTS Preload List — hstspreload.org</a> — liste maintenue par Chrome des domaines avec HTTPS obligatoire, utilisée par tous les principaux navigateurs.</li>
+      <li><a href="https://securityheaders.com" target="_blank" rel="noopener noreferrer">SecurityHeaders.com</a> — scanner gratuit qui vérifie les en-têtes de sécurité de votre site et fournit une note, opéré par Scott Helme.</li>
+      <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP Clickjacking Defense Cheat Sheet</a> — référence technique pour X-Frame-Options et CSP frame-ancestors.</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       OUTILS CONNEXES
+  ═══════════════════════════════════════ -->
+  <div class="related-tools">
+    <h3>Outils DevToolbox connexes</h3>
+    <ul>
+      <li><a href="/fr/outils/analyseur-headers-http/">→ Analyseur d'en-têtes HTTP</a> — collez vos en-têtes, obtenez une note de sécurité instantanée et l'explication de chaque en-tête</li>
+      <li><a href="/fr/outils/decodeur-jwt/">→ Décodeur JWT & Analyseur de sécurité</a> — inspectez les jetons JWT qui voyagent dans les en-têtes Authorization</li>
+      <li><a href="/fr/outils/encodeur-decodeur-url/">→ Encodeur / Décodeur URL</a> — décodez les valeurs encodées en pourcentage dans les en-têtes Location, Set-Cookie et autres</li>
+      <li><a href="/fr/outils/convertisseur-timestamp/">→ Convertisseur de timestamp Unix</a> — convertissez les timestamps des en-têtes Date, Last-Modified et Expires</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour les développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/fr/a-propos/">À propos</a> | <a href="/fr/contact/">Contact</a></p>
+</footer>
+</div>
+
+<script>
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Clair' : '🌙 Sombre';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Clair';
+  }
+})();
+</script>
+</body>
+</html>
