@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTTP Response Headers: The Complete Security Guide (2026)</title>
+<meta name="description" content="A developer's guide to HTTP response headers: security score, clickjacking, CSP, HSTS, CORS, Cache-Control. Ready-to-paste Nginx and Apache configs. Written by Mathias Kouadio.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/http-response-headers-guide/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/http-response-headers-guide/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/guide-headers-http/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/http-response-headers-guide/">
+
+<meta property="og:title" content="HTTP Response Headers: The Complete Security Guide (2026)">
+<meta property="og:description" content="Security headers explained with real attack scenarios, ready-to-paste server configs, and a CORS deep dive. 100% practical.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/http-response-headers-guide/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"HTTP Response Headers: The Complete Security Guide (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/about/"},
+  "datePublished":"2026-06-10",
+  "dateModified":"2026-06-10",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/tools/blog/http-response-headers-guide/",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"A developer's guide to HTTP response headers: what each one does, what happens when it's missing, and ready-to-paste configurations for Nginx and Apache."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Do I need all security headers on every page?","acceptedAnswer":{"@type":"Answer","text":"The headers HSTS, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy should be on every page. CSP and X-Frame-Options are also strongly recommended. The Server and X-Powered-By headers should be removed globally."}},
+    {"@type":"Question","name":"Does Content-Security-Policy break my website?","acceptedAnswer":{"@type":"Answer","text":"A poorly configured CSP can block legitimate resources. Start with Content-Security-Policy-Report-Only to test without enforcing, monitor the reports, and gradually tighten the policy. Avoid unsafe-inline as much as possible — use nonces instead."}},
+    {"@type":"Question","name":"Is X-Frame-Options still needed if I have CSP frame-ancestors?","acceptedAnswer":{"@type":"Answer","text":"If you have a CSP with frame-ancestors, X-Frame-Options is technically redundant in modern browsers. But keeping both provides defense in depth for older browsers that do not support CSP. The overhead is one line of config."}},
+    {"@type":"Question","name":"What is the difference between no-cache and no-store in Cache-Control?","acceptedAnswer":{"@type":"Answer","text":"no-cache means the browser can store the response but must revalidate with the server before serving it again. no-store means the browser must never store the response at all, not even temporarily. Use no-store for sensitive data like banking pages."}},
+    {"@type":"Question","name":"Can I set Access-Control-Allow-Origin: * and also allow credentials?","acceptedAnswer":{"@type":"Answer","text":"No. Browsers refuse this combination by design. When Access-Control-Allow-Credentials is true, the CORS spec requires a specific origin in Access-Control-Allow-Origin. Using * with credentials is blocked by all modern browsers."}},
+    {"@type":"Question","name":"How do I test my security headers?","acceptedAnswer":{"@type":"Answer","text":"Use the DevToolbox HTTP Header Analyzer: paste your response headers and get an instant security grade with explanations. You can also use curl -I https://yoursite.com in the terminal, or the Network tab in browser DevTools."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/tools/blog/"},
+    {"@type":"ListItem","position":3,"name":"HTTP Response Headers Guide","item":"https://www.devstoolsbox.dev/tools/blog/http-response-headers-guide/"}
+  ]
+}
+</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-JRBW78KE29');
+    </script>
+<style>
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
+
+/* header */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+/* breadcrumb */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+/* article card */
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+/* typography */
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+/* note/warning callouts */
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+/* decision table */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+.dec-table{background:var(--pass-bg);border:2px solid var(--pass);border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+body.dark .dec-table{background:var(--pass-bg)}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+
+/* security header rows */
+.sec-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:16px 0}
+.sec-card-name{font-family:var(--mono);font-weight:800;color:var(--primary);font-size:.95rem;margin-bottom:6px}
+.sec-card-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-left:8px;vertical-align:middle}
+.badge-crit{background:var(--fail-bg);color:var(--fail)}
+.badge-high{background:#fff0e8;color:#c2410c}
+.badge-med{background:var(--warn-bg);color:#b45309}
+.badge-low{background:var(--pass-bg);color:var(--pass)}
+body.dark .badge-high{background:#4a1a00;color:#fb923c}
+.sec-card-rec{font-family:var(--mono);font-size:.82rem;color:var(--text3);margin-top:8px;padding:7px 10px;background:var(--bg);border-radius:7px;border:1px solid var(--border)}
+
+/* CTA button */
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+/* FAQ */
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+/* references */
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+/* related tools */
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+/* footer */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+
+/* toc */
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/http-response-headers-guide/" class="pill-btn active">EN</a>
+      <a href="/fr/blog/guide-headers-http/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tools/blog/">Blog</a></li>
+    <li aria-current="page">HTTP Response Headers Guide</li>
+  </ol>
+</nav>
+
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-06-10">
+  <meta itemprop="dateModified" content="2026-06-10">
+
+  <h1 itemprop="headline">HTTP Response Headers: The Complete Security Guide (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-06-10">June 10, 2026</time>
+    <span>·</span>
+    <span>18 min read</span>
+    <span>·</span>
+    <span>By <a href="/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <!-- TABLE OF CONTENTS -->
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">In this article</div>
+    <ol>
+      <li><a href="#incident">The production incident that started this</a></li>
+      <li><a href="#decision-table">Quick decision table</a></li>
+      <li><a href="#security-headers">The 8 security headers every server needs</a></li>
+      <li><a href="#cache-control">Cache-Control: every directive explained</a></li>
+      <li><a href="#information-leakage">Headers that reveal too much</a></li>
+      <li><a href="#cors">CORS: the most misunderstood part</a></li>
+      <li><a href="#server-configs">Ready-to-paste server configurations</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- ═══════════════════════════════════════
+       SECTION 1 — INCIDENT
+  ═══════════════════════════════════════ -->
+  <h2 id="incident">The production incident that started this</h2>
+
+  <p>In 2015, researchers discovered a vulnerability affecting a major banking application in the UK. The attack was simple: a third-party ad network had been compromised and was serving a page that loaded the bank's transfer confirmation screen inside a transparent <code>&lt;iframe&gt;</code>. When a user visited the malicious page, they thought they were clicking a "Win an iPhone" button. They were actually clicking "Confirm transfer" on a bank page they couldn't see.</p>
+
+  <p>The fix would have been two lines of configuration on the bank's server. Two lines that would have added <code>X-Frame-Options: DENY</code> to every response. They weren't there. This attack pattern — clickjacking — has been documented by the OWASP Foundation since 2008, and it still works on sites that haven't added this header.</p>
+
+  <p>This isn't an edge case. Security researchers at <a href="https://securityheaders.com" target="_blank" rel="noopener noreferrer">SecurityHeaders.com</a> run automated scans of the Alexa top million sites. In their most recent analysis, only about 3% of websites received an A or A+ rating. The other 97% were missing at least one critical security header. On most of them, the misconfiguration wasn't complex — it was simply absent.</p>
+
+  <p>HTTP response headers are invisible in normal browsing. They don't appear in the page source. They live in the Network tab of DevTools, in <code>curl -I</code> output, in Nginx config files. Most developers never look at them until something breaks. This article changes that.</p>
+
+  <div class="callout callout-info">
+    <strong>Check your headers now:</strong> Paste your HTTP response headers into the <a href="/tools/http-header-analyzer/">DevToolbox HTTP Header Analyzer</a> and get an instant security grade with plain-English explanations. It runs entirely in your browser — nothing is sent to any server.
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 2 — DECISION TABLE
+  ═══════════════════════════════════════ -->
+  <h2 id="decision-table">Quick decision table — what to add and why</h2>
+
+  <p>If you're in a hurry, here's the answer. If you want to understand each one deeply — which you should, because the devil is in the configuration — the rest of this article covers every row in detail.</p>
+
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>Header</th><th>Risk if absent</th><th>Recommended value</th><th>Priority</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Strict-Transport-Security</code></td><td>HTTP downgrade attacks, cookie theft on HTTP</td><td><code>max-age=31536000; includeSubDomains</code></td><td>Critical</td></tr>
+        <tr><td><code>Content-Security-Policy</code></td><td>XSS via injected scripts</td><td><code>default-src 'self'; object-src 'none'</code></td><td>Critical</td></tr>
+        <tr><td><code>X-Frame-Options</code></td><td>Clickjacking</td><td><code>DENY</code> or <code>SAMEORIGIN</code></td><td>High</td></tr>
+        <tr><td><code>X-Content-Type-Options</code></td><td>MIME-sniffing → file execution</td><td><code>nosniff</code></td><td>High</td></tr>
+        <tr><td><code>Referrer-Policy</code></td><td>URL leakage (tokens in query strings)</td><td><code>strict-origin-when-cross-origin</code></td><td>Medium</td></tr>
+        <tr><td><code>Permissions-Policy</code></td><td>Compromised scripts access camera/mic/location</td><td><code>camera=(), microphone=(), geolocation=()</code></td><td>Medium</td></tr>
+        <tr><td><code>Server</code> (remove version)</td><td>Fingerprinting → targeted CVE exploitation</td><td>Generic value or absent</td><td>Medium</td></tr>
+        <tr><td><code>X-Powered-By</code> (remove)</td><td>Framework fingerprinting</td><td>Absent</td><td>Low</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 3 — THE 8 HEADERS
+  ═══════════════════════════════════════ -->
+  <h2 id="security-headers">The 8 security headers every production server needs</h2>
+
+  <h3>1. Strict-Transport-Security (HSTS)</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Strict-Transport-Security <span class="sec-card-badge badge-crit">Critical</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Tells the browser to <strong>always use HTTPS</strong> for this domain, even if the user types <code>http://</code> or clicks an HTTP link.</p>
+    <div class="sec-card-rec">max-age=31536000; includeSubDomains; preload</div>
+  </div>
+
+  <p>Without HSTS, here's what happens on public Wi-Fi: a user types <em>yourbank.com</em> in the address bar. The browser sends the first request over HTTP — it has no way to know it should use HTTPS before making contact. A network attacker sitting on the same network intercepts that HTTP request and never forwards it to the real server. They serve their own page instead. This is a <strong>protocol downgrade attack</strong>, and HSTS prevents it by making the browser refuse to make HTTP connections to the domain after the first successful HTTPS visit.</p>
+
+  <p>The <code>max-age</code> value is in seconds. <code>31536000</code> is one year — the standard recommendation. <code>includeSubDomains</code> extends the protection to all subdomains. <code>preload</code> submits your domain to <a href="https://hstspreload.org" target="_blank" rel="noopener noreferrer">the HSTS preload list</a> maintained by Google and included in all major browsers, meaning HTTPS is enforced even before the first visit — no unprotected first request ever.</p>
+
+  <div class="callout callout-warn">
+    <strong>One important caveat:</strong> don't add <code>preload</code> unless you're certain every subdomain serves valid HTTPS and always will. Removing a domain from the preload list takes weeks and requires manual review.
+  </div>
+
+  <h3>2. Content-Security-Policy (CSP)</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Content-Security-Policy <span class="sec-card-badge badge-crit">Critical</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Defines a <strong>whitelist of trusted sources</strong> for scripts, styles, images, and other resources. The browser enforces it — anything not on the list is blocked.</p>
+    <div class="sec-card-rec">default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'</div>
+  </div>
+
+  <p>CSP is your primary defense against Cross-Site Scripting (XSS). If an attacker manages to inject a script into your page — through a comment field, an API response that's rendered without sanitization, or a compromised third-party library — a well-configured CSP will block that script from executing.</p>
+
+  <p>The most common mistake I see in real projects is using <code>unsafe-inline</code> to allow inline scripts and styles. This single directive completely disables XSS protection for scripts. If you have inline scripts, the modern approach is to use nonces: a random value generated per request, added to the CSP header and to each legitimate script tag.</p>
+
+  <pre><code># With nonce-based CSP (recommended for apps with inline scripts)
+Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{random_per_request}'; object-src 'none'</code></pre>
+
+  <p>If you're not sure where to start, use <code>Content-Security-Policy-Report-Only</code> first. It sends violation reports to a URL you specify without actually blocking anything. This lets you understand what your policy would break before enforcing it.</p>
+
+  <pre><code># Test without enforcing — add report-uri to collect violations
+Content-Security-Policy-Report-Only: default-src 'self'; report-uri https://yourapp.com/csp-report</code></pre>
+
+  <h3>3. X-Frame-Options</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">X-Frame-Options <span class="sec-card-badge badge-high">High</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Prevents your page from being loaded inside an <code>&lt;iframe&gt;</code> on another origin. The primary clickjacking defense.</p>
+    <div class="sec-card-rec">DENY</div>
+  </div>
+
+  <p>The clickjacking scenario is straightforward: an attacker builds a page that overlays a transparent iframe loading your app. The user interacts with what they think is the attacker's page but is actually sending clicks to your app underneath. Sensitive actions — confirming transactions, changing passwords, granting permissions — can be triggered without the user's knowledge.</p>
+
+  <p><code>DENY</code> blocks framing entirely, on all domains including your own. <code>SAMEORIGIN</code> allows framing only from the same origin. The deprecated <code>ALLOW-FROM origin</code> is ignored by modern browsers — if you need to allow a specific origin, use CSP's <code>frame-ancestors</code> directive instead.</p>
+
+  <div class="callout callout-info">
+    <strong>CSP vs X-Frame-Options:</strong> CSP's <code>frame-ancestors</code> is more flexible and supersedes X-Frame-Options in supporting browsers. But X-Frame-Options still covers older browsers. Keeping both costs one line of config and costs nothing in performance.
+  </div>
+
+  <h3>4. X-Content-Type-Options</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">X-Content-Type-Options <span class="sec-card-badge badge-high">High</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Prevents the browser from guessing the content type of a response. The only valid value is <code>nosniff</code>.</p>
+    <div class="sec-card-rec">nosniff</div>
+  </div>
+
+  <p>Without this header, browsers try to be helpful by "sniffing" the content type when the declared type seems wrong. An attacker can upload a file with a <code>.txt</code> extension that contains JavaScript. If a script tag points to it, an older browser might execute it anyway, regardless of what the server says the Content-Type is. <code>nosniff</code> tells the browser: "Trust the Content-Type I declare. Don't guess."</p>
+
+  <p>This is one of the simplest headers to add — one line of config, zero side effects if your Content-Type headers are correct. There's no valid reason to not have it in production.</p>
+
+  <h3>5. Referrer-Policy</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Referrer-Policy <span class="sec-card-badge badge-med">Medium</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Controls how much URL information is included in the <code>Referer</code> header when navigating to other sites.</p>
+    <div class="sec-card-rec">strict-origin-when-cross-origin</div>
+  </div>
+
+  <p>Consider a URL like <code>https://yourapp.com/reset-password?token=abc123</code>. Without a Referrer-Policy, if a user clicks a link on that page to another site, the destination site's server logs receive the full URL — including the reset token. That token is now in a third-party server's logs, potentially accessible to their engineers, and possibly collected by analytics services.</p>
+
+  <p>The same applies to search query parameters, internal IDs, session tokens passed in URLs, and any other data in your URL structure. <code>strict-origin-when-cross-origin</code> sends the full URL to same-origin destinations but only the origin (no path, no query string) to cross-origin destinations. It's the browser default since Chrome 85, but explicitly setting it ensures consistent behavior across all browsers.</p>
+
+  <h3>6. Permissions-Policy</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Permissions-Policy <span class="sec-card-badge badge-med">Medium</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Restricts browser API access for your page — camera, microphone, geolocation, payment, and more.</p>
+    <div class="sec-card-rec">camera=(), microphone=(), geolocation=(), payment=()</div>
+  </div>
+
+  <p>If your application doesn't use the camera, there's no reason for any script on your page to be able to access it — including a compromised third-party library or a successful XSS payload. Permissions-Policy enforces this at the browser level. Even if an attacker manages to run code on your page, the browser will refuse to grant camera access if your policy says <code>camera=()</code>.</p>
+
+  <p>This header replaced the older <code>Feature-Policy</code> header in 2020. The successor is supported in all modern browsers. List only the APIs your application actually uses, and explicitly deny everything else.</p>
+
+  <h3>7. Cross-Origin Opener Policy (COOP)</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Cross-Origin-Opener-Policy <span class="sec-card-badge badge-med">Medium</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Isolates your browsing context from cross-origin windows, required for high-resolution timers and <code>SharedArrayBuffer</code>.</p>
+    <div class="sec-card-rec">same-origin</div>
+  </div>
+
+  <p>After the Spectre CPU vulnerability was discovered in 2018, browsers restricted access to precise timing APIs that could be used for side-channel attacks. To re-enable features like <code>SharedArrayBuffer</code> and high-resolution <code>performance.now()</code>, your site needs to be in a cross-origin isolated context — which requires both COOP and COEP (<code>Cross-Origin-Embedder-Policy: require-corp</code>). If you don't use SharedArrayBuffer, COOP <code>same-origin</code> is still a good defense-in-depth header that prevents your page from being referenced by cross-origin windows.</p>
+
+  <h3>8. Cross-Origin Resource Policy (CORP)</h3>
+
+  <div class="sec-card">
+    <div class="sec-card-name">Cross-Origin-Resource-Policy <span class="sec-card-badge badge-low">Low</span></div>
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px">Controls which origins can load this resource, protecting against Spectre-style attacks via cross-origin reads.</p>
+    <div class="sec-card-rec">same-origin (for sensitive resources)</div>
+  </div>
+
+  <p>This header is particularly relevant for APIs and resources that return sensitive data. <code>same-origin</code> means only same-origin documents can load the resource. Use <code>cross-origin</code> for resources intentionally shared (like a public CDN). Set it on APIs that should never be embedded or cross-origin loaded.</p>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 4 — CACHE-CONTROL
+  ═══════════════════════════════════════ -->
+  <h2 id="cache-control">Cache-Control: every directive explained</h2>
+
+  <p>Cache-Control is the header that most developers half-understand. They know <code>no-cache</code> means "don't cache" — except it doesn't. Getting this wrong has real consequences: users see stale data, sensitive pages get cached by CDNs, or your app makes unnecessary requests to the origin on every load. Let me go through each directive properly.</p>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead>
+        <tr><th>Directive</th><th>What it actually means</th><th>When to use it</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>max-age=N</code></td><td>Cache for N seconds. After that, the browser revalidates with the server.</td><td>Static assets, pages that change infrequently</td></tr>
+        <tr><td><code>no-store</code></td><td>Never store this response anywhere — not even temporarily. Every request goes to the server.</td><td>Banking pages, personal data, pages with sensitive info</td></tr>
+        <tr><td><code>no-cache</code></td><td>The browser <em>can</em> store it, but <em>must</em> revalidate with the server before serving it. Uses ETag or Last-Modified to check if fresh.</td><td>Pages that change frequently but benefit from ETag validation</td></tr>
+        <tr><td><code>private</code></td><td>Only the user's browser cache can store this. CDNs and shared proxies cannot.</td><td>Authenticated pages, user-specific content</td></tr>
+        <tr><td><code>public</code></td><td>CDNs, proxies, and shared caches can store this.</td><td>Static assets, public API responses, images</td></tr>
+        <tr><td><code>s-maxage=N</code></td><td>CDN-specific max-age. Overrides max-age for shared caches only.</td><td>When you want different TTLs for browsers vs CDNs</td></tr>
+        <tr><td><code>stale-while-revalidate=N</code></td><td>Serve the stale cached version for up to N seconds while fetching a fresh copy in the background.</td><td>UI pages where a slightly stale response is acceptable</td></tr>
+        <tr><td><code>immutable</code></td><td>The resource will never change. The browser skips revalidation during max-age, even on hard refresh.</td><td>Content-hashed assets (app.a3b1c2d4.js, logo.png?v=3)</td></tr>
+        <tr><td><code>must-revalidate</code></td><td>Once stale, the browser must revalidate with the origin before serving. Cannot serve stale content even if the server is unreachable.</td><td>Data where serving stale content is unacceptable</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>The most common misunderstanding: <code>no-cache</code> ≠ "no caching". It means "cache it, but always check with the server first". If you truly don't want caching at all, use <code>no-store</code>. The confusion comes from the name, which was arguably a bad choice by the HTTP spec authors.</p>
+
+  <p>A practical strategy for modern web applications: use <code>Cache-Control: public, max-age=31536000, immutable</code> for content-hashed static assets (your bundler adds a hash to the filename on every build), and <code>Cache-Control: no-cache</code> for your HTML files (which are short and cheap to revalidate, and need to reference the latest assets).</p>
+
+  <pre><code># Nginx — different cache strategies per resource type
+
+# HTML files: always revalidate (they reference the latest assets)
+location ~* \.html$ {
+    add_header Cache-Control "no-cache";
+}
+
+# Content-hashed assets: cache forever, never revalidate
+location ~* \.(js|css|woff2)$ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+}
+
+# API responses: private, 60 seconds max
+location /api/ {
+    add_header Cache-Control "private, max-age=60";
+}
+
+# Sensitive pages: never store
+location /account/ {
+    add_header Cache-Control "no-store";
+}</code></pre>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 5 — INFORMATION LEAKAGE
+  ═══════════════════════════════════════ -->
+  <h2 id="information-leakage">Headers that reveal too much information</h2>
+
+  <p>Some headers shouldn't be there at all. They're added by default by web servers and frameworks, and they hand attackers free intelligence about your infrastructure.</p>
+
+  <h3>Server: Apache/2.4.51 (Ubuntu)</h3>
+
+  <p>That response header tells an attacker exactly what to search for on <a href="https://nvd.nist.gov" target="_blank" rel="noopener noreferrer">NVD (National Vulnerability Database)</a> or <a href="https://www.exploit-db.com" target="_blank" rel="noopener noreferrer">Exploit-DB</a>. Apache 2.4.49 had a path traversal CVE (CVE-2021-41773) that was actively exploited within days of disclosure. A server advertising its version is essentially saying: "Here's a list of my known vulnerabilities."</p>
+
+  <p>Removing the version is trivial. Removing the server name entirely is slightly more involved but possible on all major servers.</p>
+
+  <pre><code># Nginx — hide version number
+server_tokens off;
+# Result: Server: nginx (version removed)
+
+# Apache — httpd.conf or .htaccess
+ServerTokens Prod
+ServerSignature Off
+# Result: Server: Apache (only product name, no version)</code></pre>
+
+  <h3>X-Powered-By: PHP/8.1.0 or X-Powered-By: Express</h3>
+
+  <p>Added by default by PHP and Express.js. Same problem: you're advertising your framework and version. Removing it:</p>
+
+  <pre><code># Express.js — disable the header entirely
+app.disable('x-powered-by');
+
+# Or use Helmet, which handles this and other security headers automatically
+const helmet = require('helmet');
+app.use(helmet());
+
+# PHP — php.ini
+expose_php = Off</code></pre>
+
+  <h3>X-AspNet-Version and X-AspNetMvc-Version</h3>
+
+  <p>Added by default in older ASP.NET configurations. Neither header serves any legitimate purpose in production.</p>
+
+  <pre><code><!-- web.config -->
+&lt;system.web&gt;
+  &lt;httpRuntime enableVersionHeader="false" /&gt;
+&lt;/system.web&gt;</code></pre>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 6 — CORS
+  ═══════════════════════════════════════ -->
+  <h2 id="cors">CORS: the most misunderstood security mechanism</h2>
+
+  <p>Cross-Origin Resource Sharing (CORS) is the mechanism that controls which origins can make cross-origin requests to your server. It's enforced by browsers — not by your server itself. Understanding this distinction is critical, because CORS does <strong>not</strong> protect your server from server-to-server requests or from non-browser clients like <code>curl</code>.</p>
+
+  <h3>The common mistake: wildcard + credentials</h3>
+
+  <p>A pattern I've seen in production multiple times:</p>
+
+  <pre><code># ❌ This combination is rejected by all modern browsers
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true</code></pre>
+
+  <p>The CORS spec explicitly forbids this combination. When <code>Access-Control-Allow-Credentials: true</code>, the browser will only include cookies and authorization headers in the cross-origin request if the server specifies a concrete origin — not a wildcard. The logic: a wildcard means "any origin", which is acceptable for truly public resources, but you'd never want to send your authentication cookies to a request from any random origin.</p>
+
+  <p>If you need credentials, you need to echo back the specific requesting origin (after validating it against your allowlist):</p>
+
+  <pre><code># ✅ Correct for credentialed cross-origin requests
+# (Set dynamically in your server code after validating the Origin header)
+Access-Control-Allow-Origin: https://app.yourcompany.com
+Access-Control-Allow-Credentials: true
+Vary: Origin  # ← Tell caches that responses differ by Origin</code></pre>
+
+  <div class="callout callout-warn">
+    <strong>Always add Vary: Origin</strong> when you set Access-Control-Allow-Origin dynamically. Without it, a CDN might cache the response with one origin's header and serve it to a different origin — either leaking your credentials policy or causing legitimate requests to fail.
+  </div>
+
+  <h3>The CORS headers reference</h3>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead>
+        <tr><th>Header</th><th>Who sends it</th><th>What it controls</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Access-Control-Allow-Origin</code></td><td>Server (response)</td><td>Which origin can read the response</td></tr>
+        <tr><td><code>Access-Control-Allow-Methods</code></td><td>Server (preflight response)</td><td>Which HTTP methods are allowed</td></tr>
+        <tr><td><code>Access-Control-Allow-Headers</code></td><td>Server (preflight response)</td><td>Which request headers are permitted</td></tr>
+        <tr><td><code>Access-Control-Allow-Credentials</code></td><td>Server (response)</td><td>Whether cookies/auth headers can be sent</td></tr>
+        <tr><td><code>Access-Control-Max-Age</code></td><td>Server (preflight response)</td><td>How long to cache the preflight result (seconds)</td></tr>
+        <tr><td><code>Origin</code></td><td>Browser (request)</td><td>The origin of the requesting page</td></tr>
+        <tr><td><code>Access-Control-Request-Method</code></td><td>Browser (preflight)</td><td>The method the actual request will use</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Simple vs preflighted requests</h3>
+
+  <p>Not every cross-origin request triggers a preflight OPTIONS request. "Simple" requests — GET and POST with standard content types like <code>application/x-www-form-urlencoded</code> — go directly. Complex requests — those with custom headers, non-standard content types (like <code>application/json</code>), or methods other than GET/POST — trigger a preflight first. The browser sends an OPTIONS request to check permissions, and your server must respond with the appropriate headers before the real request is sent.</p>
+
+  <p>Use <code>Access-Control-Max-Age</code> to cache preflight results and avoid the extra round trip on every request. A value of 86400 (one day) is reasonable for most APIs.</p>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 7 — SERVER CONFIGS
+  ═══════════════════════════════════════ -->
+  <h2 id="server-configs">Ready-to-paste server configurations</h2>
+
+  <p>These configurations give you a solid security baseline. They're not exhaustive — your CSP in particular needs to be tailored to your application's actual sources — but they address the most critical headers and will move you from an F to a B or better immediately.</p>
+
+  <h3>Nginx — complete security headers block</h3>
+
+  <pre><code>server {
+    listen 443 ssl http2;
+    server_name example.com;
+
+    # ── Security headers ──────────────────────────────────────
+
+    # Force HTTPS for 1 year, including subdomains
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Prevent clickjacking
+    add_header X-Frame-Options "DENY" always;
+
+    # Prevent MIME sniffing
+    add_header X-Content-Type-Options "nosniff" always;
+
+    # Control referrer information
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Restrict browser API access
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
+
+    # Content Security Policy — tighten for your app
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; object-src 'none'; base-uri 'self';" always;
+
+    # ── Hide server information ───────────────────────────────
+    server_tokens off;
+
+    # ── Your SSL, location blocks, etc. ──────────────────────
+}</code></pre>
+
+  <h3>Apache — .htaccess or VirtualHost</h3>
+
+  <pre><code># Requires mod_headers to be enabled: a2enmod headers
+
+&lt;IfModule mod_headers.c&gt;
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Content-Security-Policy "default-src 'self'; object-src 'none';"
+&lt;/IfModule&gt;
+
+# Hide Apache version
+ServerTokens Prod
+ServerSignature Off</code></pre>
+
+  <h3>Express.js (Node.js) — with Helmet</h3>
+
+  <pre><code>const express = require('express');
+const helmet = require('helmet');
+
+const app = express();
+
+// Helmet configures all the important security headers automatically
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  permissionsPolicy: {
+    camera: [],
+    microphone: [],
+    geolocation: [],
+  },
+}));
+
+// Remove X-Powered-By (Helmet does this too, but explicit is better)
+app.disable('x-powered-by');</code></pre>
+
+  <h3>Vercel / Netlify — next.config.js or netlify.toml</h3>
+
+  <pre><code>// next.config.js (Next.js)
+const securityHeaders = [
+  { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+];
+
+module.exports = {
+  async headers() {
+    return [{ source: '/(.*)', headers: securityHeaders }];
+  },
+};</code></pre>
+
+  <pre><code># netlify.toml
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"</code></pre>
+
+  <div style="text-align:center;margin:28px 0">
+    <a href="/tools/http-header-analyzer/" class="btn-cta">🔍 Analyze your headers now — free, instant, client-side</a>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SECTION 8 — FAQ
+  ═══════════════════════════════════════ -->
+  <h2 id="faq">Frequently asked questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Do I need all security headers on every page?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">HSTS, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy should be set globally on every response. CSP and X-Frame-Options are strongly recommended everywhere but may require per-page customization if you embed legitimate iframes or load third-party scripts. The Server and X-Powered-By headers should be removed or neutralized globally — they serve no user-facing purpose in production.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Will a strict CSP break my website?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">A poorly configured CSP can block legitimate resources — your own scripts, Google Analytics, embedded fonts. The right approach is to use Content-Security-Policy-Report-Only first. This mode sends violation reports to a URL you specify without enforcing anything. Monitor the reports for a week, add the necessary sources to your policy, then switch to enforcement. Also avoid unsafe-inline for scripts — use nonces instead, which allow specific legitimate inline scripts while blocking injected ones.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Is X-Frame-Options still needed if I use CSP frame-ancestors?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Strictly speaking, no — CSP frame-ancestors supersedes X-Frame-Options in browsers that support CSP Level 2 (all modern browsers). But keeping both headers provides defense in depth for older browsers and browser extensions that might not fully implement CSP. The cost is one extra line of config. The benefit is slightly broader coverage. Unless you have a specific reason to remove it, keep both.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the difference between no-cache and no-store?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">This is the most common Cache-Control confusion. no-cache means the browser can store the response locally but must check with the server before serving it — using ETag or Last-Modified validation. If the server says nothing changed, it returns 304 Not Modified and the browser serves the cached copy. no-store means never store the response anywhere. Use no-cache for content that changes frequently but where caching logic is useful. Use no-store for truly sensitive content like banking sessions or personal medical data.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Can I combine Access-Control-Allow-Origin: * with credentials?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">No, and the browser will block this combination regardless of what your server sends. The CORS spec requires that when Access-Control-Allow-Credentials is true, the Access-Control-Allow-Origin header must contain a specific origin, not a wildcard. This is by design: credentials should never be sent cross-origin to an arbitrary unknown origin. To support credentialed cross-origin requests, validate the Origin header from the request against your allowlist and echo it back in the response, along with a Vary: Origin header to prevent caching issues.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I check my current security headers?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Three ways. The quickest: open browser DevTools, go to the Network tab, click any request to your server, and look at the Response Headers section. From the terminal: curl -I https://yoursite.com shows all response headers. Or use the DevToolbox HTTP Header Analyzer — paste the headers and get an instant security grade with explanations for each one, what's missing, and what the recommended value is.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       REFERENCES
+  ═══════════════════════════════════════ -->
+  <section class="references">
+    <h3>Sources and references</h3>
+    <ul class="ref-list">
+      <li><a href="https://owasp.org/www-project-secure-headers/" target="_blank" rel="noopener noreferrer">OWASP Secure Headers Project</a> — canonical reference for security header recommendations, updated regularly by the security community.</li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers" target="_blank" rel="noopener noreferrer">MDN Web Docs — HTTP Headers</a> — the most accurate and up-to-date documentation for individual header specifications.</li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP" target="_blank" rel="noopener noreferrer">MDN — Content Security Policy</a> — complete CSP directive reference with browser compatibility.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noopener noreferrer">RFC 9110 — HTTP Semantics (IETF, 2022)</a> — the authoritative specification for HTTP/1.1 and HTTP/2 semantics, including Cache-Control.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc6797" target="_blank" rel="noopener noreferrer">RFC 6797 — HTTP Strict Transport Security (IETF, 2012)</a> — the original HSTS specification.</li>
+      <li><a href="https://fetch.spec.whatwg.org/#http-cors-protocol" target="_blank" rel="noopener noreferrer">WHATWG Fetch Standard — CORS protocol</a> — the living standard implemented by all modern browsers, authoritative for CORS behavior.</li>
+      <li><a href="https://csp.withgoogle.com/docs/strict-csp.html" target="_blank" rel="noopener noreferrer">Google — Strict CSP recommendation</a> — Google's internal guidance on deploying strict nonce-based CSP at scale.</li>
+      <li><a href="https://hstspreload.org" target="_blank" rel="noopener noreferrer">HSTS Preload List — hstspreload.org</a> — Chrome-maintained list of domains with mandatory HTTPS, used by all major browsers.</li>
+      <li><a href="https://securityheaders.com" target="_blank" rel="noopener noreferrer">SecurityHeaders.com</a> — free scanner that checks your site's security headers and provides a grade, operated by Scott Helme.</li>
+      <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP Clickjacking Defense Cheat Sheet</a> — technical reference for X-Frame-Options and CSP frame-ancestors.</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       RELATED TOOLS
+  ═══════════════════════════════════════ -->
+  <div class="related-tools">
+    <h3>Related DevToolbox tools</h3>
+    <ul>
+      <li><a href="/tools/http-header-analyzer/">→ HTTP Header Analyzer</a> — paste headers, get an instant security grade and explanation of every header</li>
+      <li><a href="/tools/jwt-decoder/">→ JWT Decoder & Security Analyzer</a> — inspect the JWT tokens that travel in Authorization headers</li>
+      <li><a href="/tools/url-encoder-decoder/">→ URL Encoder / Decoder</a> — decode percent-encoded values in Location, Set-Cookie, and other headers</li>
+      <li><a href="/tools/unix-timestamp-converter/">→ Unix Timestamp Converter</a> — convert the timestamps in Date, Last-Modified, and Expires headers</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers.
+  <a href="/tools/blog/">Blog</a> | <a href="/tools/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
+</div>
+
+<script>
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Light';
+  }
+})();
+</script>
+</body>
+</html>

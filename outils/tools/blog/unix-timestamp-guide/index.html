@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unix Timestamps: The Complete Developer Guide — Formats, Timezones, UUID Decoding (2026)</title>
+<meta name="description" content="Everything about Unix timestamps: auto-detect seconds vs milliseconds, all date formats in one table, timezone pitfalls, UUID v1/v7 and MongoDB ObjectID timestamp extraction, code in 5 languages, Year 2038 problem. Written by Mathias Kouadio.">
+<meta name="keywords" content="unix timestamp guide, epoch timestamp explained, timestamp to date python javascript, uuid v1 timestamp extract, mongodb objectid timestamp, windows filetime convert, year 2038 problem, timezone aware datetime">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/unix-timestamp-guide/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/unix-timestamp-guide/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/guide-timestamp-unix/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/unix-timestamp-guide/">
+
+<meta property="og:title" content="Unix Timestamps: The Complete Developer Guide (2026)">
+<meta property="og:description" content="Auto-detect seconds vs ms, all date formats, UUID timestamp decoding, timezone pitfalls, code in 5 languages. Everything in one article.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/unix-timestamp-guide/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Unix Timestamps: The Complete Developer Guide — Formats, Timezones, UUID Decoding (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/tools/about/"},
+  "datePublished":"2026-06-10",
+  "dateModified":"2026-06-10",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/tools/blog/unix-timestamp-guide/",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"Complete guide to Unix timestamps: auto-detect seconds vs milliseconds, all conversion formats, timezone pitfalls, UUID v1/v7 and MongoDB ObjectID timestamp extraction, code in 5 languages, Year 2038 problem."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"How do I tell if a Unix timestamp is in seconds or milliseconds?","acceptedAnswer":{"@type":"Answer","text":"Count the digits. A 10-digit number is almost certainly Unix seconds (valid until year 2286). A 13-digit number is milliseconds. Anything above 10,000,000,000 should be treated as milliseconds. JavaScript's Date.now() and Java's System.currentTimeMillis() return milliseconds. Python's time.time() returns seconds."}},
+    {"@type":"Question","name":"What is the Unix epoch?","acceptedAnswer":{"@type":"Answer","text":"The Unix epoch is January 1, 1970 at 00:00:00 UTC. The Unix timestamp is the number of seconds (or milliseconds) that have elapsed since that exact moment. It is timezone-independent, which is why it is the universal standard for storing and comparing dates in databases and APIs."}},
+    {"@type":"Question","name":"Can I extract a date from a UUID v1?","acceptedAnswer":{"@type":"Answer","text":"Yes. UUID v1 encodes a 60-bit timestamp counting 100-nanosecond intervals since October 15, 1582 (the start of the Gregorian calendar reform). Extracting the timestamp requires reassembling three non-contiguous fields in the UUID (time_low, time_mid, time_hi), subtracting the Gregorian offset, then dividing by 10,000 to get Unix milliseconds."}},
+    {"@type":"Question","name":"What is Windows FILETIME and how do I convert it?","acceptedAnswer":{"@type":"Answer","text":"Windows FILETIME is a 64-bit integer counting 100-nanosecond intervals since January 1, 1601. To convert from Unix seconds: FILETIME = (unixSeconds + 11644473600) × 10,000,000. The constant 11644473600 is the number of seconds between January 1, 1601 and January 1, 1970."}},
+    {"@type":"Question","name":"What is the Year 2038 problem?","acceptedAnswer":{"@type":"Answer","text":"On 32-bit systems, Unix timestamps are stored as a signed 32-bit integer, which has a maximum value of 2,147,483,647. This corresponds to January 19, 2038 at 03:14:07 UTC. After that point, the integer overflows to a large negative number, causing date calculations to fail. 64-bit systems are not affected."}},
+    {"@type":"Question","name":"Why do Python datetime objects cause timezone bugs?","acceptedAnswer":{"@type":"Answer","text":"Python has two kinds of datetime objects: naive (no timezone info) and aware (with timezone info). datetime.fromtimestamp() without a tz argument creates a naive datetime interpreted in the local timezone of the server — not UTC. If your server is in UTC+2, a timestamp representing 10:00 UTC becomes a naive datetime showing 12:00, which when serialized as UTC gives the wrong time. Always pass tz=datetime.timezone.utc or a ZoneInfo object."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/tools/blog/"},
+    {"@type":"ListItem","position":3,"name":"Unix Timestamp Guide","item":"https://www.devstoolsbox.dev/tools/blog/unix-timestamp-guide/"}
+  ]
+}
+</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-JRBW78KE29');
+    </script>
+<style>
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
+
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+em{color:var(--text2);font-style:italic}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+.dec-table{background:var(--pass-bg);border:2px solid var(--pass);border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+.plain-table tr:nth-child(even) td{background:var(--surface2)}
+
+/* code language tabs */
+.lang-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:-1px}
+.lang-tab{padding:6px 14px;border-radius:8px 8px 0 0;border:1px solid var(--border);border-bottom:none;background:var(--surface2);color:var(--text2);font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.lang-tab.active{background:var(--code-bg);color:var(--code-color);border-color:var(--code-bg)}
+.code-block{display:none;margin-top:0}
+.code-block.visible{display:block}
+.code-block pre{border-radius:0 12px 12px 12px;margin-top:0}
+
+/* format reference card */
+.format-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin:10px 0;display:grid;grid-template-columns:140px 1fr;gap:8px;align-items:start}
+@media(max-width:500px){.format-card{grid-template-columns:1fr}}
+.format-name{font-family:var(--mono);font-weight:800;color:var(--primary);font-size:.85rem}
+.format-val{font-family:var(--mono);font-size:.82rem;color:var(--text);word-break:break-all}
+.format-desc{grid-column:1/-1;font-size:.82rem;color:var(--text3);margin-top:4px}
+
+/* identifier decoder section */
+.id-decoder-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+.id-decoder-card h4{margin-top:0;margin-bottom:8px;color:var(--primary);font-family:var(--mono)}
+
+/* year 2038 visual */
+.y2038-bar{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:16px 0;font-size:.85rem}
+.y2038-scale{display:flex;align-items:center;gap:0;margin:10px 0;height:28px;border-radius:6px;overflow:hidden}
+.y2038-past{background:#10b981;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;flex-shrink:0}
+.y2038-future{background:#f1f5f9;height:100%;flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.72rem;color:var(--text3)}
+.y2038-marker{width:3px;height:100%;background:#ef4444;flex-shrink:0}
+body.dark .y2038-future{background:var(--surface3,#252e3f)}
+
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/unix-timestamp-guide/" class="pill-btn active">EN</a>
+      <a href="/fr/blog/guide-timestamp-unix/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tools/blog/">Blog</a></li>
+    <li aria-current="page">Unix Timestamp Guide</li>
+  </ol>
+</nav>
+
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-06-10">
+  <meta itemprop="dateModified" content="2026-06-10">
+
+  <h1 itemprop="headline">Unix Timestamps: The Complete Developer Guide — Formats, Timezones, UUID Decoding (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-06-10">June 10, 2026</time>
+    <span>·</span>
+    <span>20 min read</span>
+    <span>·</span>
+    <span>By <a href="/tools/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">In this article</div>
+    <ol>
+      <li><a href="#incident">The production bug that introduced me to this</a></li>
+      <li><a href="#decision-table">Quick decision table</a></li>
+      <li><a href="#detect-unit">How to auto-detect seconds vs milliseconds</a></li>
+      <li><a href="#all-formats">All timestamp formats in one reference table</a></li>
+      <li><a href="#timezones">Timezones: the naive datetime trap</a></li>
+      <li><a href="#identifiers">Timestamps hidden inside identifiers</a></li>
+      <li><a href="#by-language">Conversion by language (5 languages)</a></li>
+      <li><a href="#year-2038">The Year 2038 problem</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- ══════════════════════════════════
+       SECTION 1 — INCIDENT
+  ══════════════════════════════════ -->
+  <h2 id="incident">The production bug that introduced me to this</h2>
+
+  <p>A few years ago I was working on a dashboard that pulled event data from a third-party API. The API returned timestamps as integers — <code>created_at: 1695132000</code> — and my frontend team was rendering them as dates. For weeks, every single event in the interface was showing as <em>"January 1, 1970 at 00:28"</em>.</p>
+
+  <p>The backend team had been storing Unix timestamps in <strong>seconds</strong>. The frontend was treating them as <strong>milliseconds</strong> and passing them directly to <code>new Date(1695132000)</code>. In JavaScript, the <code>Date</code> constructor expects milliseconds. 1,695,132,000 milliseconds since the epoch is January 1970. 1,695,132,000 seconds is September 2023. Two interpretations of the same number, separated by 53 years.</p>
+
+  <p>The fix was one multiplication: <code>new Date(1695132000 * 1000)</code>. The bug had been there for three weeks before anyone noticed, because no one had looked at an actual event date closely enough. This exact mistake is so common that most timestamp debugging questions on Stack Overflow trace back to it.</p>
+
+  <p>This guide is everything you need to never make that mistake, understand all timestamp formats you'll encounter in real systems, and extract dates from identifiers that embed timestamps — including UUID v1, UUID v7, and MongoDB ObjectIDs.</p>
+
+  <div class="callout callout-info">
+    <strong>Try it instantly:</strong> The <a href="/tools/unix-timestamp-converter/">DevToolbox Unix Timestamp Converter</a> converts any timestamp to all formats at once, auto-detects seconds vs milliseconds, and decodes UUID v1/v7 and MongoDB ObjectID timestamps. Runs entirely in your browser.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2 — DECISION TABLE
+  ══════════════════════════════════ -->
+  <h2 id="decision-table">Quick decision table — which format are you dealing with?</h2>
+
+  <p>When you receive a number or a string and need to understand what kind of timestamp it is, this table is your first stop.</p>
+
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>What you have</th><th>Format</th><th>Digits / Length</th><th>Example</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>10-digit integer</td><td>Unix seconds</td><td>10</td><td><code>1749376800</code></td></tr>
+        <tr><td>13-digit integer</td><td>Unix milliseconds</td><td>13</td><td><code>1749376800000</code></td></tr>
+        <tr><td>16-digit integer</td><td>Unix microseconds</td><td>16</td><td><code>1749376800000000</code></td></tr>
+        <tr><td>19-digit integer</td><td>Unix nanoseconds (Go, Rust)</td><td>19</td><td><code>1749376800000000000</code></td></tr>
+        <tr><td>18-digit integer</td><td>Windows FILETIME (100ns since 1601)</td><td>18</td><td><code>133680516000000000</code></td></tr>
+        <tr><td>10-digit integer starting ~39</td><td>NTP timestamp (seconds since 1900)</td><td>10</td><td><code>3958365600</code></td></tr>
+        <tr><td>ISO 8601 string</td><td>Date with time</td><td>20–29 chars</td><td><code>2025-06-08T10:00:00Z</code></td></tr>
+        <tr><td>UUID with version 1</td><td>Contains timestamp since 1582</td><td>36 chars</td><td><code>6ba7b810-9dad-11d1-…</code></td></tr>
+        <tr><td>UUID with version 7</td><td>Contains Unix ms in first 48 bits</td><td>36 chars</td><td><code>018f4d1a-3b2c-7def-…</code></td></tr>
+        <tr><td>24-char hex string</td><td>MongoDB ObjectID (contains Unix seconds)</td><td>24 hex chars</td><td><code>507f1f77bcf86cd799439011</code></td></tr>
+        <tr><td>~5-digit decimal with fraction</td><td>Excel serial date (days since 1900-01-01)</td><td>varies</td><td><code>45816.41667</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 3 — DETECT UNIT
+  ══════════════════════════════════ -->
+  <h2 id="detect-unit">How to auto-detect seconds vs milliseconds</h2>
+
+  <p>The most reliable heuristic is to count the digits. A Unix timestamp in seconds for any date between 2001 and 2286 is a 10-digit number. A timestamp in milliseconds for the same period is a 13-digit number. This works because the Unix epoch progresses predictably — in seconds, we won't hit 11 digits until November 20, 2286.</p>
+
+  <pre><code># Python — heuristic with boundaries
+def detect_timestamp_unit(ts: int) -> str:
+    """
+    Returns the likely unit of a Unix timestamp.
+    Works for any date between 2001 and 2286.
+    """
+    if 1_000_000_000 <= ts <= 9_999_999_999:
+        return "seconds"        # 10 digits
+    elif 1_000_000_000_000 <= ts <= 9_999_999_999_999:
+        return "milliseconds"   # 13 digits
+    elif 1_000_000_000_000_000 <= ts <= 9_999_999_999_999_999:
+        return "microseconds"   # 16 digits
+    elif ts >= 1_000_000_000_000_000_000:
+        return "nanoseconds"    # 19 digits (Go, Rust, PostgreSQL pg_timestamp_ns)
+    else:
+        return "unknown"
+
+# Usage
+print(detect_timestamp_unit(1749376800))          # seconds
+print(detect_timestamp_unit(1749376800000))        # milliseconds
+print(detect_timestamp_unit(1749376800000000))     # microseconds</code></pre>
+
+  <p>If you're building an API and want to avoid this ambiguity entirely, the correct solution is to use ISO 8601 strings for timestamps in your JSON payloads. <code>"2025-06-08T10:00:00Z"</code> is unambiguous, human-readable without conversion, and supported natively by every modern date library. The slight overhead in payload size is almost always worth the clarity.</p>
+
+  <div class="callout callout-warn">
+    <strong>Watch out for language defaults.</strong> JavaScript's <code>Date.now()</code>, Java's <code>System.currentTimeMillis()</code>, and Ruby's <code>Time.now.to_i * 1000</code> return milliseconds. Python's <code>time.time()</code>, Unix system calls, PostgreSQL's <code>EXTRACT(EPOCH FROM NOW())</code>, and most database drivers return seconds. When you mix languages or services in a single system, document which unit you use and enforce it with a type alias or wrapper.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 4 — ALL FORMATS
+  ══════════════════════════════════ -->
+  <h2 id="all-formats">All timestamp formats in one reference table</h2>
+
+  <p>The same instant — June 8, 2025, 10:00:00 UTC — represented in every format you'll encounter across different systems. These are the values you'll get from the <a href="/tools/unix-timestamp-converter/">DevToolbox Timestamp Converter</a> for this date.</p>
+
+  <div class="format-card">
+    <div class="format-name">Unix (seconds)</div>
+    <div class="format-val">1749376800</div>
+    <div class="format-desc">The baseline. Every other format converts from/to this. 10 digits for any date in the 21st century. Used by databases, APIs, POSIX system calls.</div>
+  </div>
+  <div class="format-card">
+    <div class="format-name">Unix (ms)</div>
+    <div class="format-val">1749376800000</div>
+    <div class="format-desc">13 digits. Native to JavaScript, Java, and most browser APIs. Multiply seconds by 1000. <code>Date.now()</code> returns this.</div>
+  </div>
+  <div class="format-card">
+    <div class="format-name">ISO 8601</div>
+    <div class="format-val">2025-06-08T10:00:00.000Z</div>
+    <div class="format-desc">The internet standard (RFC 3339 is a profile of ISO 8601). The Z suffix means UTC. Used in JSON APIs, OpenAPI specs, GraphQL. Always include the Z.</div>
+  </div>
+  <div class="format-card">
+    <div class="format-name">RFC 3339</div>
+    <div class="format-val">2025-06-08T10:00:00+00:00</div>
+    <div class="format-desc">Similar to ISO 8601 but with an explicit numeric offset. Used in ATOM feeds, CalDAV, RFC 5545 (iCalendar). The +00:00 and Z are semantically identical.</div>
+  </div>
+  <div class="format-card">
+    <div class="format-name">RFC 2822</div>
+    <div class="format-val">Sun, 08 Jun 2025 10:00:00 +0000</div>
+    <div class="format-desc">Email standard (SMTP). The Date: header in email messages uses this format. Also used in HTTP's Date, Last-Modified, and Expires headers.</div>
+  </div>
+  <div class="format-card">
+    <div class="format-name">Windows FILETIME</div>
+    <div class="format-val">133680516000000000</div>
+    <div class="format-desc">100-nanosecond intervals since January 1, 1601. Used throughout the Windows API, .NET DateTime, LDAP, and Active Directory timestamps. Conversion: (unixSeconds + 11,644,473,600) × 10,000,000.</div>
+  </div>
+  <div class="format-card">
+    <div class="format-name">NTP timestamp</div>
+    <div class="format-val">3958365600</div>
+    <div class="format-desc">Seconds since January 1, 1900. Used by the Network Time Protocol (RFC 5905). Conversion: unixSeconds + 2,208,988,800 (the number of seconds between 1900-01-01 and 1970-01-01).</div>
+  </div>
+  <div class="format-card">
+    <div class="format-name">Excel serial date</div>
+    <div class="format-val">45816.41667</div>
+    <div class="format-desc">Days (and fractions of a day) since January 1, 1900, with a deliberate off-by-one bug inherited from Lotus 1-2-3. Conversion: (unixSeconds / 86400) + 25569. Cell must be formatted as Date to display correctly.</div>
+  </div>
+  <div class="format-card">
+    <div class="format-name">Java Date (ms)</div>
+    <div class="format-val">1749376800000</div>
+    <div class="format-desc">Same as Unix milliseconds. <code>System.currentTimeMillis()</code>. The older <code>java.util.Date</code> uses this. Prefer <code>java.time.Instant</code> in modern Java code.</div>
+  </div>
+
+  <h3>Conversion formulas in one place</h3>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead>
+        <tr><th>From Unix (seconds) to…</th><th>Formula</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Unix milliseconds</td><td><code>ts × 1000</code></td></tr>
+        <tr><td>Windows FILETIME</td><td><code>(ts + 11644473600) × 10000000</code></td></tr>
+        <tr><td>NTP timestamp</td><td><code>ts + 2208988800</code></td></tr>
+        <tr><td>Excel serial date</td><td><code>ts / 86400 + 25569</code></td></tr>
+        <tr><td>iOS / macOS Core Data (since 2001-01-01)</td><td><code>ts - 978307200</code></td></tr>
+        <tr><td>GPS timestamp (since 1980-01-06)</td><td><code>ts - 315964800</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5 — TIMEZONES
+  ══════════════════════════════════ -->
+  <h2 id="timezones">Timezones: the naive datetime trap</h2>
+
+  <p>Timezone bugs are the most common class of date-related issues in backend systems, and they're almost invisible — they produce plausible-looking wrong values, not crashes. The root cause is almost always the same: a <strong>naive datetime</strong> being treated as if it were UTC.</p>
+
+  <p>In Python, there are two kinds of <code>datetime</code> objects. A <em>naive</em> datetime has no timezone information attached. An <em>aware</em> datetime has a timezone. The problem is that naive datetimes don't announce their ambiguity — they just exist, floating, and your code assumes they're UTC because that's the intention. But <code>datetime.fromtimestamp()</code> without a <code>tz</code> argument creates a naive datetime in the <strong>server's local timezone</strong>, not UTC.</p>
+
+  <pre><code>import datetime, zoneinfo
+
+ts = 1749376800  # 2025-06-08 10:00:00 UTC
+
+# ❌ Bug: naive datetime interpreted in local timezone
+# On a server set to Europe/Paris (UTC+2), this gives 12:00:00 local
+# If you then serialize it as UTC, you get 12:00:00Z instead of 10:00:00Z
+dt_naive = datetime.datetime.fromtimestamp(ts)
+print(dt_naive)                    # 2025-06-08 12:00:00 (WRONG if you expect UTC)
+
+# ✅ Correct: always specify timezone explicitly
+dt_utc = datetime.datetime.fromtimestamp(ts, tz=datetime.timezone.utc)
+print(dt_utc)                      # 2025-06-08 10:00:00+00:00 ✓
+
+# ✅ Convert to a specific timezone after getting UTC
+paris = zoneinfo.ZoneInfo("Europe/Paris")
+dt_paris = dt_utc.astimezone(paris)
+print(dt_paris)                    # 2025-06-08 12:00:00+02:00 ✓
+
+# ✅ Back to Unix timestamp from an aware datetime
+print(int(dt_utc.timestamp()))     # 1749376800 ✓</code></pre>
+
+  <p>The same trap exists in JavaScript. <code>new Date(timestamp)</code> creates a UTC timestamp internally, but methods like <code>getHours()</code> return values in the <strong>local timezone of the browser or server</strong>. If you're running Node.js on a server in a non-UTC timezone, <code>new Date(ts * 1000).getHours()</code> does not give you the UTC hour.</p>
+
+  <pre><code>const ts = 1749376800; // 2025-06-08 10:00:00 UTC
+
+const d = new Date(ts * 1000);
+
+// ❌ These depend on the system timezone — wrong if you expect UTC
+console.log(d.getHours());               // Varies by system timezone
+
+// ✅ These always return UTC values, regardless of system timezone
+console.log(d.getUTCHours());            // 10 ✓
+console.log(d.toISOString());            // "2025-06-08T10:00:00.000Z" ✓
+console.log(d.toUTCString());            // "Sun, 08 Jun 2025 10:00:00 GMT" ✓
+
+// ✅ Timezone-aware formatting with Intl (modern, recommended)
+const formatter = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Europe/Paris',
+  dateStyle: 'full',
+  timeStyle: 'long'
+});
+console.log(formatter.format(d));
+// "Sunday, June 8, 2025 at 12:00:00 PM Central European Summer Time"</code></pre>
+
+  <h3>Daylight Saving Time and the ambiguous hour</h3>
+
+  <p>Twice a year, clocks change. When clocks go back in autumn, one hour is "repeated" — the same wall clock time occurs twice. If you're storing events as local times without timezone info, you cannot distinguish between the two 2:30 AMs. This is why every serious system stores timestamps as UTC (or Unix timestamps) and converts to local time only for display.</p>
+
+  <div class="callout callout-warn">
+    <strong>Rule of thumb:</strong> Store as UTC, display as local. Always use IANA timezone names (<code>Europe/Paris</code>, <code>America/New_York</code>) rather than offsets (<code>+02:00</code>) for user-facing timezones — offsets don't account for DST changes.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 6 — IDENTIFIERS
+  ══════════════════════════════════ -->
+  <h2 id="identifiers">Timestamps hidden inside identifiers</h2>
+
+  <p>Several widely-used identifier formats embed a timestamp as part of their structure. This is useful: you can determine when a record was created directly from its ID, without a separate <code>created_at</code> column. But it also means that if you're seeing a UUID or ObjectID you don't recognize, you can decode when it was created.</p>
+
+  <div class="id-decoder-card">
+    <h4>UUID version 1</h4>
+    <p style="font-size:.88rem;color:var(--text2);margin-bottom:12px">UUID v1 encodes a <strong>60-bit timestamp</strong> counting 100-nanosecond intervals since <strong>October 15, 1582</strong> — the date the Gregorian calendar was adopted. The timestamp is split across three non-contiguous fields in the UUID, so extracting it requires reassembling the pieces.</p>
+    <p style="font-size:.88rem;color:var(--text2);margin-bottom:12px">Given the UUID <code>6ba7b810-9dad-11d1-80b4-00c04fd430c8</code>:</p>
+    <ul style="font-size:.85rem;color:var(--text2);margin-bottom:12px">
+      <li><code>time_low</code> = <code>6ba7b810</code> (first 8 hex chars, 32 bits)</li>
+      <li><code>time_mid</code> = <code>9dad</code> (chars 9–12, 16 bits)</li>
+      <li><code>time_hi</code> = <code>11d1</code> with the version nibble (<code>1</code>) masked out → <code>01d1</code> (12 bits)</li>
+    </ul>
+    <pre><code># Python — extract Unix timestamp from UUID v1
+import uuid
+
+def uuid1_to_unix_ms(uuid_str: str) -> int:
+    """Extract Unix timestamp (ms) from a UUID v1 string."""
+    u = uuid.UUID(uuid_str)
+    if u.version != 1:
+        raise ValueError(f"Expected UUID v1, got v{u.version}")
+
+    # u.time is the 60-bit timestamp in 100ns intervals since 1582-10-15
+    # Gregorian offset: 100ns intervals between 1582-10-15 and 1970-01-01
+    GREGORIAN_OFFSET = 0x01b21dd213814000
+
+    unix_100ns = u.time - GREGORIAN_OFFSET
+    unix_ms = unix_100ns // 10_000  # Convert 100ns to ms
+
+    return unix_ms
+
+sample = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+ms = uuid1_to_unix_ms(sample)
+from datetime import datetime, timezone
+print(datetime.fromtimestamp(ms / 1000, tz=timezone.utc))
+# 1997-02-03 17:26:46.009320+00:00</code></pre>
+  </div>
+
+  <div class="id-decoder-card">
+    <h4>UUID version 7</h4>
+    <p style="font-size:.88rem;color:var(--text2);margin-bottom:12px">UUID v7 (standardized in <a href="https://www.rfc-editor.org/rfc/rfc9562" target="_blank" rel="noopener noreferrer">RFC 9562, May 2024</a>) took a much simpler approach: the <strong>first 48 bits directly encode the Unix timestamp in milliseconds</strong>. No Gregorian offset, no field reassembly. Just read the first 12 hex characters.</p>
+    <pre><code># Python — extract Unix timestamp from UUID v7
+import uuid
+
+def uuid7_to_unix_ms(uuid_str: str) -> int:
+    """Extract Unix timestamp (ms) from a UUID v7 string."""
+    u = uuid.UUID(uuid_str)
+    if u.version != 7:
+        raise ValueError(f"Expected UUID v7, got v{u.version}")
+
+    # The first 48 bits (12 hex chars) = Unix timestamp in milliseconds
+    # uuid.int is the full 128-bit integer; shift right by 80 to get top 48 bits
+    return u.int >> 80
+
+sample = "018f4d1a-3b2c-7def-9abc-123456789abc"
+ms = uuid7_to_unix_ms(sample)
+from datetime import datetime, timezone
+print(datetime.fromtimestamp(ms / 1000, tz=timezone.utc))
+
+# JavaScript — even simpler
+const uuid7 = "018f4d1a-3b2c-7def-9abc-123456789abc";
+const hex48 = uuid7.replace(/-/g, '').slice(0, 12); // First 12 hex chars
+const unixMs = parseInt(hex48, 16);
+console.log(new Date(unixMs).toISOString());</code></pre>
+  </div>
+
+  <div class="id-decoder-card">
+    <h4>MongoDB ObjectID</h4>
+    <p style="font-size:.88rem;color:var(--text2);margin-bottom:12px">A MongoDB ObjectID is a 24-character hex string. The <strong>first 4 bytes (8 hex chars) encode the Unix creation timestamp in seconds</strong>. Unlike UUID v7, this is seconds — not milliseconds — so the resolution is 1 second.</p>
+    <pre><code># Python — extract creation timestamp from MongoDB ObjectID
+def objectid_to_unix_s(object_id: str) -> int:
+    """Extract Unix timestamp (seconds) from a MongoDB ObjectID."""
+    if len(object_id) != 24:
+        raise ValueError("ObjectID must be exactly 24 hex characters")
+    # First 8 hex chars = first 4 bytes = Unix timestamp in seconds
+    return int(object_id[:8], 16)
+
+oid = "507f1f77bcf86cd799439011"
+ts = objectid_to_unix_s(oid)
+from datetime import datetime, timezone
+print(datetime.fromtimestamp(ts, tz=timezone.utc))
+# 2012-10-16 21:10:47+00:00
+
+# JavaScript
+const oid = "507f1f77bcf86cd799439011";
+const unixSeconds = parseInt(oid.substring(0, 8), 16);
+console.log(new Date(unixSeconds * 1000).toISOString());
+# "2012-10-16T21:10:47.000Z"</code></pre>
+  </div>
+
+  <div class="callout callout-pass">
+    <strong>Use the online decoder:</strong> The <a href="/tools/unix-timestamp-converter/">DevToolbox Timestamp Converter</a> has a built-in decoder for UUID v1, UUID v7, and MongoDB ObjectID. Paste any identifier and get the embedded timestamp in all formats instantly.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 7 — BY LANGUAGE
+  ══════════════════════════════════ -->
+  <h2 id="by-language">Conversion by language — copy-paste ready</h2>
+
+  <p>Each snippet covers the four operations you'll do most often: get the current timestamp, convert a timestamp to a date object, convert a date to a timestamp, and format with a specific timezone.</p>
+
+  <div class="lang-tabs">
+    <button class="lang-tab active" onclick="switchLang('python')">Python</button>
+    <button class="lang-tab" onclick="switchLang('js')">JavaScript</button>
+    <button class="lang-tab" onclick="switchLang('go')">Go</button>
+    <button class="lang-tab" onclick="switchLang('java')">Java</button>
+    <button class="lang-tab" onclick="switchLang('sql')">SQL</button>
+  </div>
+
+  <div class="code-block visible" id="lang-python">
+    <pre><code>import time
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo  # Python 3.9+ (backport: pip install backports.zoneinfo)
+
+# ── Current timestamps ────────────────────────────────────────────
+now_s  = int(time.time())           # Unix seconds (integer)
+now_ms = int(time.time() * 1000)    # Unix milliseconds (integer)
+now_dt = datetime.now(timezone.utc) # UTC-aware datetime object
+
+# ── Unix seconds → datetime ───────────────────────────────────────
+ts = 1749376800
+
+dt_utc   = datetime.fromtimestamp(ts, tz=timezone.utc)
+dt_paris = datetime.fromtimestamp(ts, tz=ZoneInfo("Europe/Paris"))
+
+print(dt_utc.isoformat())    # 2025-06-08T10:00:00+00:00
+print(dt_paris.isoformat())  # 2025-06-08T12:00:00+02:00
+
+# ── Format as various standard strings ───────────────────────────
+print(dt_utc.strftime("%Y-%m-%dT%H:%M:%SZ"))   # ISO 8601 with Z
+print(dt_utc.strftime("%a, %d %b %Y %H:%M:%S +0000"))  # RFC 2822
+
+import email.utils
+print(email.utils.formatdate(ts, usegmt=True))  # RFC 2822 (proper)
+
+# ── datetime → Unix timestamp ────────────────────────────────────
+d = datetime(2025, 6, 8, 10, 0, 0, tzinfo=timezone.utc)
+unix_s = int(d.timestamp())  # 1749376800
+
+# ── Conversion formulas ──────────────────────────────────────────
+filetime = (ts + 11_644_473_600) * 10_000_000   # Windows FILETIME
+ntp      = ts + 2_208_988_800                    # NTP timestamp
+excel    = ts / 86400 + 25569                    # Excel serial date
+
+print(f"FILETIME : {filetime}")
+print(f"NTP      : {ntp}")
+print(f"Excel    : {excel:.5f}")</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-js">
+    <pre><code>// ── Current timestamps ────────────────────────────────────────────
+const nowMs  = Date.now();                              // Unix milliseconds
+const nowS   = Math.floor(Date.now() / 1000);           // Unix seconds
+const nowISO = new Date().toISOString();                // "2025-06-08T10:00:00.000Z"
+
+// ── Unix seconds → Date object ───────────────────────────────────
+const ts = 1749376800;
+const d  = new Date(ts * 1000);                        // Pass milliseconds
+
+// ── Format as standard strings ───────────────────────────────────
+console.log(d.toISOString());     // "2025-06-08T10:00:00.000Z"     (ISO 8601/RFC 3339)
+console.log(d.toUTCString());     // "Sun, 08 Jun 2025 10:00:00 GMT" (RFC 2822)
+
+// ── Timezone-aware formatting ─────────────────────────────────────
+const fmtParis = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Europe/Paris',
+  year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit',
+  hour12: false
+});
+console.log(fmtParis.format(d));  // "06/08/2025, 12:00:00" (Paris time)
+
+// ── Relative time ─────────────────────────────────────────────────
+const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+const diffHours = Math.round((ts * 1000 - Date.now()) / 3_600_000);
+console.log(rtf.format(diffHours, 'hour'));  // "3 hours ago" / "in 2 hours"
+
+// ── Date object → Unix timestamp ─────────────────────────────────
+const futureDate = new Date('2025-12-31T00:00:00Z');
+const futureUnix = Math.floor(futureDate.getTime() / 1000); // 1767139200
+
+// ── Build URL with timestamp parameter safely ─────────────────────
+const url = new URL('https://api.example.com/events');
+url.searchParams.set('since', ts.toString());
+console.log(url.toString());</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-go">
+    <pre><code>package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    // ── Current timestamps ─────────────────────────────────────
+    nowUnixS  := time.Now().Unix()      // int64, seconds
+    nowUnixMs := time.Now().UnixMilli() // int64, milliseconds (Go 1.17+)
+    nowUnixNs := time.Now().UnixNano()  // int64, nanoseconds
+
+    // ── Unix seconds → time.Time ──────────────────────────────
+    ts := int64(1749376800)
+    t  := time.Unix(ts, 0).UTC()   // Always specify UTC explicitly
+
+    // ── Format as standard strings ───────────────────────────
+    fmt.Println(t.Format(time.RFC3339))     // "2025-06-08T10:00:00Z"
+    fmt.Println(t.Format(time.RFC3339Nano)) // "2025-06-08T10:00:00.000000000Z"
+    fmt.Println(t.Format(time.RFC1123Z))    // "Sun, 08 Jun 2025 10:00:00 +0000"
+    fmt.Println(t.Format("2006-01-02 15:04:05"))  // Custom format (Go's reference time)
+
+    // ── Timezone-aware ─────────────────────────────────────────
+    paris, _ := time.LoadLocation("Europe/Paris")
+    tParis   := t.In(paris)
+    fmt.Println(tParis.Format(time.RFC3339)) // "2025-06-08T12:00:00+02:00"
+
+    // ── time.Time → Unix timestamp ────────────────────────────
+    d := time.Date(2025, 6, 8, 10, 0, 0, 0, time.UTC)
+    fmt.Println(d.Unix())    // 1749376800
+
+    // ── Windows FILETIME ──────────────────────────────────────
+    filetime := (ts + 11_644_473_600) * 10_000_000
+    fmt.Printf("FILETIME: %d\n", filetime)
+
+    _ = nowUnixMs
+    _ = nowUnixNs
+    _ = nowUnixS
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-java">
+    <pre><code>import java.time.*;
+import java.time.format.*;
+
+public class TimestampExamples {
+    public static void main(String[] args) {
+        // ── Current timestamps ─────────────────────────────────
+        long nowMs  = System.currentTimeMillis();  // milliseconds
+        long nowS   = Instant.now().getEpochSecond(); // seconds
+
+        // ── Unix seconds → Instant ─────────────────────────────
+        long ts = 1749376800L;
+        Instant instant = Instant.ofEpochSecond(ts);
+
+        // ── Format as ISO 8601 ─────────────────────────────────
+        System.out.println(instant.toString());
+        // "2025-06-08T10:00:00Z"
+
+        // ── Timezone-aware formatting ──────────────────────────
+        ZoneId paris = ZoneId.of("Europe/Paris");
+        ZonedDateTime zdt = instant.atZone(paris);
+        System.out.println(zdt.format(DateTimeFormatter.RFC_1123_DATE_TIME));
+        // "Sun, 8 Jun 2025 12:00:00 +0200"
+
+        // ── Custom format ──────────────────────────────────────
+        DateTimeFormatter fmt = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss z")
+            .withZone(paris);
+        System.out.println(fmt.format(instant));
+        // "2025-06-08 12:00:00 CEST"
+
+        // ── LocalDateTime → Unix timestamp (always specify zone) ──
+        LocalDateTime ldt = LocalDateTime.of(2025, 6, 8, 10, 0, 0);
+        long unix = ldt.toEpochSecond(ZoneOffset.UTC); // 1749376800
+
+        // ── Windows FILETIME ─────────────────────────────────────
+        long filetime = (ts + 11_644_473_600L) * 10_000_000L;
+        System.out.printf("FILETIME: %d%n", filetime);
+
+        // ── From FILETIME back to Instant ─────────────────────
+        Instant fromFiletime = DateTimeOffset.fromFileTime(filetime).toInstant();
+        // (In .NET terms; in Java, manually reverse the formula)
+
+        System.out.println(nowS);
+        System.out.println(nowMs);
+    }
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-sql">
+    <pre><code>-- ═══════════════════════════════════════════════════
+-- PostgreSQL
+-- ═══════════════════════════════════════════════════
+
+-- Current Unix timestamp
+SELECT EXTRACT(EPOCH FROM NOW())::BIGINT;          -- seconds: 1749376800
+SELECT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT; -- milliseconds
+
+-- Unix seconds → timestamptz
+SELECT TO_TIMESTAMP(1749376800);
+-- "2025-06-08 10:00:00+00"
+
+-- With timezone conversion
+SELECT TO_TIMESTAMP(1749376800) AT TIME ZONE 'Europe/Paris';
+-- "2025-06-08 12:00:00"
+
+-- timestamptz → Unix seconds
+SELECT EXTRACT(EPOCH FROM '2025-06-08T10:00:00Z'::TIMESTAMPTZ)::BIGINT;
+-- 1749376800
+
+-- Sort by embedded UUID v7 timestamp (natural order = creation order)
+SELECT id, created_at FROM events ORDER BY id;  -- UUID v7 sorts chronologically
+
+
+-- ═══════════════════════════════════════════════════
+-- MySQL / MariaDB
+-- ═══════════════════════════════════════════════════
+
+-- Current Unix timestamp
+SELECT UNIX_TIMESTAMP();           -- seconds
+SELECT UNIX_TIMESTAMP() * 1000;    -- milliseconds
+
+-- Unix seconds → datetime (server timezone)
+SELECT FROM_UNIXTIME(1749376800);
+
+-- Unix seconds → datetime (specific timezone)
+SELECT CONVERT_TZ(FROM_UNIXTIME(1749376800), 'UTC', 'Europe/Paris');
+
+-- datetime → Unix seconds
+SELECT UNIX_TIMESTAMP('2025-06-08 10:00:00');
+
+
+-- ═══════════════════════════════════════════════════
+-- SQLite
+-- ═══════════════════════════════════════════════════
+
+-- Current Unix timestamp
+SELECT strftime('%s', 'now');                   -- seconds as text
+
+-- Unix seconds → ISO datetime
+SELECT datetime(1749376800, 'unixepoch');        -- "2025-06-08 10:00:00"
+
+-- With timezone offset (SQLite has no native timezone support)
+SELECT datetime(1749376800, 'unixepoch', '+2 hours'); -- rough Paris offset
+
+-- datetime → Unix seconds
+SELECT strftime('%s', '2025-06-08T10:00:00');</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 8 — YEAR 2038
+  ══════════════════════════════════ -->
+  <h2 id="year-2038">The Year 2038 problem</h2>
+
+  <p>On January 19, 2038 at 03:14:07 UTC, 32-bit signed integer Unix timestamps overflow. The maximum value of a 32-bit signed integer is 2,147,483,647. After that, it wraps to a large negative number — which represents December 13, 1901.</p>
+
+  <div class="y2038-bar">
+    <div style="font-size:.8rem;color:var(--text2);margin-bottom:8px">Unix timestamp timeline (32-bit signed integer)</div>
+    <div class="y2038-scale">
+      <div class="y2038-past" style="width:64%">1970 → 2025 (safe)</div>
+      <div class="y2038-marker"></div>
+      <div class="y2038-future">2038 overflow ⚠️</div>
+    </div>
+    <div style="font-size:.75rem;color:var(--text3);margin-top:6px">Max value: 2,147,483,647 = January 19, 2038 at 03:14:07 UTC</div>
+  </div>
+
+  <p>You can demonstrate the overflow yourself on any 32-bit system:</p>
+
+  <pre><code>/* C — Year 2038 overflow demonstration */
+#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+#include &lt;stdint.h&gt;
+
+int main() {
+    // Max value of a 32-bit signed integer
+    int32_t max32 = 2147483647;
+
+    // Convert to struct tm
+    time_t t = (time_t)max32;
+    struct tm *tm_info = gmtime(&t);
+    printf("Max 32-bit timestamp: %s", asctime(tm_info));
+    // "Tue Jan 19 03:14:07 2038"
+
+    // One second later: overflow
+    int32_t overflow = max32 + 1;  // Wraps to -2147483648
+    time_t t2 = (time_t)overflow;
+    struct tm *tm_overflow = gmtime(&t2);
+    printf("After overflow: %s", asctime(tm_overflow));
+    // "Fri Dec 13 20:45:52 1901"
+
+    return 0;
+}</code></pre>
+
+  <h3>Who is still affected in 2026?</h3>
+
+  <p>Most modern software runs on 64-bit systems and uses 64-bit time_t, which won't overflow until the year 292,277,026,596 — well beyond any practical concern. But the problem persists in specific contexts:</p>
+
+  <ul>
+    <li><strong>Embedded systems</strong> — microcontrollers, industrial control systems, automotive ECUs, and IoT devices often run 32-bit architectures with 32-bit timestamps baked into firmware.</li>
+    <li><strong>Legacy databases</strong> — some older MySQL installations use 32-bit <code>TIMESTAMP</code> columns, which refuse dates after January 19, 2038. Use <code>DATETIME</code> instead.</li>
+    <li><strong>32-bit Linux</strong> — the Linux kernel added 64-bit time_t support for 32-bit architectures in version 5.6 (March 2020). Distributions based on older kernels still have the issue.</li>
+    <li><strong>File systems</strong> — FAT32 stores modification times in a 32-bit field. Files won't be directly corrupted, but some timestamp operations may fail after 2038.</li>
+  </ul>
+
+  <pre><code># Check if your system uses 64-bit time_t
+python3 -c "import struct; print(struct.calcsize('l') * 8, 'bit time_t')"
+# 64 bit time_t  → safe
+# 32 bit time_t  → vulnerable
+
+# Check in C
+#include &lt;time.h&gt;
+#include &lt;stdio.h&gt;
+int main() {
+    printf("sizeof(time_t) = %zu bytes (%zu bits)\n",
+           sizeof(time_t), sizeof(time_t) * 8);
+    return 0;
+}</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 9 — FAQ
+  ══════════════════════════════════ -->
+  <h2 id="faq">Frequently asked questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I tell if a Unix timestamp is in seconds or milliseconds?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Count the digits. A 10-digit number is almost certainly Unix seconds — this covers any date between September 2001 (1,000,000,000) and November 2286 (9,999,999,999). A 13-digit number is milliseconds. The confusion exists because JavaScript's <code>Date.now()</code> and Java's <code>System.currentTimeMillis()</code> return milliseconds, while Python's <code>time.time()</code> and most Unix system calls return seconds. If you control the API, document the unit explicitly and consider using ISO 8601 strings instead — they're unambiguous.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the Unix epoch?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">The Unix epoch is January 1, 1970 at 00:00:00 UTC — the reference point from which Unix timestamps are counted. It was chosen by the original UNIX developers because it was a recent, round date that predated the first commercial UNIX installations. There's no deep significance to the choice; it was a practical decision. The exact value was formalized in the POSIX standard (IEEE Std 1003.1).</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Can I extract a date from a UUID v1?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Yes. UUID v1 (defined in RFC 4122) encodes a 60-bit timestamp in 100-nanosecond intervals since October 15, 1582. The timestamp is stored in three non-contiguous fields (time_low, time_mid, time_hi_and_version), so you have to reassemble them and subtract the Gregorian offset (122,192,928,000,000,000 in 100ns units) to get the Unix timestamp. The Python <code>uuid</code> module exposes this as <code>uuid.UUID(s).time</code>. The DevToolbox UUID v1 MAC Extractor does this for you and also identifies whether the MAC address is real or randomly generated.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is Windows FILETIME and how do I convert it?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Windows FILETIME is a 64-bit integer counting 100-nanosecond intervals since January 1, 1601 00:00:00 UTC. It's used throughout the Windows API (FindFirstFile, GetFileTime), .NET DateTime, LDAP, and Active Directory. The constant 11,644,473,600 is the number of seconds between January 1, 1601 and January 1, 1970. Conversion from Unix seconds: FILETIME = (unixSeconds + 11644473600) × 10,000,000. In .NET: <code>DateTime.FromFileTimeUtc(filetime)</code> or <code>DateTimeOffset.FromUnixTimeSeconds(unixSeconds)</code>.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the Year 2038 problem?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">On 32-bit systems that store Unix timestamps as signed 32-bit integers, the maximum representable value is 2,147,483,647, corresponding to January 19, 2038 at 03:14:07 UTC. After that moment, the integer wraps to a large negative number (−2,147,483,648), which represents December 13, 1901. Modern 64-bit systems are not affected — their maximum timestamp is the year 292,277,026,596. The risk area is embedded systems, legacy databases, and 32-bit Linux builds.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why do Python datetime objects cause timezone bugs?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Python has two kinds of datetime objects: naive (no timezone information) and aware (with timezone). <code>datetime.fromtimestamp(ts)</code> without a <code>tz</code> argument creates a naive datetime in the server's local timezone — not UTC. If your server is in UTC+2 and you serialize this naive datetime as UTC, you get a time that's two hours off. The fix is always explicit: <code>datetime.fromtimestamp(ts, tz=datetime.timezone.utc)</code>. For timezone conversions, use <code>zoneinfo.ZoneInfo</code> (Python 3.9+) with IANA timezone names rather than fixed offsets, which don't account for DST changes.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════
+       CTA
+  ══════════════════════════════════ -->
+  <div style="text-align:center;margin:32px 0">
+    <a href="/tools/unix-timestamp-converter/" class="btn-cta">🕐 Open the Timestamp Converter — free, all formats, UUID decoder</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       REFERENCES
+  ══════════════════════════════════ -->
+  <section class="references">
+    <h3>Sources and references</h3>
+    <ul class="ref-list">
+      <li><a href="https://www.rfc-editor.org/rfc/rfc9562" target="_blank" rel="noopener noreferrer">RFC 9562 — Universally Unique IDentifiers (UUIDs), IETF, May 2024</a> — the current UUID standard, defines UUID v7 with Unix millisecond timestamps.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc4122" target="_blank" rel="noopener noreferrer">RFC 4122 — A Universally Unique IDentifier (UUID) URN Namespace, IETF, 2005</a> — original UUID specification including v1 timestamp encoding.</li>
+      <li><a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_16" target="_blank" rel="noopener noreferrer">The Open Group — POSIX.1-2017, Section 4.16: Seconds Since the Epoch</a> — the authoritative definition of Unix time, including the leap second handling caveat.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc3339" target="_blank" rel="noopener noreferrer">RFC 3339 — Date and Time on the Internet: Timestamps, IETF, 2002</a> — the internet timestamp standard, a profile of ISO 8601.</li>
+      <li><a href="https://docs.python.org/3/library/datetime.html" target="_blank" rel="noopener noreferrer">Python Documentation — datetime module</a> — official reference for naive vs aware datetime, timezone handling, and conversion methods.</li>
+      <li><a href="https://learn.microsoft.com/en-us/windows/win32/sysinfo/file-times" target="_blank" rel="noopener noreferrer">Microsoft Learn — File Times (Windows API)</a> — official documentation for the Windows FILETIME structure and its 1601 epoch.</li>
+      <li><a href="https://www.mongodb.com/docs/manual/reference/method/ObjectId/" target="_blank" rel="noopener noreferrer">MongoDB Documentation — ObjectId()</a> — official specification of the ObjectID format including the 4-byte timestamp prefix.</li>
+      <li><a href="https://datatracker.ietf.org/doc/html/rfc5905" target="_blank" rel="noopener noreferrer">RFC 5905 — Network Time Protocol Version 4, IETF, 2010</a> — NTP timestamp format definition and the 1900 epoch.</li>
+      <li><a href="https://en.wikipedia.org/wiki/Year_2038_problem" target="_blank" rel="noopener noreferrer">Wikipedia — Year 2038 problem</a> — comprehensive overview of systems at risk and remediation efforts.</li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" target="_blank" rel="noopener noreferrer">MDN — JavaScript Date object</a> — browser behavior for timestamp parsing, UTC vs local methods, and Intl formatting.</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════
+       RELATED TOOLS
+  ══════════════════════════════════ -->
+  <div class="related-tools">
+    <h3>Related DevToolbox tools</h3>
+    <ul>
+      <li><a href="/tools/unix-timestamp-converter/">→ Unix Timestamp Converter</a> — all formats at once, UUID v1/v7 decoder, MongoDB ObjectID decoder, IANA timezones</li>
+      <li><a href="/tools/uuid-generator/">→ UUID Generator</a> — generate UUID v1, v4, v7 and ULID in one click</li>
+      <li><a href="/tools/uuid-v1-mac-extractor/">→ UUID v1 MAC Extractor</a> — extract the MAC address and full timestamp from a UUID v1</li>
+      <li><a href="/tools/http-header-analyzer/">→ HTTP Header Analyzer</a> — analyze Date, Last-Modified, Expires, and Cache-Control headers</li>
+      <li><a href="/tools/jwt-decoder/">→ JWT Decoder</a> — decode and verify the <code>exp</code>, <code>iat</code>, <code>nbf</code> timestamp claims in a JWT</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers.
+  <a href="/tools/blog/">Blog</a> | <a href="/tools/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
+</div>
+
+<script>
+/* Language tabs */
+function switchLang(lang) {
+  ['python','js','go','java','sql'].forEach(l => {
+    const el = document.getElementById('lang-' + l);
+    if (el) el.classList.toggle('visible', l === lang);
+  });
+  document.querySelectorAll('.lang-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['python','js','go','java','sql'][i] === lang);
+  });
+}
+
+/* Theme */
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Light';
+  }
+})();
+</script>
+</body>
+</html>
