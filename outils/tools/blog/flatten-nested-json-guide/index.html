@@ -1,240 +1,363 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How to Flatten Nested JSON — Convert to CSV / Excel Easily Online</title>
-    <meta name="description" content="Learn how to flatten nested JSON objects into flat CSV columns or formatted JSON. Use our free online converter to turn complex API responses into Excel‑ready tables. No server upload, instant results.">
-    <meta name="keywords" content="flatten nested json online, json array to csv, json to excel online, convert api json to csv, nested json csv converter, json csv excel utf8, csv to formatted json, flatten json algorithm, flatten vs normalize">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="Devstoolsbox">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Flatten Nested JSON — Convert to CSV / Excel Online, Complete Guide (2026)</title>
+<meta name="description" content="Flatten nested JSON into CSV or Excel in seconds. Step-by-step guide with Python, JavaScript, jq examples, edge cases, and a free browser-based converter. Written by Mathias Kouadio.">
+<meta name="keywords" content="flatten nested json online, json array to csv, json to excel online, convert api json to csv, nested json csv converter, json csv excel utf8, flatten json algorithm, flatten vs normalize json, pandas json_normalize, jq json csv">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
 
-    <meta property="og:title" content="How to Flatten Nested JSON — Convert to CSV / Excel Online">
-    <meta property="og:description" content="Flatten complex JSON structures into CSV, Excel, or formatted JSON with our free online tool. Step‑by‑step guide with examples.">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
-    <meta property="og:site_name" content="Devstoolsbox">
+<meta property="og:title" content="How to Flatten Nested JSON,  Convert to CSV / Excel Online (2026)">
+<meta property="og:description" content="Flatten complex API JSON into CSV or Excel with our free browser-based converter. Covers edge cases, Python pandas, jq, and the flatten vs normalize decision.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
+<meta property="og:site_name" content="DevToolbox">
+<meta property="og:image" content="https://www.devstoolsbox.dev/og/flatten-json-guide-cover.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="article:published_time" content="2026-04-28">
+<meta property="article:modified_time" content="2026-06-20">
+<meta property="article:author" content="Mathias Kouadio">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Flatten Nested JSON Online">
-    <meta name="twitter:description" content="Convert API JSON with nested objects into flat CSV / Excel. Free, secure, no upload.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to Flatten Nested JSON, Free Online Converter">
+<meta name="twitter:description" content="Convert API JSON with nested objects into flat CSV / Excel. Free, secure, no upload.">
+<meta name="twitter:image" content="https://www.devstoolsbox.dev/og/flatten-json-guide-cover.webp">
 
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "How to Flatten Nested JSON — Convert to CSV / Excel Easily Online",
-            "author": { "@type": "Person", "name": "Devstoolsbox Team" },
-            "datePublished": "2026-04-28",
-            "dateModified": "2026-05-18",
-            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/",
-            "publisher": { "@type": "Organization", "name": "Devstoolsbox", "url": "https://www.devstoolsbox.dev/" }
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                { "@type": "Question", "name": "Why does my flattened CSV contain repeated rows for the same user?", "acceptedAnswer": { "@type": "Answer", "text": "That happens when you flatten a JSON object that contains an array (like orders). Each element of the array creates a new row with the parent columns repeated. If you want to avoid duplication, you can either export multiple CSV files (normalize) or decide how you want arrays to be represented (as JSON string, only first element, etc.)." } },
-                { "@type": "Question", "name": "What is the difference between flattening and normalizing JSON?", "acceptedAnswer": { "@type": "Answer", "text": "Flattening creates a single wide table where nested objects become dot‑notation columns and arrays produce multiple rows with repeated parent data. Normalizing splits the data into several tables linked by foreign keys, like users.csv and orders.csv. Use flattening for quick export, normalizing for database imports." } },
-                { "@type": "Question", "name": "Can I flatten JSON that has dots in the key names?", "acceptedAnswer": { "@type": "Answer", "text": "It's risky because dots are used as separators in flattened column names. Our tool detects dots in original keys and warns you. You can choose a different separator (like __) or rename the keys before flattening." } },
-                { "@type": "Question", "name": "What happens to null values when I flatten JSON?", "acceptedAnswer": { "@type": "Answer", "text": "In our tool, null values become empty cells in the CSV. That's usually what you want. If you need explicit 'null' strings or zeros, you can adjust the empty cell handling in the converter." } },
-                { "@type": "Question", "name": "How can I flatten extremely large JSON files (gigabytes)?", "acceptedAnswer": { "@type": "Answer", "text": "For huge files, use command‑line tools like jq or Python with pandas. We show examples in the article. Our online tool works best up to a few megabytes of JSON, completely in your browser." } }
-            ]
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
-                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
-                { "@type": "ListItem", "position": 3, "name": "Flatten Nested JSON Guide", "item": "https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/" }
-            ]
-        }
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"How to Flatten Nested JSON — Convert to CSV / Excel Online — Complete Guide (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/about/"},
+  "datePublished":"2026-04-28",
+  "dateModified":"2026-06-20",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/",
+  "image":"https://www.devstoolsbox.dev/images/flatten-json-guide-cover.png",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"Step-by-step guide to flattening nested JSON into CSV or Excel. Covers the algorithm in Python and JavaScript, edge cases (arrays, nulls, dots in keys), flatten vs normalize, pandas json_normalize, jq, and a free browser-based converter."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Why does my flattened CSV contain repeated rows for the same user?","acceptedAnswer":{"@type":"Answer","text":"When a JSON object contains an array field such as orders, the flattening algorithm expands each array element into its own row, duplicating all parent fields on every row. This is the expected behavior of a flat export. To avoid duplication, either normalize the data into two separate CSV files linked by a foreign key, or configure the converter to serialize the entire array as a JSON string in a single cell."}},
+    {"@type":"Question","name":"What is the difference between flattening and normalizing JSON?","acceptedAnswer":{"@type":"Answer","text":"Flattening produces a single wide table: nested objects become dot-notation columns, and arrays produce extra rows with repeated parent data. Normalizing splits the JSON into multiple related tables linked by foreign keys, similar to a relational database schema. Use flattening for quick exports, spreadsheet analysis, and reporting. Use normalizing when importing into a relational database to avoid data redundancy."}},
+    {"@type":"Question","name":"Can I flatten JSON that already has dots in the key names?","acceptedAnswer":{"@type":"Answer","text":"Using a dot separator when the original keys already contain dots creates ambiguity: a column named first.name could represent either a flattened path or an original key. The DevToolbox converter detects dots inside original keys and warns you. Switch the separator to double underscore or rename the problematic keys before converting."}},
+    {"@type":"Question","name":"What happens to null values when flattening JSON?","acceptedAnswer":{"@type":"Answer","text":"The DevToolbox converter represents null values as empty cells in the CSV output, which is the cleanest representation for Excel and Google Sheets. If a downstream system requires the literal string null or a zero placeholder, this behavior can be changed in the converter's empty cell handling settings."}},
+    {"@type":"Question","name":"How do I flatten very large JSON files?","acceptedAnswer":{"@type":"Answer","text":"For files larger than a few megabytes, the online tool may be slow. Use Python's pandas.json_normalize for scriptable pipelines, or the jq command-line tool for streaming and shell automation. Both approaches are shown with ready-to-copy code in this article."}},
+    {"@type":"Question","name":"Does the JSON to CSV converter upload my data to a server?","acceptedAnswer":{"@type":"Answer","text":"No. The DevToolbox JSON to CSV converter runs entirely in the browser using JavaScript. Your JSON data never leaves your machine. No files are uploaded, no account is required, and nothing is stored on any server."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/tools/blog/"},
+    {"@type":"ListItem","position":3,"name":"Flatten Nested JSON Guide","item":"https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/"}
+  ]
+}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-JRBW78KE29');
     </script>
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --surface2: #f1f5f9;
-            --primary: #7c3aed;
-            --primary-hover: #6d28d9;
-            --primary-light: rgba(124,58,237,0.08);
-            --text: #0f172a;
-            --text2: #374151;
-            --text3: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --radius: 16px;
-            --code-bg: #1e293b;
-            --code-color: #e2e8f0;
-        }
-        body.dark {
-            --bg: #0b0f19;
-            --surface: #151a28;
-            --surface2: #1d2333;
-            --primary: #a78bfa;
-            --primary-hover: #8b5cf6;
-            --text: #f1f5f9;
-            --text2: #cbd5e1;
-            --text3: #94a3b8;
-            --border: #2d3548;
-            --code-bg: #0f172a;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg); color: var(--text);
-            line-height:1.7; padding:20px;
-            transition: background 0.3s, color 0.3s;
-        }
-        .container { max-width:900px; margin:0 auto; }
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
-        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
-        .logo::before { content:'🛠️'; }
-        .header-right { display:flex; gap:8px; align-items:center; }
-        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
-        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
-        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+/* HEADER */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        .article-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
-        }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
-        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
-        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
-        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
-        p { margin-bottom:16px; color:var(--text2); }
-        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
-        li { margin-bottom:8px; }
-        strong { color:var(--text); }
-        code {
-            background:var(--code-bg); color:var(--code-color);
-            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
-        }
-        pre {
-            background:var(--code-bg); color:var(--code-color);
-            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
-            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
-        }
-        .btn-tool {
-            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
-            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
-        }
-        .btn-tool:hover { background:var(--primary-hover); }
-        .footer {
-            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
-            color:var(--text3); font-size:0.8rem;
-        }
-        .footer a { color:var(--primary); text-decoration:none; }
-        @media (max-width:600px) {
-            h1 { font-size:1.6rem; }
-            .article-card { padding:20px; }
-        }
-    </style>
+/* BREADCRUMB */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+/* ARTICLE */
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+/* CALLOUTS */
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:480px}
+.dec-table{border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+.plain-table tr:nth-child(even) td{background:var(--surface2)}
+
+/* TOPIC CARDS */
+.ap-card{border:1px solid var(--border);border-radius:14px;padding:22px;margin:20px 0}
+.ap-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ap-name{font-weight:800;font-size:1.05rem;color:var(--text)}
+.ap-number{font-size:1.3rem;font-weight:900;color:var(--primary);margin-right:8px}
+.sev-badge{font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;align-self:flex-start}
+.sev-tip{background:var(--pass-bg);color:var(--pass)}
+.sev-warn{background:var(--warn-bg);color:#b45309}
+.sev-info{background:var(--primary-light);color:var(--primary)}
+body.dark .sev-warn{background:#422006;color:#fbbf24}
+.fix-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--pass);display:block;margin:14px 0 6px}
+.danger-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--fail);display:block;margin:14px 0 6px}
+.note-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--primary);display:block;margin:14px 0 6px}
+
+/* SIDE-BY-SIDE COMPARISON */
+.compare-box{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+@media(max-width:560px){.compare-box{grid-template-columns:1fr}}
+.compare-panel{border-radius:10px;padding:14px;border:1px solid var(--border)}
+.compare-bad{background:var(--fail-bg);border-color:var(--fail)}
+.compare-good{background:var(--pass-bg);border-color:var(--pass)}
+.compare-label{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.compare-bad .compare-label{color:var(--fail)}
+.compare-good .compare-label{color:var(--pass)}
+body.dark .compare-bad{background:var(--fail-bg)}
+body.dark .compare-good{background:var(--pass-bg)}
+
+/* TOC */
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+/* CTA */
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+/* FAQ */
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+/* REFERENCES */
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+/* RELATED TOOLS */
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+/* FIGURE */
+figure{margin:28px 0}
+figure img{max-width:100%;height:auto;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);display:block}
+figcaption{margin-top:10px;font-size:.83rem;color:var(--text3);text-align:center;font-style:italic}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <a href="/" class="logo">Devstoolsbox</a>
-        <div class="header-right">
-            <div class="theme-toggle">
-                <button class="theme-btn active" data-theme="light"> Light</button>
-                <button class="theme-btn" data-theme="dark"> Dark</button>
-            </div>
-            <div class="lang-switch">
-                <a href="/tools/blog/flatten-nested-json-guide/" class="lang-btn active">EN</a>
-                <a href="/fr/blog/aplatir-json-imbrique-guide/" class="lang-btn">FR</a>
-            </div>
-        </div>
-    </header>
+<div class="page">
 
-    <main>
-        <article class="article-card" itemscope itemtype="https://schema.org/Article">
-            <h1>How to Flatten Nested JSON — Convert Complex API Data into Clean CSV / Excel in Seconds</h1>
-            <div class="meta">Published on April 28, 2026 · Updated May 18, 2026 — 8 min read</div>
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/flatten-nested-json-guide/" class="pill-btn active">EN</a>
+      <a href="/fr/blog/aplatir-json-imbrique-guide/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
 
-            <p>
-                You ran JSON.parse() on the API response, opened it in your converter, and got [object Object] in the address column. That's the flattening problem. It's not just about clicking a button — knowing what happens under the hood, what breaks, and when to normalize instead of flatten will save you hours of debugging.
-            </p>
-            <p>
-                Whether you need to <strong>convert a JSON array to CSV</strong>, export <strong>JSON to Excel online</strong>, 
-                or turn a raw API response into a formatted CSV that Excel can read with proper accents, 
-                this guide will show you the fastest, most private way to do it — without writing a single line of code.
-            </p>
-                <figure style="margin: 28px 0; text-align: center;">
-  <img
-    src="/convertisseur-json-csv.webp"
-    alt="Devstoolsbox JSON ↔ CSV converter interface showing the table preview and flattening options"
-    loading="lazy"
-    decoding="async"
-    style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
-  >
-  <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
-   JSON → CSV conversion with automatic flattening of nested objects and customizable array path.
-  </figcaption>
-</figure>
-            <h2>What does “flatten nested JSON” actually mean?</h2>
-            <p>
-                It means taking a structure like this:
-            </p>
-            <pre><code>[
-  {
-    "name": "Alice",
-    "address": {
-      "city": "Paris",
-      "zip": "75001"
-    }
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/fr/blog/">Blog</a></li>
+    <li aria-current="page">Flatten Nested JSON Guide</li>
+  </ol>
+</nav>
+
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-04-28">
+  <meta itemprop="dateModified" content="2026-06-20">
+
+  <h1 itemprop="headline">How to Flatten Nested JSON, Convert Complex API Data into Clean CSV&nbsp;/ Excel (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-04-28">April 28, 2026</time>
+    <span>·</span>
+    <span>Updated June 20, 2026</span>
+    <span>·</span>
+    <span>6 min read</span>
+    <span>·</span>
+    <span>By <a href="/tools/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">In this article</div>
+    <ol>
+      <li><a href="#incident">The [object Object] that broke a client report</a></li>
+      <li><a href="#decision-table">Quick reference: flatten vs normalize decision</a></li>
+      <li><a href="#what-is-flattening">What flattening actually does</a></li>
+      <li><a href="#algorithm">The algorithm in Python and JavaScript</a></li>
+      <li><a href="#edge-cases">Edge cases that surprise developers</a></li>
+      <li><a href="#step-by-step">Step-by-step with the DevToolbox converter</a></li>
+      <li><a href="#large-files">For large files: pandas and jq</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- SECTION 1 — INCIDENT -->
+  <h2 id="incident">The [object Object] that broke a client report</h2>
+
+  <p>It was a Monday morning stand-up. A developer on a client project had spent the weekend building a data export feature. The product manager opened the Excel file, scrolled to the <em>address</em> column, and every cell said <code>[object Object]</code>. The meeting was paused. The export was pulled. Three hours were spent figuring out what happened.</p>
+
+  <p>What happened was straightforward: the API response was a JSON array where each record had a nested <code>address</code> object with <code>city</code>, <code>zip</code>, and <code>country</code> sub-fields. The export script had done <code>row.address</code> — and JavaScript had silently converted the object to its string representation instead of expanding the fields into separate columns.</p>
+
+  <p>This is the nested JSON problem. It happens every time a flat table format (CSV, Excel, SQL) meets a hierarchical data format (JSON). Knowing how to flatten correctly — and when not to — will save you from this conversation every time an API changes its response shape.</p>
+
+  <div class="callout callout-info">
+    <strong>Skip to the tool:</strong> If you just need to flatten JSON right now, open the <a href="/tools/json-csv-converter/">DevToolbox JSON to CSV Converter</a>, paste your JSON, check <strong>Flatten objects</strong>, and download. Come back here when you want to understand why a particular edge case is behaving unexpectedly.
+  </div>
+
+  <!-- SECTION 2 — DECISION TABLE -->
+  <h2 id="decision-table">Quick reference: flatten vs normalize</h2>
+
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>Situation</th><th>Approach</th><th>Output</th><th>Use when</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Nested objects only (no arrays)</td><td>Flatten</td><td>One wide CSV</td><td>Always — simple and clean</td></tr>
+        <tr><td>Arrays of simple values</td><td>Flatten (join as string) or drop</td><td>One CSV, array as joined cell</td><td>Values are secondary info</td></tr>
+        <tr><td>Arrays of objects (e.g. orders)</td><td>Flatten (expand rows) or Normalize</td><td>Flat: repeated rows · Normal: 2 CSVs</td><td>Flat for Excel, Normal for DB import</td></tr>
+        <tr><td>Deep nesting (5+ levels)</td><td>Flatten with max depth limit</td><td>One CSV, deep fields serialized</td><td>When column count would explode</td></tr>
+        <tr><td>Keys containing dots</td><td>Flatten with __ separator</td><td>One CSV, no ambiguous column names</td><td>Always when dots exist in keys</td></tr>
+        <tr><td>Multi-gigabyte files</td><td>pandas / jq (command line)</td><td>Streamed CSV</td><td>Files too large for browser tool</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 3 — WHAT IS FLATTENING -->
+  <h2 id="what-is-flattening">What flattening actually does</h2>
+
+  <p>Flattening converts a hierarchical JSON structure into a single flat table. Every nested object becomes a set of additional columns, with keys joined by a separator (usually a dot). The depth of nesting becomes the length of the column name, not an additional level of structure.</p>
+
+  <div class="compare-box">
+    <div class="compare-panel compare-bad">
+      <div class="compare-label">❌ Before — nested (unusable in Excel)</div>
+      <pre style="margin:0;background:transparent;padding:0;font-size:.78rem"><code style="background:transparent;padding:0">[{
+  "name": "Alice",
+  "address": {
+    "city": "Paris",
+    "zip": "75001"
   }
-]</code></pre>
-            <p>
-                And turning it into a flat table:
-            </p>
-            <pre><code>name,address.city,address.zip
+}]</code></pre>
+    </div>
+    <div class="compare-panel compare-good">
+      <div class="compare-label">✅ After, flat (Excel-ready)</div>
+      <pre style="margin:0;background:transparent;padding:0;font-size:.78rem"><code style="background:transparent;padding:0">name,address.city,address.zip
 Alice,Paris,75001</code></pre>
-            <p>
-                The <code>address</code> sub‑object disappears; its fields become new columns with dot‑notation headers. 
-                That’s <strong>JSON to Excel online</strong> 101, and it’s exactly what our 
-                <a href="https://www.devstoolsbox.dev/tools/json-csv-converter/">JSON to CSV Converter</a> does automatically 
-                when you check the <strong>Flatten objects</strong> option.
-            </p>
+    </div>
+  </div>
 
-            <h2>Why flatten JSON? Real‑world reasons</h2>
-            <ul>
-                <li><strong>Convert API JSON to CSV</strong> for business reports. Your backend sends nested data; your stakeholder wants a table.</li>
-                <li><strong>Prepare data for databases</strong>. Most SQL tools import flat CSV better than deeply nested JSON.</li>
-                <li><strong>Debug JWT tokens</strong>. Often a JWT payload contains nested claims. 
-                You can <a href="https://www.devstoolsbox.dev/tools/jwt-decoder/">decode the JWT</a>, then flatten its payload into CSV for analysis.</li>
-                <li><strong>Share with non‑tech colleagues</strong>. They know Excel, not JSON paths.</li>
-            </ul>
+  <p>The <code>address</code> sub-object disappears entirely. Its fields become new columns with dot-notation headers. Any spreadsheet tool can now filter, sort, and pivot the data without parsing JSON.</p>
 
-            <h2>How flattening works under the hood</h2>
-            <p>
-                Flattening a JSON object is a recursive process. Starting from the top level, we walk through every key. 
-                If the value is another object (and not an array), we go deeper and prepend the parent key to the child keys, 
-                separating them with a dot. If the value is a simple type (string, number, boolean, null), we store it as a column. 
-            </p>
-            <p>
-                Here's the core algorithm in Python — just a few lines:
-            </p>
-            <pre><code>def flatten(obj, prefix='', sep='.'):
+  <!-- SECTION 4 — ALGORITHM -->
+  <h2 id="algorithm">The algorithm in Python and JavaScript</h2>
+
+  <p>Flattening is a recursive function. For each key in the object: if the value is another object (not an array), recurse deeper and build a composite key by joining the parent key and child key with the separator. If the value is a primitive (string, number, boolean, null), store it directly.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Python</span>Core implementation</div>
+      <span class="sev-badge sev-tip">Ready to use</span>
+    </div>
+
+    <pre><code>def flatten(obj, prefix='', sep='.'):
     items = {}
     for key, val in obj.items():
         new_key = f"{prefix}{sep}{key}" if prefix else key
@@ -242,230 +365,340 @@ Alice,Paris,75001</code></pre>
             items.update(flatten(val, new_key, sep))
         else:
             items[new_key] = val
-    return items</code></pre>
-            <p>
-                And the same logic in JavaScript, ready to run in your browser:
-            </p>
-            <pre><code>function flatten(obj, prefix = '', sep = '.') {
+    return items
+
+# Example
+data = {"name": "Alice", "address": {"city": "Paris", "zip": "75001"}}
+print(flatten(data))
+# → {'name': 'Alice', 'address.city': 'Paris', 'address.zip': '75001'}
+
+# Apply to an array of records
+import csv, io
+records = [{"name": "Alice", "address": {"city": "Paris", "zip": "75001"}},
+           {"name": "Bob",   "address": {"city": "Lyon",  "zip": "69001"}}]
+
+flat = [flatten(r) for r in records]
+keys = sorted({k for row in flat for k in row})
+
+output = io.StringIO()
+writer = csv.DictWriter(output, fieldnames=keys)
+writer.writeheader()
+writer.writerows(flat)
+print(output.getvalue())</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">JavaScript</span>Browser and Node.js</div>
+      <span class="sev-badge sev-tip">Ready to use</span>
+    </div>
+
+    <pre><code>function flatten(obj, prefix = '', sep = '.') {
   return Object.keys(obj).reduce((acc, key) => {
     const newKey = prefix ? `${prefix}${sep}${key}` : key;
-    if (typeof obj[key] === 'object' && !Array.isArray(obj[key]) && obj[key] !== null) {
+    if (
+      typeof obj[key] === 'object' &&
+      !Array.isArray(obj[key]) &&
+      obj[key] !== null
+    ) {
       Object.assign(acc, flatten(obj[key], newKey, sep));
     } else {
       acc[newKey] = obj[key];
     }
     return acc;
   }, {});
-}</code></pre>
-            <p>
-                When you apply this to an array of objects (like an API response), you first flatten each element, then combine all 
-                keys into the CSV header. That's exactly what the Devstoolsbox converter does in real‑time.
-            </p>
+}
 
-            <h2>Edge cases that surprise developers</h2>
-            <p>
-                Flattening is simple until you hit one of these real‑world scenarios:
-            </p>
-            <h3>Arrays of objects</h3>
-            <p>
-                If a field contains an array of objects — say <code>orders: [{id: 1}, {id: 2}]</code> — the basic flatten 
-                function can't turn that into a single column. Our tool outputs each array element as a new row, duplicating 
-                the parent fields. That's often what you want for a flat table, but it can lead to many rows. If you'd rather 
-                keep the array as a JSON string inside the cell, you can adjust the flattening options in the converter.
-            </p>
-            <h3>Null values</h3>
-            <p>
-                What happens when a field is <code>null</code>? In Devstoolsbox, null becomes an empty cell. 
-                This is clean for Excel; other tools might drop the column entirely. You can also choose to represent 
-                nulls as the string "null" or as 0 via the empty‑cell handling settings.
-            </p>
-            <h3>Dots in original key names</h3>
-            <p>
-                If your JSON already has keys like <code>"first.name"</code>, flattening with a dot separator will create 
-                a collision. Our tool warns you when it detects dots inside keys. You can switch the separator to <code>__</code> 
-                or rename those keys before flattening.
-            </p>
-            <h3>Maximum depth</h3>
-            <p>
-                While there's no hard limit, extremely deep nesting (10+ levels) can produce hundreds of columns. 
-                In such cases, you might want to flatten only the first few levels and keep the rest as a serialized JSON string. 
-                The converter lets you set a maximum flatten depth.
-            </p>
+// Convert an array of records to CSV
+function toCSV(records, sep = '.') {
+  const flat = records.map(r => flatten(r, '', sep));
+  const keys = [...new Set(flat.flatMap(Object.keys))].sort();
+  const header = keys.join(',');
+  const rows = flat.map(r => keys.map(k => JSON.stringify(r[k] ?? '')).join(','));
+  return [header, ...rows].join('\n');
+}
 
-            <h2>Flatten vs. normalize: which one do you really need?</h2>
-            <p>
-                People often confuse flattening with normalization. They serve different purposes.
-            </p>
-            <p>
-                <strong>Flattening</strong> produces a single wide table. Every nested object becomes extra columns; 
-                every array element becomes an extra row with parent data repeated. This is great for quick exports, 
-                Excel analysis, and reports.
-            </p>
-            <p>
-                <strong>Normalizing</strong> splits the data into multiple related tables — for example, a <code>users.csv</code> 
-                and an <code>orders.csv</code> linked by a <code>user_id</code>. This is the clean approach for relational databases.
-            </p>
-            <p>
-                When you flatten a user with orders, you get:
-            </p>
-            <pre><code>name,order.id,order.amount
+console.log(toCSV([
+  { name: 'Alice', address: { city: 'Paris', zip: '75001' } },
+  { name: 'Bob',   address: { city: 'Lyon',  zip: '69001' } }
+]));</code></pre>
+  </div>
+
+  <!-- SECTION 5 — EDGE CASES -->
+  <h2 id="edge-cases">Edge cases that surprise developers</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">1</span>Arrays of objects inside a record</div>
+      <span class="sev-badge sev-warn">Watch out</span>
+    </div>
+    <p>When a field contains an array of objects,  <code>"orders": [{"id": 1, "total": 50}, {"id": 2, "total": 30}]</code>, the simple flatten function has no single column to put them in. The DevToolbox converter expands each array element into its own row, duplicating all parent fields. This is usually what you want for Excel analysis, but produces repeated rows that can confuse a database import.</p>
+    <div class="note-tag">Result of row expansion</div>
+    <pre><code>name,orders.id,orders.total
 Alice,1,50
-Alice,2,30</code></pre>
-            <p>
-                If you normalize, you'd export two CSVs:
-            </p>
-            <pre><code># users.csv
-id,name
-1,Alice
+Alice,2,30    ← Alice appears twice</code></pre>
+    <p>If you'd rather keep the array as a single cell, set the array handling option to <strong>Serialize as JSON string</strong>. The cell will contain <code>"[{""id"":1,""total"":50},{""id"":2,""total"":30}]"</code>.</p>
+  </div>
 
-# orders.csv
-user_id,id,amount
-1,1,50
-1,2,30</code></pre>
-            <p>
-                Which one you pick depends on the downstream tool. Excel users love a flat table; database administrators prefer normalized tables.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">2</span>Dots in original key names</div>
+      <span class="sev-badge sev-warn">Watch out</span>
+    </div>
+    <p>If your JSON has a key like <code>"first.name"</code>, flattening with a dot separator creates an ambiguous column name, you cannot tell whether <code>first.name</code> was an original key or a flattened path. The DevToolbox converter detects this and shows a warning. Switch to <code>__</code> as the separator or sanitize the keys before converting.</p>
+    <div class="danger-tag">Ambiguous output, avoid this</div>
+    <pre><code>// Original key contains a dot
+{ "first.name": "Alice", "address": { "city": "Paris" } }
+// Flattened with dot separator → ambiguous:
+// first.name  ← is this "first" → "name" or the original key?
+// address.city</code></pre>
+    <div class="fix-tag">Use double-underscore separator</div>
+    <pre><code>// Safe: no ambiguity with __ separator
+flatten(obj, '', '__')
+// → { 'first.name': 'Alice', 'address__city': 'Paris' }</code></pre>
+  </div>
 
-            <h2>Using the Devstoolsbox converter: a step‑by‑step guide</h2>
-            <p>
-                Our <strong>nested JSON CSV converter</strong> requires no upload, no login, and no server communication. 
-                Everything stays in your browser. Here’s the workflow:
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">3</span>Null values and missing keys</div>
+      <span class="sev-badge sev-info">Good to know</span>
+    </div>
+    <p>When records in an array have different keys, one user has <code>phone</code> and another doesn't, the flattened CSV needs a column for <code>phone</code> that is empty for the second user. The DevToolbox converter handles this automatically, creating a union of all keys across all records and filling in empty cells for missing values.</p>
+    <pre><code>[
+  { "name": "Alice", "phone": "0612345678" },
+  { "name": "Bob" }   ← no phone field
+]
+// Flattened output:
+// name,phone
+// Alice,0612345678
+// Bob,              ← empty cell, not an error</code></pre>
+    <div class="callout callout-pass">
+      <strong>Null vs missing:</strong> A field set to <code>null</code> and a field that is absent entirely both become empty cells in the CSV output. If the distinction matters for your pipeline, handle it before flattening by replacing <code>null</code> with a sentinel value.
+    </div>
+  </div>
 
-            <h3>1. Paste your JSON</h3>
-            <p>
-                Go to the <a href="https://www.devstoolsbox.dev/tools/json-csv-converter/">JSON / CSV Converter</a> and paste 
-                your raw JSON into the left panel. If you fetched it from an API, paste the whole response — 
-                the tool can extract the array for you.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">4</span>Deep nesting producing hundreds of columns</div>
+      <span class="sev-badge sev-info">Good to know</span>
+    </div>
+    <p>A response with 8 levels of nesting can produce column names like <code>data.users.profile.settings.notifications.email.digest.frequency</code>. The converter lets you set a maximum flatten depth. Everything below that depth is serialized as a JSON string in a single cell, keeping the table manageable.</p>
+    <pre><code>flatten(obj, '', '.', maxDepth=3)
+// Fields deeper than 3 levels → serialized as JSON string in their parent column</code></pre>
+  </div>
 
-            <h3>2. Specify the array path (if needed)</h3>
-            <p>
-                APIs often wrap the actual array inside <code>data</code>, <code>results</code>, or <code>users</code>. 
-                Use the <strong>Array path</strong> field to point directly to the list you want to convert. 
-                For example, if your response looks like:
-            </p>
-            <pre><code>{
+  <!-- SECTION 6 — STEP BY STEP -->
+  <h2 id="step-by-step">Step-by-step with the DevToolbox converter</h2>
+
+  <p>The converter runs entirely in your browser,  no upload, no login, no server. Your data stays on your machine.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Step 1</span>Paste your JSON</div>
+    </div>
+    <p>Open the <a href="/tools/json-csv-converter/">JSON / CSV Converter</a> and paste your raw JSON in the left panel. The tool accepts both a root array <code>[{...}, {...}]</code> and a wrapped API response <code>{"data": [{...}]}</code>.</p>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Step 2</span>Set the array path if the data is wrapped</div>
+    </div>
+    <p>Most API responses wrap the actual data inside a key:</p>
+    <pre><code>{
   "status": "ok",
   "data": {
-    "users": [ ... ]
+    "users": [ {...}, {...} ]
   }
 }</code></pre>
-            <p>
-                Just type <code>data.users</code>. The converter will skip the wrapping layers and work on the array.
-            </p>
+    <p>Type <code>data.users</code> in the <strong>Array path</strong> field. The converter skips the wrapper object and processes only the records you need. Without this, it would try to flatten the wrapper itself and produce a single row with a serialized array.</p>
+    <div class="callout callout-warn">
+      <strong>Most common mistake:</strong> forgetting to set the array path. If your output is a single row with an <code>[object Object]</code>-style value, this is why.
+    </div>
+  </div>
 
-            <h3>3. Enable flatten objects</h3>
-            <p>
-                Check the <strong>Flatten objects</strong> checkbox. This triggers the flattening of every nested object 
-                into dot‑notation columns. You can see the result immediately in the live table preview.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Step 3</span>Enable flatten objects and preview</div>
+    </div>
+    <p>Check <strong>Flatten objects</strong>. The live table preview updates in real-time. You can see immediately how nested fields map to column names and spot any edge cases before downloading.</p>
+  </div>
 
-            <h3>4. Convert and download</h3>
-            <p>
-                Click <strong>Convert to CSV →</strong>. The generated CSV appears in the right panel. 
-                For <strong>JSON CSV Excel UTF‑8</strong> compatibility, hit <strong>Download CSV (UTF‑8 BOM)</strong> — 
-                this adds the invisible marker that tells Excel to display French accents, umlauts, and any special characters correctly.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Step 4</span>Download with UTF-8 BOM for Excel</div>
+    </div>
+    <p>Click <strong>Convert to CSV →</strong> then choose <strong>Download CSV (UTF-8 BOM)</strong>. The BOM is an invisible byte-order marker at the start of the file that tells Excel to decode the file as UTF-8. Without it, French accents, German umlauts, Arabic characters, and any non-ASCII text will display as garbled symbols when opened directly in Excel on Windows.</p>
+    <pre><code># Python equivalent, the utf-8-sig encoding adds the BOM automatically
+df.to_csv('output.csv', index=False, encoding='utf-8-sig')</code></pre>
+  </div>
 
-            <h2>For large files: pandas and jq</h2>
-            <p>
-                The online tool shines for quick, interactive flattening. But when you're dealing with a multi‑gigabyte JSON export, 
-                you'll want a command‑line approach. Here are two proven methods.
-            </p>
-            <h3>Python with pandas</h3>
-            <p>
-                Data analysts love <code>pd.json_normalize</code>. It does exactly what our tool does, but in a scriptable way. 
-                This snippet reads a JSON file, flattens the array at <code>data.users</code>, and writes a CSV with proper 
-                UTF‑8 BOM for Excel:
-            </p>
-            <pre><code>import pandas as pd
+  <div style="text-align:center;margin:28px 0">
+    <a href="/tools/json-csv-converter/" class="btn-cta"> Open the JSON to CSV Converter,  free, no upload</a>
+  </div>
+
+  <!-- SECTION 7 — LARGE FILES -->
+  <h2 id="large-files">For large files: pandas and jq</h2>
+
+  <p>The online tool is built for interactive, quick conversions up to a few megabytes. For large exports from a data warehouse, a full database dump, or a CI/CD pipeline, use one of these approaches.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">pandas</span>Python, best for data pipelines</div>
+      <span class="sev-badge sev-tip">Recommended</span>
+    </div>
+    <p><code>pd.json_normalize</code> is the standard library function for this. It handles nested objects, arrays of records, custom separators, and produces a DataFrame you can transform before exporting.</p>
+    <pre><code>import pandas as pd
 import json
 
-with open('data.json') as f:
+with open('api_response.json', encoding='utf-8') as f:
     data = json.load(f)
 
+# Simple case: root is an array
+df = pd.json_normalize(data, sep='.')
+df.to_csv('output.csv', index=False, encoding='utf-8-sig')
+
+# Wrapped array: data is at data.users
 df = pd.json_normalize(data['data']['users'], sep='.')
-df.to_csv('output.csv', index=False, encoding='utf-8-sig')</code></pre>
-            <p>
-                <code>utf-8-sig</code> is Python's way of adding the UTF‑8 BOM. That little detail saves hours when colleagues open the file in Excel.
-            </p>
-            <h3>jq for the terminal</h3>
-            <p>
-                <code>jq</code> is a lightweight and incredibly fast JSON processor. To extract and flatten a subset of fields 
-                from a large nested array, you can run:
-            </p>
-            <pre><code>jq -r '.data.users[] | [.name, .address.city, .address.zip] | @csv' data.json</code></pre>
-            <p>
-                This pipes the flattened rows directly to stdout, which you can redirect to a CSV file. It's ideal for 
-                automated pipelines.
-            </p>
+df.to_csv('output.csv', index=False, encoding='utf-8-sig')
 
-            <h2>Integrating with the rest of Devstoolsbox</h2>
-            <p>
-                Once you’ve flattened your JSON into CSV, you might need:
-            </p>
-            <ul>
-                <li><a href="https://www.devstoolsbox.dev/tools/json-formatter/">JSON Formatter</a> — validate and pretty‑print your original JSON before flattening.</li>
-                <li><a href="https://www.devstoolsbox.dev/tools/jwt-decoder/">JWT Decoder</a> — if your JSON contains a JWT token, decode it first to expose nested claims.</li>
-                <li><a href="https://www.devstoolsbox.dev/tools/password-hash-generator/">Password & Hash Generator</a> — secure any credentials you extract from the JSON.</li>
-                <li><a href="https://www.devstoolsbox.dev/tools/regex-tester/">Regex Tester</a> — clean up data fields before or after conversion.</li>
-            </ul>
+# Array nested inside each record (orders per user)
+# record_path: the nested array to expand into rows
+# meta: parent fields to keep on every expanded row
+df = pd.json_normalize(
+    data['users'],
+    record_path='orders',
+    meta=['id', 'name', 'email'],
+    sep='.'
+)
+df.to_csv('users_orders.csv', index=False, encoding='utf-8-sig')</code></pre>
+  </div>
 
-            <h2>Frequently Asked Questions</h2>
-            <h3>Why does my flattened CSV contain repeated rows for the same user?</h3>
-            <p>
-                That happens when you flatten a JSON object that contains an array (like orders). Each element of the array 
-                creates a new row with the parent columns repeated. If you want to avoid duplication, you can either export 
-                multiple CSV files (normalize) or decide how you want arrays to be represented (as JSON string, only first element, etc.).
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">jq</span>Terminal, best for shell pipelines</div>
+      <span class="sev-badge sev-info">Fast & scriptable</span>
+    </div>
+    <p><code>jq</code> processes JSON as a stream, which means it can handle files much larger than available RAM. It's ideal for CI/CD pipelines, cron jobs, and any workflow where installing Python is impractical.</p>
+    <pre><code># Extract specific fields as CSV
+jq -r '
+  .data.users[] |
+  [.name, .address.city, .address.zip, .email] |
+  @csv
+' api_response.json > output.csv
 
-            <h3>What is the difference between flattening and normalizing JSON?</h3>
-            <p>
-                Flattening creates a single wide table; normalizing splits the data into several related tables. Use flattening 
-                for quick export, normalizing for database imports.
-            </p>
+# Add a header row
+(
+  echo '"name","city","zip","email"'
+  jq -r '.data.users[] | [.name, .address.city, .address.zip, .email] | @csv' input.json
+) > output.csv
 
-            <h3>Can I flatten JSON that has dots in the key names?</h3>
-            <p>
-                It's risky because dots are used as separators. Our tool detects dots in original keys and warns you. 
-                You can choose a different separator (like <code>__</code>) or rename the keys before flattening.
-            </p>
+# Handle null values (replace with empty string)
+jq -r '.data.users[] | [(.name // ""), (.address.city // ""), (.email // "")] | @csv' input.json</code></pre>
 
-            <h3>What happens to null values when I flatten JSON?</h3>
-            <p>
-                In our tool, null values become empty cells. That's usually what you want. If you need explicit 'null' 
-                strings or zeros, adjust the empty cell handling in the converter settings.
-            </p>
+    <div class="callout callout-pass">
+      <strong>Which tool to use:</strong> Use the <strong>online converter</strong> for one-off exports and when you want immediate visual feedback. Use <strong>pandas</strong> when you need to chain transformations in a Jupyter notebook or scheduled script. Use <strong>jq</strong> in shell scripts and CI/CD pipelines where speed and low dependencies matter.
+    </div>
+  </div>
 
-            <h3>How can I flatten extremely large JSON files (gigabytes)?</h3>
-            <p>
-                Use command‑line tools like <code>jq</code> or Python with <code>pandas</code>. We show examples in the 
-                article. Our online tool works best up to a few megabytes of JSON, completely in your browser.
-            </p>
+  <!-- FAQ -->
+  <h2 id="faq">Frequently asked questions</h2>
 
-            <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/tools/json-csv-converter/" class="btn-tool">Flatten Your JSON Now — Free Browser-Based Converter</a></p>
-        </article>
-    </main>
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why does my flattened CSV have repeated rows for the same record?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Your JSON contains an array field, for example, a user with multiple orders. The flattening algorithm expands each array element into its own row and repeats all parent fields (name, email, etc.) on every row. This is intentional: it's the only way to represent a one-to-many relationship in a flat table. If you want to avoid duplication, either normalize the data into two separate CSV files, or configure the converter to serialize the array as a JSON string in a single cell.</p>
+      </div>
+    </details>
 
-    <footer class="footer">
-        <p>&copy; 2025 <a href="/">Devstoolsbox</a> — Free online tools for developers and designers. <a href="https://www.devstoolsbox.dev/tools/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
-    </footer>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Flatten vs normalize, which one should I use?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Flattening gives you one wide CSV, fast, simple, great for Excel and reporting tools. Normalizing gives you multiple related CSV files linked by foreign keys — correct for importing into a relational database without data redundancy. If the output goes to a spreadsheet, a BI tool, or a non-technical colleague, flatten. If the output goes into PostgreSQL, MySQL, or any SQL database, normalize.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">My JSON keys contain dots. What should I do?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Switch the separator from dot to double underscore in the converter settings. With dot as the separator, a key named <code>first.name</code> in the original JSON produces the same column name as a flattened path <code>first → name</code>. This ambiguity breaks any downstream tool that tries to interpret column names as paths. Double underscore is safe because it rarely appears in original JSON keys.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What happens to null values in the output?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Null values become empty cells in the CSV, the cleanest representation for spreadsheet tools. A field set to null and a field that is entirely absent both produce an empty cell. If your downstream system requires the literal string "null" or a numeric zero, sanitize the data before converting or adjust the empty-cell handling in the converter settings.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I handle very large JSON files?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">For files larger than a few megabytes, use <code>pd.json_normalize</code> in Python for scriptable pipelines, or <code>jq</code> for streaming from the command line. Both handle large files efficiently and support the same use cases as the online converter. Ready-to-copy code for both is in the article above.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Is my data sent to a server when I use the converter?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">No. The DevToolbox JSON to CSV converter runs entirely client-side in JavaScript. Your JSON data is processed in your browser's memory and never transmitted to any server. No account is required, no files are stored, and no analytics are collected on your input data.</p>
+      </div>
+    </details>
+  </div>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/tools/json-csv-converter/" class="btn-cta"> Flatten your JSON now, free, instant, client-side</a>
+  </div>
+
+  <!-- REFERENCES -->
+  <section class="references">
+    <h3>Sources and references</h3>
+    <ul class="ref-list">
+      <li><a href="https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html" target="_blank" rel="noopener noreferrer">pandas Documentation, json_normalize</a> official API reference for the standard Python flattening function.</li>
+      <li><a href="https://stedolan.github.io/jq/manual/" target="_blank" rel="noopener noreferrer">jq Manual, stedolan.github.io</a>, complete reference for jq filters, including <code>@csv</code> output formatting.</li>
+      <li><a href="https://datatracker.ietf.org/doc/html/rfc8259" target="_blank" rel="noopener noreferrer">RFC 8259, The JSON Data Interchange Format</a>, the IETF specification defining valid JSON, including null, arrays, and nested objects.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener noreferrer">RFC 4180, Common Format and MIME Type for CSV Files</a>, the specification covering CSV quoting rules, line endings, and encoding.</li>
+      <li><a href="https://support.microsoft.com/en-us/office/import-or-export-text-txt-or-csv-files-5250ac4c-663c-47ce-937b-339e391393ba" target="_blank" rel="noopener noreferrer">Microsoft Support, Import CSV files in Excel</a>,  UTF-8 BOM requirement for Excel CSV imports on Windows.</li>
+      <li><a href="https://docs.python.org/3/library/csv.html" target="_blank" rel="noopener noreferrer">Python Documentation, csv module</a>, DictWriter and encoding options for Python CSV generation.</li>
+    </ul>
+  </section>
+
+  <!-- RELATED TOOLS -->
+  <div class="related-tools">
+    <h3>Related DevToolbox tools</h3>
+    <ul>
+      <li><a href="/tools/json-csv-converter/"> JSON to CSV Converter</a>  flatten nested JSON into CSV or Excel directly in your browser, no upload required</li>
+      <li><a href="/tools/json-formatter/"> JSON Formatter</a>  validate and pretty-print your JSON before flattening to catch syntax errors early</li>
+      <li><a href="/tools/jwt-decoder/"> JWT Decoder</a>  decode JWT tokens to expose nested claims, then flatten the payload into a CSV for analysis</li>
+      <li><a href="/tools/regex-tester/"> Regex Tester</a>  clean and validate data fields in your JSON before or after conversion</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers.
+  <a href="/fr/blog/">Blog</a> | <a href="/tools/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
 </div>
 
 <script>
-    (function() {
-        const btns = document.querySelectorAll('.theme-btn');
-        btns.forEach(b => b.addEventListener('click', () => {
-            const t = b.dataset.theme;
-            document.body.classList.toggle('dark', t === 'dark');
-            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
-            localStorage.setItem('theme', t);
-        }));
-        const saved = localStorage.getItem('theme') || 'light';
-        document.body.classList.toggle('dark', saved === 'dark');
-        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
-    })();
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Light';
+  }
+})();
 </script>
 </body>
 </html>
