@@ -2,441 +2,704 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comment aplatir un JSON imbriqué — Convertir en CSV / Excel facilement en ligne</title>
-    <meta name="description" content="Apprenez à aplatir des objets JSON imbriqués en colonnes CSV plates ou en JSON formaté. Utilisez notre convertisseur en ligne gratuit pour transformer des réponses API complexes en tableaux prêts pour Excel. Sans téléversement, résultat instantané.">
-    <meta name="keywords" content="aplatir json imbriqué en ligne, json array to csv, json to excel online, convertir api json en csv, nested json csv converter, json csv excel utf8, csv to formatted json, algorithme aplatissement json, flatten vs normalize">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="Devstoolsbox">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comment aplatir un JSON imbriqué – Convertir en CSV / Excel en ligne – Guide complet (2026)</title>
+<meta name="description" content="Aplatissez un JSON complexe en CSV ou Excel en quelques secondes. Guide étape par étape avec Python, JavaScript, jq, cas particuliers et un convertisseur en ligne gratuit. Par Mathias Kouadio.">
+<meta name="keywords" content="aplatir json imbriqué en ligne, tableau json vers csv, json vers excel en ligne, convertir json api en csv, convertisseur json csv imbriqué, csv excel utf8, algorithme aplatir json, aplatir vs normaliser json, pandas json_normalize, jq json csv">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/flatten-nested-json-guide/">
 
-    <meta property="og:title" content="Comment aplatir un JSON imbriqué — Convertir en CSV / Excel en ligne">
-    <meta property="og:description" content="Aplatissez des structures JSON complexes en CSV, Excel ou JSON formaté avec notre outil en ligne gratuit. Guide étape par étape avec exemples.">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
-    <meta property="og:site_name" content="Devstoolsbox">
+<meta property="og:title" content="Comment aplatir un JSON imbriqué – Convertir en CSV / Excel en ligne (2026)">
+<meta property="og:description" content="Aplatissez un JSON d'API complexe en CSV ou Excel avec notre convertisseur en ligne gratuit. Couvre les cas particuliers, pandas, jq et le choix entre aplatir et normaliser.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/">
+<meta property="og:site_name" content="DevToolbox">
+<meta property="og:image" content="https://www.devstoolsbox.dev/og/flatten-json-guide-cover.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="article:published_time" content="2026-04-28">
+<meta property="article:modified_time" content="2026-06-20">
+<meta property="article:author" content="Mathias Kouadio">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Aplatir un JSON imbriqué en ligne">
-    <meta name="twitter:description" content="Convertissez du JSON d'API avec des objets imbriqués en CSV / Excel plat. Gratuit, sécurisé, sans téléversement.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Comment aplatir un JSON imbriqué – Convertisseur en ligne gratuit">
+<meta name="twitter:description" content="Convertissez un JSON d'API avec des objets imbriqués en CSV / Excel plat. Gratuit, sécurisé, sans téléchargement.">
+<meta name="twitter:image" content="https://www.devstoolsbox.dev/og/flatten-json-guide-cover.webp">
 
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Comment aplatir un JSON imbriqué — Convertir en CSV / Excel facilement en ligne",
-            "author": { "@type": "Person", "name": "L'équipe Devstoolsbox" },
-            "datePublished": "2026-04-28",
-            "dateModified": "2026-05-18",
-            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/",
-            "publisher": { "@type": "Organization", "name": "Devstoolsbox", "url": "https://www.devstoolsbox.dev/" }
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                { "@type": "Question", "name": "Pourquoi mon CSV aplati contient-il des lignes répétées pour le même utilisateur ?", "acceptedAnswer": { "@type": "Answer", "text": "Cela se produit quand vous aplatissez un objet JSON qui contient un tableau (comme des commandes). Chaque élément du tableau crée une nouvelle ligne où les colonnes parentes sont répétées. Si vous voulez éviter cette duplication, vous pouvez soit exporter plusieurs fichiers CSV (normalisation), soit choisir comment les tableaux sont représentés (chaîne JSON, premier élément uniquement…)." } },
-                { "@type": "Question", "name": "Quelle est la différence entre aplatir et normaliser du JSON ?", "acceptedAnswer": { "@type": "Answer", "text": "L'aplatissement crée une seule table large où les objets imbriqués deviennent des colonnes en notation par points et les tableaux produisent plusieurs lignes avec les données parentes répétées. La normalisation divise les données en plusieurs tables liées par des clés étrangères, comme utilisateurs.csv et commandes.csv. Utilisez l'aplatissement pour un export rapide, la normalisation pour un import en base de données." } },
-                { "@type": "Question", "name": "Puis-je aplatir un JSON qui contient des points dans les noms de clés ?", "acceptedAnswer": { "@type": "Answer", "text": "C'est risqué car les points servent de séparateurs dans les noms de colonnes aplaties. Notre outil détecte les points dans les clés d'origine et vous avertit. Vous pouvez choisir un autre séparateur (comme __) ou renommer les clés avant l'aplatissement." } },
-                { "@type": "Question", "name": "Que deviennent les valeurs null quand j'aplatis du JSON ?", "acceptedAnswer": { "@type": "Answer", "text": "Dans notre outil, les valeurs null deviennent des cellules vides. C'est généralement ce que l'on souhaite. Si vous avez besoin de chaînes 'null' explicites ou de zéros, vous pouvez ajuster la gestion des cellules vides dans les paramètres du convertisseur." } },
-                { "@type": "Question", "name": "Comment aplatir des fichiers JSON très volumineux (plusieurs gigaoctets) ?", "acceptedAnswer": { "@type": "Answer", "text": "Pour les fichiers volumineux, utilisez des outils en ligne de commande comme jq ou Python avec pandas. Nous montrons des exemples dans l'article. Notre outil en ligne fonctionne idéalement jusqu'à quelques mégaoctets de JSON, entièrement dans votre navigateur." } }
-            ]
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
-                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
-                { "@type": "ListItem", "position": 3, "name": "Guide : Aplatir un JSON imbriqué", "item": "https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/" }
-            ]
-        }
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Comment aplatir un JSON imbriqué – Convertir en CSV / Excel en ligne – Guide complet (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/about/"},
+  "datePublished":"2026-04-28",
+  "dateModified":"2026-06-20",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/",
+  "image":"https://www.devstoolsbox.dev/images/flatten-json-guide-cover.png",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"Guide étape par étape pour aplatir un JSON imbriqué en CSV ou Excel. Couvre l'algorithme en Python et JavaScript, les cas particuliers (tableaux, nulls, points dans les clés), aplatir vs normaliser, pandas json_normalize, jq et un convertisseur en ligne gratuit."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Pourquoi mon CSV aplati contient-il des lignes répétées pour le même utilisateur ?","acceptedAnswer":{"@type":"Answer","text":"Lorsqu'un objet JSON contient un champ de type tableau, tel que commandes, l'algorithme d'aplatissement développe chaque élément du tableau sur sa propre ligne, en dupliquant tous les champs parents sur chaque ligne. C'est le comportement attendu d'un export plat. Pour éviter la duplication, normalisez les données en deux fichiers CSV distincts liés par une clé étrangère, ou configurez le convertisseur pour sérialiser tout le tableau sous forme de chaîne JSON dans une seule cellule."}},
+    {"@type":"Question","name":"Quelle est la différence entre aplatir et normaliser un JSON ?","acceptedAnswer":{"@type":"Answer","text":"L'aplatissement produit un seul tableau large : les objets imbriqués deviennent des colonnes en notation pointée, et les tableaux génèrent des lignes supplémentaires avec des données parentes répétées. La normalisation divise le JSON en plusieurs tables liées par des clés étrangères, comme un schéma de base de données relationnelle. Utilisez l'aplatissement pour des exports rapides, l'analyse sur tableur et les rapports. Utilisez la normalisation pour importer dans une base de données relationnelle afin d'éviter la redondance."}},
+    {"@type":"Question","name":"Puis-je aplatir un JSON qui contient déjà des points dans les noms de clés ?","acceptedAnswer":{"@type":"Answer","text":"Utiliser un séparateur point alors que les clés originales contiennent déjà des points crée une ambiguïté : une colonne nommée prenom.nom pourrait représenter soit un chemin aplati, soit une clé originale. Le convertisseur DevToolbox détecte les points dans les clés originales et vous avertit. Passez au séparateur double underscore ou renommez les clés problématiques avant la conversion."}},
+    {"@type":"Question","name":"Que deviennent les valeurs null lors de l'aplatissement d'un JSON ?","acceptedAnswer":{"@type":"Answer","text":"Le convertisseur DevToolbox représente les valeurs null par des cellules vides dans la sortie CSV, ce qui est la représentation la plus propre pour Excel et Google Sheets. Si un système en aval exige la chaîne littérale null ou un zéro, ce comportement peut être modifié dans les paramètres de gestion des cellules vides du convertisseur."}},
+    {"@type":"Question","name":"Comment aplatir de très gros fichiers JSON ?","acceptedAnswer":{"@type":"Answer","text":"Pour les fichiers de plus de quelques mégaoctets, l'outil en ligne peut être lent. Utilisez pandas.json_normalize en Python pour des pipelines scriptables, ou l'outil en ligne de commande jq pour le streaming et l'automatisation shell. Les deux approches sont présentées avec du code prêt à copier dans cet article."}},
+    {"@type":"Question","name":"Le convertisseur JSON vers CSV envoie-t-il mes données à un serveur ?","acceptedAnswer":{"@type":"Answer","text":"Non. Le convertisseur JSON vers CSV de DevToolbox s'exécute entièrement dans le navigateur en JavaScript. Vos données JSON ne quittent jamais votre machine. Aucun fichier n'est téléchargé, aucun compte n'est requis et rien n'est stocké sur un serveur."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/fr/blog/"},
+    {"@type":"ListItem","position":3,"name":"Guide pour aplatir un JSON imbriqué","item":"https://www.devstoolsbox.dev/fr/blog/aplatir-json-imbrique-guide/"}
+  ]
+}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-JRBW78KE29');
     </script>
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --surface2: #f1f5f9;
-            --primary: #7c3aed;
-            --primary-hover: #6d28d9;
-            --primary-light: rgba(124,58,237,0.08);
-            --text: #0f172a;
-            --text2: #374151;
-            --text3: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --radius: 16px;
-            --code-bg: #1e293b;
-            --code-color: #e2e8f0;
-        }
-        body.dark {
-            --bg: #0b0f19;
-            --surface: #151a28;
-            --surface2: #1d2333;
-            --primary: #a78bfa;
-            --primary-hover: #8b5cf6;
-            --text: #f1f5f9;
-            --text2: #cbd5e1;
-            --text3: #94a3b8;
-            --border: #2d3548;
-            --code-bg: #0f172a;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg); color: var(--text);
-            line-height:1.7; padding:20px;
-            transition: background 0.3s, color 0.3s;
-        }
-        .container { max-width:900px; margin:0 auto; }
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
-        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
-        .logo::before { content:'🛠️'; }
-        .header-right { display:flex; gap:8px; align-items:center; }
-        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
-        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
-        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+/* HEADER */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        .article-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
-        }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
-        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
-        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
-        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
-        p { margin-bottom:16px; color:var(--text2); }
-        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
-        li { margin-bottom:8px; }
-        strong { color:var(--text); }
-        code {
-            background:var(--code-bg); color:var(--code-color);
-            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
-        }
-        pre {
-            background:var(--code-bg); color:var(--code-color);
-            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
-            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
-        }
-        .btn-tool {
-            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
-            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
-        }
-        .btn-tool:hover { background:var(--primary-hover); }
-        .footer {
-            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
-            color:var(--text3); font-size:0.8rem;
-        }
-        .footer a { color:var(--primary); text-decoration:none; }
-        @media (max-width:600px) {
-            h1 { font-size:1.6rem; }
-            .article-card { padding:20px; }
-        }
-    </style>
+/* BREADCRUMB */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+/* ARTICLE */
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+/* CALLOUTS */
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:480px}
+.dec-table{border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+.plain-table tr:nth-child(even) td{background:var(--surface2)}
+
+/* TOPIC CARDS */
+.ap-card{border:1px solid var(--border);border-radius:14px;padding:22px;margin:20px 0}
+.ap-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ap-name{font-weight:800;font-size:1.05rem;color:var(--text)}
+.ap-number{font-size:1.3rem;font-weight:900;color:var(--primary);margin-right:8px}
+.sev-badge{font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;align-self:flex-start}
+.sev-tip{background:var(--pass-bg);color:var(--pass)}
+.sev-warn{background:var(--warn-bg);color:#b45309}
+.sev-info{background:var(--primary-light);color:var(--primary)}
+body.dark .sev-warn{background:#422006;color:#fbbf24}
+.fix-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--pass);display:block;margin:14px 0 6px}
+.danger-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--fail);display:block;margin:14px 0 6px}
+.note-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--primary);display:block;margin:14px 0 6px}
+
+/* SIDE-BY-SIDE COMPARISON */
+.compare-box{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+@media(max-width:560px){.compare-box{grid-template-columns:1fr}}
+.compare-panel{border-radius:10px;padding:14px;border:1px solid var(--border)}
+.compare-bad{background:var(--fail-bg);border-color:var(--fail)}
+.compare-good{background:var(--pass-bg);border-color:var(--pass)}
+.compare-label{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.compare-bad .compare-label{color:var(--fail)}
+.compare-good .compare-label{color:var(--pass)}
+body.dark .compare-bad{background:var(--fail-bg)}
+body.dark .compare-good{background:var(--pass-bg)}
+
+/* TOC */
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+/* CTA */
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+/* FAQ */
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+/* REFERENCES */
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+/* RELATED TOOLS */
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+/* FIGURE */
+figure{margin:28px 0}
+figure img{max-width:100%;height:auto;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);display:block}
+figcaption{margin-top:10px;font-size:.83rem;color:var(--text3);text-align:center;font-style:italic}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <a href="/fr/" class="logo">Devstoolsbox</a>
-        <div class="header-right">
-            <div class="theme-toggle">
-                <button class="theme-btn active" data-theme="light"> Clair</button>
-                <button class="theme-btn" data-theme="dark"> Sombre</button>
-            </div>
-            <div class="lang-switch">
-                <a href="/fr/blog/aplatir-json-imbrique-guide/" class="lang-btn active">FR</a>
-                <a href="/tools/blog/flatten-nested-json-guide/" class="lang-btn">EN</a>
-            </div>
-        </div>
-    </header>
+<div class="page">
 
-    <main>
-        <article class="article-card" itemscope itemtype="https://schema.org/Article">
-            <h1>Comment aplatir un JSON imbriqué — Transformer des données API complexes en CSV / Excel propre en quelques secondes</h1>
-            <div class="meta">Publié le 28 avril 2026 · Mis à jour le 18 mai 2026 — 8 min de lecture</div>
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/flatten-nested-json-guide/" class="pill-btn">EN</a>
+      <a href="/fr/blog/aplatir-json-imbrique-guide/" class="pill-btn active">FR</a>
+    </div>
+  </div>
+</header>
 
-            <p>
-                Presque chaque API renvoie du JSON imbriqué. Vous demandez une liste d'utilisateurs, et dans chaque utilisateur se trouve un objet <code>adresse</code> avec rue, ville, code postal ; peut-être un objet <code>préférences</code>, ou un tableau de commandes. Les tableurs et bases de données, eux, attendent des tables plates. C'est là que l'<strong>aplatissement du JSON imbriqué</strong> devient essentiel.
-            </p>
-            <p>
-                Que vous ayez besoin de <strong>convertir un tableau JSON en CSV</strong>, d'exporter du <strong>JSON vers Excel en ligne</strong>, ou de transformer une réponse d'API brute en un CSV formaté qu'Excel peut lire avec les accents corrects, ce guide vous montrera la méthode la plus rapide et la plus privée — sans écrire une seule ligne de code.
-            </p>
+<nav class="breadcrumb" aria-label="Fil d'Ariane">
+  <ol>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/fr/blog/">Blog</a></li>
+    <li aria-current="page">Guide pour aplatir un JSON imbriqué</li>
+  </ol>
+</nav>
 
-            <figure style="margin: 28px 0; text-align: center;">
-                <img
-                    src="/convertisseur-json-csv.webp"
-                    alt="Interface du convertisseur JSON ↔ CSV de Devstoolsbox montrant l'aperçu du tableau et les options d'aplatissement"
-                    loading="lazy"
-                    decoding="async"
-                    style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
-                >
-                <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
-                    Conversion JSON → CSV avec aplatissement automatique des objets imbriqués et chemin de tableau personnalisable.
-                </figcaption>
-            </figure>
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-04-28">
+  <meta itemprop="dateModified" content="2026-06-20">
 
-            <h2>Que signifie réellement « aplatir un JSON imbriqué » ?</h2>
-            <p>
-                Cela signifie prendre une structure comme celle-ci :
-            </p>
-            <pre><code>[
-  {
-    "nom": "Alice",
-    "adresse": {
-      "ville": "Paris",
-      "code_postal": "75001"
-    }
+  <h1 itemprop="headline">Comment aplatir un JSON imbriqué – Transformer des données d'API complexes en CSV / Excel propre (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-04-28">28 avril 2026</time>
+    <span>·</span>
+    <span>Mis à jour le 20 juin 2026</span>
+    <span>·</span>
+    <span>6 min de lecture</span>
+    <span>·</span>
+    <span>Par <a href="/fr/a-propos/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <nav class="toc" aria-label="Table des matières">
+    <div class="toc-title">Dans cet article</div>
+    <ol>
+      <li><a href="#incident">Le [object Object] qui a cassé un rapport client</a></li>
+      <li><a href="#decision-table">Référence rapide : aplatir ou normaliser ?</a></li>
+      <li><a href="#what-is-flattening">Ce que fait réellement l'aplatissement</a></li>
+      <li><a href="#algorithm">L'algorithme en Python et JavaScript</a></li>
+      <li><a href="#edge-cases">Cas particuliers qui surprennent les développeurs</a></li>
+      <li><a href="#step-by-step">Pas à pas avec le convertisseur DevToolbox</a></li>
+      <li><a href="#large-files">Pour les gros fichiers : pandas et jq</a></li>
+      <li><a href="#faq">Foire aux questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- SECTION 1 — INCIDENT -->
+  <h2 id="incident">Le [object Object] qui a cassé un rapport client</h2>
+
+  <p>C'était un lundi matin, en réunion d'équipe. Un développeur d'un projet client avait passé le week-end à construire une fonctionnalité d'export de données. Le chef de produit a ouvert le fichier Excel, fait défiler jusqu'à la colonne <em>adresse</em>, et chaque cellule affichait <code>[object Object]</code>. La réunion a été interrompue. L'export a été retiré. Trois heures ont été nécessaires pour comprendre ce qui s'était passé.</p>
+
+  <p>Ce qui s'était passé était simple : la réponse de l'API était un tableau JSON où chaque enregistrement contenait un objet <code>adresse</code> imbriqué avec les sous-champs <code>ville</code>, <code>code_postal</code> et <code>pays</code>. Le script d'export avait fait <code>ligne.adresse</code> – et JavaScript avait silencieusement converti l'objet en sa représentation textuelle au lieu d'étendre les champs en colonnes séparées.</p>
+
+  <p>C'est le problème du JSON imbriqué. Il se produit chaque fois qu'un format de table plate (CSV, Excel, SQL) rencontre un format de données hiérarchique (JSON). Savoir aplatir correctement – et quand ne pas le faire – vous évitera cette conversation à chaque fois qu'une API modifie la forme de sa réponse.</p>
+
+  <div class="callout callout-info">
+    <strong>Passez directement à l'outil :</strong> Si vous avez juste besoin d'aplatir du JSON maintenant, ouvrez le <a href="/fr/outils/convertisseur-json-csv/">Convertisseur JSON vers CSV de DevToolbox</a>, collez votre JSON, cochez <strong>Aplatir les objets</strong> et téléchargez. Revenez ici quand vous voudrez comprendre pourquoi un cas particulier se comporte de manière inattendue.
+  </div>
+
+  <!-- SECTION 2 — DECISION TABLE -->
+  <h2 id="decision-table">Référence rapide : aplatir ou normaliser</h2>
+
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>Situation</th><th>Approche</th><th>Résultat</th><th>À utiliser quand</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Objets imbriqués seulement (pas de tableaux)</td><td>Aplatir</td><td>Un CSV large</td><td>Toujours – simple et propre</td></tr>
+        <tr><td>Tableaux de valeurs simples</td><td>Aplatir (concaténer en chaîne) ou ignorer</td><td>Un CSV, tableau en cellule concaténée</td><td>Les valeurs sont des infos secondaires</td></tr>
+        <tr><td>Tableaux d'objets (ex. commandes)</td><td>Aplatir (développer les lignes) ou Normaliser</td><td>Plat : lignes répétées · Normalisé : 2 CSV</td><td>Plat pour Excel, Normalisé pour import en base</td></tr>
+        <tr><td>Imbrication profonde (5+ niveaux)</td><td>Aplatir avec limite de profondeur</td><td>Un CSV, champs profonds sérialisés</td><td>Quand le nombre de colonnes exploserait</td></tr>
+        <tr><td>Clés contenant des points</td><td>Aplatir avec séparateur __</td><td>Un CSV, sans ambiguïté de noms de colonnes</td><td>Toujours quand des points existent dans les clés</td></tr>
+        <tr><td>Fichiers de plusieurs gigaoctets</td><td>pandas / jq (ligne de commande)</td><td>CSV en streaming</td><td>Fichiers trop volumineux pour l'outil navigateur</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 3 — WHAT IS FLATTENING -->
+  <h2 id="what-is-flattening">Ce que fait réellement l'aplatissement</h2>
+
+  <p>L'aplatissement convertit une structure JSON hiérarchique en une seule table plate. Chaque objet imbriqué devient un ensemble de colonnes supplémentaires, avec les clés reliées par un séparateur (généralement un point). La profondeur de l'imbrication devient la longueur du nom de colonne, pas un niveau de structure supplémentaire.</p>
+
+  <div class="compare-box">
+    <div class="compare-panel compare-bad">
+      <div class="compare-label">❌ Avant – imbriqué (inutilisable dans Excel)</div>
+      <pre style="margin:0;background:transparent;padding:0;font-size:.78rem"><code style="background:transparent;padding:0">[{
+  "nom": "Alice",
+  "adresse": {
+    "ville": "Paris",
+    "code_postal": "75001"
   }
-]</code></pre>
-            <p>
-                Et la transformer en tableau plat :
-            </p>
-            <pre><code>nom,adresse.ville,adresse.code_postal
+}]</code></pre>
+    </div>
+    <div class="compare-panel compare-good">
+      <div class="compare-label">✅ Après – plat (prêt pour Excel)</div>
+      <pre style="margin:0;background:transparent;padding:0;font-size:.78rem"><code style="background:transparent;padding:0">nom,adresse.ville,adresse.code_postal
 Alice,Paris,75001</code></pre>
-            <p>
-                Le sous‑objet <code>adresse</code> disparaît ; ses champs deviennent de nouvelles colonnes avec des en‑têtes en notation par points. C'est la base du <strong>JSON vers Excel en ligne</strong>, et c'est exactement ce que fait notre <a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">Convertisseur JSON en CSV</a> automatiquement lorsque vous cochez l'option <strong>Aplatir les objets</strong>.
-            </p>
+    </div>
+  </div>
 
-            <h2>Pourquoi aplatir du JSON ? Raisons concrètes</h2>
-            <ul>
-                <li><strong>Convertir du JSON d'API en CSV</strong> pour des rapports métier. Votre backend envoie des données imbriquées ; votre interlocuteur veut un tableau.</li>
-                <li><strong>Préparer des données pour des bases de données</strong>. La plupart des outils SQL importent mieux du CSV plat que du JSON profondément imbriqué.</li>
-                <li><strong>Déboguer des jetons JWT</strong>. Souvent, la charge utile d'un JWT contient des claims imbriqués. Vous pouvez <a href="https://www.devstoolsbox.dev/fr/outils/decodeur-jwt/">décoder le JWT</a>, puis aplatir sa charge utile en CSV pour analyse.</li>
-                <li><strong>Partager avec des collègues non techniques</strong>. Ils connaissent Excel, pas les chemins JSON.</li>
-            </ul>
+  <p>Le sous-objet <code>adresse</code> disparaît complètement. Ses champs deviennent de nouvelles colonnes avec des en-têtes en notation pointée. N'importe quel outil de tableur peut désormais filtrer, trier et croiser les données sans analyser le JSON.</p>
 
-            <h2>Utilisations courantes de l'aplatissement JSON</h2>
-            <ul>
-                <li>Exporter des réponses d'API vers Excel</li>
-                <li>Importer du JSON dans des bases de données SQL</li>
-                <li>Analyser des données JSON dans des tableurs</li>
-                <li>Créer des rapports CSV à partir d'API</li>
-                <li>Préparer du JSON pour des outils de BI</li>
-            </ul>
+  <!-- SECTION 4 — ALGORITHM -->
+  <h2 id="algorithm">L'algorithme en Python et JavaScript</h2>
 
-            <h2>Comment fonctionne l'aplatissement en coulisses</h2>
-            <p>
-                Aplatir un objet JSON est un processus récursif. En partant du niveau supérieur, on parcourt chaque clé. Si la valeur est un autre objet (et pas un tableau), on descend plus profondément et on préfixe la clé enfant avec la clé parente, en les séparant par un point. Si la valeur est d'un type simple (chaîne, nombre, booléen, null), on la stocke comme colonne.
-            </p>
-            <p>
-                Voici l'algorithme en Python — quelques lignes seulement :
-            </p>
-            <pre><code>def aplatir(obj, prefixe='', sep='.'):
-    items = {}
+  <p>L'aplatissement est une fonction récursive. Pour chaque clé de l'objet : si la valeur est un autre objet (pas un tableau), on plonge récursivement et on construit une clé composée en joignant la clé parente et la clé enfant avec le séparateur. Si la valeur est un type primitif (chaîne, nombre, booléen, null), on la stocke directement.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Python</span>Implémentation de base</div>
+      <span class="sev-badge sev-tip">Prêt à l'emploi</span>
+    </div>
+
+    <pre><code>def aplatir(obj, prefix='', sep='.'):
+    elements = {}
     for cle, val in obj.items():
-        nouvelle_cle = f"{prefixe}{sep}{cle}" if prefixe else cle
+        nouvelle_cle = f"{prefix}{sep}{cle}" if prefix else cle
         if isinstance(val, dict):
-            items.update(aplatir(val, nouvelle_cle, sep))
+            elements.update(aplatir(val, nouvelle_cle, sep))
         else:
-            items[nouvelle_cle] = val
-    return items</code></pre>
-            <p>
-                Et la même logique en JavaScript, prête à tourner dans votre navigateur :
-            </p>
-            <pre><code>function aplatir(obj, prefixe = '', sep = '.') {
+            elements[nouvelle_cle] = val
+    return elements
+
+# Exemple
+donnees = {"nom": "Alice", "adresse": {"ville": "Paris", "code_postal": "75001"}}
+print(aplatir(donnees))
+# → {'nom': 'Alice', 'adresse.ville': 'Paris', 'adresse.code_postal': '75001'}
+
+# Appliquer à un tableau d'enregistrements
+import csv, io
+enregistrements = [{"nom": "Alice", "adresse": {"ville": "Paris", "code_postal": "75001"}},
+           {"nom": "Bob",   "adresse": {"ville": "Lyon",  "code_postal": "69001"}}]
+
+plats = [aplatir(r) for r in enregistrements]
+cles = sorted({k for ligne in plats for k in ligne})
+
+sortie = io.StringIO()
+writer = csv.DictWriter(sortie, fieldnames=cles)
+writer.writeheader()
+writer.writerows(plats)
+print(sortie.getvalue())</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">JavaScript</span>Navigateur et Node.js</div>
+      <span class="sev-badge sev-tip">Prêt à l'emploi</span>
+    </div>
+
+    <pre><code>function aplatir(obj, prefix = '', sep = '.') {
   return Object.keys(obj).reduce((acc, cle) => {
-    const nouvelleCle = prefixe ? `${prefixe}${sep}${cle}` : cle;
-    if (typeof obj[cle] === 'object' && !Array.isArray(obj[cle]) && obj[cle] !== null) {
+    const nouvelleCle = prefix ? `${prefix}${sep}${cle}` : cle;
+    if (
+      typeof obj[cle] === 'object' &&
+      !Array.isArray(obj[cle]) &&
+      obj[cle] !== null
+    ) {
       Object.assign(acc, aplatir(obj[cle], nouvelleCle, sep));
     } else {
       acc[nouvelleCle] = obj[cle];
     }
     return acc;
   }, {});
-}</code></pre>
-            <p>
-                Quand vous appliquez cela à un tableau d'objets (comme une réponse d'API), on aplatit d'abord chaque élément, puis on combine toutes les clés pour former l'en‑tête du CSV. C'est exactement ce que le convertisseur Devstoolsbox fait en temps réel.
-            </p>
+}
 
-            <h2>Cas limites qui surprennent les développeurs</h2>
-            <p>
-                L'aplatissement est simple jusqu'à ce que vous rencontriez l'un de ces scénarios réels :
-            </p>
-            <h3>Tableaux d'objets</h3>
-            <p>
-                Si un champ contient un tableau d'objets — disons <code>commandes: [{id: 1}, {id: 2}]</code> — la fonction d'aplatissement de base ne peut pas transformer cela en une seule colonne. Notre outil produit chaque élément du tableau comme une nouvelle ligne, en dupliquant les champs parents. C'est souvent ce que l'on veut pour un tableau plat, mais cela peut générer beaucoup de lignes. Si vous préférez conserver le tableau sous forme de chaîne JSON dans la cellule, vous pouvez ajuster les options d'aplatissement dans le convertisseur.
-            </p>
-            <h3>Valeurs nulles</h3>
-            <p>
-                Que se passe-t-il quand un champ est <code>null</code> ? Dans Devstoolsbox, null devient une cellule vide. C'est propre pour Excel ; d'autres outils pourraient supprimer complètement la colonne. Vous pouvez aussi choisir de représenter les nulls par la chaîne "null" ou par 0 via les paramètres de gestion des cellules vides.
-            </p>
-            <h3>Points dans les noms de clés d'origine</h3>
-            <p>
-                Si votre JSON contient déjà des clés comme <code>"prenom.nom"</code>, l'aplatissement avec un séparateur point créera une collision. Notre outil vous avertit quand il détecte des points dans les clés. Vous pouvez passer le séparateur à <code>__</code> ou renommer ces clés avant l'aplatissement.
-            </p>
-            <h3>Profondeur maximale</h3>
-            <p>
-                Bien qu'il n'y ait pas de limite stricte, une imbrication extrêmement profonde (plus de 10 niveaux) peut produire des centaines de colonnes. Dans ce cas, vous pouvez choisir d'aplatir seulement les premiers niveaux et de conserver le reste sous forme de chaîne JSON sérialisée. Le convertisseur vous permet de définir une profondeur d'aplatissement maximale.
-            </p>
+// Convertir un tableau d'enregistrements en CSV
+function versCSV(enregistrements, sep = '.') {
+  const plats = enregistrements.map(r => aplatir(r, '', sep));
+  const cles = [...new Set(plats.flatMap(Object.keys))].sort();
+  const enTete = cles.join(',');
+  const lignes = plats.map(r => cles.map(k => JSON.stringify(r[k] ?? '')).join(','));
+  return [enTete, ...lignes].join('\n');
+}
 
-            <h2>Aplatir ou normaliser : de quoi avez-vous vraiment besoin ?</h2>
-            <p>
-                On confond souvent aplatissement et normalisation. Ils servent des objectifs différents.
-            </p>
-            <p>
-                <strong>L'aplatissement</strong> produit une seule table large. Chaque objet imbriqué devient des colonnes supplémentaires ; chaque élément de tableau devient une ligne supplémentaire avec les données parentes répétées. C'est idéal pour des exports rapides, des analyses Excel et des rapports.
-            </p>
-            <p>
-                <strong>La normalisation</strong> divise les données en plusieurs tables liées — par exemple, un <code>utilisateurs.csv</code> et un <code>commandes.csv</code> reliés par un <code>utilisateur_id</code>. C'est l'approche propre pour les bases de données relationnelles.
-            </p>
-            <p>
-                Quand vous aplatissez un utilisateur avec ses commandes, vous obtenez :
-            </p>
-            <pre><code>nom,commande.id,commande.montant
+console.log(versCSV([
+  { nom: 'Alice', adresse: { ville: 'Paris', code_postal: '75001' } },
+  { nom: 'Bob',   adresse: { ville: 'Lyon',  code_postal: '69001' } }
+]));</code></pre>
+  </div>
+
+  <!-- SECTION 5 — EDGE CASES -->
+  <h2 id="edge-cases">Cas particuliers qui surprennent les développeurs</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">1</span>Tableaux d'objets à l'intérieur d'un enregistrement</div>
+      <span class="sev-badge sev-warn">Attention</span>
+    </div>
+    <p>Lorsqu'un champ contient un tableau d'objets – <code>"commandes": [{"id": 1, "total": 50}, {"id": 2, "total": 30}]</code> – la simple fonction d'aplatissement n'a pas de colonne unique où les placer. Le convertisseur DevToolbox développe chaque élément du tableau sur sa propre ligne, en dupliquant tous les champs parents. C'est généralement ce que vous voulez pour une analyse Excel, mais cela produit des lignes répétées qui peuvent perturber un import en base de données.</p>
+    <div class="note-tag">Résultat de l'expansion des lignes</div>
+    <pre><code>nom,commandes.id,commandes.total
 Alice,1,50
-Alice,2,30</code></pre>
-            <p>
-                Si vous normalisez, vous exportez deux CSVs :
-            </p>
-            <pre><code># utilisateurs.csv
-id,nom
-1,Alice
+Alice,2,30    ← Alice apparaît deux fois</code></pre>
+    <p>Si vous préférez conserver le tableau dans une seule cellule, réglez l'option de traitement des tableaux sur <strong>Sérialiser en chaîne JSON</strong>. La cellule contiendra <code>"[{""id"":1,""total"":50},{""id"":2,""total"":30}]"</code>.</p>
+  </div>
 
-# commandes.csv
-utilisateur_id,id,montant
-1,1,50
-1,2,30</code></pre>
-            <p>
-                Le choix dépend de l'outil cible. Les utilisateurs d'Excel adorent une table plate ; les administrateurs de bases de données préfèrent des tables normalisées.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">2</span>Points dans les noms de clés originaux</div>
+      <span class="sev-badge sev-warn">Attention</span>
+    </div>
+    <p>Si votre JSON a une clé comme <code>"prenom.nom"</code>, l'aplatissement avec un séparateur point crée un nom de colonne ambigu, vous ne pouvez pas dire si <code>prenom.nom</code> était une clé originale ou un chemin aplati. Le convertisseur DevToolbox détecte cela et affiche un avertissement. Passez au séparateur <code>__</code> ou nettoyez les clés avant la conversion.</p>
+    <div class="danger-tag">Résultat ambigu – à éviter</div>
+    <pre><code>// La clé originale contient un point
+{ "prenom.nom": "Alice", "adresse": { "ville": "Paris" } }
+// Aplati avec séparateur point → ambigu :
+// prenom.nom  ← est-ce "prenom" → "nom" ou la clé originale ?
+// adresse.ville</code></pre>
+    <div class="fix-tag">Utilisez le séparateur double underscore</div>
+    <pre><code>// Sûr : aucune ambiguïté avec le séparateur __
+aplatir(obj, '', '__')
+// → { 'prenom.nom': 'Alice', 'adresse__ville': 'Paris' }</code></pre>
+  </div>
 
-            <h2>Avec le convertisseur Devstoolsbox : un guide pas à pas</h2>
-            <p>
-                Notre <strong>convertisseur CSV pour JSON imbriqué</strong> ne nécessite aucun téléversement, aucune connexion, ni aucune communication avec un serveur. Tout reste dans votre navigateur. Voici la procédure :
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">3</span>Valeurs nulles et clés manquantes</div>
+      <span class="sev-badge sev-info">Bon à savoir</span>
+    </div>
+    <p>Lorsque les enregistrements d'un tableau ont des clés différentes, un utilisateur a un champ <code>telephone</code> et un autre non, le CSV aplati doit avoir une colonne <code>telephone</code> qui est vide pour le deuxième utilisateur. Le convertisseur DevToolbox gère cela automatiquement, en créant une union de toutes les clés sur tous les enregistrements et en remplissant les cellules vides pour les valeurs manquantes.</p>
+    <pre><code>[
+  { "nom": "Alice", "telephone": "0612345678" },
+  { "nom": "Bob" }   ← pas de champ telephone
+]
+// Sortie aplatie :
+// nom,telephone
+// Alice,0612345678
+// Bob,              ← cellule vide, pas une erreur</code></pre>
+    <div class="callout callout-pass">
+      <strong>Null vs absent :</strong> Un champ défini à <code>null</code> et un champ totalement absent deviennent tous les deux des cellules vides dans la sortie CSV. Si la distinction est importante pour votre pipeline, traitez-la avant l'aplatissement en remplaçant <code>null</code> par une valeur sentinelle.
+    </div>
+  </div>
 
-            <h3>1. Collez votre JSON</h3>
-            <p>
-                Rendez-vous sur le <a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/">Convertisseur JSON / CSV</a> et collez votre JSON brut dans le panneau de gauche. Si vous l'avez récupéré d'une API, collez la réponse entière — l'outil peut extraire le tableau pour vous.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">4</span>Imbrication profonde produisant des centaines de colonnes</div>
+      <span class="sev-badge sev-info">Bon à savoir</span>
+    </div>
+    <p>Une réponse avec 8 niveaux d'imbrication peut produire des noms de colonnes comme <code>donnees.utilisateurs.profil.parametres.notifications.email.resume.frequence</code>. Le convertisseur vous permet de définir une profondeur d'aplatissement maximale. Tout ce qui est en dessous est sérialisé sous forme de chaîne JSON dans une seule cellule, ce qui garde la table exploitable.</p>
+    <pre><code>aplatir(obj, '', '.', profondeurMax=3)
+// Les champs à plus de 3 niveaux → sérialisés en chaîne JSON dans leur colonne parente</code></pre>
+  </div>
 
-            <h3>2. Spécifiez le chemin du tableau (si nécessaire)</h3>
-            <p>
-                Les API enveloppent souvent le véritable tableau dans <code>data</code>, <code>results</code>, ou <code>users</code>. Utilisez le champ <strong>Chemin du tableau</strong> pour pointer directement vers la liste que vous voulez convertir. Par exemple, si votre réponse ressemble à :
-            </p>
-            <pre><code>{
-  "status": "ok",
+  <!-- SECTION 6 — STEP BY STEP -->
+  <h2 id="step-by-step">Pas à pas avec le convertisseur DevToolbox</h2>
+
+  <p>Le convertisseur fonctionne entièrement dans votre navigateur, pas de téléchargement, pas de connexion, pas de serveur. Vos données restent sur votre machine.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Étape 1</span>Collez votre JSON</div>
+    </div>
+    <p>Ouvrez le <a href="/fr/outils/convertisseur-json-csv/">Convertisseur JSON / CSV</a> et collez votre JSON brut dans le panneau de gauche. L'outil accepte aussi bien un tableau racine <code>[{...}, {...}]</code> qu'une réponse d'API encapsulée <code>{"data": [{...}]}</code>.</p>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Étape 2</span>Définissez le chemin du tableau si les données sont encapsulées</div>
+    </div>
+    <p>La plupart des réponses d'API enveloppent les données réelles dans une clé :</p>
+    <pre><code>{
+  "statut": "ok",
   "data": {
-    "users": [ ... ]
+    "utilisateurs": [ {...}, {...} ]
   }
 }</code></pre>
-            <p>
-                Tapez simplement <code>data.users</code>. Le convertisseur ignorera les couches d'emballage et travaillera sur le tableau.
-            </p>
+    <p>Tapez <code>data.utilisateurs</code> dans le champ <strong>Chemin du tableau</strong>. Le convertisseur ignore l'objet enveloppe et traite uniquement les enregistrements dont vous avez besoin. Sans cela, il essaierait d'aplatir l'enveloppe elle-même et produirait une seule ligne avec un tableau sérialisé.</p>
+    <div class="callout callout-warn">
+      <strong>Erreur la plus fréquente :</strong> oublier de définir le chemin du tableau. Si votre sortie est une seule ligne avec une valeur du style <code>[object Object]</code>, c'est la raison.
+    </div>
+  </div>
 
-            <h3>3. Activez l'aplatissement des objets</h3>
-            <p>
-                Cochez la case <strong>Aplatir les objets</strong>. Cela déclenche l'aplatissement de chaque objet imbriqué en colonnes à notation par points. Vous pouvez voir le résultat immédiatement dans l'aperçu du tableau en direct.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Étape 3</span>Activez l'aplatissement des objets et prévisualisez</div>
+    </div>
+    <p>Cochez <strong>Aplatir les objets</strong>. L'aperçu du tableau en direct se met à jour en temps réel. Vous pouvez voir immédiatement comment les champs imbriqués correspondent aux noms de colonnes et repérer les éventuels cas particuliers avant de télécharger.</p>
+  </div>
 
-            <h3>4. Convertissez et téléchargez</h3>
-            <p>
-                Cliquez sur <strong>Convertir en CSV →</strong>. Le CSV généré apparaît dans le panneau de droite. Pour une compatibilité <strong>JSON CSV Excel UTF‑8</strong>, cliquez sur <strong>Télécharger CSV (UTF‑8 BOM)</strong> — cela ajoute le marqueur invisible qui indique à Excel d'afficher correctement les accents, les umlauts et tous les caractères spéciaux.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Étape 4</span>Téléchargez avec BOM UTF-8 pour Excel</div>
+    </div>
+    <p>Cliquez sur <strong>Convertir en CSV →</strong> puis choisissez <strong>Télécharger CSV (UTF-8 BOM)</strong>. Le BOM est un marqueur d'ordre des octets invisible au début du fichier qui indique à Excel de décoder le fichier en UTF-8. Sans lui, les accents français, les trémas allemands, les caractères arabes et tout texte non ASCII s'afficheront sous forme de symboles illisibles lorsqu'ils sont ouverts directement dans Excel sous Windows.</p>
+    <pre><code># Équivalent Python — l'encodage utf-8-sig ajoute automatiquement le BOM
+df.to_csv('sortie.csv', index=False, encoding='utf-8-sig')</code></pre>
+  </div>
 
-            <h2>Pour les gros fichiers : pandas et jq</h2>
-            <p>
-                L'outil en ligne brille pour un aplatissement rapide et interactif. Mais quand vous avez affaire à un export JSON de plusieurs gigaoctets, vous voudrez une approche en ligne de commande. Voici deux méthodes éprouvées.
-            </p>
-            <h3>Python avec pandas</h3>
-            <p>
-                Les analystes de données adorent <code>pd.json_normalize</code>. Cela fait exactement ce que notre outil fait, mais de manière scriptable. Ce bout de code lit un fichier JSON, aplatit le tableau à <code>data.users</code>, et écrit un CSV avec le BOM UTF‑8 pour Excel :
-            </p>
-            <pre><code>import pandas as pd
+  <div style="text-align:center;margin:28px 0">
+    <a href="/fr/outils/convertisseur-json-csv/" class="btn-cta"> Ouvrir le Convertisseur JSON vers CSV, gratuit, sans téléchargement</a>
+  </div>
+
+  <!-- SECTION 7 — LARGE FILES -->
+  <h2 id="large-files">Pour les gros fichiers : pandas et jq</h2>
+
+  <p>L'outil en ligne est conçu pour des conversions interactives rapides jusqu'à quelques mégaoctets. Pour les exports volumineux depuis un entrepôt de données, un dump complet de base de données ou un pipeline CI/CD, utilisez l'une de ces approches.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">pandas</span>Python, idéal pour les pipelines de données</div>
+      <span class="sev-badge sev-tip">Recommandé</span>
+    </div>
+    <p><code>pd.json_normalize</code> est la fonction standard pour cela. Elle gère les objets imbriqués, les tableaux d'enregistrements, les séparateurs personnalisés et produit un DataFrame que vous pouvez transformer avant l'export.</p>
+    <pre><code>import pandas as pd
 import json
 
-with open('data.json') as f:
-    data = json.load(f)
+with open('reponse_api.json', encoding='utf-8') as f:
+    donnees = json.load(f)
 
-df = pd.json_normalize(data['data']['users'], sep='.')
-df.to_csv('output.csv', index=False, encoding='utf-8-sig')</code></pre>
-            <p>
-                <code>utf-8-sig</code> est la façon dont Python ajoute le BOM UTF‑8. Ce petit détail fait gagner des heures quand les collègues ouvrent le fichier dans Excel.
-            </p>
-            <h3>jq pour le terminal</h3>
-            <p>
-                <code>jq</code> est un processeur JSON léger et incroyablement rapide. Pour extraire et aplatir un sous‑ensemble de champs d'un grand tableau imbriqué, vous pouvez lancer :
-            </p>
-            <pre><code>jq -r '.data.users[] | [.nom, .adresse.ville, .adresse.code_postal] | @csv' data.json</code></pre>
-            <p>
-                Cela envoie les lignes aplaties directement vers stdout, que vous pouvez rediriger vers un fichier CSV. Idéal pour les pipelines automatisés.
-            </p>
+# Cas simple : la racine est un tableau
+df = pd.json_normalize(donnees, sep='.')
+df.to_csv('sortie.csv', index=False, encoding='utf-8-sig')
 
-            <h2>Intégration avec le reste de Devstoolsbox</h2>
-            <p>
-                Une fois votre JSON aplati en CSV, vous pourriez avoir besoin de :
-            </p>
-            <ul>
-                <li><a href="https://www.devstoolsbox.dev/fr/outils/formateur-json/">Formateur JSON</a> — validez et indentez votre JSON d'origine avant aplatissement.</li>
-                <li><a href="https://www.devstoolsbox.dev/fr/outils/decodeur-jwt/">Décodeur JWT</a> — si votre JSON contient un jeton JWT, décodez‑le d'abord pour exposer les claims imbriqués.</li>
-                <li><a href="https://www.devstoolsbox.dev/fr/outils/generateur-mot-de-passe/">Générateur de mots de passe & Hash</a> — sécurisez les identifiants que vous extrayez du JSON.</li>
-                <li><a href="https://www.devstoolsbox.dev/fr/outils/testeur-regex/">Testeur Regex</a> — nettoyez les champs de données avant ou après la conversion.</li>
-            </ul>
+# Tableau encapsulé : les données sont dans data.utilisateurs
+df = pd.json_normalize(donnees['data']['utilisateurs'], sep='.')
+df.to_csv('sortie.csv', index=False, encoding='utf-8-sig')
 
-            <h2>Foire Aux Questions</h2>
-            <h3>Pourquoi mon CSV aplati contient-il des lignes répétées pour le même utilisateur ?</h3>
-            <p>
-                Cela se produit quand vous aplatissez un objet JSON qui contient un tableau (comme des commandes). Chaque élément du tableau crée une nouvelle ligne où les colonnes parentes sont répétées. Si vous voulez éviter cette duplication, vous pouvez soit exporter plusieurs fichiers CSV (normalisation), soit choisir comment les tableaux sont représentés (chaîne JSON, premier élément uniquement…).
-            </p>
+# Tableau imbriqué dans chaque enregistrement (commandes par utilisateur)
+# record_path : le tableau imbriqué à développer en lignes
+# meta : les champs parents à conserver sur chaque ligne développée
+df = pd.json_normalize(
+    donnees['utilisateurs'],
+    record_path='commandes',
+    meta=['id', 'nom', 'email'],
+    sep='.'
+)
+df.to_csv('utilisateurs_commandes.csv', index=False, encoding='utf-8-sig')</code></pre>
+  </div>
 
-            <h3>Quelle est la différence entre aplatir et normaliser du JSON ?</h3>
-            <p>
-                L'aplatissement crée une seule table large ; la normalisation divise les données en plusieurs tables liées. Utilisez l'aplatissement pour un export rapide, la normalisation pour un import en base de données.
-            </p>
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">jq</span>Terminal, idéal pour les pipelines shell</div>
+      <span class="sev-badge sev-info">Rapide & scriptable</span>
+    </div>
+    <p><code>jq</code> traite le JSON comme un flux, ce qui signifie qu'il peut gérer des fichiers beaucoup plus gros que la RAM disponible. C'est idéal pour les pipelines CI/CD, les tâches cron et tout flux de travail où installer Python n'est pas pratique.</p>
+    <pre><code># Extraire des champs spécifiques en CSV
+jq -r '
+  .data.utilisateurs[] |
+  [.nom, .adresse.ville, .adresse.code_postal, .email] |
+  @csv
+' reponse_api.json > sortie.csv
 
-            <h3>Puis-je aplatir un JSON qui contient des points dans les noms de clés ?</h3>
-            <p>
-                C'est risqué car les points servent de séparateurs. Notre outil détecte les points dans les clés d'origine et vous avertit. Vous pouvez choisir un autre séparateur (comme <code>__</code>) ou renommer les clés avant l'aplatissement.
-            </p>
+# Ajouter une ligne d'en-tête
+(
+  echo '"nom","ville","code_postal","email"'
+  jq -r '.data.utilisateurs[] | [.nom, .adresse.ville, .adresse.code_postal, .email] | @csv' entree.json
+) > sortie.csv
 
-            <h3>Que deviennent les valeurs null quand j'aplatis du JSON ?</h3>
-            <p>
-                Dans notre outil, les valeurs null deviennent des cellules vides. C'est généralement ce que l'on souhaite. Si vous avez besoin de chaînes 'null' explicites ou de zéros, ajustez la gestion des cellules vides dans les paramètres du convertisseur.
-            </p>
+# Gérer les valeurs nulles (remplacer par une chaîne vide)
+jq -r '.data.utilisateurs[] | [(.nom // ""), (.adresse.ville // ""), (.email // "")] | @csv' entree.json</code></pre>
 
-            <h3>Comment aplatir des fichiers JSON très volumineux (plusieurs gigaoctets) ?</h3>
-            <p>
-                Utilisez des outils en ligne de commande comme <code>jq</code> ou Python avec <code>pandas</code>. Nous montrons des exemples dans l'article. Notre outil en ligne fonctionne idéalement jusqu'à quelques mégaoctets de JSON, entièrement dans votre navigateur.
-            </p>
+    <div class="callout callout-pass">
+      <strong>Quel outil utiliser :</strong> Utilisez le <strong>convertisseur en ligne</strong> pour des exports ponctuels et lorsque vous voulez un retour visuel immédiat. Utilisez <strong>pandas</strong> quand vous devez enchaîner des transformations dans un notebook Jupyter ou un script planifié. Utilisez <strong>jq</strong> dans les scripts shell et les pipelines CI/CD où la vitesse et le peu de dépendances comptent.
+    </div>
+  </div>
 
-            <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/fr/outils/convertisseur-json-csv/" class="btn-tool">🔧 Essayer le Convertisseur JSON en CSV gratuit</a></p>
-        </article>
-    </main>
+  <!-- FAQ -->
+  <h2 id="faq">Foire aux questions</h2>
 
-    <footer class="footer">
-        <p>&copy; 2025 <a href="/">Devstoolsbox</a> — Outils en ligne gratuits pour développeurs et designers. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/fr/contact/">Contact</a></p>
-    </footer>
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Pourquoi mon CSV aplati a-t-il des lignes répétées pour le même enregistrement ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Votre JSON contient un champ de type tableau, par exemple, un utilisateur avec plusieurs commandes. L'algorithme d'aplatissement développe chaque élément du tableau sur sa propre ligne et répète tous les champs parents (nom, email, etc.) sur chaque ligne. C'est intentionnel : c'est la seule façon de représenter une relation un-à-plusieurs dans une table plate. Si vous voulez éviter la duplication, normalisez les données en deux fichiers CSV distincts, ou configurez le convertisseur pour sérialiser le tableau sous forme de chaîne JSON dans une seule cellule.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Aplatir ou normaliser, lequel choisir ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">L'aplatissement donne un seul CSV large, rapide, simple, idéal pour Excel et les outils de reporting. La normalisation donne plusieurs fichiers CSV liés par des clés étrangères – correct pour importer dans une base de données relationnelle sans redondance. Si la sortie va dans un tableur, un outil BI ou à un collègue non technique, aplatissez. Si la sortie va dans PostgreSQL, MySQL ou toute base SQL, normalisez.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Mes clés JSON contiennent des points. Que faire ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Passez le séparateur de point à double underscore dans les paramètres du convertisseur. Avec le point comme séparateur, une clé nommée <code>prenom.nom</code> dans le JSON original produit le même nom de colonne qu'un chemin aplati <code>prenom → nom</code>. Cette ambiguïté casse tout outil en aval qui essaie d'interpréter les noms de colonnes comme des chemins. Le double underscore est sûr car il apparaît rarement dans les clés JSON originales.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Que deviennent les valeurs null dans la sortie ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Les valeurs null deviennent des cellules vides dans le CSV, la représentation la plus propre pour les outils de tableur. Un champ défini à null et un champ totalement absent produisent tous les deux une cellule vide. Si votre système en aval exige la chaîne littérale "null" ou un zéro numérique, nettoyez les données avant la conversion ou ajustez le comportement des cellules vides dans les paramètres du convertisseur.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Comment gérer de très gros fichiers JSON ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Pour les fichiers de plus de quelques mégaoctets, utilisez <code>pd.json_normalize</code> en Python pour des pipelines scriptables, ou <code>jq</code> pour le streaming depuis la ligne de commande. Les deux gèrent efficacement les gros fichiers et couvrent les mêmes cas d'usage que le convertisseur en ligne. Le code prêt à copier pour les deux se trouve dans l'article ci-dessus.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Mes données sont-elles envoyées à un serveur lorsque j'utilise le convertisseur ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Non. Le convertisseur JSON vers CSV de DevToolbox s'exécute entièrement côté client en JavaScript. Vos données JSON sont traitées dans la mémoire de votre navigateur et ne sont jamais transmises à un serveur. Aucun compte n'est requis, aucun fichier n'est stocké et aucune analyse n'est collectée sur vos données d'entrée.</p>
+      </div>
+    </details>
+  </div>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/fr/outils/convertisseur-json-csv/" class="btn-cta"> Aplatissez votre JSON maintenant, gratuit, instantané, côté client</a>
+  </div>
+
+  <!-- REFERENCES -->
+  <section class="references">
+    <h3>Sources et références</h3>
+    <ul class="ref-list">
+      <li><a href="https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html" target="_blank" rel="noopener noreferrer">Documentation pandas, json_normalize</a>, référence officielle de l'API pour la fonction standard d'aplatissement Python.</li>
+      <li><a href="https://stedolan.github.io/jq/manual/" target="_blank" rel="noopener noreferrer">Manuel jq, stedolan.github.io</a>, référence complète des filtres jq, y compris la mise en forme de sortie <code>@csv</code>.</li>
+      <li><a href="https://datatracker.ietf.org/doc/html/rfc8259" target="_blank" rel="noopener noreferrer">RFC 8259, Le format d'échange de données JSON</a>, la spécification IETF définissant le JSON valide, y compris null, les tableaux et les objets imbriqués.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener noreferrer">RFC 4180, Format commun et type MIME pour les fichiers CSV</a>, la spécification couvrant les règles de guillemets CSV, les fins de ligne et l'encodage.</li>
+      <li><a href="https://support.microsoft.com/fr-fr/office/importer-ou-exporter-des-fichiers-texte-txt-ou-csv-5250ac4c-663c-47ce-937b-339e391393ba" target="_blank" rel="noopener noreferrer">Support Microsoft — Importer des fichiers CSV dans Excel</a> — exigence du BOM UTF-8 pour les imports CSV Excel sous Windows.</li>
+      <li><a href="https://docs.python.org/fr/3/library/csv.html" target="_blank" rel="noopener noreferrer">Documentation Python, module csv</a>, DictWriter et options d'encodage pour la génération de CSV en Python.</li>
+    </ul>
+  </section>
+
+  <!-- RELATED TOOLS -->
+  <div class="related-tools">
+    <h3>Outils DevToolbox associés</h3>
+    <ul>
+      <li><a href="/fr/outils/convertisseur-json-csv/"> Convertisseur JSON vers CSV</a> aplatissez du JSON imbriqué en CSV ou Excel directement dans votre navigateur, sans téléchargement</li>
+      <li><a href="/fr/outils/formateur-json/"> Formateur JSON</a>, validez et formatez votre JSON avant l'aplatissement pour détecter les erreurs de syntaxe tôt</li>
+      <li><a href="/fr/outils/decodeur-jwt/"> Décodeur JWT</a>, décodez les jetons JWT pour exposer les revendications imbriquées, puis aplatissez la charge utile en CSV pour analyse</li>
+      <li><a href="/fr/outils/testeur-regex/"> Testeur Regex</a>, nettoyez et validez les champs de données dans votre JSON avant ou après la conversion</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour les développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/fr/a-propos/">À propos</a> | <a href="/fr/outils/contact/">Contact</a></p>
+</footer>
 </div>
 
 <script>
-    (function() {
-        const btns = document.querySelectorAll('.theme-btn');
-        btns.forEach(b => b.addEventListener('click', () => {
-            const t = b.dataset.theme;
-            document.body.classList.toggle('dark', t === 'dark');
-            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
-            localStorage.setItem('theme', t);
-        }));
-        const saved = localStorage.getItem('theme') || 'light';
-        document.body.classList.toggle('dark', saved === 'dark');
-        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
-    })();
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Clair' : '🌙 Sombre';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Clair';
+  }
+})();
 </script>
 </body>
 </html>
