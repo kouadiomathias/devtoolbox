@@ -1,267 +1,942 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Easily Create a Cron Expression – Complete Guide to the DevToolbox Generator</title>
-    <meta name="description" content="Learn how to write cron expressions without errors using the DevToolbox visual builder. Slider‑based interface, natural language explanation, presets, exports for Linux, AWS, Docker. Step‑by‑step practical guide.">
-    <meta name="keywords" content="cron expression generator, cron schedule builder, cron every 5 minutes, cron job daily, cron aws, cron gcp, cron visual editor, crontab generator">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="DevToolbox">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/cron-generator-guide/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/cron-generator/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/generateur-cron/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/cron-generator/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Set Up a Cron Job: Build, Test and Deploy Automated Tasks on Linux (2026)</title>
+<meta name="description" content="Step-by-step tutorial to write, test and deploy real cron jobs on Linux: backup scripts, Python automation, API calls and log cleanup. Practical examples with monitoring and the DevToolbox Cron Generator. Written by Mathias Kouadio.">
+<meta name="keywords" content="cron job setup tutorial, schedule python script cron, automate task linux cron, cron job monitoring, deploy cron production, cron backup script, cron job email notification, crontab setup linux 2026">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/cron-generator-guide/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/cron-generator-guide/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/generateur-cron/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/cron-generator-guide/">
 
-    <meta property="og:title" content="Easily Create a Cron Expression – Complete Guide to the DevToolbox Generator">
-    <meta property="og:description" content="Practical guide to writing cron expressions with a visual builder, presets and natural language explanation. Export to Linux, AWS, Docker.">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/cron-generator/">
-    <meta property="og:site_name" content="DevToolbox">
+<meta property="og:title" content="How to Set Up a Cron Job: Build, Test and Deploy Automated Tasks (2026)">
+<meta property="og:description" content="Practical tutorial: write a real cron job from scratch, test it safely, deploy to production, and monitor it. Backup, Python, API call, log cleanup — with full code examples.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/cron-generator-guide/">
+<meta property="og:site_name" content="DevToolbox">
+<meta property="og:image" content="https://www.devstoolsbox.dev/og/cron-job-setup-guide-cover.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="article:published_time" content="2026-04-27">
+<meta property="article:modified_time" content="2026-06-20">
+<meta property="article:author" content="Mathias Kouadio">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Cron Generator: the Complete Guide">
-    <meta name="twitter:description" content="Create cron expressions without errors with a visual builder. Natural language explanation, presets, exports.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to Set Up a Cron Job: Build, Test and Deploy (2026)">
+<meta name="twitter:description" content="Real cron job tutorial: backup scripts, Python automation, API calls, monitoring. Full code examples for Linux production.">
+<meta name="twitter:image" content="https://www.devstoolsbox.dev/og/cron-job-setup-guide-cover.webp">
 
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Easily Create a Cron Expression – Complete Guide to the DevToolbox Generator",
-            "author": { "@type": "Person", "name": "DevToolbox Team" },
-            "datePublished": "2026-04-27",
-            "dateModified": "2026-04-27",
-            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/cron-generator/",
-            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                { "@type": "Question", "name": "What is the difference between Linux and AWS cron?", "acceptedAnswer": { "@type": "Answer", "text": "Standard Linux cron uses 5 fields. AWS CloudWatch Events uses 6 (adding seconds)." } },
-                { "@type": "Question", "name": "How do I write 'every 5 minutes' in cron?", "acceptedAnswer": { "@type": "Answer", "text": "The expression is */5 * * * * (in standard cron)." } },
-                { "@type": "Question", "name": "What do the @hourly, @daily macros mean?", "acceptedAnswer": { "@type": "Answer", "text": "They are shortcuts for common schedules (every hour, every day)." } },
-                { "@type": "Question", "name": "Does the cron generator work offline?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, everything runs in the browser. No data is sent to a server." } }
-            ]
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
-                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
-                { "@type": "ListItem", "position": 3, "name": "Cron Generator Guide", "item": "https://www.devstoolsbox.dev/tools/blog/cron-generator/" }
-            ]
-        }
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"How to Set Up a Cron Job: Build, Test and Deploy Automated Tasks on Linux (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/tools/about/"},
+  "datePublished":"2026-04-27",
+  "dateModified":"2026-06-20",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/tools/blog/cron-generator-guide/",
+  "image":"https://www.devstoolsbox.dev/og/cron-job-setup-guide-cover.webp",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"Step-by-step tutorial to write, test and deploy real cron jobs on Linux. Covers backup automation, Python scripts, API calls, log cleanup, monitoring with email alerts, and using the DevToolbox Cron Generator as a validation tool."
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {
+      "@type":"Question",
+      "name":"How do I run a Python script with cron?",
+      "acceptedAnswer":{"@type":"Answer","text":"Always use the absolute path to the Python interpreter and the script, and set the full PATH in your crontab. A safe cron line looks like: 0 2 * * * /usr/bin/python3 /opt/scripts/sync.py >> /var/log/sync.log 2>&1. Using a virtual environment requires activating it first: 0 2 * * * /opt/venv/bin/python /opt/scripts/sync.py >> /var/log/sync.log 2>&1. The venv's Python executable already knows about installed packages, so no explicit activation is needed."}
+    },
+    {
+      "@type":"Question",
+      "name":"How do I test a cron job without waiting for the scheduled time?",
+      "acceptedAnswer":{"@type":"Answer","text":"Run the exact command from your cron line directly in the terminal, but simulate the minimal cron environment: env -i HOME=/home/deploy PATH=/usr/bin:/bin /bin/bash -c '/opt/scripts/backup.sh'. This catches PATH and environment issues before the job runs on schedule. Also verify the cron expression fires at the right time using the DevToolbox Cron Generator to preview the next 10 execution dates."}
+    },
+    {
+      "@type":"Question",
+      "name":"How do I receive an email when a cron job fails?",
+      "acceptedAnswer":{"@type":"Answer","text":"Add MAILTO=you@example.com at the top of your crontab. Any unredirected output (stdout or stderr) from your cron lines will be emailed to that address. For this to work, a local mail service (postfix or sendmail) must be running on the server. For more reliable alerting, send a notification from inside the script using curl to a webhook or mail command, so you control exactly what triggers an alert."}
+    },
+    {
+      "@type":"Question",
+      "name":"What is the safest way to delete old files with a cron job?",
+      "acceptedAnswer":{"@type":"Answer","text":"First run the find command without -delete and redirect output to a log file to see what would be deleted: find /var/log/app -name '*.log' -mtime +30. Only add -delete once you have confirmed the file list is correct. Wrap the deletion in a script with error checking, and log both the file list and any errors. Never run find -delete as root on a broad path without testing first."}
+    },
+    {
+      "@type":"Question",
+      "name":"How do I make a cron job run after a server reboot?",
+      "acceptedAnswer":{"@type":"Answer","text":"Use the @reboot special string in your crontab: @reboot /opt/scripts/start_service.sh >> /var/log/start_service.log 2>&1. This runs the command once, shortly after the cron daemon starts following a system boot. Note that @reboot is not available in all cron implementations and is not supported on AWS CloudWatch. For production-critical startup tasks, a systemd service with Type=oneshot and WantedBy=multi-user.target is more reliable."}
+    },
+    {
+      "@type":"Question",
+      "name":"How do I view the logs of a cron job that already ran?",
+      "acceptedAnswer":{"@type":"Answer","text":"If you redirected output to a file (recommended), read it with tail -f /var/log/myjob.log. To see whether cron itself ran the job, check the system cron log: grep CRON /var/log/syslog | grep myjob on Debian/Ubuntu, or grep CRON /var/log/cron | grep myjob on RHEL/CentOS. The system log shows whether cron dispatched the command — if the line is absent, the expression never matched or the cron daemon is not running."}
+    },
+    {
+      "@type":"Question",
+      "name":"Can I run multiple commands in a single cron line?",
+      "acceptedAnswer":{"@type":"Answer","text":"Yes, but it is better to put them in a script. If you must inline multiple commands, use semicolons (run regardless of previous exit code) or double ampersands (stop on first failure): 0 2 * * * /cmd1 && /cmd2 && /cmd3. For anything more complex — error handling, logging, conditional logic — write a proper shell script and call that from the cron line. Scripts are easier to test, version-control, and debug."}
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/tools/blog/"},
+    {"@type":"ListItem","position":3,"name":"Cron Job Setup Guide","item":"https://www.devstoolsbox.dev/tools/blog/cron-generator-guide/"}
+  ]
+}
+</script>
+ <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-JRBW78KE29');
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JRBW78KE29');
     </script>
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --surface2: #f1f5f9;
-            --primary: #7c3aed;
-            --primary-hover: #6d28d9;
-            --primary-light: rgba(124,58,237,0.08);
-            --text: #0f172a;
-            --text2: #374151;
-            --text3: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --radius: 16px;
-            --code-bg: #1e293b;
-            --code-color: #e2e8f0;
-        }
-        body.dark {
-            --bg: #0b0f19;
-            --surface: #151a28;
-            --surface2: #1d2333;
-            --primary: #a78bfa;
-            --primary-hover: #8b5cf6;
-            --text: #f1f5f9;
-            --text2: #cbd5e1;
-            --text3: #94a3b8;
-            --border: #2d3548;
-            --code-bg: #0f172a;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg); color: var(--text);
-            line-height:1.7; padding:20px;
-            transition: background 0.3s, color 0.3s;
-        }
-        .container { max-width:900px; margin:0 auto; }
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
-        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
-        .logo::before { content:'🛠️'; }
-        .header-right { display:flex; gap:8px; align-items:center; }
-        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
-        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
-        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+/* HEADER */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        .article-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
-        }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
-        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
-        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
-        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
-        p { margin-bottom:16px; color:var(--text2); }
-        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
-        li { margin-bottom:8px; }
-        strong { color:var(--text); }
-        code {
-            background:var(--code-bg); color:var(--code-color);
-            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
-        }
-        pre {
-            background:var(--code-bg); color:var(--code-color);
-            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
-            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
-        }
-        .btn-tool {
-            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
-            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
-        }
-        .btn-tool:hover { background:var(--primary-hover); }
-        .footer {
-            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
-            color:var(--text3); font-size:0.8rem;
-        }
-        .footer a { color:var(--primary); text-decoration:none; }
-        @media (max-width:600px) {
-            h1 { font-size:1.6rem; }
-            .article-card { padding:20px; }
-        }
-    </style>
+/* BREADCRUMB */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+/* ARTICLE */
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+/* CALLOUTS */
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:460px}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+.plain-table tr:nth-child(even) td{background:var(--surface2)}
+
+/* AP-CARD (job cards here = use cases) */
+.ap-card{border:1px solid var(--border);border-radius:14px;padding:22px;margin:20px 0}
+.ap-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ap-name{font-weight:800;font-size:1.05rem;color:var(--text)}
+.ap-number{font-size:1.3rem;font-weight:900;color:var(--primary);margin-right:8px}
+.sev-badge{font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;align-self:flex-start}
+.sev-script{background:var(--pass-bg);color:var(--pass)}
+.sev-warn{background:var(--warn-bg);color:#b45309}
+.sev-info{background:var(--primary-light);color:var(--primary)}
+.sev-tip{background:#f0fdf4;color:#166534}
+body.dark .sev-warn{background:#422006;color:#fbbf24}
+body.dark .sev-tip{background:#064e3b;color:#34d399}
+.fix-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--pass);display:block;margin:14px 0 6px}
+.danger-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--fail);display:block;margin:14px 0 6px}
+.note-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--primary);display:block;margin:14px 0 6px}
+.step-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);display:block;margin:14px 0 6px}
+
+/* STEP NUMBERS */
+.step-circle{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-weight:800;font-size:.82rem;margin-right:10px;flex-shrink:0}
+
+/* TOC */
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+/* CTA */
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+/* FAQ */
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+/* REFERENCES */
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+/* RELATED TOOLS */
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <a href="/" class="logo">DevToolbox</a>
-        <div class="header-right">
-            <div class="theme-toggle">
-                <button class="theme-btn active" data-theme="light">☀️ Light</button>
-                <button class="theme-btn" data-theme="dark">🌙 Dark</button>
-            </div>
-            <div class="lang-switch">
-                <a href="/tools/blog/cron-generator/" class="lang-btn active">EN</a>
-                <a href="/fr/blog/generateur-cron/" class="lang-btn">FR</a>
-            </div>
-        </div>
-    </header>
+<div class="page">
 
-    <main>
-        <article itemscope itemtype="https://schema.org/Article" class="article-card">
-            <meta itemprop="datePublished" content="2026-04-27">
-            <meta itemprop="author" content="DevToolbox Team">
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/cron-generator-guide/" class="pill-btn active">EN</a>
+      <a href="/fr/blog/generateur-cron/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
 
-            <h1 itemprop="headline">Stop Struggling with Cron Expressions: Use the DevToolbox Visual Generator</h1>
-            <div class="meta">Published on April 27, 2026 by the DevToolbox Team — 7 min read</div>
-                <figure style="margin: 28px 0; text-align: center;">
-                             <img
-                src="/generateur-cron.webp"
-                alt="..."
-                width="793"
-                height="596"
-                loading="lazy"
-                decoding="async"
-                style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);"
-            >
-                  <figcaption style="margin-top: 10px; font-size: 0.85rem; color: var(--text3);">
-                    Le générateur visuel avec l'expression, l'explication en langage naturel et les prochaines exécutions.
-                  </figcaption>
-                </figure>
-            <div itemprop="articleBody">
-                <p>If you manage a Linux server, use AWS CloudWatch, or schedule tasks in Docker, you’ve definitely encountered cron syntax. Five or six fields separated by spaces, asterisks, slashes… not always easy to remember. A single typo, and the task never runs. That’s precisely why we created the <strong>DevToolbox Cron Expression Generator</strong>. It translates the jargon into plain English, lets you build an expression with sliders, and shows the next execution times at a glance – all without sending a single byte to a server.</p>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tools/blog/">Blog</a></li>
+    <li aria-current="page">Cron Job Setup Guide</li>
+  </ol>
+</nav>
 
-                <h2>What exactly is a cron expression?</h2>
-                <p>In Linux, a scheduled task (cron job) is defined by a line in the crontab. The standard syntax has <strong>five fields</strong>: minute (0‑59), hour (0‑23), day of month (1‑31), month (1‑12), and day of week (0‑7, where 0 and 7 both represent Sunday). AWS CloudWatch and some implementations add a sixth field for seconds. This little difference is a frequent source of errors.</p>
-                <p>Our tool handles both formats. You choose <strong>standard (5 fields)</strong> or <strong>extended (6 fields)</strong>, and the validator adapts immediately. No more hunting for the documentation each time.</p>
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-04-27">
+  <meta itemprop="dateModified" content="2026-06-20">
 
-                <h2>Build an expression without memorizing anything</h2>
-                <p>Open the <a href="https://www.devstoolsbox.dev/tools/cron-generator/">Cron Generator</a>. By default, the expression <code>0 9 * * 1</code> is displayed. A sentence underneath interprets it straight away: “Every Monday at 9:00 AM”. If you type something else, the explanation updates in real time. Here’s how to use it step by step.</p>
+  <h1 itemprop="headline">How to Set Up a Cron Job: Build, Test and Deploy Automated Tasks on Linux (2026)</h1>
 
-                <h3>1. Enter or modify the expression</h3>
-                <p>The main field accepts any valid cron expression. But you can also build it without typing anything. The <strong>visual builder</strong> turns each field into a slider you can drag. For example, to schedule a task every day at 2:30 PM, set the minutes slider to 30, the hours slider to 14, and leave the others on *. The expression updates automatically.</p>
+  <div class="article-meta">
+    <time datetime="2026-04-27">April 27, 2026</time>
+    <span>·</span>
+    <span>Updated June 20, 2026</span>
+    <span>·</span>
+    <span>9 min read</span>
+    <span>·</span>
+    <span>By <a href="/tools/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
 
-                <h3>2. Presets to get started quickly</h3>
-                <p>Preset buttons cover the most common cases: <strong>Daily at midnight</strong>, <strong>Every Monday 9AM</strong>, <strong>Every 5 minutes</strong>, <strong>1st of the month at midnight</strong>, etc. Click one, the expression loads, the sliders reposition, and the explanation appears. A huge time‑saver when configuring a new server.</p>
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">In this guide</div>
+    <ol>
+      <li><a href="#incident">The script that ran for two months on the wrong server</a></li>
+      <li><a href="#workflow">The 5-step workflow for any cron job</a></li>
+      <li><a href="#write-script">Step 1 — Write a script that works in isolation</a></li>
+      <li><a href="#build-expression">Step 2 — Build and validate the cron expression</a></li>
+      <li><a href="#add-crontab">Step 3 — Add to crontab safely</a></li>
+      <li><a href="#test">Step 4 — Test before the first scheduled run</a></li>
+      <li><a href="#monitor">Step 5 — Monitor and receive alerts</a></li>
+      <li><a href="#real-jobs">4 real cron jobs with full code</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
 
-                <h3>3. Macros @hourly, @daily…</h3>
-                <p>Some systems accept shortcuts like <code>@hourly</code> (equivalent to <code>0 * * * *</code>) or <code>@daily</code>. Our tool recognises them and translates them too. If you type <code>@weekly</code>, it will display “Every Sunday at midnight”. Handy for beginners.</p>
+  <div itemprop="articleBody">
 
-                <h3>4. Preview the next executions</h3>
-                <p>The right‑hand column lists the next 10 dates when the task will run. Even though the calculation is simplified (it currently doesn’t handle complex intervals like <code>*/15</code>), it gives an excellent idea of the rhythm. Below, the number of executions per year is estimated. Caution: if you schedule a task every minute (which gives over 500,000 yearly executions), an orange badge warns you. This helps avoid nasty surprises on a production server.</p>
+  <!-- ══════════════════════════════════
+       INCIDENT
+  ══════════════════════════════════ -->
+  <h2 id="incident">The script that ran for two months on the wrong server</h2>
 
-                <h3>5. Export for your platform</h3>
-                <p>Four buttons let you copy the expression in the right format: <strong>Linux (crontab)</strong>, <strong>Docker</strong>, <strong>AWS</strong> (6 fields with seconds), and <strong>GCP</strong>. One click, and the expression is in the clipboard, ready to paste into your configuration.</p>
+  <p>A team I know was migrating a Django application from their old VPS to a new cloud server. They moved the code, migrated the database, updated the DNS. The deployment checklist was thorough. One thing they didn't check: the crontab on the old server.</p>
 
-                <h2>Pitfalls to avoid and best practices</h2>
-                <p>Some classic mistakes when writing a cron expression by hand:</p>
-                <ul>
-                    <li><strong>Confusing day of month and day of week</strong>: if both are specified, the task runs when one OR the other matches. Better to fill in only one and leave the other as <code>*</code>.</li>
-                    <li><strong>Forgetting the timezone</strong>: cron uses the server’s system time. Remember to check the timezone before scheduling.</li>
-                    <li><strong>Running untested scripts</strong>: execute the command manually before automating it.</li>
-                </ul>
-                <p>The generator won’t solve the last two points, but it eliminates syntax errors – the number one reason why tasks never fire.</p>
+  <p>For two months after the migration, a nightly backup script kept running on the decommissioned server — pulling live data via an API token that had never been revoked, storing compressed archives in a directory nobody was watching, running up storage bills on a machine they thought was idle. When they finally noticed (a billing spike), they found 61 gigabytes of backups on a server that wasn't supposed to exist anymore.</p>
 
-                <h2>Integration with other DevToolbox tools</h2>
-                <p>Once your cron expression is validated, you can combine it with other utilities:</p>
-                <ul>
-                    <li>The <a href="https://www.devstoolsbox.dev/tools/encodeur-decodeur-url/">encodeur decodeur url</a> to inspect authentication tokens used by your jobs.</li>
-                    <li>The <a href="https://www.devstoolsbox.dev/tools/json-csv-converter/">json csv converter</a> to encode credentials inside scripts.</li>
-                    <li>The <a href="https://www.devstoolsbox.dev/tools/password-hash-generator/">Password Generator</a> to secure your access.</li>
-                    <li>The <a href="https://www.devstoolsbox.dev/tools/unix-timestamp-converter/">Unix Timestamp Converter</a> to work with dates in your scripts.</li>
-                </ul>
+  <p>The cron job itself was fine. The expression was correct. The script worked perfectly. What failed was the deployment process around it: no documentation of what cron jobs existed, no alert when the job ran, no log anyone was reading.</p>
 
-                <h2>Frequently Asked Questions (FAQ)</h2>
-                <h3>Can I use the generator offline?</h3>
-                <p>Yes. All the code executes in your browser. No network dependency. Load the page, disconnect your internet, and the tool remains fully functional.</p>
+  <p>This guide is about the <em>full lifecycle</em> of a cron job not just writing the expression, but writing a solid script, testing it safely before it runs in production, and setting up monitoring so you know when it works and when it doesn't.</p>
 
-                <h3>Does the generator support complex cron expressions like <code>1-5/2</code>?</h3>
-                <p>It validates common patterns (intervals, lists, steps). For very exotic combinations, the best approach is to test with the next‑execution preview.</p>
+  <div class="callout callout-info">
+    <strong>This guide is about building and deploying real jobs.</strong> If you want to understand cron expression syntax in depth — operators, the OR trap, timezone DST pitfalls — read our companion article: <a href="/tools/blog/cron-expression-generator-guide/">Cron Expressions: The Complete Guide</a>. The two articles cover different ground deliberately.
+  </div>
 
-                <h3>What’s the difference between <code>*/5</code> and <code>0,5,10,15,…​</code>?</h3>
-                <p>Both produce the same result for the minutes field. <code>*/5</code> means “every 5 units”. The generator accepts both syntaxes.</p>
+  <!-- ══════════════════════════════════
+       WORKFLOW
+  ══════════════════════════════════ -->
+  <h2 id="workflow">The 5-step workflow for any cron job</h2>
 
-                <p style="margin-top:24px;"><a href="https://www.devstoolsbox.dev/tools/cron-generator/" class="btn-tool">🔧 Try the free Cron Generator</a></p>
-            </div>
-        </article>
-    </main>
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>Step</th><th>What you do</th><th>Why it matters</th><th>Tool</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1 — Write</td><td>Write the script with error handling and logging built in</td><td>A cron job has no terminal — errors are invisible without explicit logging</td><td>Your editor</td></tr>
+        <tr><td>2 — Validate</td><td>Build and verify the cron expression</td><td>An invalid expression runs at the wrong time or never — silently</td><td><a href="/tools/cron-generator/">Cron Generator</a></td></tr>
+        <tr><td>3 — Add</td><td>Edit crontab safely with crontab -e</td><td>Direct file edits bypass syntax validation</td><td>crontab -e</td></tr>
+        <tr><td>4 — Test</td><td>Run the script in a simulated cron environment before waiting for schedule</td><td>Catches PATH and permission issues that only appear in cron context</td><td>env -i command</td></tr>
+        <tr><td>5 — Monitor</td><td>Set up log output + email alert + healthcheck ping</td><td>Without monitoring, a broken cron job can fail silently for months</td><td>MAILTO + curl</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-    <footer class="footer">
-        <p>&copy; 2025 <a href="/">DevToolbox</a> — Free tools for developers. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/contact/">Contact</a></p>
-    </footer>
+  <!-- ══════════════════════════════════
+       STEP 1 — WRITE SCRIPT
+  ══════════════════════════════════ -->
+  <h2 id="write-script">Step 1 Write a script that works in isolation</h2>
+
+  <p>The first rule of cron scripts: <strong>never write logic directly in the cron line</strong>. Inline commands are impossible to test, impossible to version-control, and impossible to read six months later. Every cron job should call a script file.</p>
+
+  <p>Before you even think about the cron expression, write your script so it can run standalone from the terminal, by hand — and produce a clear log of what it did. Here is the shell script template I use for every new cron job:</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">🐚</span>Production-ready shell script template</div>
+      <span class="sev-badge sev-script">Copy and adapt</span>
+    </div>
+
+    <pre><code>#!/bin/bash
+# ─────────────────────────────────────────────────────────────────
+# Script : /opt/scripts/backup.sh
+# Purpose: Nightly PostgreSQL backup to S3
+# Cron   : 0 2 * * * /opt/scripts/backup.sh
+# Owner  : deploy@myserver.com
+# ─────────────────────────────────────────────────────────────────
+set -euo pipefail   # Exit on error, unset variable, pipe failure
+
+LOG=/var/log/backup.log
+DATE=$(date '+%Y-%m-%d_%H-%M-%S')
+BACKUP_DIR=/tmp/backups
+S3_BUCKET=s3://my-company-backups/postgres
+
+mkdir -p "$BACKUP_DIR"
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG"
+}
+
+log "=== Backup started ==="
+
+# 1. Dump database
+log "Dumping database..."
+pg_dump -U postgres mydb > "$BACKUP_DIR/mydb_$DATE.sql"
+
+# 2. Compress
+log "Compressing..."
+gzip "$BACKUP_DIR/mydb_$DATE.sql"
+
+# 3. Upload to S3
+log "Uploading to S3..."
+aws s3 cp "$BACKUP_DIR/mydb_$DATE.sql.gz" "$S3_BUCKET/"
+
+# 4. Clean local temp file
+rm -f "$BACKUP_DIR/mydb_$DATE.sql.gz"
+
+log "=== Backup completed successfully ==="
+exit 0</code></pre>
+
+    <p>Three things this template does that matter in a cron context:</p>
+    <ul>
+      <li><strong><code>set -euo pipefail</code></strong> the script stops immediately if any command fails. Without this, a failed <code>pg_dump</code> silently continues to the upload step, uploading an empty or corrupt file.</li>
+      <li><strong>Explicit logging with timestamps</strong> every meaningful action is logged with a timestamp. When you read the log at 9 AM and see the backup completed at 02:03:17, you know it worked. When you see the log ends at "Dumping database..." you know exactly where it died.</li>
+      <li><strong>Header comment block</strong> the cron line, purpose, and owner are documented inside the script itself. When someone finds this script six months later, they know what it does and where it runs.</li>
+    </ul>
+
+    <div class="callout callout-warn">
+      <strong>Always make the script executable before adding it to crontab:</strong>
+      <pre style="margin-top:8px"><code>chmod +x /opt/scripts/backup.sh
+# Verify
+ls -la /opt/scripts/backup.sh
+# → -rwxr-xr-x 1 deploy deploy 1234 Jun 20 08:00 /opt/scripts/backup.sh</code></pre>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       STEP 2 — BUILD EXPRESSION
+  ══════════════════════════════════ -->
+  <h2 id="build-expression">Step 2. Build and validate the cron expression</h2>
+
+  <p>Once your script works standalone, you need an expression that fires at exactly the right time. The two mistakes that cost the most time here are expressions that <em>look</em> correct but fire at unexpected intervals, and expressions with syntax errors that are silently ignored.</p>
+
+  <p>Open the <a href="/tools/cron-generator/">DevToolbox Cron Generator</a>. Type your intended schedule in plain English — or build it with the visual sliders — and the tool shows you the next 10 exact execution dates. This takes 30 seconds and catches schedule mistakes before they reach production.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">📅</span>Common schedules and their expressions</div>
+      <span class="sev-badge sev-info">Quick reference</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="plain-table">
+        <thead><tr><th>What you want</th><th>Expression</th><th>Next run preview</th></tr></thead>
+        <tbody>
+          <tr><td>Every day at 2 AM</td><td><code>0 2 * * *</code></td><td>Tomorrow at 02:00</td></tr>
+          <tr><td>Every weekday at 8:30 AM</td><td><code>30 8 * * 1-5</code></td><td>Next Mon–Fri at 08:30</td></tr>
+          <tr><td>Every 5 minutes</td><td><code>*/5 * * * *</code></td><td>:00, :05, :10, :15…</td></tr>
+          <tr><td>First day of every month at 6 AM</td><td><code>0 6 1 * *</code></td><td>1st of next month</td></tr>
+          <tr><td>Every Sunday at midnight</td><td><code>0 0 * * 0</code></td><td>Next Sunday 00:00</td></tr>
+          <tr><td>Twice a day at 6 AM and 6 PM</td><td><code>0 6,18 * * *</code></td><td>Today at 06:00 and 18:00</td></tr>
+          <tr><td>Every 15 minutes between 9 AM and 5 PM, weekdays</td><td><code>*/15 9-17 * * 1-5</code></td><td>Next weekday 09:00, 09:15…</td></tr>
+          <tr><td>On reboot</td><td><code>@reboot</code></td><td>Next server restart</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>Use the Cron Generator to verify, not just to build.</strong> Even if you know the syntax, pasting your expression into the generator and reading the "next 10 executions" list takes 10 seconds and has saved me from scheduling mistakes more than once. A job that fires at "00:00 on the 1st AND every Monday" instead of "the first Monday of each month" is a real example — see our <a href="/tools/blog/cron-expression-generator-guide/#or-trap">cron OR trap guide</a> for the full explanation.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       STEP 3 — ADD TO CRONTAB
+  ══════════════════════════════════ -->
+  <h2 id="add-crontab">Step 3 Add to crontab safely</h2>
+
+  <p>Never edit <code>/etc/crontab</code> directly for user jobs. Use <code>crontab -e</code> it opens the crontab in a temporary file, validates the syntax on save, and only installs the new version if it's valid. A syntax error with direct file editing silently breaks the entire crontab.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">⚙</span>The complete production crontab structure</div>
+      <span class="sev-badge sev-script">Production template</span>
+    </div>
+
+    <pre><code># Open for editing (use 'crontab -e' as the user who owns the scripts)
+crontab -e</code></pre>
+
+    <pre><code># ══════════════════════════════════════════════════════
+# Crontab for user: deploy
+# Server: prod-web-01, Last updated: 2026-06-20
+# ══════════════════════════════════════════════════════
+
+# Environment
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=ops@example.com
+CRON_TZ=UTC
+HOME=/home/deploy
+
+#  Backups ──────────────────────────────────────────
+# Daily PostgreSQL backup at 2 AM UTC
+0 2 * * * /opt/scripts/backup.sh >> /var/log/backup.log 2>&1
+
+#  Maintenance ──────────────────────────────────────
+# Clean log files older than 30 days every Sunday at 3 AM
+0 3 * * 0 /opt/scripts/cleanup_logs.sh >> /var/log/cleanup.log 2>&1
+
+#  Sync ─────────────────────────────────────────────
+# Sync product catalog from API every 15 minutes during business hours
+*/15 8-18 * * 1-5 /opt/scripts/sync_catalog.py >> /var/log/sync.log 2>&1</code></pre>
+
+    <p>A few conventions that make a crontab readable six months later:</p>
+    <ul>
+      <li><strong>One comment per job</strong> — say what the job does in plain language, not just the schedule.</li>
+      <li><strong>Group jobs by category</strong> backups, maintenance, sync, reports. Each group gets a header comment.</li>
+      <li><strong>Always redirect both stdout and stderr</strong> — <code>>> /var/log/job.log 2>&1</code> on every line. Unredirected output goes to MAILTO if configured, or is silently discarded.</li>
+      <li><strong>Document the file at the top</strong> server name, user, last updated. When you SSH into an unfamiliar server at 2 AM, this metadata is invaluable.</li>
+    </ul>
+
+    <div class="note-tag">Useful crontab commands</div>
+    <pre><code>crontab -l              # List current user's crontab
+crontab -e              # Edit current user's crontab
+sudo crontab -l         # List root's crontab (separate file!)
+crontab -l > ~/crontab.backup  # Export before making changes
+crontab ~/crontab.backup       # Restore from backup</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       STEP 4 — TEST
+  ══════════════════════════════════ -->
+  <h2 id="test">Step 4 Test before the first scheduled run</h2>
+
+  <p>The most common failure mode in cron jobs is something that works perfectly in the terminal and silently fails in the cron context. The reason is almost always the environment: cron runs with a minimal PATH, no loaded shell profile, and a different working directory than your terminal session.</p>
+
+  <p>You can reproduce this exact environment before the job fires for the first time:</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">🧪</span>Simulating the cron environment</div>
+      <span class="sev-badge sev-info">Test before deploy</span>
+    </div>
+
+    <div class="note-tag">Method 1. env -i (closest to real cron)</div>
+    <pre><code># This strips your current environment and runs the script
+# with only the variables cron would have
+env -i HOME=/home/deploy \
+       USER=deploy \
+       LOGNAME=deploy \
+       SHELL=/bin/bash \
+       PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+       /bin/bash -c '/opt/scripts/backup.sh'
+
+# Read the output carefully any "command not found" error
+# means you need to use an absolute path or expand PATH in the crontab</code></pre>
+
+    <div class="note-tag">Method 2. temporary cron line with a 2-minute delay</div>
+    <pre><code># Find the current time
+date '+%M %H'   # e.g. "32 14" → 14:32
+
+# Add a cron line that fires 2 minutes from now
+# If current time is 14:32, set minute to 34
+34 14 * * * /opt/scripts/backup.sh >> /tmp/test_backup.log 2>&1
+
+# Wait 3 minutes, then read the log
+cat /tmp/test_backup.log
+
+# Remove the test line from crontab when done
+crontab -e</code></pre>
+
+    <div class="note-tag">Method 3. check cron actually dispatched the job</div>
+    <pre><code># After the expected run time, check the system cron log
+grep CRON /var/log/syslog | grep backup | tail -5
+# You should see a line like:
+# Jun 20 02:00:01 server CRON[12345]: (deploy) CMD (/opt/scripts/backup.sh)
+# If this line is absent → expression didn't match, or cron daemon isn't running
+# If this line is present but the job failed → check /var/log/backup.log</code></pre>
+
+    <div class="callout callout-pass">
+      <strong>The two-log rule:</strong> Always check <em>two</em> logs when debugging a cron job. First the system cron log (<code>/var/log/syslog</code>) to confirm the job was dispatched. Then your application log (<code>/var/log/backup.log</code>) to see what the script did. If the first log has the dispatch line but the second log is empty, the script crashed before writing anything — check permissions and the <code>set -e</code> behavior.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       STEP 5 — MONITOR
+  ══════════════════════════════════ -->
+  <h2 id="monitor">Step 5 Monitor and receive alerts</h2>
+
+  <p>A cron job that runs silently every night is invisible until it breaks. The goal of monitoring is to make success visible and failure loud. You want to know immediately when a job fails — not when the backup is missing at 3 AM on a Friday night or when a product catalog sync has been failing for six weeks.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">🔔</span>Three monitoring layers implement all three</div>
+      <span class="sev-badge sev-warn">Don't skip this step</span>
+    </div>
+
+    <div class="note-tag">Layer 1 Log files (minimum viable)</div>
+    <pre><code># In your crontab: redirect everything to a log with a timestamp prefix
+0 2 * * * /opt/scripts/backup.sh >> /var/log/backup.log 2>&1
+
+# In your script: prefix every log line with a timestamp
+log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> /var/log/backup.log; }
+
+# Rotate logs to prevent disk fill (logrotate config)
+# /etc/logrotate.d/cron-jobs
+/var/log/backup.log {
+    daily
+    rotate 30
+    compress
+    missingok
+    notifempty
+}</code></pre>
+
+    <div class="note-tag">Layer 2. Email on failure (simple but effective)</div>
+    <pre><code>#!/bin/bash
+# In your script: send an email if something goes wrong
+MAILTO=ops@example.com
+SCRIPT_NAME=$(basename "$0")
+
+on_error() {
+    local line=$1
+    echo "ERROR in $SCRIPT_NAME at line $line — $(date)" | \
+        mail -s "CRON FAILURE: $SCRIPT_NAME" "$MAILTO"
+}
+trap 'on_error $LINENO' ERR
+
+# The rest of your script below
+# If any command fails, the trap fires and sends an email</code></pre>
+
+    <div class="note-tag">Layer 3 — Healthcheck ping (most reliable)</div>
+    <pre><code>#!/bin/bash
+# Ping a healthcheck URL when the job SUCCEEDS
+# Services like healthchecks.io or BetterUptime alert you
+# if the ping doesn't arrive within the expected window
+
+HEALTHCHECK_URL="https://hc-ping.com/your-unique-uuid"
+
+# Your job logic
+pg_dump -U postgres mydb | gzip > /tmp/backup.sql.gz
+aws s3 cp /tmp/backup.sql.gz s3://my-bucket/
+
+# Signal success — if this line is never reached, the healthcheck
+# will alert you after the expected run window passes
+curl -fsS --retry 3 "$HEALTHCHECK_URL" > /dev/null 2>&1
+
+# To signal failure explicitly:
+# curl -fsS "$HEALTHCHECK_URL/fail" > /dev/null 2>&1</code></pre>
+
+    <div class="callout callout-pass">
+      <strong>Healthcheck services</strong> like <a href="https://healthchecks.io" target="_blank" rel="noopener noreferrer">healthchecks.io</a> (free tier available) work the opposite way from traditional monitoring: instead of checking <em>if</em> a service is running, they alert you when an expected ping <em>doesn't arrive</em>. This catches jobs that stop running silently — no code change, no error, just a job that was somehow removed from the crontab during a server rebuild.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       REAL JOBS
+  ══════════════════════════════════ -->
+  <h2 id="real-jobs">4 real cron jobs with full code</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">1</span>Nightly database backup to S3</div>
+      <span class="sev-badge sev-script">Shell + AWS CLI</span>
+    </div>
+    <div class="step-tag">Cron line</div>
+    <pre><code>0 2 * * * /opt/scripts/db_backup.sh >> /var/log/db_backup.log 2>&1</code></pre>
+    <div class="fix-tag">Script</div>
+    <pre><code>#!/bin/bash
+set -euo pipefail
+DATE=$(date '+%Y-%m-%d')
+DB_NAME=myapp_production
+BUCKET=s3://my-company-backups
+
+log() { echo "[$(date '+%H:%M:%S')] $*"; }
+
+log "Starting backup of $DB_NAME"
+pg_dump -U postgres "$DB_NAME" | gzip > /tmp/"$DB_NAME"_"$DATE".sql.gz
+log "Dump complete. Uploading..."
+aws s3 cp /tmp/"$DB_NAME"_"$DATE".sql.gz "$BUCKET"/postgres/
+rm /tmp/"$DB_NAME"_"$DATE".sql.gz
+
+# Delete backups older than 30 days from S3
+aws s3 ls "$BUCKET"/postgres/ | awk '{print $4}' | \
+  while read f; do
+    age=$(( ($(date +%s) - $(date -d "${f:8:10}" +%s)) / 86400 ))
+    [ "$age" -gt 30 ] && aws s3 rm "$BUCKET/postgres/$f"
+  done
+
+log "Backup complete and old files pruned"
+curl -fsS "https://hc-ping.com/YOUR-UUID" > /dev/null 2>&1</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">2</span>Python API sync every 15 minutes on weekdays</div>
+      <span class="sev-badge sev-script">Python 3 + venv</span>
+    </div>
+    <div class="step-tag">Cron line</div>
+    <pre><code>*/15 8-18 * * 1-5 /opt/venv/bin/python /opt/scripts/sync_products.py >> /var/log/sync.log 2>&1</code></pre>
+    <div class="note-tag">Why /opt/venv/bin/python and not python3?</div>
+    <p style="font-size:.9rem;margin-bottom:0">Using the venv's Python binary means all installed packages (requests, psycopg2, etc.) are available without activating the virtualenv. No <code>source activate</code> in the cron line — that requires a shell with profile loading, which cron doesn't do.</p>
+    <div class="fix-tag">Script</div>
+    <pre><code>#!/usr/bin/env python3
+"""
+Sync product catalog from supplier API.
+Cron: */15 8-18 * * 1-5
+"""
+import requests, psycopg2, logging, sys
+from datetime import datetime
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(message)s',
+    stream=sys.stdout
+)
+log = logging.getLogger(__name__)
+
+API_URL = "https://api.supplier.com/v2/products"
+API_KEY = "sk_live_xxxxx"   # Use env var in production: os.environ['SUPPLIER_API_KEY']
+DB_DSN  = "postgresql://app:secret@localhost/myapp"
+
+def sync():
+    log.info("Fetching products from API...")
+    r = requests.get(API_URL, headers={"Authorization": f"Bearer {API_KEY}"}, timeout=30)
+    r.raise_for_status()
+    products = r.json()["data"]
+    log.info(f"Received {len(products)} products")
+
+    conn = psycopg2.connect(DB_DSN)
+    cur = conn.cursor()
+
+    updated = 0
+    for p in products:
+        cur.execute("""
+            INSERT INTO products (id, name, price, stock, updated_at)
+            VALUES (%(id)s, %(name)s, %(price)s, %(stock)s, NOW())
+            ON CONFLICT (id) DO UPDATE
+            SET name=EXCLUDED.name, price=EXCLUDED.price,
+                stock=EXCLUDED.stock, updated_at=NOW()
+        """, p)
+        updated += 1
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    log.info(f"Sync complete {updated} products upserted")
+
+if __name__ == "__main__":
+    sync()</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">3</span>Weekly log cleanup</div>
+      <span class="sev-badge sev-script">Shell + find</span>
+    </div>
+    <div class="step-tag">Cron line</div>
+    <pre><code>0 3 * * 0 /opt/scripts/cleanup_logs.sh >> /var/log/cleanup.log 2>&1</code></pre>
+    <div class="fix-tag">Script</div>
+    <pre><code>#!/bin/bash
+set -euo pipefail
+
+LOG_DIRS=("/var/log/app" "/var/log/nginx" "/tmp/uploads")
+MAX_AGE_DAYS=30
+
+log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
+log "=== Log cleanup started ==="
+
+total_freed=0
+for dir in "${LOG_DIRS[@]}"; do
+    if [ ! -d "$dir" ]; then
+        log "Directory $dir not found skipping"
+        continue
+    fi
+
+    # DRY RUN FIRST list files that would be deleted
+    log "Files older than $MAX_AGE_DAYS days in $dir:"
+    find "$dir" -name "*.log*" -mtime +"$MAX_AGE_DAYS" -type f | \
+        while read f; do
+            size=$(du -sh "$f" | cut -f1)
+            log "  → $f ($size)"
+        done
+
+    # Actually delete
+    count=$(find "$dir" -name "*.log*" -mtime +"$MAX_AGE_DAYS" -type f | wc -l)
+    find "$dir" -name "*.log*" -mtime +"$MAX_AGE_DAYS" -type f -delete
+    log "Deleted $count files from $dir"
+done
+
+log "=== Cleanup complete ==="</code></pre>
+    <div class="callout callout-warn">
+      <strong>Always log the file list before deleting.</strong> The cleanup script above writes the name and size of every file it deletes. If something gets cleaned up by mistake, you at least know what it was and when it happened.
+    </div>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">4</span>Daily report email curl + Mailgun</div>
+      <span class="sev-badge sev-script">Shell + curl</span>
+    </div>
+    <div class="step-tag">Cron line</div>
+    <pre><code>0 8 * * 1-5 /opt/scripts/daily_report.sh >> /var/log/reports.log 2>&1</code></pre>
+    <div class="fix-tag">Script</div>
+    <pre><code>#!/bin/bash
+set -euo pipefail
+
+MAILGUN_DOMAIN="mail.example.com"
+MAILGUN_API_KEY="key-xxxxx"
+RECIPIENT="team@example.com"
+DATE=$(date '+%A %B %d, %Y')
+
+log() { echo "[$(date '+%H:%M:%S')] $*"; }
+
+# Build report body from database query
+log "Generating report..."
+REPORT=$(psql -U postgres myapp -t -c "
+SELECT
+    COUNT(*)          AS new_users,
+    SUM(total)        AS revenue,
+    COUNT(CASE WHEN status='failed' THEN 1 END) AS failed_orders
+FROM orders
+WHERE created_at >= NOW() - INTERVAL '24 hours';
+")
+
+SUBJECT="Daily Report — $DATE"
+BODY="Good morning,
+
+Here is yesterday's summary:
+
+$REPORT
+
+—
+Sent automatically by cron on $(hostname)
+"
+
+log "Sending report to $RECIPIENT..."
+curl -s -o /dev/null --user "api:$MAILGUN_API_KEY" \
+    https://api.mailgun.net/v3/"$MAILGUN_DOMAIN"/messages \
+    -F from="reports@$MAILGUN_DOMAIN" \
+    -F to="$RECIPIENT" \
+    -F subject="$SUBJECT" \
+    -F text="$BODY"
+
+log "Report sent successfully"</code></pre>
+  </div>
+
+  <div style="text-align:center;margin:28px 0">
+    <a href="/tools/cron-generator/" class="btn-cta"> Validate your cron expression see the next 10 run dates</a>
+  </div>
+
+  <!-- FAQ -->
+  <h2 id="faq">Frequently asked questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I run a Python script with cron?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Use the absolute path to the Python interpreter from your virtual environment: <code>/opt/venv/bin/python /opt/scripts/myscript.py</code>. The venv's Python already knows about all installed packages, so you don't need to activate the virtualenv. If you're using the system Python without a venv, use <code>/usr/bin/python3</code>. Never use a bare <code>python</code> or <code>python3</code> in a cron line — cron's minimal PATH may not find it, or may find the wrong version.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I test a cron job without waiting for the scheduled time?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Run the script in a minimal environment that mimics cron: <code>env -i HOME=/home/youruser PATH=/usr/bin:/bin /bin/bash -c '/opt/scripts/myscript.sh'</code>. This strips your current shell environment and runs the script with only the variables cron would provide. Any "command not found" error you get here is an error you'd get from cron too. You can also add a temporary cron line that fires 2 minutes from now, watch the log file, then remove the line.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I get an email alert when a cron job fails?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Add <code>MAILTO=you@example.com</code> at the top of your crontab. Any unredirected output from your cron lines will be emailed to that address — including error messages. This requires a local mail service (postfix or sendmail) to be running. For more reliable alerting, add a <code>trap 'send_alert' ERR</code> inside your script that sends a notification via curl to Mailgun, SendGrid, Slack webhook, or a healthcheck service. This way you control exactly what triggers an alert and what the message says.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the safest way to delete old files with a cron job?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Always run the <code>find</code> command without <code>-delete</code> first and redirect the output to a log file. Review the list carefully before adding the deletion flag. In your production script, log the name and size of every file before deleting it, so you have a record if something is cleaned up by mistake. Never run <code>find -delete</code> as root on a broad path like <code>/var</code> without a well-tested filter. The cleanup script in this guide shows a safe pattern with logging and per-directory processing.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I make a cron job run once after a server reboot?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Use the <code>@reboot</code> special string in your crontab: <code>@reboot /opt/scripts/start_service.sh >> /var/log/start.log 2>&1</code>. This fires once shortly after the cron daemon starts following a system boot. Note that <code>@reboot</code> is not available on all implementations and is not supported on AWS CloudWatch or Kubernetes CronJob. For production-critical startup tasks on a modern Linux server, a systemd service with <code>WantedBy=multi-user.target</code> is more reliable and easier to monitor.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I view the output of a cron job that already ran?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">If you redirected output to a log file (which you should always do), read it with <code>cat /var/log/myjob.log</code> or <code>tail -50 /var/log/myjob.log</code>. To check whether cron dispatched the job at all, search the system cron log: <code>grep CRON /var/log/syslog | grep myjob</code> on Debian/Ubuntu, or <code>grep CRON /var/log/cron | grep myjob</code> on RHEL/CentOS. If the system log has the dispatch line but your application log is empty, the script crashed before writing any output — check the script's exit code and set -e behavior.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Can I run multiple commands in a single cron line?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Technically yes, using semicolons (always run next command) or <code>&&</code> (stop on first failure). But for anything beyond a single simple command, write a shell script instead. Scripts are easier to test, easier to read, support proper error handling with <code>set -euo pipefail</code>, can be version-controlled with git, and produce structured logs. A cron line should ideally contain nothing but: schedule, script path, log redirect. Everything else belongs in the script.</p>
+      </div>
+    </details>
+  </div>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/tools/cron-generator/" class="btn-cta"> Open the Cron Generator build, validate, preview</a>
+  </div>
+
+  <!-- REFERENCES -->
+  <section class="references">
+    <h3>Sources and references</h3>
+    <ul class="ref-list">
+      <li><a href="https://www.man7.org/linux/man-pages/man1/crontab.1.html" target="_blank" rel="noopener noreferrer">crontab(1) — Linux man page</a> — crontab -e, -l, -r commands and user crontab behavior.</li>
+      <li><a href="https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin" target="_blank" rel="noopener noreferrer">GNU Bash Manual — set -euo pipefail</a> — behavior of set -e (exit on error), -u (unset variable), and pipefail.</li>
+      <li><a href="https://docs.aws.amazon.com/cli/latest/reference/s3/cp.html" target="_blank" rel="noopener noreferrer">AWS CLI Documentation — s3 cp</a> — S3 file upload and the --retry flag for unreliable network conditions.</li>
+      <li><a href="https://healthchecks.io/docs/" target="_blank" rel="noopener noreferrer">Healthchecks.io Documentation</a> — dead man's switch monitoring for cron jobs using HTTP pings.</li>
+      <li><a href="https://www.psycopg.org/psycopg3/docs/basic/transactions.html" target="_blank" rel="noopener noreferrer">psycopg3 — Transaction management</a> — safe database operations from Python scripts used in cron jobs.</li>
+      <li><a href="https://documentation.mailgun.com/en/latest/api-sending.html" target="_blank" rel="noopener noreferrer">Mailgun API — Sending messages</a> — programmatic email delivery used in the daily report example.</li>
+      <li><a href="https://www.man7.org/linux/man-pages/man1/find.1.html" target="_blank" rel="noopener noreferrer">find(1) — Linux man page</a> — -mtime, -delete, and safe usage patterns for log cleanup scripts.</li>
+    </ul>
+  </section>
+
+  <!-- RELATED TOOLS -->
+  <div class="related-tools">
+    <h3>Related DevToolbox tools</h3>
+    <ul>
+      <li><a href="/tools/cron-generator/">→ Cron Expression Generator</a> build and validate your cron expression visually, preview the next 10 run dates before deploying</li>
+      <li><a href="/tools/unix-timestamp-converter/">→ Unix Timestamp Converter</a> convert the timestamps from your cron logs to human-readable UTC dates for debugging</li>
+      <li><a href="/tools/text-diff/">→ Text Diff</a> compare old and new versions of a crontab or script before deploying changes to production</li>
+      <li><a href="/tools/blog/cron-expression-generator-guide/">→ Cron Expressions: The Complete Guide</a> — deep dive into operators, the OR trap, DST timezone pitfalls, and the full debugging checklist</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a>  Free tools for developers.
+  <a href="/tools/blog/">Blog</a> | <a href="/tools/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
 </div>
 
-<!-- Theme script -->
 <script>
-    (function() {
-        const btns = document.querySelectorAll('.theme-btn');
-        btns.forEach(b => b.addEventListener('click', () => {
-            const t = b.dataset.theme;
-            document.body.classList.toggle('dark', t === 'dark');
-            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
-            localStorage.setItem('theme', t);
-        }));
-        const saved = localStorage.getItem('theme') || 'light';
-        document.body.classList.toggle('dark', saved === 'dark');
-        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
-    })();
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Light';
+  }
+})();
 </script>
 </body>
 </html>
