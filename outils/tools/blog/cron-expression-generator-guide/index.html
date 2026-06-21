@@ -1,372 +1,941 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Understanding Cron Expressions in Depth — Complete Guide 2026</title>
-    <meta name="description" content="Master cron format: operators, day-of-month OR pitfall, timezones, debugging, cron vs systemd timers, comparative tables and examples for Linux, Quartz, AWS, Kubernetes.">
-    <meta name="keywords" content="cron expression explained, cron operators, cron vs systemd, cron debugging, cron timezone, cron every 5 minutes, cron quartz, linux cron, kubernetes cronjob">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="DevToolbox">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/generateur-expression-cron-guide/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cron Expressions: The Complete Guide, Operators, Traps, Timezones and Debugging (2026)</title>
+<meta name="description" content="Master cron expressions from the ground up: the OR trap, timezone DST bugs, Linux vs Quartz vs AWS vs Kubernetes syntax, overlap prevention and a step-by-step debugging checklist. Written by Mathias Kouadio.">
+<meta name="keywords" content="cron expression explained, cron operators, cron or trap day of week, cron timezone dst, cron vs systemd, cron debugging checklist, cron every 5 minutes, cron quartz aws kubernetes, linux cron best practices 2026">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/generateur-expression-cron-guide/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/">
 
-    <meta property="og:title" content="Understanding Cron Expressions in Depth — Complete Guide 2026">
-    <meta property="og:description" content="Operators, OR behavior, timezones, debugging, cron vs systemd timers: an exhaustive guide to never miss a scheduled task again.">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/">
-    <meta property="og:site_name" content="DevToolbox">
+<meta property="og:title" content="Cron Expressions: Complete Guide, Operators, Traps, Timezones and Debugging (2026)">
+<meta property="og:description" content="The OR trap, DST timezone bugs, Linux vs Quartz vs AWS vs Kubernetes: everything you need to stop losing sleep over misfiring cron jobs.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/">
+<meta property="og:site_name" content="DevToolbox">
+<meta property="og:image" content="https://www.devstoolsbox.dev/og/cron-expressions-guide-cover.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="article:published_time" content="2026-05-17">
+<meta property="article:modified_time" content="2026-06-20">
+<meta property="article:author" content="Mathias Kouadio">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Understanding Cron Expressions in Depth">
-    <meta name="twitter:description" content="Complete guide with operators, pitfalls, comparative tables and cron job debugging.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cron Expressions: Complete Guide 2026">
+<meta name="twitter:description" content="OR trap, DST bugs, debugging checklist: everything about cron expressions in one place.">
+<meta name="twitter:image" content="https://www.devstoolsbox.dev/og/cron-expressions-guide-cover.webp">
 
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Understanding Cron Expressions in Depth — Complete Guide 2026",
-            "author": { "@type": "Person", "name": "DevToolbox Team" },
-            "datePublished": "2026-05-17",
-            "dateModified": "2026-05-17",
-            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/",
-            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                { "@type": "Question", "name": "Why isn't my cron job running even though the expression looks correct?", "acceptedAnswer": { "@type": "Answer", "text": "In most cases the culprit isn't the expression — it's the environment. Cron runs with a stripped-down PATH limited to /usr/bin:/bin, with none of the custom paths from your interactive shell. A script that calls python3 or node without an absolute path fails silently because cron simply can't find the command. Add PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin at the top of your crontab, redirect output with >> /var/log/my_job.log 2>&1, and check grep CRON /var/log/syslog to see what cron actually attempted to run." } },
-                { "@type": "Question", "name": "How do I prevent a cron job from running twice in parallel when execution time exceeds the interval", "acceptedAnswer": { "@type": "Answer", "text": "Standard cron doesn't check whether a previous instance is still running — it fires a new one at every trigger. For a job scheduled every 5 minutes that can take 8, you quickly end up with overlapping processes stepping on each other. The simplest fix on Linux is flock -n /tmp/my_job.lock /path/to/script.sh: if the lock is already held, the new instance exits immediately without doing anything. On Kubernetes, setting .spec.concurrencyPolicy: Forbid on the CronJob achieves exactly the same result without touching the script itself." } }
-            ]
-        }
-    </script>
-    <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
-                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
-                { "@type": "ListItem", "position": 3, "name": "Understanding Cron Expressions", "item": "https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/" }
-            ]
-        }
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Cron Expressions: The Complete Guide Operators, Traps, Timezones and Debugging (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/tools/about/"},
+  "datePublished":"2026-05-17",
+  "dateModified":"2026-06-20",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/",
+  "image":"https://www.devstoolsbox.dev/og/cron-expressions-guide-cover.webp",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"Complete guide to cron expressions: operators, the day-of-week OR trap, timezone DST handling, Linux vs Quartz vs AWS vs Kubernetes syntax, overlap prevention and a step-by-step debugging checklist."
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {
+      "@type":"Question",
+      "name":"How do I write a cron expression that runs every 5 minutes?",
+      "acceptedAnswer":{"@type":"Answer","text":"The expression */5 * * * * runs a job every 5 minutes on standard Linux cron (5 fields: minute, hour, day-of-month, month, day-of-week). The step operator / combined with * means 'every N units'. To run every 10 minutes starting at minute 2: 2-59/10 * * * *."}
+    },
+    {
+      "@type":"Question",
+      "name":"Why does my cron job run on the wrong days when I specify both a day-of-month and a day-of-week?",
+      "acceptedAnswer":{"@type":"Answer","text":"This is the OR trap. When both day-of-month and day-of-week are non-wildcard values, standard cron uses OR logic — the job runs when either condition matches, not when both match. The expression 0 0 1 * 1 runs on the 1st of every month AND every Monday. To schedule only the first Monday, use the Quartz hash operator (0 0 12 ? * 2#1) or add a check inside your script."}
+    },
+    {
+      "@type":"Question",
+      "name":"What is the difference between standard Linux cron and Quartz / AWS cron?",
+      "acceptedAnswer":{"@type":"Answer","text":"Standard Linux cron uses 5 fields: minute, hour, day-of-month, month, day-of-week. Quartz (Java) and AWS CloudWatch Events add a sixth field for seconds at the beginning, making the order: second, minute, hour, day-of-month, month, day-of-week, and optionally year. Quartz also adds special operators L (last), W (nearest weekday), and # (Nth weekday). AWS forces UTC and does not support the ? operator in the same way."}
+    },
+    {
+      "@type":"Question",
+      "name":"Why does my cron job run twice in autumn or not at all in spring?",
+      "acceptedAnswer":{"@type":"Answer","text":"This is a DST (Daylight Saving Time) bug. If your cron daemon uses a local timezone and your job is scheduled during a DST transition, the clock either skips that hour (spring) or repeats it (autumn). The safest fix is to schedule cron jobs in UTC everywhere and convert to local time only in your application. On cronie, set CRON_TZ=UTC at the top of your crontab."}
+    },
+    {
+      "@type":"Question",
+      "name":"Why is my cron job not running even though the syntax looks correct?",
+      "acceptedAnswer":{"@type":"Answer","text":"The most common cause is a PATH mismatch. The PATH available to cron is much shorter than an interactive shell. A command that works manually may not be found by cron. Fix by adding PATH=/usr/local/bin:/usr/bin:/bin at the top of your crontab. Also check: the script is executable (chmod +x), the log output is redirected (>> /tmp/job.log 2>&1), and the cron daemon is running (systemctl status cron)."}
+    },
+    {
+      "@type":"Question",
+      "name":"How do I prevent a cron job from running multiple instances at the same time?",
+      "acceptedAnswer":{"@type":"Answer","text":"Standard cron launches a new instance regardless of whether the previous one finished. On Linux, wrap the command with flock: flock -n /tmp/myjob.lock /path/to/script.sh. On Ubuntu, the run-one package provides a simpler alternative. In Kubernetes CronJob, set spec.concurrencyPolicy to Forbid to skip a new run if the previous one is still running, or Replace to cancel the running job and start a new one."}
+    },
+    {
+      "@type":"Question",
+      "name":"When should I use systemd timers instead of cron?",
+      "acceptedAnswer":{"@type":"Answer","text":"Prefer systemd timers when you need: centralized logs via journalctl, catch-up after a reboot (Persistent=true), service dependencies (After= or Requires=), or a random delay to spread load (RandomizedDelaySec). Use cron for simple repeating tasks, portability across systems without systemd, or when you manage many scheduled tasks in one crontab file."}
+    }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/tools/blog/"},
+    {"@type":"ListItem","position":3,"name":"Cron Expression Guide","item":"https://www.devstoolsbox.dev/tools/blog/cron-expression-generator-guide/"}
+  ]
+}
+</script>
+ <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-JRBW78KE29');
     </script>
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
 
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --surface2: #f1f5f9;
-            --primary: #7c3aed;
-            --primary-hover: #6d28d9;
-            --primary-light: rgba(124,58,237,0.08);
-            --text: #0f172a;
-            --text2: #374151;
-            --text3: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --radius: 16px;
-            --code-bg: #1e293b;
-            --code-color: #e2e8f0;
-        }
-        body.dark {
-            --bg: #0b0f19;
-            --surface: #151a28;
-            --surface2: #1d2333;
-            --primary: #a78bfa;
-            --primary-hover: #8b5cf6;
-            --text: #f1f5f9;
-            --text2: #cbd5e1;
-            --text3: #94a3b8;
-            --border: #2d3548;
-            --code-bg: #0f172a;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg); color: var(--text);
-            line-height:1.7; padding:20px;
-            transition: background 0.3s, color 0.3s;
-        }
-        .container { max-width:900px; margin:0 auto; }
+/* HEADER */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
-        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
-        .logo::before { content:'🛠️'; }
-        .header-right { display:flex; gap:8px; align-items:center; }
-        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
-        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; }
-        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+/* BREADCRUMB */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
 
-        .article-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
-        }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:16px; line-height:1.3; }
-        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; }
-        h2 { font-size:1.5rem; margin-top:32px; margin-bottom:12px; font-weight:700; }
-        h3 { font-size:1.2rem; margin-top:24px; margin-bottom:8px; font-weight:600; }
-        p { margin-bottom:16px; color:var(--text2); }
-        ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
-        li { margin-bottom:8px; }
-        strong { color:var(--text); }
-        code {
-            background:var(--code-bg); color:var(--code-color);
-            padding:2px 6px; border-radius:4px; font-family:'SF Mono', 'Cascadia Code', monospace; font-size:0.9em;
-        }
-        pre {
-            background:var(--code-bg); color:var(--code-color);
-            padding:16px; border-radius:12px; overflow-x:auto; margin-bottom:20px;
-            font-family:'SF Mono', monospace; font-size:0.85rem; line-height:1.5;
-        }
-        .btn-tool {
-            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
-            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
-        }
-        .btn-tool:hover { background:var(--primary-hover); }
-        table {
-            width:100%; border-collapse: collapse; margin:20px 0; font-size:0.9rem;
-        }
-        th, td {
-            padding:10px 12px; border:1px solid var(--border); text-align:left;
-        }
-        th { background:var(--surface2); font-weight:600; }
-        .footer {
-            text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px;
-            color:var(--text3); font-size:0.8rem;
-        }
-        .footer a { color:var(--primary); text-decoration:none; }
-        @media (max-width:600px) {
-            h1 { font-size:1.6rem; }
-            .article-card { padding:20px; }
-            table { font-size:0.8rem; }
-        }
-    </style>
+/* ARTICLE */
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+/* CALLOUTS */
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:480px}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+.plain-table tr:nth-child(even) td{background:var(--surface2)}
+
+/* AP-CARD */
+.ap-card{border:1px solid var(--border);border-radius:14px;padding:22px;margin:20px 0}
+.ap-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ap-name{font-weight:800;font-size:1.05rem;color:var(--text)}
+.ap-number{font-size:1.3rem;font-weight:900;color:var(--primary);margin-right:8px}
+.sev-badge{font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;align-self:flex-start}
+.sev-critical{background:var(--fail-bg);color:var(--fail)}
+.sev-high{background:#fff0e8;color:#c2410c}
+.sev-medium{background:var(--warn-bg);color:#b45309}
+.sev-low{background:var(--pass-bg);color:var(--pass)}
+.sev-info{background:var(--primary-light);color:var(--primary)}
+body.dark .sev-high{background:#4a1a00;color:#fb923c}
+.fix-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--pass);display:block;margin:14px 0 6px}
+.danger-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--fail);display:block;margin:14px 0 6px}
+.note-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--primary);display:block;margin:14px 0 6px}
+
+/* TOC */
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+/* CTA */
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+/* CRON FIELD VISUAL */
+.cron-anatomy{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0;font-family:var(--mono);font-size:.9rem}
+.cron-field{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cron-value{background:var(--primary);color:#fff;padding:8px 14px;border-radius:8px;font-weight:700;font-size:1rem;min-width:44px;text-align:center}
+.cron-label{font-size:.72rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-family:'Inter',-apple-system,sans-serif}
+
+/* FAQ */
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+/* REFERENCES */
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+/* RELATED TOOLS */
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <a href="/" class="logo">DevToolbox</a>
-        <div class="header-right">
-            <div class="theme-toggle">
-                <button class="theme-btn active" data-theme="light"> Light</button>
-                <button class="theme-btn" data-theme="dark"> Dark</button>
-            </div>
-            <div class="lang-switch">
-                <a href="/tools/blog/cron-expression-generator-guide/" class="lang-btn active">EN</a>
-                <a href="/fr/blog/generateur-expression-cron-guide/" class="lang-btn">FR</a>
-            </div>
-        </div>
-    </header>
+<div class="page">
 
-    <main>
-        <article class="article-card">
-            <h1>Understanding Cron Expressions in Depth — Complete Guide 2026</h1>
-            <div class="meta">Published on May 17, 2026 by the DevToolbox Team — 15 min read</div>
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/cron-expression-generator-guide/" class="pill-btn active">EN</a>
+      <a href="/fr/blog/generateur-expression-cron-guide/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
 
-            <p>
-               Friday night, 11:47 PM. A critical backup never ran. You open the crontab, the expression looks right — 0 0 1 * 1 — yet the job never fired on the first Monday of the month as intended. It ran on the 1st of every month and every Monday. Two behaviors from a single expression, because cron silently applies an OR when both day fields are specified.
-            </p>
-            <p>
-                That kind of surprise happens once. After that, you always double-check. This guide covers what the official documentation glosses over: the OR behavior of day fields, Quartz operators L, W and #, timezone handling when daylight saving kicks in, why your script works manually but never in cron, and when switching to systemd timers actually makes sense. To test every example live, the cron expression generator validates syntax and shows the next scheduled runs.
-            </p>
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tools/blog/">Blog</a></li>
+    <li aria-current="page">Cron Expression Guide</li>
+  </ol>
+</nav>
 
-            <h2>1. Basic Structure and Operators per Field</h2>
-            <p>
-                The standard syntax (Vixie cron, cronie) consists of five fields: <strong>minute (0-59), hour (0-23), day of month (1-31), month (1-12), day of week (0-7, 0 and 7 both mean Sunday)</strong>. Extended implementations (Quartz, AWS CloudWatch) add a sixth field (seconds) at the beginning. Kubernetes CronJob uses 5 fields but supports an explicit timezone since version 1.25.
-            </p>
-            <p>
-                Each field accepts operators. Here's the complete table, with availability per environment:
-            </p>
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-05-17">
+  <meta itemprop="dateModified" content="2026-06-20">
 
-            <table>
-                <thead>
-                    <tr><th>Operator</th><th>Description</th><th>Standard Linux</th><th>Quartz / AWS</th><th>Kubernetes CronJob</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td><code>*</code></td><td>All values</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>,</code></td><td>List: <code>1,15,30</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>-</code></td><td>Range: <code>1-5</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>/</code></td><td>Step: <code>*/5</code> or <code>0-30/5</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td><code>?</code></td><td>No specific value (day of month OR day of week)</td><td>❌</td><td>✅</td><td>❌</td></tr>
-                    <tr><td><code>L</code></td><td>Last day of month (L) or last Friday (5L)</td><td>❌</td><td>✅</td><td>❌</td></tr>
-                    <tr><td><code>W</code></td><td>Nearest weekday (15W)</td><td>❌</td><td>✅</td><td>❌</td></tr>
-                    <tr><td><code>#</code></td><td>The Nth occurrence of a day in a month (2#3 = 3rd Tuesday)</td><td>❌</td><td>✅</td><td>❌</td></tr>
-                </tbody>
-            </table>
-            <p>
-                <strong>Quartz example:</strong> <code>0 0 12 ? * 2L</code> means "last Monday of every month at noon". In our generator, simply select the "Quartz (6 fields)" mode to enable these operators.
-            </p>
+  <h1 itemprop="headline">Cron Expressions: The Complete Guide. Operators, Traps, Timezones and Debugging (2026)</h1>
 
-            <h2>2. The OR Behavior Trap (Day of Month + Day of Week)</h2>
-            <p>
-                This is one of the least documented pitfalls. When both <strong>day of month</strong> and <strong>day of week</strong> are specified (neither is <code>*</code>), cron runs the job when <strong>either</strong> matches — not both. Concrete example:
-            </p>
-            <pre><code>0 0 1 * 1</code></pre>
-            <p>
-                This expression runs on <strong>the 1st of every month</strong> AND <strong>every Monday</strong>, not just the first Monday of the month. If you only wanted the first Monday, you'd need Quartz's <code>#</code> or <code>L</code> operator, or a check inside the script. To avoid this surprising behavior, always leave one of the two fields as <code>*</code> or use <code>?</code> in a Quartz environment.
-            </p>
+  <div class="article-meta">
+    <time datetime="2026-05-17">May 17, 2026</time>
+    <span>·</span>
+    <span>Updated June 20, 2026</span>
+    <span>·</span>
+    <span>10 min read</span>
+    <span>·</span>
+    <span>By <a href="/tools/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
 
-            <h2>3. Textual Names for Months and Days</h2>
-            <p>
-                Linux cron accepts abbreviations: <code>MON</code>, <code>TUE</code>, <code>WED</code> for days, and <code>JAN</code>, <code>FEB</code> for months. This makes expressions more readable:
-            </p>
-            <pre><code>0 9 * JAN-MAR MON-FRI</code></pre>
-            <p>
-                Note that these names are in English and only work with traditional cron (Vixie, cronie). Neither Quartz nor Kubernetes supports them. If you generate an expression for multiple environments, prefer numeric values.
-            </p>
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">In this article</div>
+    <ol>
+      <li><a href="#incident">The backup that ran every Monday, for three weeks on the wrong server</a></li>
+      <li><a href="#decision-table">Quick reference: which cron syntax for which platform</a></li>
+      <li><a href="#anatomy">The 5 fields, and what each one actually controls</a></li>
+      <li><a href="#operators">Operators: *, ,, -, /, ?, L, W, #</a></li>
+      <li><a href="#or-trap">The OR trap, the most misunderstood cron behavior</a></li>
+      <li><a href="#timezones">Timezones and DST, why your 2 AM job runs at 3 AM or twice</a></li>
+      <li><a href="#overlap">Overlap: what happens when a job takes longer than its interval</a></li>
+      <li><a href="#env-variables">Environment variables that make or break cron jobs</a></li>
+      <li><a href="#systemd">Cron vs systemd timers when to switch</a></li>
+      <li><a href="#debugging">Debugging checklist, step by step when nothing runs</a></li>
+      <li><a href="#invalid">Common invalid expressions and what they silently do</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
 
-            <h2>4. Comparative Table of Cron Implementations</h2>
-            <table>
-                <thead>
-                    <tr><th>Implementation</th><th>Fields</th><th>Seconds</th><th>L, W, #</th><th>Native Timezone</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Vixie cron (Linux)</td><td>5</td><td>❌</td><td>❌</td><td>TZ variable</td></tr>
-                    <tr><td>cronie</td><td>5</td><td>❌</td><td>❌</td><td>✅ CRON_TZ</td></tr>
-                    <tr><td>Quartz (Java)</td><td>6–7</td><td>✅</td><td>✅</td><td>✅</td></tr>
-                    <tr><td>AWS CloudWatch Events</td><td>6</td><td>✅</td><td>✅ (L, W)</td><td>✅ forced UTC</td></tr>
-                    <tr><td>Kubernetes CronJob</td><td>5</td><td>❌</td><td>❌</td><td>✅ .spec.timeZone (≥1.25)</td></tr>
-                    <tr><td>GitHub Actions</td><td>5</td><td>❌</td><td>❌</td><td>fixed UTC</td></tr>
-                    <tr><td>systemd timer</td><td>different syntax</td><td>✅</td><td>—</td><td>✅ (via OnCalendar=)</td></tr>
-                </tbody>
-            </table>
+  <div itemprop="articleBody">
 
-            <h2>5. Timezone Handling — In Detail</h2>
-            <p>
-                A task scheduled at <code>0 2 * * *</code> runs at 2 AM — but in which timezone? The answer depends on the environment.
-            </p>
-            <ul>
-                <li><strong>Classic Linux:</strong> cron uses the system time. Check with <code>timedatectl</code> or <code>date +%Z</code>. You can set <code>CRON_TZ=Europe/Paris</code> at the top of the crontab (cronie only).</li>
-                <li><strong>AWS CloudWatch:</strong> always <strong>UTC</strong>. No variable possible. If you need execution at 8 AM Paris time in summer, write <code>0 6 * * ? *</code> (UTC+2).</li>
-                <li><strong>Kubernetes CronJob (≥1.25):</strong> specify <code>.spec.timeZone: "Europe/Paris"</code>. The cron syntax remains 5 fields; the time is interpreted in that timezone.</li>
-                <li><strong>Daylight Saving Time pitfall:</strong> a job at <code>0 2 * * *</code> may run twice (in autumn) or never (in spring) if the timezone switches between CET and CEST. Prefer hours like 3:00 AM or use <code>CRON_TZ</code> with UTC to avoid this.</li>
-            </ul>
+  <!-- ══════════════════════════════════
+       SECTION 1 — INCIDENT
+  ══════════════════════════════════ -->
+  <h2 id="incident">The backup that ran every Monday, for three weeks on the wrong server</h2>
 
-            <h2>6. Overlap Behavior</h2>
-            <p>
-                If a cron job takes 10 minutes and is scheduled every 5 minutes, standard cron launches a new instance <strong>without waiting for the previous one to finish</strong>. This can cause dozens of concurrent processes. Solutions:
-            </p>
-            <ul>
-                <li><strong>Linux:</strong> use <code>flock</code> to lock execution: <code>flock -n /tmp/myjob.lock /path/script.sh</code></li>
-                <li><strong>Ubuntu:</strong> the <code>run-one</code> command (run-one package) ensures only one instance runs.</li>
-                <li><strong>Kubernetes:</strong> set <code>.spec.concurrencyPolicy: Forbid</code> in the CronJob.</li>
-            </ul>
+  <p>A team I worked with had a cron job set up to run database backups on the first Monday of each month. The expression was:</p>
 
-            <h2>7. Environment Variables in the Crontab</h2>
-            <p>
-                The crontab accepts variables in the header. This is essential because the <strong>default PATH</strong> in cron differs from the interactive shell — the source of 90% of "my script works manually but not in cron" problems.
-            </p>
-            <pre><code>SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
-MAILTO=admin@example.com
-CRON_TZ=Europe/Paris
+  <pre><code>0 2 1 * 1</code></pre>
 
-*/10 * * * * /opt/scripts/my_job.sh</code></pre>
-            <p>
-                To disable system emails (standard output), set <code>MAILTO=""</code>. Always redirect output to a file: <code>>> /var/log/my_job.log 2>&1</code>.
-            </p>
+  <p>The intent was clear: "at 2 AM, on the 1st, on Monday." The actual behavior was different. For three weeks, the job ran every Monday at 2 AM — not just the first one. On months where the 1st happened to fall on a Monday, it also ran on that day. Some months it ran five times. The storage filled. The alert fired. The root cause took two hours to find.</p>
 
-            <h2>8. Cron vs systemd Timers — When to Switch</h2>
-            <p>
-                systemd timers offer a modern alternative with centralized journaling, service dependencies and catch-up after reboot. Direct comparison:
-            </p>
-            <pre><code># Cron: every 5 minutes
-*/5 * * * *
+  <p>The culprit was a single line of documentation nobody had read: when both day-of-month and day-of-week are specified, standard cron uses <strong>OR logic</strong>, not AND. The job ran when <em>either</em> field matched, not when both did simultaneously.</p>
 
-# equivalent systemd timer
-OnCalendar=*:0/5</code></pre>
-            <p>
-                Advantages of systemd timers:
-            </p>
-            <ul>
-                <li><code>RandomizedDelaySec=30</code> — adds a random delay to avoid load spikes.</li>
-                <li><code>Persistent=true</code> — runs missed tasks after a reboot.</li>
-                <li>Logs centralized in <code>journalctl -u my-timer.service</code>.</li>
-            </ul>
-            <p>
-                If you manage modern machines (systemd), consider migrating complex tasks to timers. For simple tasks, cron remains perfectly suitable.
-            </p>
+  <p>This guide is built around the real traps, the ones that look correct, run silently, and only reveal themselves when something breaks in production. We start with the OR trap, cover every operator, every platform difference, every timezone edge case, and end with a debugging checklist you can run through in under ten minutes.</p>
 
-            <h2>9. Debugging a Silent Cron Job — Ultimate Checklist</h2>
-            <p>
-                When a cron job doesn't run, no error appears by default. Here are the diagnostic steps:
-            </p>
-            <ol>
-                <li><strong>Check logs:</strong> <code>grep CRON /var/log/syslog</code> or <code>/var/log/cron</code>. Look for the line corresponding to your command.</li>
-                <li><strong>Distinguish user crontab vs root:</strong> <code>crontab -l</code> (current user) and <code>sudo crontab -l</code> (root) are two separate files.</li>
-                <li><strong>Redirect output:</strong> add <code>>> /tmp/my_job.log 2>&1</code> at the end of the line to capture stdout and stderr.</li>
-                <li><strong>Check permissions:</strong> the script must be executable (<code>chmod +x script.sh</code>) and accessible within the PATH defined in the crontab.</li>
-                <li><strong>Test the PATH:</strong> run your script in a minimal environment: <code>env -i /bin/bash -l -c "/path/script.sh"</code>. This simulates the cron environment.</li>
-                <li><strong>Enable MAILTO:</strong> <code>MAILTO=you@email.com</code> at the top of the crontab. Any error output will be sent by email (if the mail service is configured).</li>
-                <li><strong>Use the cron generator:</strong> our <a href="https://www.devstoolsbox.dev/tools/cron-generator/">validation tool</a> checks syntax and shows the next executions, helping to spot scheduling errors.</li>
-            </ol>
+  <div class="callout callout-info">
+    <strong>Test every expression in this guide live:</strong> The <a href="/tools/cron-generator/">DevToolbox Cron Generator</a> validates syntax, shows the next 10 execution dates, and supports Linux, Quartz, and AWS modes — entirely in your browser.
+  </div>
 
-            <h2>10. Common Invalid Expressions — Error Table</h2>
-            <table>
-                <thead>
-                    <tr><th>Expression</th><th>Error</th><th>Correction</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td><code>60 * * * *</code></td><td>Minute out of range</td><td><code>59 * * * *</code></td></tr>
-                    <tr><td><code>0 0 30 2 *</code></td><td>February 30 doesn't exist</td><td>Silently never triggered</td></tr>
-                    <tr><td><code>0 0 * * 7</code></td><td>Sunday = 0 or 7 depending on implementation</td><td>Test <code>0 0 * * 0</code> or both</td></tr>
-                    <tr><td><code>*/5 * * * * *</code></td><td>6 fields on a 5‑field cron</td><td>Remove the first field</td></tr>
-                    <tr><td><code>0 0 31 * *</code></td><td>Only months with 31 days</td><td>The job won't run in February, April, etc.</td></tr>
-                </tbody>
-            </table>
+  <!-- ══════════════════════════════════
+       SECTION 2 — DECISION TABLE
+  ══════════════════════════════════ -->
+  <h2 id="decision-table">Quick reference: which cron syntax for which platform</h2>
 
-            <p>
-                A syntax error is often silent: cron may ignore the entire line. Our <strong>online validator</strong> alerts you in real time and avoids these pitfalls.
-            </p>
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>Platform</th><th>Fields</th><th>Seconds</th><th>L, W, #</th><th>Timezone</th><th>OR trap applies?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Linux cron (Vixie / cronie)</td><td>5</td><td>❌</td><td>❌</td><td>CRON_TZ variable</td><td>🔴 Yes</td></tr>
+        <tr><td>Quartz (Java)</td><td>6–7</td><td>✅</td><td>✅ all</td><td>✅ native</td><td>✅ Use ? to avoid</td></tr>
+        <tr><td>AWS CloudWatch Events</td><td>6</td><td>✅</td><td>✅ L, W</td><td>UTC forced</td><td>✅ Use ? to avoid</td></tr>
+        <tr><td>Kubernetes CronJob</td><td>5</td><td>❌</td><td>❌</td><td>spec.timeZone (≥1.25)</td><td>🔴 Yes</td></tr>
+        <tr><td>GitHub Actions</td><td>5</td><td>❌</td><td>❌</td><td>UTC fixed</td><td>🔴 Yes</td></tr>
+        <tr><td>systemd timer</td><td>different syntax</td><td>✅</td><td>—</td><td>✅ native</td><td>N/A</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-            <h2>FAQ</h2>
-            <h3>How do I write a cron expression for every 5 minutes?</h3>
-            <p><code>*/5 * * * *</code> in standard cron. Each field: minute (every 5), hour (every), day of month (every), month (every), day of week (every).</p>
-            <h3>What is the difference between Linux cron and AWS cron?</h3>
-            <p>Linux uses 5 fields, AWS CloudWatch (and Quartz) can use 6 fields with seconds. Our generator handles both modes.</p>
-            <h3>Why is my cron job not running?</h3>
-            <p>Check PATH, permissions, redirect output to a file, and look at <code>/var/log/syslog</code>. Use <code>MAILTO</code> to receive errors.</p>
-            <h3>How to prevent a cron job from overlapping?</h3>
-            <p>Use <code>flock</code>, <code>run-one</code> or the <code>concurrencyPolicy: Forbid</code> property in Kubernetes.</p>
+  <!-- ══════════════════════════════════
+       SECTION 3: ANATOMY
+  ══════════════════════════════════ -->
+  <h2 id="anatomy">The 5 fields and what each one actually controls</h2>
 
-            <p style="margin-top:24px;">
-                <a href="https://www.devstoolsbox.dev/tools/cron-generator/" class="btn-tool">🔧 Try the Free Cron Expression Generator (local, no sign‑up)</a>
-            </p>
-        </article>
-    </main>
+  <p>A standard cron expression has five fields separated by spaces. Each field controls one unit of time. Here is the exact anatomy:</p>
 
-    <footer class="footer">
-        <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers and admins. <a href="https://www.devstoolsbox.dev/fr/blog/">Blog</a> | <a href="https://www.devstoolsbox.dev/tools/contact/">Contact</a></p>
-    </footer>
+  <div class="cron-anatomy" aria-label="Cron expression field breakdown">
+    <div class="cron-field"><div class="cron-value">*</div><div class="cron-label">Minute<br>0–59</div></div>
+    <div class="cron-field"><div class="cron-value">*</div><div class="cron-label">Hour<br>0–23</div></div>
+    <div class="cron-field"><div class="cron-value">*</div><div class="cron-label">Day of month<br>1–31</div></div>
+    <div class="cron-field"><div class="cron-value">*</div><div class="cron-label">Month<br>1–12</div></div>
+    <div class="cron-field"><div class="cron-value">*</div><div class="cron-label">Day of week<br>0–7 (0=7=Sun)</div></div>
+  </div>
+
+  <p>A few things that trip up everyone at least once:</p>
+
+  <ul>
+    <li><strong>Sunday is both 0 and 7</strong> in standard cron. <code>0 0 * * 0</code> and <code>0 0 * * 7</code> both mean "midnight on Sunday." Some implementations only accept one — always test both if portability matters.</li>
+    <li><strong>Month and day-of-week accept textual names</strong> in cronie: <code>MON</code>, <code>TUE</code>... and <code>JAN</code>, <code>FEB</code>... These are case-insensitive and English-only. Quartz and Kubernetes do not support them.</li>
+    <li><strong>The minimum unit is one minute.</strong> There is no native way to run a cron job every 30 seconds on standard cron. Use <code>*/1 * * * * /script.sh; sleep 30; /script.sh</code> inside the cron command, or switch to a systemd timer which supports second-level precision.</li>
+  </ul>
+
+  <pre><code># Every minute
+* * * * *
+
+# Every day at midnight
+0 0 * * *
+
+# Every weekday (Monday to Friday) at 8:30 AM
+30 8 * * 1-5
+
+# First day of every month at 6 AM
+0 6 1 * *
+
+# Every 15 minutes between 9 AM and 5 PM on weekdays
+*/15 9-17 * * 1-5
+
+# At 2:30 AM every Sunday
+30 2 * * 0</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 4 — OPERATORS
+  ══════════════════════════════════ -->
+  <h2 id="operators">Operators: *, ,, -, /, ?, L, W, #</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">*</span>Wildcard all values</div>
+      <span class="sev-badge sev-info">Universal</span>
+    </div>
+    <p>Matches every possible value for that field. <code>* * * * *</code> runs every minute of every hour of every day.</p>
+    <pre><code>0 * * * *    # Every hour on the hour (minute=0, any hour, any day)</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">,</span>List multiple values</div>
+      <span class="sev-badge sev-info">Universal</span>
+    </div>
+    <p>Specifies a list of discrete values. Order does not matter cron evaluates the union of all values.</p>
+    <pre><code>0 9,12,17 * * 1-5   # At 9 AM, noon, and 5 PM on weekdays</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">-</span>Range — consecutive values</div>
+      <span class="sev-badge sev-info">Universal</span>
+    </div>
+    <p>Specifies a continuous range, inclusive on both ends.</p>
+    <pre><code>0 9 * JAN-MAR MON-FRI   # 9 AM on weekdays in January, February, March</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">/</span>Step every N units</div>
+      <span class="sev-badge sev-info">Universal</span>
+    </div>
+    <p>Runs at regular intervals. <code>*/5</code> means "every 5 units." You can combine with a range: <code>0-30/5</code> means "every 5 minutes within the first 30 minutes of each hour."</p>
+    <pre><code>*/5 * * * *      # Every 5 minutes
+0-30/10 * * * *  # At minutes 0, 10, 20, 30 of every hour</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">Q</span>No specific value Quartz/AWS only</div>
+      <span class="sev-badge sev-medium">Quartz / AWS</span>
+    </div>
+    <p>Used in day-of-month OR day-of-week to explicitly say "I don't care about this field." This is the correct way to avoid the OR trap in Quartz environments — set one field to a value and the other to <code>?</code>.</p>
+    <pre><code># Quartz: run every Monday (not every 1st AND every Monday)
+0 0 12 ? * MON
+
+# Quartz: run on the 1st of every month (not on Mondays too)
+0 0 12 1 * ?</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">L</span>Last Quartz/AWS only</div>
+      <span class="sev-badge sev-medium">Quartz / AWS</span>
+    </div>
+    <p>In day-of-month: the last day of the month (handles February and months with 30 days automatically). In day-of-week: the last occurrence of a day in the month. <code>5L</code> = last Friday.</p>
+    <pre><code># Quartz: last day of every month at midnight
+0 0 0 L * ?
+
+# Quartz: last Friday of every month at 6 PM
+0 0 18 ? * 6L</code></pre>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">#</span>Nth weekday — Quartz only</div>
+      <span class="sev-badge sev-medium">Quartz only</span>
+    </div>
+    <p>The Nth occurrence of a given weekday in the month. <code>2#1</code> = first Monday (day 2 of week = Monday in Quartz, where 1=Sunday). This is the correct way to schedule "the first Monday of the month" without hitting the OR trap.</p>
+    <pre><code># Quartz: first Monday of every month at noon
+0 0 12 ? * 2#1
+
+# Quartz: third Wednesday of every month at 9 AM
+0 0 9 ? * 4#3</code></pre>
+    <div class="callout callout-info">
+      <strong>Quartz day numbering:</strong> In Quartz, 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday. This differs from Linux where 1=Monday. Always double-check when migrating between platforms.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5 — OR TRAP
+  ══════════════════════════════════ -->
+  <h2 id="or-trap">The OR trap the most misunderstood cron behavior</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">⚠</span>Day-of-month OR day-of-week not AND</div>
+      <span class="sev-badge sev-critical">Critical wrong behavior</span>
+    </div>
+
+    <p>When both the day-of-month field and the day-of-week field contain a non-wildcard value, cron schedules the job when <strong>either condition is true</strong>. This is by design — and it's documented in the POSIX spec — but it surprises almost everyone who encounters it for the first time.</p>
+
+    <div class="danger-tag">Trap this runs far more often than expected</div>
+    <pre><code># Intended: "run at midnight on the first Monday of each month"
+# Actual: "run at midnight on the 1st of every month, AND on every Monday"
+0 0 1 * 1
+
+# In a month with 5 Mondays, this runs 6 times (5 Mondays + the 1st)
+# In a month where the 1st IS a Monday, the 1st is not counted twice</code></pre>
+
+    <div class="fix-tag">Fix 1 leave one field as * (for simple cases)</div>
+    <pre><code># Run only on every Monday (ignore day-of-month entirely)
+0 0 * * 1
+
+# Run only on the 1st of every month (ignore day-of-week entirely)
+0 0 1 * *</code></pre>
+
+    <div class="fix-tag">Fix 2  use Quartz # operator (for "Nth weekday of month")</div>
+    <pre><code># Quartz: genuinely the first Monday of every month, nothing else
+0 0 0 ? * 2#1</code></pre>
+
+    <div class="fix-tag">Fix 3  check inside the script (for standard cron)</div>
+    <pre><code>#!/bin/bash
+# Run via: 0 0 * * 1 /path/first_monday_check.sh
+# This script checks whether today is the first Monday of the month
+day=$(date +%d)
+if [ "$day" -le 7 ]; then
+    # Only the first 7 days of the month can contain the first Monday
+    /path/to/actual_job.sh
+fi</code></pre>
+
+    <div class="callout callout-warn">
+      <strong>The rule:</strong> In standard cron, if you need to combine day-of-month and day-of-week with AND logic, you must enforce it inside the script. The cron expression itself cannot express AND — only OR.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 6 — TIMEZONES
+  ══════════════════════════════════ -->
+  <h2 id="timezones">Timezones and DST why your 2 AM job runs at 3 AM or twice</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">🕐</span>DST the clock that breaks your schedule</div>
+      <span class="sev-badge sev-high">High silent wrong timing</span>
+    </div>
+
+    <p>Twice a year, Daylight Saving Time shifts local clocks by one hour. If your cron daemon uses a local timezone and your job is scheduled during the transition window, two things can happen:</p>
+
+    <ul>
+      <li><strong>Spring (clocks spring forward):</strong> The hour from 2:00 AM to 3:00 AM doesn't exist. A job at <code>0 2 * * *</code> silently skips that day.</li>
+      <li><strong>Autumn (clocks fall back):</strong> The hour from 2:00 AM to 3:00 AM exists twice. A job at <code>0 2 * * *</code> runs twice that night.</li>
+    </ul>
+
+    <div class="danger-tag">Risky depends on system timezone and DST transitions</div>
+    <pre><code># If system timezone is Europe/Paris:
+0 2 * * *
+# → skips entirely on last Sunday of March
+# → runs twice on last Sunday of October</code></pre>
+
+    <div class="fix-tag">Fix schedule in UTC, convert to local time in your app</div>
+    <pre><code># At the top of your crontab (cronie only):
+CRON_TZ=UTC
+
+# Now this runs at 2:00 AM UTC regardless of DST
+0 2 * * *
+
+# In Europe/Paris (UTC+1 winter, UTC+2 summer):
+# → Winter: 3:00 AM Paris time
+# → Summer: 4:00 AM Paris time
+# This is predictable and repeatable. DST shifts affect the local display, not the actual run time.</code></pre>
+
+    <div class="fix-tag">Platform-specific timezone settings</div>
+    <pre><code># Linux cronie CRON_TZ in crontab header
+CRON_TZ=America/New_York
+0 9 * * 1-5   # 9 AM New York time, DST-aware
+
+# Kubernetes CronJob (≥ 1.25) spec.timeZone
+spec:
+  schedule: "0 9 * * 1-5"
+  timeZone: "America/New_York"   # IANA timezone name
+
+# AWS CloudWatch always UTC, no override possible
+# 9 AM New York in summer (UTC-4): 13:00 UTC
+0 13 * * ? *   # summer
+# 9 AM New York in winter (UTC-5): 14:00 UTC
+0 14 * * ? *   # winter you need two separate rules, or use Lambda with timezone logic</code></pre>
+
+    <div class="callout callout-pass">
+      <strong>Best practice:</strong> Store and run all cron jobs in UTC. Convert to local time only in your application or notification layer. This eliminates DST bugs completely and makes schedules portable across regions.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 7 — OVERLAP
+  ══════════════════════════════════ -->
+  <h2 id="overlap">Overlap: what happens when a job takes longer than its interval</h2>
+
+  <p>Standard cron has no built-in awareness of how long a job runs. If a job scheduled every 5 minutes takes 8 minutes, by the time it finishes, two more instances have already started. On a busy server this can cascade into dozens of concurrent processes within an hour.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">🔒</span>Preventing overlap three approaches</div>
+      <span class="sev-badge sev-high">High server stability</span>
+    </div>
+
+    <div class="fix-tag">Linux — flock (most reliable)</div>
+    <pre><code># flock acquires an exclusive lock on a file before running the script
+# -n means "non-blocking" if the lock is held, skip this run
+*/5 * * * * flock -n /tmp/myjob.lock /path/to/script.sh
+
+# With a timeout (wait up to 10 seconds before giving up):
+*/5 * * * * flock -w 10 /tmp/myjob.lock /path/to/script.sh</code></pre>
+
+    <div class="fix-tag">Ubuntu run-one (simplest)</div>
+    <pre><code># run-one ensures only one instance of a command runs at a time
+# install: sudo apt install run-one
+*/5 * * * * run-one /path/to/script.sh</code></pre>
+
+    <div class="fix-tag">Kubernetes CronJob concurrencyPolicy</div>
+    <pre><code>spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid   # Skip new run if previous is still running
+  # Other options:
+  # Allow    default, multiple instances can run simultaneously
+  # Replace  cancel the running job, start a new one</code></pre>
+
+    <div class="fix-tag">Script-level PID file (portable, no dependencies)</div>
+    <pre><code>#!/bin/bash
+PIDFILE=/tmp/myjob.pid
+
+if [ -f "$PIDFILE" ]; then
+    pid=$(cat "$PIDFILE")
+    if kill -0 "$pid" 2>/dev/null; then
+        echo "Job already running (PID $pid). Skipping."
+        exit 0
+    fi
+fi
+
+echo $$ > "$PIDFILE"
+trap "rm -f $PIDFILE" EXIT
+
+# Your actual job below
+/path/to/actual_work.sh</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 8 — ENV VARIABLES
+  ══════════════════════════════════ -->
+  <h2 id="env-variables">Environment variables that make or break cron jobs</h2>
+
+  <p>The number one reason a cron job fails silently while working perfectly in your terminal is the PATH. The cron environment is minimal by design — it has none of your shell aliases, none of your <code>.bashrc</code> exports, and a PATH that typically only includes <code>/usr/bin:/bin</code>.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">⚙</span>The production-safe crontab header</div>
+      <span class="sev-badge sev-info">Best practice</span>
+    </div>
+
+    <pre><code>SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=ops@example.com
+CRON_TZ=UTC
+HOME=/home/deploy
+
+# Format: minute hour day-of-month month day-of-week command
+*/10 * * * * /opt/scripts/sync.sh >> /var/log/sync.log 2>&1
+0 2 * * * /opt/scripts/backup.sh >> /var/log/backup.log 2>&1</code></pre>
+
+    <ul>
+      <li><strong>SHELL</strong> specifies the shell used to run commands. Default is <code>/bin/sh</code>, which may lack bash features.</li>
+      <li><strong>PATH</strong> list every directory where your scripts and their dependencies live. When in doubt, use absolute paths in your commands.</li>
+      <li><strong>MAILTO</strong> any output that is not redirected to a file is emailed to this address. Set to <code>""</code> to suppress emails entirely.</li>
+      <li><strong>CRON_TZ</strong> timezone for this crontab (cronie only). Use IANA names like <code>America/New_York</code> or <code>UTC</code>.</li>
+    </ul>
+
+    <div class="note-tag">How to simulate the cron environment manually</div>
+    <pre><code># This runs your script in an environment close to what cron uses
+# Use this to reproduce "works in terminal, fails in cron" bugs
+env -i HOME=/root SHELL=/bin/bash PATH=/usr/bin:/bin /bin/bash -l -c "/path/to/script.sh"</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 9 — SYSTEMD
+  ══════════════════════════════════ -->
+  <h2 id="systemd">Cron vs systemd timers when to switch</h2>
+
+  <p>systemd timers are the modern replacement for cron on Linux systems that run systemd (which is most distributions since 2015). They offer several features that cron simply can't provide, but they're also more complex to set up for simple tasks.</p>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead><tr><th>Feature</th><th>cron</th><th>systemd timer</th></tr></thead>
+      <tbody>
+        <tr><td>Setup complexity</td><td>✅ One line in crontab</td><td>❌ Two files (.timer + .service)</td></tr>
+        <tr><td>Log access</td><td>❌ /var/log/syslog only</td><td>✅ journalctl -u myservice</td></tr>
+        <tr><td>Catch-up after reboot</td><td>❌ Missed runs are lost</td><td>✅ Persistent=true</td></tr>
+        <tr><td>Random delay to spread load</td><td>❌ Not built-in</td><td>✅ RandomizedDelaySec=</td></tr>
+        <tr><td>Service dependencies</td><td>❌ Not supported</td><td>✅ After=, Requires=</td></tr>
+        <tr><td>Second-level precision</td><td>❌ Minute minimum</td><td>✅ OnCalendar=*:*:0/30</td></tr>
+        <tr><td>Portability</td><td>✅ Any Unix</td><td>❌ systemd only</td></tr>
+        <tr><td>Multi-user crontabs</td><td>✅ Each user has their own</td><td>❌ System-level only by default</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">→</span>Equivalent expressions</div>
+      <span class="sev-badge sev-info">Migration reference</span>
+    </div>
+    <pre><code># cron: every 5 minutes
+*/5 * * * * /opt/scripts/sync.sh
+
+# systemd timer equivalent: /etc/systemd/system/sync.timer
+[Unit]
+Description=Sync every 5 minutes
+
+[Timer]
+OnCalendar=*:0/5
+Persistent=true          # Run missed jobs after reboot
+RandomizedDelaySec=30    # Spread load: run anywhere in a 30s window
+
+[Install]
+WantedBy=timers.target</code></pre>
+
+    <pre><code># The matching service file: /etc/systemd/system/sync.service
+[Unit]
+Description=Sync service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/scripts/sync.sh
+User=deploy</code></pre>
+
+    <pre><code># Enable and start the timer
+systemctl enable --now sync.timer
+
+# Check status and next run time
+systemctl list-timers --all | grep sync
+
+# View logs
+journalctl -u sync.service -f</code></pre>
+  </div>
+
+  <div class="callout callout-pass">
+    <strong>Recommendation:</strong> Use cron for simple, portable, or per-user scheduled tasks. Switch to systemd timers when you need logging, catch-up runs, dependencies, or second-level precision on a managed Linux server.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 10 — DEBUGGING
+  ══════════════════════════════════ -->
+  <h2 id="debugging">Debugging checklist step by step when nothing runs</h2>
+
+  <p>When a cron job doesn't run, there's no error by default. The following checklist covers every common cause in order of frequency.</p>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">🔍</span>The 7-step cron debugging process</div>
+      <span class="sev-badge sev-high">Start here</span>
+    </div>
+
+    <div class="note-tag">Step 1 Is the cron daemon running?</div>
+    <pre><code>systemctl status cron      # Debian/Ubuntu
+systemctl status crond     # RHEL/CentOS
+pgrep -x cron || pgrep -x crond   # Check the process exists</code></pre>
+
+    <div class="note-tag">Step 2 Check the system logs</div>
+    <pre><code># Ubuntu/Debian
+grep CRON /var/log/syslog | tail -30
+
+# RHEL/CentOS
+grep CRON /var/log/cron | tail -30
+
+# Look for: "(deploy) CMD (/opt/scripts/sync.sh)"
+# If the line appears → cron ran it, the problem is in the script
+# If the line is absent → the expression, user, or daemon is the issue</code></pre>
+
+    <div class="note-tag">Step 3 Redirect all output to a file</div>
+    <pre><code># Add to your cron line:
+*/5 * * * * /opt/scripts/sync.sh >> /tmp/sync.log 2>&1
+# 2>&1 redirects both stdout and stderr to the same file
+# Without this, output is silently discarded or emailed (if mail is configured)</code></pre>
+
+    <div class="note-tag">Step 4 Check which crontab you're editing</div>
+    <pre><code>crontab -l           # Current user's crontab
+sudo crontab -l      # Root's crontab (completely separate file)
+cat /etc/cron.d/*    # System-wide cron jobs</code></pre>
+
+    <div class="note-tag">Step 5 Verify permissions and PATH</div>
+    <pre><code>ls -la /opt/scripts/sync.sh    # Must be executable
+chmod +x /opt/scripts/sync.sh  # Fix if missing
+
+# Test with an absolute path in the cron line
+*/5 * * * * /usr/bin/python3 /opt/scripts/sync.py >> /tmp/sync.log 2>&1</code></pre>
+
+    <div class="note-tag">Step 6 Simulate the cron environment</div>
+    <pre><code># Run this in the terminal to reproduce the exact cron environment
+env -i HOME=/home/deploy USER=deploy LOGNAME=deploy \
+  SHELL=/bin/bash PATH=/usr/bin:/bin \
+  /bin/bash -c '/opt/scripts/sync.sh' 2>&1</code></pre>
+
+    <div class="note-tag">Step 7 Enable email notifications</div>
+    <pre><code># Add to the top of your crontab:
+MAILTO=you@example.com
+# Any unredirected output (including error messages) will be emailed
+# Requires a local mail service (postfix, sendmail) to be running</code></pre>
+
+    <div class="callout callout-info">
+      <strong>Shortcut:</strong> The <a href="/tools/cron-generator/">DevToolbox Cron Generator</a> shows the exact next 10 run dates for any expression — useful for confirming your expression fires when you expect it to, before spending time on permissions or PATH issues.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 11 — INVALID EXPRESSIONS
+  ══════════════════════════════════ -->
+  <h2 id="invalid">Common invalid expressions and what they silently do</h2>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead><tr><th>Expression</th><th>Problem</th><th>What actually happens</th><th>Correct version</th></tr></thead>
+      <tbody>
+        <tr><td><code>60 * * * *</code></td><td>Minute 60 doesn't exist</td><td>Syntax error, line ignored</td><td><code>59 * * * *</code></td></tr>
+        <tr><td><code>0 0 30 2 *</code></td><td>February 30 never exists</td><td>Job never runs — silently</td><td><code>0 0 28 2 *</code> or use L in Quartz</td></tr>
+        <tr><td><code>0 0 * * 7</code></td><td>Sunday = 0 or 7 varies</td><td>May not work on all cron daemons</td><td>Test both <code>0</code> and <code>7</code>, prefer <code>0</code></td></tr>
+        <tr><td><code>*/5 * * * * *</code></td><td>6 fields on a 5-field cron</td><td>Syntax error or last field ignored</td><td><code>*/5 * * * *</code></td></tr>
+        <tr><td><code>0 0 31 * *</code></td><td>Only 7 months have 31 days</td><td>Silently skips Feb, Apr, Jun, Sep, Nov</td><td>Use a script check or Quartz L</td></tr>
+        <tr><td><code>0 0 1 * 1</code></td><td>OR trap (see section above)</td><td>Runs on every Monday + the 1st</td><td>Use <code>?</code> in Quartz or script check</td></tr>
+        <tr><td><code>@reboot</code> (on AWS)</td><td>Non-standard shorthand</td><td>Not supported on CloudWatch</td><td>Use a startup script or Lambda</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="text-align:center;margin:28px 0">
+    <a href="/tools/cron-generator/" class="btn-cta"> Validate your cron expression free, instant, no sign-up</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 12 — FAQ
+  ══════════════════════════════════ -->
+  <h2 id="faq">Frequently asked questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I write a cron expression that runs every 5 minutes?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Use <code>*/5 * * * *</code> on standard Linux cron. The <code>/</code> operator means "every N units" and <code>*</code> means "all possible values", so <code>*/5</code> in the minute field means "at minute 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55." To start at a specific minute, use a range: <code>2-59/5</code> runs at minutes 2, 7, 12, 17, etc.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why does my cron job fire on wrong days when I set both day-of-month and day-of-week?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Standard cron applies OR logic when both day-of-month and day-of-week are non-wildcard values. The expression <code>0 0 1 * 1</code> means "run when it is the 1st OR when it is Monday" — not both simultaneously. To get true AND logic, either leave one field as <code>*</code>, or add a conditional check inside your script (check if the date meets both conditions before running the actual work). In Quartz environments, use the <code>#</code> operator or <code>?</code> to be explicit about which field matters.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is the difference between Linux cron and Quartz / AWS cron?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Linux cron uses 5 fields (minute, hour, day-of-month, month, day-of-week). Quartz (used in Java frameworks and Spring) adds a seconds field at the beginning, making 6 fields minimum, plus an optional year field (7 fields total). Quartz also adds the L, W, and # operators for "last day", "nearest weekday", and "Nth weekday" respectively. AWS CloudWatch Events uses a 6-field format similar to Quartz but with some differences: it always runs in UTC, uses ? differently, and requires you to explicitly specify ? in one of the day fields when the other is set.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why does my cron job run twice in autumn or skip in spring?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">This is a Daylight Saving Time bug. When a local timezone changes its UTC offset, the clock either jumps forward (spring, skipping an hour) or falls back (autumn, repeating an hour). If your cron job is scheduled during that transition window, it will be skipped or duplicated. The fix is to run all cron jobs in UTC: add <code>CRON_TZ=UTC</code> to the top of your crontab in cronie, or set the timezone in your Kubernetes CronJob spec. Then calculate the correct UTC time manually, accounting for the UTC offset of your target timezone.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why isn't my cron job running even though the expression is correct?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">The most common cause is a PATH problem. The cron environment only has a minimal PATH (<code>/usr/bin:/bin</code>), so commands that work in your terminal may not be found by cron. Add <code>PATH=/usr/local/bin:/usr/bin:/bin</code> at the top of your crontab, or use absolute paths for every command in your cron lines. Also check: the script has execute permission (<code>chmod +x</code>), the cron daemon is running (<code>systemctl status cron</code>), you're editing the correct user's crontab (<code>crontab -l</code> vs <code>sudo crontab -l</code>), and output is redirected (<code>>> /tmp/job.log 2>&1</code>) so errors are visible.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How do I prevent a cron job from overlapping with itself?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Standard cron starts a new instance regardless of whether the previous one is still running. On Linux, the most reliable solution is to wrap your command with <code>flock</code>: <code>flock -n /tmp/myjob.lock /path/to/script.sh</code>. The <code>-n</code> flag means "skip this run if the lock is held" — no queuing, no waiting. On Ubuntu, the <code>run-one</code> package provides a simpler alternative. In Kubernetes, set <code>spec.concurrencyPolicy: Forbid</code> in your CronJob manifest.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">When should I use a systemd timer instead of cron?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Choose systemd timers when you need centralized logging (via <code>journalctl</code>), catch-up runs after a reboot (<code>Persistent=true</code>), service dependencies (<code>After=network.target</code>), second-level scheduling precision, or a random delay to avoid load spikes (<code>RandomizedDelaySec</code>). Stick with cron when you need portability across Unix systems without systemd, per-user scheduled tasks, or when you already have a large crontab that works well and doesn't need the extra features.</p>
+      </div>
+    </details>
+  </div>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/tools/cron-generator/" class="btn-cta"> Open the Cron Expression Generator validate &amp; preview next runs</a>
+  </div>
+
+  <!-- REFERENCES -->
+  <section class="references">
+    <h3>Sources and references</h3>
+    <ul class="ref-list">
+      <li><a href="https://www.man7.org/linux/man-pages/man5/crontab.5.html" target="_blank" rel="noopener noreferrer">crontab(5) — Linux man page</a> — the authoritative reference for cron field syntax, operators, and behavior on Linux.</li>
+      <li><a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html" target="_blank" rel="noopener noreferrer">POSIX crontab specification</a> — the standard that defines the OR behavior for day-of-month and day-of-week.</li>
+      <li><a href="https://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html" target="_blank" rel="noopener noreferrer">Quartz Scheduler — CronTrigger documentation</a> — complete reference for Quartz's 6/7-field format, L, W, and # operators.</li>
+      <li><a href="https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html" target="_blank" rel="noopener noreferrer">AWS EventBridge — Scheduled rules and cron expressions</a> — AWS-specific cron syntax and UTC requirements.</li>
+      <li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/" target="_blank" rel="noopener noreferrer">Kubernetes Documentation — CronJob</a> — CronJob spec including concurrencyPolicy and timeZone field (v1.25+).</li>
+      <li><a href="https://www.freedesktop.org/software/systemd/man/systemd.timer.html" target="_blank" rel="noopener noreferrer">systemd.timer — freedesktop.org</a> — official documentation for systemd timer units and OnCalendar syntax.</li>
+      <li><a href="https://www.man7.org/linux/man-pages/man1/flock.1.html" target="_blank" rel="noopener noreferrer">flock(1) — Linux man page</a> — file locking utility used to prevent cron job overlap.</li>
+      <li><a href="https://www.iana.org/time-zones" target="_blank" rel="noopener noreferrer">IANA Time Zone Database</a> — the canonical source for timezone names used in CRON_TZ and Kubernetes spec.timeZone.</li>
+    </ul>
+  </section>
+
+  <!-- RELATED TOOLS -->
+  <div class="related-tools">
+    <h3>Related DevToolbox tools</h3>
+    <ul>
+      <li><a href="/tools/cron-generator/">→ Cron Expression Generator</a> build and validate cron expressions visually, preview the next 10 run dates, supports Linux, Quartz, AWS modes</li>
+      <li><a href="/tools/unix-timestamp-converter/">→ Unix Timestamp Converter</a> convert the UTC timestamps from your cron logs to human-readable local time for debugging</li>
+      <li><a href="/tools/text-diff/">→ Text Diff</a> compare two versions of a crontab or systemd timer file before deploying changes to production</li>
+      
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a>  Free tools for developers.
+  <a href="/fr/blog/">Blog</a> | <a href="/tools/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
 </div>
 
 <script>
-    (function() {
-        const btns = document.querySelectorAll('.theme-btn');
-        btns.forEach(b => b.addEventListener('click', () => {
-            const t = b.dataset.theme;
-            document.body.classList.toggle('dark', t === 'dark');
-            btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
-            localStorage.setItem('theme', t);
-        }));
-        const saved = localStorage.getItem('theme') || 'light';
-        document.body.classList.toggle('dark', saved === 'dark');
-        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
-    })();
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Light';
+  }
+})();
 </script>
 </body>
 </html>
