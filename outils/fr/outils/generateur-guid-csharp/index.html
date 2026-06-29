@@ -1,425 +1,1006 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur GUID C# — Créez des GUID avec System.Guid.NewGuid()</title>
-    <meta name="description" content="Générez des GUID (UUID) en C# avec System.Guid.NewGuid(). Comprenez la différence GUID vs UUID, les options de format et copiez du code C# prêt à l'emploi. 100 % côté client.">
-    <meta name="keywords" content="générateur guid c#, guid vs uuid, .net uuid, system.guid, guid newguid, csharp uuid, générer guid c#, guid to string">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="DevToolbox">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/csharp-guid-generator/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/csharp-guid-generator/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Générateur de GUID C# — System.Guid.NewGuid(), lot, validateur et extraits de code</title>
+<meta name="description" content="Générez des GUID C# par lot, validez n'importe quel GUID, convertissez entre les 5 formats (D, N, B, P, X), copiez du code C# prêt à l'emploi pour EF Core, ASP.NET Core et Dapper. Gratuit, 100% côté client.">
+<meta name="keywords" content="générateur guid c#, générateur guid par lot, validateur guid, system.guid newguid, convertisseur format guid, csharp uuid, guid ef core, asp.net guid, guid vs uuid csharp, uuid v7 dotnet">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/csharp-guid-generator/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/csharp-guid-generator/">
 
-    <meta property="og:title" content="Générateur GUID C# — System.Guid.NewGuid()">
-    <meta property="og:description" content="Créez des GUID en C# avec System.Guid. Copiez le code C# et découvrez la différence entre GUID et UUID.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/">
-    <meta property="og:site_name" content="DevToolbox">
+<meta property="og:title" content="Générateur de GUID C# — Lot, validateur et extraits de code">
+<meta property="og:description" content="Générez des GUID par lot, validez n'importe quelle chaîne GUID, convertissez entre 5 formats, copiez du code pour EF Core et ASP.NET. Gratuit, côté client.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/">
+<meta property="og:site_name" content="DevToolbox">
+<meta property="og:image" content="https://www.devstoolsbox.dev/og/csharp-guid-generator-cover.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Générateur GUID C#">
-    <meta name="twitter:description" content="Générez des GUID en C# avec NewGuid(). Copiez le code et apprenez la différence GUID vs UUID.">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Générateur de GUID C# — Lot, validateur et extraits de code">
+<meta name="twitter:description" content="Générez, validez et convertissez des GUID C#. Copiez des extraits de code pour EF Core, ASP.NET Core et Dapper.">
+<meta name="twitter:image" content="https://www.devstoolsbox.dev/og/csharp-guid-generator-cover.webp">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebApplication",
+  "name":"Générateur de GUID C#",
+  "url":"https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/",
+  "description":"Générez des GUID par lot, validez n'importe quelle chaîne GUID, convertissez entre les 5 spécificateurs de format System.Guid (D, N, B, P, X) et copiez des extraits de code C# prêts à l'emploi pour EF Core, ASP.NET Core et Dapper. 100% côté client.",
+  "applicationCategory":"DeveloperApplication",
+  "operatingSystem":"Any",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/fr/a-propos/"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Un GUID est-il identique à un UUID en C# ?","acceptedAnswer":{"@type":"Answer","text":"Oui. GUID (Globally Unique Identifier) est le terme Microsoft pour le standard UUID défini dans la RFC 4122. System.Guid.NewGuid() génère un UUID v4 — 128 bits de données aléatoires cryptographiques. La représentation binaire est identique ; seule la convention de nommage diffère."}},
+    {"@type":"Question","name":"Quelle est la différence entre Guid.NewGuid() et new Guid() en C# ?","acceptedAnswer":{"@type":"Answer","text":"Guid.NewGuid() génère un nouvel UUID v4 aléatoire à chaque appel. new Guid() — le constructeur sans paramètre — renvoie Guid.Empty, soit 00000000-0000-0000-0000-000000000000. Utiliser new Guid() là où vous vouliez Guid.NewGuid() est l'un des bugs les plus courants en .NET, produisant des valeurs zéro identiques pour chaque enregistrement."}},
+    {"@type":"Question","name":"Comment convertir un GUID en chaîne sans tirets en C# ?","acceptedAnswer":{"@type":"Answer","text":"Appelez ToString(\"N\") sur l'instance Guid : string compact = id.ToString(\"N\"). Cela produit une chaîne hexadécimale minuscule de 32 caractères sans tirets. Pour la reconstituer, utilisez Guid.ParseExact(str, \"N\") pour une analyse non ambiguë."}},
+    {"@type":"Question","name":"Quel format de GUID utiliser dans une API JSON ?","acceptedAnswer":{"@type":"Answer","text":"Utilisez le format D (la forme avec tirets par défaut) pour toutes les réponses d'API JSON : id.ToString() ou id.ToString(\"D\"). C'est le format universellement reconnu que chaque bibliothèque JSON de chaque langage peut analyser sans configuration."}},
+    {"@type":"Question","name":"Comment utiliser un GUID comme clé primaire dans Entity Framework Core ?","acceptedAnswer":{"@type":"Answer","text":"Déclarez la propriété de clé primaire comme Guid. EF Core génère automatiquement un nouveau GUID à l'insertion en utilisant ValueGeneratedOnAdd(). Pour de meilleures performances SQL Server, utilisez HasDefaultValueSql(\"NEWSEQUENTIALID()\") pour générer des GUID séquentiels au niveau de la base de données et éviter la fragmentation d'index."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Outils","item":"https://www.devstoolsbox.dev/outils/"},
+    {"@type":"ListItem","position":3,"name":"Générateur de GUID C#","item":"https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/"}
+  ]
+}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-JRBW78KE29');
     </script>
-    <style>
-        :root {
-            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
-            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
-            --accent-green: #10b981; --accent-green-bg: #d1fae5;
-            --text: #0f172a; --text2: #374151; --text3: #64748b;
-            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
-            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
-        }
-        body.dark {
-            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
-            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
-            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
-            --shadow: 0 4px 16px rgba(0,0,0,0.3);
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
-            transition: background 0.3s, color 0.3s;
-        }
-        .container { max-width:960px; margin:0 auto; }
+    <!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-HlpMMJ_kCCYxp8OttpLql.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+  --code-bg:#0f172a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:900px;margin:0 auto}
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
-        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
-        .logo::before { content:'🛠️'; }
-        .header-right { display:flex; gap:8px; align-items:center; }
-        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
-        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
-        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+/* ── HEADER ── */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
-        .breadcrumb a { color:var(--primary); text-decoration:none; }
+/* ── BREADCRUMB ── */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
 
-        .seo-hook {
-            background:var(--primary-light); border-left:4px solid var(--primary);
-            padding:10px 16px; border-radius:8px; margin-bottom:20px;
-            font-size:0.92rem; color:var(--text2);
-        }
+/* ── TOOL CARD ── */
+.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:24px}
+h1{font-size:1.85rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:6px}
+.subhead{color:var(--text3);font-size:.88rem;margin-bottom:20px}
+h2{font-size:1.3rem;font-weight:800;margin-top:0;margin-bottom:14px;letter-spacing:-.015em}
 
-        .tool-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
-        }
-        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
-        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+/* ── SECTION TABS ── */
+.section-tabs{display:flex;gap:4px;background:var(--surface2);padding:3px;border-radius:10px;border:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
+.section-tab{padding:7px 16px;border-radius:7px;border:none;background:transparent;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--text3);transition:.15s;font-family:inherit;white-space:nowrap}
+.section-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
 
-        .display-box {
-            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
-        }
-        .guid-display {
-            flex:1; min-width:280px; padding:12px 16px;
-            font-family:var(--mono); font-size:1.1rem; font-weight:600;
-            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
-            color:var(--text); word-break:break-all;
-        }
-        .format-selector { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
-        .format-btn {
-            padding:8px 16px; border-radius:30px; font-weight:600; font-size:0.85rem;
-            border:1px solid var(--border); background:var(--surface); color:var(--text);
-            cursor:pointer; transition:all 0.2s; font-family:inherit;
-        }
-        .format-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
-        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
-        .btn {
-            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
-            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
-            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
-            font-family:inherit; white-space:nowrap;
-        }
-        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
-        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
-        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
-        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+/* ── GUID DISPLAY ── */
+.guid-display-wrap{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.guid-display{flex:1;min-width:260px;padding:13px 16px;font-family:var(--mono);font-size:1rem;font-weight:600;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);word-break:break-all;letter-spacing:.03em;transition:border .2s}
+.guid-display.fresh{border-color:var(--pass);animation:flashGreen .6s ease-out forwards}
+@keyframes flashGreen{0%{border-color:var(--pass)}100%{border-color:var(--border)}}
 
-        /* Article section */
-        .article-section {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
-        }
-        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
-        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
-        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
-        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
-        .article-section li { margin-bottom:6px; font-size:0.93rem; }
-        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
-        .article-section a { color:var(--primary); text-decoration:none; }
-        .article-section a:hover { text-decoration:underline; }
-        .faq-item { margin-bottom:20px; }
-        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+/* ── FORMAT PILLS ── */
+.format-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.fmt-btn{padding:6px 13px;border-radius:20px;font-size:.78rem;font-weight:700;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:.15s;font-family:var(--mono)}
+.fmt-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.fmt-btn:hover:not(.active){border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 
-        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
-        .footer a { color:var(--primary); text-decoration:none; }
-        .toast-msg {
-            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
-            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
-            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
-        }
-        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+/* ── OPTIONS ROW ── */
+.options-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.sel{padding:7px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:.8rem;cursor:pointer;outline:none;transition:border .2s}
+.sel:focus{border-color:var(--primary)}
+label.opt-label{font-size:.78rem;color:var(--text3);font-weight:600}
 
-        @media (max-width:640px) {
-            body { padding:12px; }
-            h1 { font-size:1.5rem; }
-            .tool-card, .article-section { padding:18px; }
-            .guid-display { font-size:0.95rem; }
-        }
-    </style>
+/* ── BUTTONS ── */
+.btn{padding:9px 18px;border-radius:40px;font-weight:600;font-size:.83rem;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap}
+.btn:hover{background:var(--surface2);transform:translateY(-1px)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-sm{padding:6px 12px;font-size:.76rem}
+.btn-ghost{background:transparent;border:none;color:var(--text3);padding:6px 10px}
+.btn-ghost:hover{color:var(--primary);background:var(--primary-light)}
+
+/* ── BATCH OUTPUT ── */
+.batch-list{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);max-height:320px;overflow-y:auto}
+.batch-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:.5px solid var(--border);font-family:var(--mono);font-size:.82rem}
+.batch-item:last-child{border-bottom:none}
+.batch-item:nth-child(even){background:var(--surface2)}
+.batch-num{color:var(--text3);min-width:26px;font-size:.72rem}
+.batch-val{flex:1;color:var(--text);word-break:break-all}
+.batch-copy{font-size:.7rem;padding:3px 8px;border-radius:12px;border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--text3);white-space:nowrap;font-family:inherit;transition:.15s}
+.batch-copy:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ── VALIDATOR ── */
+.validator-input{width:100%;padding:12px 14px;font-family:var(--mono);font-size:.9rem;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);outline:none;transition:border .2s;margin-bottom:10px}
+.validator-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.validator-input.valid{border-color:var(--pass)}
+.validator-input.invalid{border-color:var(--fail)}
+.validator-result{padding:12px 16px;border-radius:10px;font-size:.85rem;margin-bottom:10px;display:none}
+.validator-result.show{display:block}
+.validator-result.ok{background:var(--pass-bg);border:1px solid #6ee7b7;color:#065f46}
+.validator-result.err{background:var(--fail-bg);border:1px solid #fca5a5;color:#991b1b}
+body.dark .validator-result.ok{color:#6ee7b7}
+body.dark .validator-result.err{color:#fca5a5}
+.validator-formats{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.vfmt-chip{padding:4px 10px;border-radius:16px;font-size:.76rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);font-family:var(--mono);transition:.15s}
+.vfmt-chip:hover{border-color:var(--primary);color:var(--primary)}
+.vfmt-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── HISTORY ── */
+.history-list{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);max-height:260px;overflow-y:auto}
+.history-empty{padding:20px;text-align:center;color:var(--text3);font-size:.85rem}
+.history-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:.5px solid var(--border);font-family:var(--mono);font-size:.8rem}
+.history-item:last-child{border-bottom:none}
+.history-item:hover{background:var(--surface2)}
+.history-val{flex:1;color:var(--text);word-break:break-all}
+.history-time{color:var(--text3);font-size:.7rem;min-width:50px;text-align:right}
+
+/* ── CODE SNIPPETS ── */
+.snippet-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.snip-tab{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);font-size:.76rem;font-weight:600;cursor:pointer;color:var(--text3);font-family:inherit;transition:.15s}
+.snip-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.snippet-code{position:relative}
+.snippet-code pre{background:var(--code-bg);color:var(--code-color);padding:16px;border-radius:10px;overflow-x:auto;font-family:var(--mono);font-size:.79rem;line-height:1.65;margin:0}
+.snippet-copy{position:absolute;top:8px;right:8px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:var(--code-color);font-size:.72rem;cursor:pointer;font-family:inherit;transition:.15s}
+.snippet-copy:hover{background:rgba(255,255,255,.2)}
+
+/* ── ARTICLE SECTION ── */
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:24px}
+.article-card h2{font-size:1.25rem;font-weight:800;margin-top:28px;margin-bottom:10px;letter-spacing:-.015em;scroll-margin-top:24px}
+.article-card h2:first-of-type{margin-top:0}
+.article-card h3{font-size:1rem;font-weight:700;margin-top:18px;margin-bottom:6px}
+.article-card p{color:var(--text2);margin-bottom:12px;font-size:.92rem;line-height:1.8}
+.article-card ul,.article-card ol{margin-left:20px;margin-bottom:12px;color:var(--text2)}
+.article-card li{font-size:.92rem;margin-bottom:5px;line-height:1.7}
+.article-card code{background:var(--code-bg);color:var(--code-color);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.87em}
+.article-card a{color:var(--primary)}
+.article-card a:hover{text-decoration:underline}
+.article-card strong{color:var(--text)}
+
+.plain-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0;border-radius:10px;overflow:hidden}
+.plain-table th{background:var(--surface2);padding:9px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)}
+.plain-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.plain-table tr:last-child td{border-bottom:none}
+.plain-table code{background:var(--code-bg);color:var(--code-color);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:.85em}
+
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:11px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.85rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:14px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 11px;color:var(--text2);font-size:.88rem;line-height:1.8}
+
+.callout{padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0;font-size:.88rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.ref-list li{font-size:.8rem;color:var(--text3);display:flex;gap:7px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0}
+.ref-list a{color:var(--primary)}
+
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:16px 18px;margin-top:20px}
+.related-tools h3{font-size:.82rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.related-tools li a{font-size:.85rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+/* ── KBD SHORTCUT HINT ── */
+.kbd-hint{font-size:.72rem;color:var(--text3);display:flex;align-items:center;gap:4px}
+kbd{background:var(--surface2);border:1px solid var(--border);border-bottom:2px solid var(--border);border-radius:4px;padding:1px 5px;font-size:.75rem;font-family:var(--mono);color:var(--text2)}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--bg);padding:9px 20px;border-radius:40px;font-size:.84rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:1000}
+.toast.show{opacity:1}
+
+@media(max-width:600px){
+  body{padding:12px}
+  h1{font-size:1.5rem}
+  .tool-card,.article-card{padding:18px}
+  .guid-display{font-size:.85rem}
+}
+</style>
 </head>
-<body id="rootBody">
-<div class="container">
-    <header class="header">
-        <a href="/fr/" class="logo">DevToolbox</a>
-        <div class="header-right">
-            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
-                <span id="themeIcon">&#9790;</span>
-                <span id="themeLabel">Sombre</span>
-            </button>
-            <div class="lang-switch">
-                <a href="/tools/csharp-guid-generator/" class="lang-btn">EN</a>
-                <a href="/fr/outils/generateur-guid-csharp/" class="lang-btn active" aria-current="page">FR</a>
-            </div>
-        </div>
-    </header>
+<body>
+<div class="page">
 
-    <div class="breadcrumb">
-        <a href="/fr/">Accueil</a> &rsaquo;
-        <a href="/fr/outils/">Outils</a> &rsaquo;
-        <span>Générateur GUID C#</span>
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/csharp-guid-generator/" class="pill-btn">EN</a>
+      <a href="/fr/outils/generateur-guid-csharp/" class="pill-btn active">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Fil d'Ariane">
+  <ol>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/outils/">Outils</a></li>
+    <li aria-current="page">Générateur de GUID C#</li>
+  </ol>
+</nav>
+
+<main>
+<!-- ══════════════════════════════════════
+     CARTE OUTIL
+══════════════════════════════════════ -->
+<div class="tool-card">
+  <h1>Générateur de GUID C#</h1>
+  <p class="subhead">Générez des GUID avec <code>System.Guid.NewGuid()</code>, générez par lot jusqu'à 100 à la fois, validez n'importe quelle chaîne GUID et copiez du code C# prêt à l'emploi. 100% côté client.</p>
+
+  <!-- ONGLETS DE SECTION -->
+  <div class="section-tabs" id="sectionTabs">
+    <button class="section-tab active" data-section="generate">⚡ Générer</button>
+    <button class="section-tab" data-section="batch">📋 Lot</button>
+    <button class="section-tab" data-section="validate">✅ Valider</button>
+    <button class="section-tab" data-section="history">🕐 Historique</button>
+    <button class="section-tab" data-section="snippets">📄 Extraits de code</button>
+  </div>
+
+  <!-- ── SECTION : GÉNÉRER ── -->
+  <div id="sec-generate">
+    <div class="guid-display-wrap">
+      <div class="guid-display" id="guidDisplay" aria-label="GUID généré" aria-live="polite">
+        Cliquez sur Générer ou appuyez sur G
+      </div>
+      <button class="btn btn-sm" id="copyGuidBtn" aria-label="Copier le GUID">Copier</button>
     </div>
 
-    <div class="seo-hook">
-        Besoin d’un <strong>générateur GUID en C#</strong> ? Utilisez <code>System.Guid.NewGuid()</code> pour créer des UUID. Comprenez <strong>GUID vs UUID</strong> et copiez du code C# prêt à l’emploi. Aucune donnée ne quitte votre navigateur.
+    <!-- SÉLECTEUR DE FORMAT -->
+    <div class="format-row" role="group" aria-label="Format">
+      <button class="fmt-btn active" data-format="D" title="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">D · défaut</button>
+      <button class="fmt-btn" data-format="N" title="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">N · sans tirets</button>
+      <button class="fmt-btn" data-format="B" title="{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}">B · accolades</button>
+      <button class="fmt-btn" data-format="P" title="(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)">P · parenthèses</button>
+      <button class="fmt-btn" data-format="X" title="{0x...,0x...,0x...,{...}}">X · struct hex</button>
     </div>
 
-    <main>
-        <div class="tool-card">
-            <h1>Générateur GUID C# (System.Guid)</h1>
-            <div class="subhead">Générez des GUID directement dans votre navigateur avec <code>System.Guid.NewGuid()</code>. Choisissez le format d'affichage (avec tirets, sans tirets, accolades, etc.) et copiez le code C# correspondant pour votre projet.</div>
+    <!-- OPTIONS -->
+    <div class="options-row">
+      <button class="btn btn-primary" id="generateBtn">⚡ Générer</button>
 
-            <div class="display-box">
-                <div class="guid-display" id="guidDisplay" aria-label="GUID généré">550e8400-e29b-41d4-a716-446655440000</div>
-                <button class="btn btn-sm" data-copy="guidDisplay" aria-label="Copier le GUID">Copier</button>
-            </div>
+      <label class="opt-label" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="uppercaseCheck" style="accent-color:var(--primary)"> Majuscules
+      </label>
 
-            <div class="format-selector">
-                <button class="format-btn active" data-format="D">D (défaut)</button>
-                <button class="format-btn" data-format="N">N (sans tirets)</button>
-                <button class="format-btn" data-format="B">B (accolades)</button>
-                <button class="format-btn" data-format="P">P (parenthèses)</button>
-                <button class="format-btn" data-format="X">X (hex)</button>
-            </div>
+      <span class="kbd-hint">Raccourci : <kbd>G</kbd></span>
+    </div>
 
-            <div class="options-row">
-                <button class="btn btn-primary" id="generateBtn">Générer un GUID</button>
-                <button class="btn btn-outline btn-sm" id="copyCodeBtn">Copier le code C#</button>
-                <button class="btn btn-outline btn-sm" id="shareBtn">Partager</button>
-            </div>
-        </div>
+    <!-- DESCRIPTION DU FORMAT -->
+    <div id="formatDesc" style="font-size:.8rem;color:var(--text3);margin-bottom:4px;font-family:var(--mono);min-height:18px"></div>
+  </div>
 
-        <section class="article-section" aria-label="Documentation">
-            <h2>Comment générer un GUID en C# avec System.Guid</h2>
-            <p>
-                En .NET, un <strong>GUID</strong> (Globally Unique Identifier) est l’implémentation Microsoft du standard UUID. La structure <code>System.Guid</code> propose plusieurs méthodes pour créer des identifiants uniques.
-            </p>
-            <ul>
-                <li><strong><code>Guid.NewGuid()</code></strong> — génère un UUID v4 aléatoire à l’aide d’un générateur de nombres pseudo‑aléatoires cryptographique.</li>
-                <li><strong><code>Guid.Parse(string)</code></strong> — analyse une représentation textuelle d’un GUID.</li>
-                <li><strong><code>Guid.Empty</code></strong> — instance en lecture seule d’un GUID ne contenant que des zéros.</li>
-            </ul>
-            <p>
-                Notre outil illustre l’utilisation la plus courante : <code>Guid.NewGuid()</code>. Vous pouvez également explorer les différents formats de sortie qui correspondent aux spécificateurs de la méthode <code>ToString()</code>.
-            </p>
+  <!-- ── SECTION : LOT ── -->
+  <div id="sec-batch" style="display:none">
+    <div class="options-row">
+      <label class="opt-label">Nombre</label>
+      <select class="sel" id="batchCount">
+        <option value="5">5 GUIDs</option>
+        <option value="10" selected>10 GUIDs</option>
+        <option value="25">25 GUIDs</option>
+        <option value="50">50 GUIDs</option>
+        <option value="100">100 GUIDs</option>
+      </select>
+      <label class="opt-label" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="batchUppercase" style="accent-color:var(--primary)"> Majuscules
+      </label>
+      <button class="btn btn-primary" id="batchGenBtn">⚡ Générer le lot</button>
+      <button class="btn btn-sm" id="copyAllBtn" style="display:none">📋 Tout copier</button>
+    </div>
+    <!-- Réutilisation de la ligne de format pour le lot -->
+    <div class="format-row" id="batchFormatRow" role="group" aria-label="Format du lot">
+      <button class="fmt-btn active" data-bfmt="D">D</button>
+      <button class="fmt-btn" data-bfmt="N">N</button>
+      <button class="fmt-btn" data-bfmt="B">B</button>
+      <button class="fmt-btn" data-bfmt="P">P</button>
+      <button class="fmt-btn" data-bfmt="X">X</button>
+    </div>
+    <div id="batchOutput"></div>
+  </div>
 
-            <h3>Exemple : créer un nouveau GUID</h3>
-            <pre><code>using System;
+  <!-- ── SECTION : VALIDER ── -->
+  <div id="sec-validate" style="display:none">
+    <p style="font-size:.85rem;color:var(--text3);margin-bottom:10px">Collez n'importe quelle chaîne GUID pour vérifier si elle est valide et détecter son format. Vous pouvez également la convertir vers un autre format.</p>
+    <input type="text" class="validator-input" id="validatorInput"
+      placeholder="Collez un GUID — ex. {3f2504e0-4f89-11d3-9a0c-0305e82c3301}"
+      spellcheck="false" autocomplete="off" aria-label="GUID à valider">
+    <div class="validator-result" id="validatorResult"></div>
+    <div id="validatorFormats" style="display:none">
+      <p style="font-size:.8rem;color:var(--text3);margin-bottom:6px;margin-top:4px">Convertir au format :</p>
+      <div class="validator-formats" id="vfmtBtns"></div>
+      <div style="margin-top:8px" id="convertedOutput"></div>
+    </div>
+  </div>
 
-Guid id = Guid.NewGuid();
-Console.WriteLine(id.ToString()); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
+  <!-- ── SECTION : HISTORIQUE ── -->
+  <div id="sec-history" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <p style="font-size:.85rem;color:var(--text3);margin:0">20 derniers GUIDs générés cette session.</p>
+      <button class="btn btn-sm btn-ghost" id="clearHistoryBtn">Effacer</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">Aucun GUID généré pour le moment. Utilisez l'onglet Générer ou Lot pour commencer.</div>
+    </div>
+  </div>
 
-            <h3>Spécificateurs de format GUID</h3>
-            <p>La méthode <code>ToString()</code> accepte un caractère de format :</p>
-            <ul>
-                <li><strong>D</strong> (défaut) — 32 chiffres hexadécimaux séparés par des tirets : <code>00000000-0000-0000-0000-000000000000</code></li>
-                <li><strong>N</strong> — 32 chiffres hexadécimaux sans tirets : <code>00000000000000000000000000000000</code></li>
-                <li><strong>B</strong> — entre accolades : <code>{00000000-0000-0000-0000-000000000000}</code></li>
-                <li><strong>P</strong> — entre parenthèses : <code>(00000000-0000-0000-0000-000000000000)</code></li>
-                <li><strong>X</strong> — quatre valeurs hexadécimales entre accolades : <code>{0x00000000,0x0000,0x0000,{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}}</code></li>
-            </ul>
+  <!-- ── SECTION : EXTRAITS DE CODE ── -->
+  <div id="sec-snippets" style="display:none">
+    <p style="font-size:.85rem;color:var(--text3);margin-bottom:12px">Extraits de code C# prêts à coller. Le GUID affiché utilise votre valeur générée actuelle.</p>
+    <div class="snippet-tabs" id="snippetTabs">
+      <button class="snip-tab active" data-snip="basic">Base</button>
+      <button class="snip-tab" data-snip="efcore">EF Core</button>
+      <button class="snip-tab" data-snip="aspnet">ASP.NET Core</button>
+      <button class="snip-tab" data-snip="dapper">Dapper</button>
+      <button class="snip-tab" data-snip="guard">Clause de garde</button>
+    </div>
+    <div class="snippet-code" id="snippetCode">
+      <pre><code id="snippetContent">// Cliquez sur un onglet ci-dessus pour voir l'extrait</code></pre>
+      <button class="snippet-copy" id="snippetCopyBtn">Copier</button>
+    </div>
+  </div>
 
-            <h3>GUID vs UUID — quelle est la différence ?</h3>
-            <p>
-                <strong>GUID</strong> et <strong>UUID</strong> désignent la même chose : un identifiant de 128 bits standardisé par la RFC 4122. Microsoft utilise le terme GUID tandis que le reste de l’industrie emploie UUID. Ils sont interchangeables. Un GUID généré par <code>System.Guid.NewGuid()</code> est un UUID v4.
-            </p>
+</div><!-- /tool-card -->
 
-            <h3>Foire Aux Questions</h3>
-            <div class="faq-item">
-                <div class="faq-question">Un GUID est‑il identique à un UUID ?</div>
-                <p>Oui, ils font référence au même standard. GUID est le terme de Microsoft pour UUID. Tous deux sont des identifiants 128 bits conformes à la RFC 4122.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">Quelle version d’UUID produit <code>Guid.NewGuid()</code> ?</div>
-                <p>Elle génère un UUID v4, entièrement aléatoire (à l’exception des bits de version et de variante).</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">Puis‑je convertir un GUID en chaîne sans tirets ?</div>
-                <p>Oui, utilisez <code>id.ToString("N")</code> pour obtenir une chaîne hexadécimale de 32 caractères sans tirets.</p>
-            </div>
+<!-- ══════════════════════════════════════
+     ARTICLE / DOCUMENTATION
+══════════════════════════════════════ -->
+<section class="article-card">
+  <h2>System.Guid en un coup d'œil — chaque méthode dont vous avez besoin</h2>
 
-            <h3>Autres outils utiles</h3>
-            <ul>
-                <li><a href="/fr/outils/generateur-uuid/">Générateur UUID / ULID</a> — toutes les versions d’UUID et ULID en lot</li>
-                <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a> — UUID triables dans le temps</li>
-                <li><a href="/fr/outils/python-uuid-to-string/">Python UUID to String</a> — convertisseur de formats pour développeurs Python</li>
-                <li><a href="/fr/outils/generateur-nanoid/">Générateur NanoID</a> — identifiants courts et compatibles URL</li>
-            </ul>
-        </section>
-    </main>
+  <div style="overflow-x:auto">
+  <table class="plain-table">
+    <thead><tr><th>Méthode / Propriété</th><th>Renvoie</th><th>Quand l'utiliser</th></tr></thead>
+    <tbody>
+      <tr><td><code>Guid.NewGuid()</code></td><td>Nouvel UUID v4 aléatoire</td><td>Chaque fois que vous avez besoin d'un identifiant unique</td></tr>
+      <tr><td><code>new Guid()</code></td><td><code>Guid.Empty</code> (tout à zéro)</td><td>⚠️ Ne jamais utiliser comme véritable ID — c'est le bug GUID n°1 en .NET</td></tr>
+      <tr><td><code>Guid.Empty</code></td><td><code>00000000-0000-…</code></td><td>Valeur sentinelle : vérifiez <code>if (id == Guid.Empty)</code></td></tr>
+      <tr><td><code>Guid.Parse(str)</code></td><td>Guid</td><td>Analyser une chaîne connue valide — lève une exception sur entrée invalide</td></tr>
+      <tr><td><code>Guid.TryParse(str, out id)</code></td><td>bool + Guid</td><td>Analyser une entrée utilisateur ou des données d'API — ne lève jamais d'exception</td></tr>
+      <tr><td><code>Guid.ParseExact(str,"N")</code></td><td>Guid</td><td>Analyser un format spécifique — échoue rapidement avec une erreur claire</td></tr>
+      <tr><td><code>Guid.CreateVersion7()</code></td><td>UUID v7 (monotone)</td><td>.NET 9+ — UUID triés dans le temps pour les clés primaires de base de données</td></tr>
+    </tbody>
+  </table>
+  </div>
 
-    <footer class="footer">
-        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
-    </footer>
+  <h2>Les 5 spécificateurs de format — lequel utiliser et où</h2>
+
+  <div style="overflow-x:auto">
+  <table class="plain-table">
+    <thead><tr><th>Format</th><th>Exemple de sortie</th><th>Longueur</th><th>Utiliser quand</th></tr></thead>
+    <tbody>
+      <tr><td><code>D</code> (défaut)</td><td><code>3f2504e0-4f89-11d3-9a0c-…</code></td><td>36</td><td>APIs JSON, bases de données, logs, partout où un humain le lit</td></tr>
+      <tr><td><code>N</code></td><td><code>3f2504e04f8911d39a0c…</code></td><td>32</td><td>Slugs d'URL, colonnes CHAR(32), stockage compact</td></tr>
+      <tr><td><code>B</code></td><td><code>{3f2504e0-4f89-11d3-…}</code></td><td>38</td><td>Entrées du Registre Windows, identifiants COM, Win32 hérité</td></tr>
+      <tr><td><code>P</code></td><td><code>(3f2504e0-4f89-11d3-…)</code></td><td>38</td><td>Uniquement pour certains outils Microsoft hérités</td></tr>
+      <tr><td><code>X</code></td><td><code>{0x3f2504e0,0x4f89,…}</code></td><td>68</td><td>Littéraux de struct C++, interop native P/Invoke</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout-pass">
+    <strong>Règle générale :</strong> Utilisez le format <code>D</code> pour tout, sauf si vous avez une raison spécifique de ne pas le faire. C'est la forme universellement reconnue que chaque bibliothèque JSON, chaque pilote de base de données et chaque développeur peut analyser sans configuration.
+  </div>
+
+  <h2>L'erreur GUID la plus courante en .NET</h2>
+  <p>Ces deux lignes semblent presque identiques lors d'une revue de code. L'une d'elles est un bug critique :</p>
+  <pre style="background:var(--code-bg);color:var(--code-color);padding:14px;border-radius:10px;font-family:var(--mono);font-size:.8rem;overflow-x:auto;margin:10px 0"><code>// ❌ FAUX — produit 00000000-0000-0000-0000-000000000000 à chaque fois
+public Guid Id { get; set; } = new Guid();
+
+// ✅ CORRECT — génère un nouvel UUID v4 unique
+public Guid Id { get; set; } = Guid.NewGuid();</code></pre>
+  <p><code>new Guid()</code> appelle le constructeur sans paramètre, qui initialise chaque bit à zéro — identique à <code>Guid.Empty</code> et <code>default(Guid)</code>. Chaque entité que vous créez reçoit la même clé primaire tout à zéro. La première insertion en base de données réussit. Toutes les suivantes rencontrent une violation de contrainte de clé primaire — ou pire, écrasent silencieusement le premier enregistrement si votre gestion d'erreurs n'est pas stricte.</p>
+
+  <h2>Foire aux questions</h2>
+  <div>
+    <details class="faq-item">
+      <summary>Un GUID est-il identique à un UUID en C# ?</summary>
+      <div class="faq-answer">Oui. GUID (Globally Unique Identifier) est le terme Microsoft pour le standard UUID défini dans la RFC 4122. <code>System.Guid.NewGuid()</code> génère un UUID v4 — 128 bits de données aléatoires cryptographiques. La disposition binaire est identique ; seule la convention de nommage diffère entre l'écosystème .NET et le reste de l'industrie du logiciel.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Quelle est la différence entre Guid.NewGuid() et new Guid() ?</summary>
+      <div class="faq-answer"><code>Guid.NewGuid()</code> génère un UUID v4 aléatoire cryptographiquement unique à chaque appel. <code>new Guid()</code> — le constructeur sans paramètre — renvoie <code>Guid.Empty</code>, soit <code>00000000-0000-0000-0000-000000000000</code>. Chaque appel produit la même valeur tout à zéro. C'est le bug lié aux GUID le plus courant en .NET : utiliser <code>new Guid()</code> là où vous vouliez <code>Guid.NewGuid()</code>, provoquant des conflits de clé primaire ou des identifiants en double dans chaque enregistrement.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Comment convertir un GUID en chaîne sans tirets ?</summary>
+      <div class="faq-answer">Appelez <code>id.ToString("N")</code>. Cela produit une chaîne hexadécimale minuscule de 32 caractères sans séparateur : <code>3f2504e04f8911d39a0c0305e82c3301</code>. Pour la reconstituer, utilisez <code>Guid.ParseExact(str, "N")</code> — spécifier le format explicitement empêche toute ambiguïté et échoue rapidement avec une <code>FormatException</code> claire si l'entrée est incorrecte. L'onglet Valider de cet outil convertit également entre les formats de manière interactive.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Quel format de GUID utiliser dans une API REST JSON ?</summary>
+      <div class="faq-answer">Format <code>D</code> — la forme avec tirets par défaut. Appelez <code>id.ToString()</code> (sans argument) ou <code>id.ToString("D")</code>. <code>System.Text.Json</code> comme <code>Newtonsoft.Json</code> sérialisent les valeurs Guid au format D par défaut. C'est le format que chaque client HTTP de chaque langage peut analyser sans configuration supplémentaire. Utilisez le format <code>N</code> (sans tirets) uniquement pour intégrer un GUID dans un chemin d'URL afin d'éviter l'encodage des tirets.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Comment utiliser un GUID comme clé primaire dans Entity Framework Core ?</summary>
+      <div class="faq-answer">Déclarez la propriété de clé comme <code>Guid</code>. EF Core génère automatiquement un nouveau GUID à l'insertion en utilisant <code>ValueGeneratedOnAdd()</code> — aucune configuration requise. Pour SQL Server, envisagez d'utiliser <code>HasDefaultValueSql("NEWSEQUENTIALID()")</code> pour générer des GUID séquentiels au niveau de la base de données, ce qui élimine la fragmentation d'index B-tree causée par les valeurs UUID v4 aléatoires. Sur .NET 9+, <code>Guid.CreateVersion7()</code> fournit des UUID séquentiels dans le code applicatif sans configuration côté base de données.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Dois-je utiliser Guid.NewGuid() ou UUID v7 pour les clés primaires en 2026 ?</summary>
+      <div class="faq-answer">Pour les clés primaires de base de données, UUID v7 est le meilleur choix : son préfixe de timestamp en millisecondes maintient les valeurs en ordre croissant, ce qui élimine la fragmentation d'index B-tree et réduit de moitié la taille de l'index sur SQL Server. <code>Guid.CreateVersion7()</code> est intégré à .NET 9+. Pour les jetons, les identifiants de session et tout identifiant exposé à l'extérieur, utilisez <code>Guid.NewGuid()</code> (UUID v4) — il ne révèle aucune information temporelle, ce qui le rend plus sûr pour les contextes sensibles à la sécurité.</div>
+    </details>
+  </div>
+
+  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+    <h3 style="font-size:.82rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Références</h3>
+    <ul class="ref-list">
+      <li><a href="https://learn.microsoft.com/fr-fr/dotnet/api/system.guid" target="_blank" rel="noopener">Microsoft Docs — Structure System.Guid</a> — référence complète de l'API pour toutes les méthodes et spécificateurs de format.</li>
+      <li><a href="https://datatracker.ietf.org/doc/html/rfc9562" target="_blank" rel="noopener">RFC 9562 — Universally Unique IDentifiers (2024)</a> — le standard définissant UUID v7.</li>
+      <li><a href="https://datatracker.ietf.org/doc/html/rfc4122" target="_blank" rel="noopener">RFC 4122 — UUID URN Namespace (2005)</a> — le standard original que System.Guid implémente.</li>
+      <li><a href="https://learn.microsoft.com/fr-fr/ef/core/modeling/generated-properties" target="_blank" rel="noopener">EF Core Docs — Valeurs générées</a> — configuration de clé primaire GUID et ValueGeneratedOnAdd.</li>
+      <li><a href="https://learn.microsoft.com/fr-fr/dotnet/api/system.guid.createversion7" target="_blank" rel="noopener">Microsoft Docs — Guid.CreateVersion7() (.NET 9)</a> — générateur UUID v7 intégré.</li>
+    </ul>
+  </div>
+
+  <div class="related-tools">
+    <h3>Outils associés</h3>
+    <ul>
+      <li><a href="/fr/outils/generateur-uuid/">→ Générateur UUID / ULID</a> — toutes les versions d'UUID (v1, v4, v5, v7) et ULID en lot</li>
+      <li><a href="/fr/outils/generateur-uuid-v7/">→ Générateur UUID v7</a> — UUID monotones triés dans le temps pour les clés primaires de base de données</li>
+      <li><a href="/fr/outils/formateur-json/">→ Formateur JSON</a> — inspectez les réponses d'API contenant des GUID</li>
+      <li><a href="/fr/blog/guide-guid-csharp/">→ Guide GUID C#</a> — article approfondi : EF Core, ASP.NET Core, pièges SQL Server, UUID v7</li>
+      <li><a href="/fr/blog/uuid-v4-vs-uuid-v7/">→ UUID v4 vs v7 : Benchmarks à 100M</a> — comparaison de performances avec données de benchmark réelles</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour les développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/a-propos/">À propos</a> | <a href="/fr/outils/contact/">Contact</a></p>
+</footer>
 </div>
 
-<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
-
-<!-- JSON-LD -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Générateur GUID C#",
-  "url": "https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/",
-  "description": "Générez des GUID (UUID) en C# avec System.Guid.NewGuid(). 100 % côté client.",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Any",
-  "browserRequirements": "Nécessite JavaScript.",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    { "@type": "Question", "name": "Un GUID est-il identique à un UUID ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, ils font référence au même standard. GUID est le terme de Microsoft pour UUID." } },
-    { "@type": "Question", "name": "Quelle version d'UUID produit Guid.NewGuid() ?", "acceptedAnswer": { "@type": "Answer", "text": "Elle génère un UUID v4, entièrement aléatoire." } }
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
-    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
-    { "@type": "ListItem", "position": 3, "name": "Générateur GUID C#", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-guid-csharp/" }
-  ]
-}
-</script>
+<div class="toast" id="toast"></div>
 
 <script>
-(function(){
-    /* ── Thème ── */
-    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
-    let currentTheme = savedTheme;
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon   = document.getElementById('themeIcon');
-    const themeLabel  = document.getElementById('themeLabel');
-    function applyTheme(t) {
-        document.body.classList.remove('dark');
-        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
-        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
-        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
-        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+(function () {
+'use strict';
+
+/* ── THÈME ── */
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Clair' : '🌙 Sombre';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+window.toggleTheme = toggleTheme;
+(function () {
+  const s = localStorage.getItem('devtoolbox-theme') ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (s === 'dark') { document.body.classList.add('dark'); document.getElementById('themeBtn').textContent = '☀️ Clair'; }
+})();
+
+/* ── TOAST ── */
+function toast(msg, dur = 1800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), dur);
+}
+
+async function copyText(text, label = 'Copié !') {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('✅ ' + label);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('✅ ' + label);
+  }
+}
+
+/* ── GÉNÉRATION UUID ── */
+function generateUUIDv4() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+/* ── FORMATAGE UUID ── */
+function formatUUID(uuid, format, uppercase) {
+  const lower = uuid.toLowerCase();
+  const hex = lower.replace(/-/g, '');
+  let result;
+  switch (format) {
+    case 'D': result = lower; break;
+    case 'N': result = hex; break;
+    case 'B': result = `{${lower}}`; break;
+    case 'P': result = `(${lower})`; break;
+    case 'X': {
+      const a = hex.slice(0, 8), b = hex.slice(8, 12), c = hex.slice(12, 16);
+      const bytes = hex.slice(16).match(/.{2}/g).map(x => `0x${x}`).join(',');
+      result = `{0x${a},0x${b},0x${c},{${bytes}}}`;
+      break;
     }
-    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
-    applyTheme(savedTheme);
+    default: result = lower;
+  }
+  return uppercase ? result.toUpperCase() : result;
+}
 
-    /* ── Toast ── */
-    function showToast(msg) {
-        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
-        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
-    }
+/* ── VALIDATION GUID ── */
+function detectGuidFormat(str) {
+  const s = str.trim();
+  if (/^\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}$/i.test(s)) return { valid: true, format: 'B' };
+  if (/^\([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\)$/i.test(s)) return { valid: true, format: 'P' };
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) return { valid: true, format: 'D' };
+  if (/^[0-9a-f]{32}$/i.test(s)) return { valid: true, format: 'N' };
+  if (/^\{0x[0-9a-f]{8},0x[0-9a-f]{4},0x[0-9a-f]{4},\{/i.test(s)) return { valid: true, format: 'X' };
+  return { valid: false, format: null };
+}
 
-    // Génération UUID v4 (identique à Guid.NewGuid)
-    function generateUUIDv4() {
-        if (crypto.randomUUID) {
-            return crypto.randomUUID();
-        }
-        // Fallback pour les anciens navigateurs
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-
-    const guidDisplay = document.getElementById('guidDisplay');
-    const formatBtns = document.querySelectorAll('.format-btn');
-    let currentFormat = 'D';
-    let currentUUID = generateUUIDv4();
-
-    function formatUUID(uuid, format) {
-        const hex = uuid.replace(/-/g,'');
-        switch(format) {
-            case 'D': return uuid.toLowerCase();
-            case 'N': return hex;
-            case 'B': return '{' + uuid.toLowerCase() + '}';
-            case 'P': return '(' + uuid.toLowerCase() + ')';
-            case 'X': {
-                const a = hex.substring(0,8);
-                const b = hex.substring(8,12);
-                const c = hex.substring(12,16);
-                const d1 = hex.substring(16,18);
-                const d2 = hex.substring(18,20);
-                const d3 = hex.substring(20,22);
-                const d4 = hex.substring(22,24);
-                const d5 = hex.substring(24,26);
-                const d6 = hex.substring(26,28);
-                const d7 = hex.substring(28,30);
-                const d8 = hex.substring(30,32);
-                return `{0x${a},0x${b},0x${c},{0x${d1},0x${d2},0x${d3},0x${d4},0x${d5},0x${d6},0x${d7},0x${d8}}}`;
-            }
-            default: return uuid.toLowerCase();
-        }
-    }
-
-    function updateDisplay() {
-        guidDisplay.textContent = formatUUID(currentUUID, currentFormat);
-    }
-
-    formatBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            formatBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFormat = btn.dataset.format;
-            updateDisplay();
-        });
+function extractHex(str) {
+  const s = str.trim();
+  if (/^\{0x/i.test(s)) {
+    const matches = s.match(/0x([0-9a-f]{2,8})/gi) || [];
+    let hex = '';
+    matches.forEach((m, i) => {
+      const val = m.slice(2);
+      if (i === 0) hex += val.padStart(8, '0');
+      else if (i === 1) hex += val.padStart(4, '0');
+      else if (i === 2) hex += val.padStart(4, '0');
+      else hex += val.padStart(2, '0');
     });
+    return hex.slice(0, 32);
+  }
+  return s.replace(/[^0-9a-f]/gi, '');
+}
 
-    document.getElementById('generateBtn').addEventListener('click', () => {
-        currentUUID = generateUUIDv4();
-        updateDisplay();
+/* ── ÉTAT ── */
+let currentUUID = generateUUIDv4();
+let currentFormat = 'D';
+let currentUppercase = false;
+let batchFormat = 'D';
+let batchGuids = [];
+const history = [];
+let currentSnippet = 'basic';
+
+/* ── CHANGEMENT DE SECTION ── */
+const sections = ['generate','batch','validate','history','snippets'];
+function showSection(name) {
+  sections.forEach(s => {
+    document.getElementById(`sec-${s}`).style.display = s === name ? '' : 'none';
+  });
+  document.querySelectorAll('.section-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.section === name);
+  });
+  if (name === 'history') renderHistory();
+  if (name === 'snippets') renderSnippet();
+}
+document.querySelectorAll('.section-tab').forEach(t => {
+  t.addEventListener('click', () => showSection(t.dataset.section));
+});
+
+/* ── DESCRIPTIONS DE FORMAT ── */
+const FORMAT_DESCS = {
+  D: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx — 36 car. — utiliser pour JSON, APIs, logs',
+  N: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx — 32 car. — utiliser pour URLs, colonnes CHAR(32)',
+  B: '{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx} — 38 car. — utiliser pour Registre Windows, COM',
+  P: '(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx) — 38 car. — outils Microsoft hérités',
+  X: '{0x...,0x...,0x...,{...}} — 68 car. — littéraux struct C++, P/Invoke',
+};
+
+/* ── SECTION GÉNÉRER ── */
+function updateGuidDisplay() {
+  const el = document.getElementById('guidDisplay');
+  el.textContent = formatUUID(currentUUID, currentFormat, currentUppercase);
+  el.classList.remove('fresh');
+  void el.offsetWidth;
+  el.classList.add('fresh');
+  document.getElementById('formatDesc').textContent = FORMAT_DESCS[currentFormat] || '';
+  renderSnippet();
+}
+
+function generate() {
+  currentUUID = generateUUIDv4();
+  updateGuidDisplay();
+  addToHistory(currentUUID);
+}
+
+document.getElementById('generateBtn').addEventListener('click', generate);
+document.getElementById('copyGuidBtn').addEventListener('click', () => {
+  copyText(formatUUID(currentUUID, currentFormat, currentUppercase), 'GUID copié !');
+});
+
+document.querySelectorAll('.fmt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFormat = btn.dataset.format;
+    updateGuidDisplay();
+  });
+});
+
+document.getElementById('uppercaseCheck').addEventListener('change', e => {
+  currentUppercase = e.target.checked;
+  updateGuidDisplay();
+});
+
+/* ── RACCOURCI CLAVIER ── */
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'g' || e.key === 'G') generate();
+});
+
+/* ── SECTION LOT ── */
+document.querySelectorAll('[data-bfmt]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-bfmt]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    batchFormat = btn.dataset.bfmt;
+    renderBatch();
+  });
+});
+
+document.getElementById('batchGenBtn').addEventListener('click', () => {
+  const count = parseInt(document.getElementById('batchCount').value);
+  const upper = document.getElementById('batchUppercase').checked;
+  batchGuids = Array.from({ length: count }, () => generateUUIDv4());
+  batchGuids.forEach(g => addToHistory(g));
+  renderBatch(upper);
+  document.getElementById('copyAllBtn').style.display = '';
+});
+
+function renderBatch(upper) {
+  const u = upper !== undefined ? upper : document.getElementById('batchUppercase').checked;
+  const list = document.getElementById('batchOutput');
+  if (!batchGuids.length) { list.innerHTML = ''; return; }
+  list.innerHTML = `<div class="batch-list">${
+    batchGuids.map((g, i) => {
+      const formatted = formatUUID(g, batchFormat, u);
+      const escaped = formatted.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      return `<div class="batch-item">
+        <span class="batch-num">${i + 1}</span>
+        <span class="batch-val">${escaped}</span>
+        <button class="batch-copy" data-val="${escaped}">Copier</button>
+      </div>`;
+    }).join('')
+  }</div>`;
+  list.querySelectorAll('.batch-copy').forEach(btn => {
+    btn.addEventListener('click', () => copyText(btn.dataset.val, 'Copié !'));
+  });
+}
+
+document.getElementById('batchUppercase').addEventListener('change', () => renderBatch());
+document.getElementById('copyAllBtn').addEventListener('click', () => {
+  const upper = document.getElementById('batchUppercase').checked;
+  const all = batchGuids.map(g => formatUUID(g, batchFormat, upper)).join('\n');
+  copyText(all, `${batchGuids.length} GUIDs copiés !`);
+});
+
+/* ── SECTION VALIDER ── */
+document.getElementById('validatorInput').addEventListener('input', function () {
+  const s = this.value.trim();
+  const result = document.getElementById('validatorResult');
+  const fmtSection = document.getElementById('validatorFormats');
+  const btnContainer = document.getElementById('vfmtBtns');
+  const converted = document.getElementById('convertedOutput');
+
+  if (!s) {
+    this.classList.remove('valid', 'invalid');
+    result.className = 'validator-result';
+    fmtSection.style.display = 'none';
+    return;
+  }
+
+  const { valid, format } = detectGuidFormat(s);
+  if (valid) {
+    this.classList.add('valid');
+    this.classList.remove('invalid');
+    const hex = extractHex(s);
+    const canonical = `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+    result.className = 'validator-result ok show';
+    result.innerHTML = `✅ GUID valide — format détecté : <strong>${format}</strong>`;
+    fmtSection.style.display = '';
+    btnContainer.innerHTML = ['D','N','B','P','X'].map(f =>
+      `<button class="vfmt-chip${f===format?' active':''}" data-vfmt="${f}" data-uuid="${canonical}">${f}</button>`
+    ).join('');
+    converted.innerHTML = '';
+    btnContainer.querySelectorAll('.vfmt-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btnContainer.querySelectorAll('.vfmt-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const out = formatUUID(btn.dataset.uuid, btn.dataset.vfmt, false);
+        const escapedOut = out.replace(/'/g, "\\'");
+        converted.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <code style="background:var(--code-bg);color:var(--code-color);padding:8px 12px;border-radius:8px;font-family:var(--mono);font-size:.83rem;flex:1;word-break:break-all">${out}</code>
+          <button class="btn btn-sm" onclick="navigator.clipboard.writeText('${escapedOut}').then(()=>document.getElementById('toast').textContent='✅ Copié !',document.getElementById('toast').classList.add('show'),setTimeout(()=>document.getElementById('toast').classList.remove('show'),1800))">Copier</button>
+        </div>`;
+      });
     });
+  } else {
+    this.classList.add('invalid');
+    this.classList.remove('valid');
+    result.className = 'validator-result err show';
+    result.textContent = '❌ GUID non valide — vérifiez le format et réessayez';
+    fmtSection.style.display = 'none';
+  }
+});
 
-    // Copier le GUID
-    document.querySelectorAll('[data-copy]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.dataset.copy;
-            const el = document.getElementById(targetId);
-            if (el) {
-                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copié !'));
-            }
-        });
-    });
+/* ── HISTORIQUE ── */
+function addToHistory(uuid) {
+  history.unshift({ uuid, time: new Date() });
+  if (history.length > 20) history.pop();
+}
 
-    // Copier le code C#
-    document.getElementById('copyCodeBtn').addEventListener('click', () => {
-        const code = `using System;\n\nGuid id = Guid.NewGuid();\nConsole.WriteLine(id.ToString("${currentFormat}")); // "${guidDisplay.textContent}"`;
-        navigator.clipboard.writeText(code).then(() => showToast('Code C# copié !'));
-    });
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!history.length) {
+    list.innerHTML = '<div class="history-empty">Aucun GUID généré pour le moment. Utilisez l\'onglet Générer ou Lot pour commencer.</div>';
+    return;
+  }
+  const now = Date.now();
+  list.innerHTML = history.map(({ uuid, time }) => {
+    const diff = Math.round((now - time) / 1000);
+    const rel = diff < 60 ? `il y a ${diff}s` : diff < 3600 ? `il y a ${Math.floor(diff/60)}min` : 'plus tôt';
+    return `<div class="history-item">
+      <span class="history-val">${uuid}</span>
+      <button class="batch-copy" onclick="navigator.clipboard.writeText('${uuid.replace(/'/g,"\\'")}').then(()=>{})">Copier</button>
+      <span class="history-time">${rel}</span>
+    </div>`;
+  }).join('');
+}
 
-    // Partager
-    document.getElementById('shareBtn').addEventListener('click', () => {
-        const state = {
-            format: currentFormat,
-            uuid: currentUUID
-        };
-        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
-        window.location.hash = hash;
-        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copiée !'));
-    });
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+  history.length = 0;
+  renderHistory();
+});
 
-    function loadFromHash() {
-        if (window.location.hash) {
-            try {
-                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
-                if (state.format) {
-                    currentFormat = state.format;
-                    document.querySelector(`.format-btn[data-format="${state.format}"]`)?.classList.add('active');
-                }
-                if (state.uuid) currentUUID = state.uuid;
-                updateDisplay();
-            } catch(e){}
-        }
+/* ── EXTRAITS DE CODE ── */
+const SNIPPETS = {
+  basic: () => `using System;
+
+// Générer un nouveau GUID
+Guid id = Guid.NewGuid();
+Console.WriteLine(id.ToString("D")); // → ${formatUUID(currentUUID, 'D', false)}
+Console.WriteLine(id.ToString("N")); // → ${formatUUID(currentUUID, 'N', false)}
+Console.WriteLine(id.ToString("B")); // → ${formatUUID(currentUUID, 'B', false)}
+
+// Analyser depuis une chaîne
+Guid parsed = Guid.Parse("${formatUUID(currentUUID, 'D', false)}");
+
+// Analyse sécurisée (ne lève jamais d'exception)
+if (Guid.TryParse(input, out Guid result))
+{
+    Console.WriteLine(result);
+}
+
+// Clause de garde — détecter les GUID non initialisés
+if (id == Guid.Empty)
+    throw new ArgumentException("L'ID doit être renseigné.");`,
+
+  efcore: () => `// Entity Framework Core — clé primaire GUID
+using Microsoft.EntityFrameworkCore;
+
+public class Commande
+{
+    // EF Core génère automatiquement un nouveau GUID à l'insertion
+    public Guid Id { get; set; }
+    public string NomClient { get; set; } = string.Empty;
+    public decimal Total { get; set; }
+}
+
+// Configuration explicite (optionnelle — EF Core détecte Guid Id par convention)
+modelBuilder.Entity<Commande>()
+    .Property(c => c.Id)
+    .ValueGeneratedOnAdd();
+
+// SQL Server : GUID séquentiels pour éviter la fragmentation d'index
+modelBuilder.Entity<Commande>()
+    .Property(c => c.Id)
+    .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+// .NET 9+ — UUID v7 (trié dans le temps, élimine la fragmentation sans NEWSEQUENTIALID)
+public Commande() { Id = Guid.CreateVersion7(); }`,
+
+  aspnet: () => `// ASP.NET Core — GUID dans les routes et la liaison de modèle
+using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("api/commandes")]
+public class CommandesController : ControllerBase
+{
+    // La contrainte de route :guid valide automatiquement — les GUID invalides renvoient 400
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        if (id == Guid.Empty)
+            return BadRequest("L'ID de commande ne peut pas être vide.");
+
+        var commande = await _repo.FindByIdAsync(id);
+        return commande is null ? NotFound() : Ok(commande);
     }
 
-    // Affichage initial
-    updateDisplay();
-    loadFromHash();
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateCommandeDto dto)
+    {
+        var commande = new Commande { Id = Guid.NewGuid(), NomClient = dto.NomClient };
+        await _repo.AddAsync(commande);
+        // Renvoie 201 Created avec l'en-tête Location
+        return CreatedAtAction(nameof(GetById), new { id = commande.Id }, commande);
+    }
+}
+
+// Équivalent en API minimale
+app.MapGet("/commandes/{id:guid}", async (Guid id, ICommandeRepo repo) =>
+    await repo.FindByIdAsync(id) is Commande c ? Results.Ok(c) : Results.NotFound());`,
+
+  dapper: () => `// Dapper — GUID comme clé primaire
+using Dapper;
+using System.Data;
+
+// Insérer et renvoyer le nouvel ID
+public async Task<Guid> CreerCommandeAsync(string nomClient, decimal total)
+{
+    var id = Guid.NewGuid();
+    const string sql = @"
+        INSERT INTO Commandes (Id, NomClient, Total, CreeLe)
+        VALUES (@Id, @NomClient, @Total, GETUTCDATE())";
+
+    await _connection.ExecuteAsync(sql, new { Id = id, NomClient = nomClient, Total = total });
+    return id;
+}
+
+// Interroger par GUID — Dapper mappe Guid nativement sur SQL Server et PostgreSQL
+public async Task<Commande?> GetCommandeAsync(Guid id)
+{
+    const string sql = "SELECT * FROM Commandes WHERE Id = @Id";
+    return await _connection.QuerySingleOrDefaultAsync<Commande>(sql, new { Id = id });
+}
+
+// Insertion en lot avec des GUID générés
+public async Task InsertionLotAsync(IEnumerable<string> noms)
+{
+    var commandes = noms.Select(n => new { Id = Guid.NewGuid(), NomClient = n });
+    await _connection.ExecuteAsync("INSERT INTO Commandes (Id, NomClient) VALUES (@Id, @NomClient)", commandes);
+}`,
+
+  guard: () => `// Clauses de garde et modèles d'analyse sécurisée
+using System;
+
+// Clause de garde — valider à la frontière
+public void TraiterCommande(Guid commandeId, Guid clientId)
+{
+    if (commandeId == Guid.Empty)
+        throw new ArgumentException("L'ID de commande doit être renseigné.", nameof(commandeId));
+    if (clientId == Guid.Empty)
+        throw new ArgumentException("L'ID client doit être renseigné.", nameof(clientId));
+
+    // ...
+}
+
+// Analyse sécurisée depuis une chaîne de requête HTTP ou une entrée de formulaire
+public IActionResult Rechercher(string? idParam)
+{
+    if (!Guid.TryParse(idParam, out var id))
+        return BadRequest("Format d'ID invalide. Un GUID valide est attendu.");
+    return Ok(_repo.FindById(id));
+}
+
+// ParseExact pour des formats spécifiques (strict — échoue rapidement avec une erreur claire)
+Guid depuisSansTirets = Guid.ParseExact("${formatUUID(currentUUID, 'N', false)}", "N");
+Guid depuisAccolades = Guid.ParseExact("${formatUUID(currentUUID, 'B', false)}", "B");
+
+// Comparaison de chaînes — toujours comparer en tant que Guid, jamais en tant que chaîne
+Guid a = Guid.Parse("${formatUUID(currentUUID, 'D', false)}");
+Guid b = Guid.Parse("${formatUUID(currentUUID, 'D', true)}"); // majuscules
+Console.WriteLine(a == b); // ✅ True — Guid == est insensible à la casse
+// Console.WriteLine(a.ToString() == b.ToString("D")); // ❌ False — la comparaison de chaînes est sensible à la casse`,
+};
+
+function renderSnippet() {
+  const content = document.getElementById('snippetContent');
+  const fn = SNIPPETS[currentSnippet];
+  if (fn) content.textContent = fn();
+}
+
+document.querySelectorAll('.snip-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.snip-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    currentSnippet = t.dataset.snip;
+    renderSnippet();
+  });
+});
+
+document.getElementById('snippetCopyBtn').addEventListener('click', () => {
+  copyText(document.getElementById('snippetContent').textContent, 'Extrait copié !');
+});
+
+/* ── PARTAGE ── */
+function loadFromHash() {
+  if (!window.location.hash) return;
+  try {
+    const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
+    if (state.format) {
+      currentFormat = state.format;
+      document.querySelectorAll('.fmt-btn').forEach(b => b.classList.toggle('active', b.dataset.format === state.format));
+    }
+    if (state.uuid) currentUUID = state.uuid;
+    if (state.uppercase !== undefined) {
+      currentUppercase = state.uppercase;
+      document.getElementById('uppercaseCheck').checked = state.uppercase;
+    }
+    updateGuidDisplay();
+  } catch (e) {}
+}
+
+/* ── INIT ── */
+generate();
+loadFromHash();
 })();
 </script>
 </body>
