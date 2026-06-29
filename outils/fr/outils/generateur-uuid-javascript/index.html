@@ -1,406 +1,1000 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur UUID JavaScript — Créez des UUID avec crypto.randomUUID() et uuid npm</title>
-    <meta name="description" content="Générez des UUID en JavaScript avec crypto.randomUUID() ou le paquet uuid npm. Copiez les extraits de code et apprenez les bonnes pratiques. 100 % côté client.">
-    <meta name="keywords" content="générateur uuid javascript, uuid npm, crypto.randomUUID, générer uuid javascript, exemple uuid js, uuid v4 javascript">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="DevToolbox">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/javascript-uuid-generator/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/javascript-uuid-generator/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Générateur d'UUID JavaScript — v4, v7, ULID, NanoID, extraits de code | DevToolbox</title>
+<meta name="description" content="Générez des UUID v4, v7, v1, ULID et NanoID en JavaScript. Génération par lot, options de format (majuscules, sans tirets, URN), extraits de code en 5 langages, validateur d'UUID, historique. 100% côté client.">
+<meta name="keywords" content="générateur uuid javascript, uuid v7 javascript, crypto randomUUID, générateur ulid, générateur nanoid, uuid npm, générer uuid js, uuid v4 v7 navigateur, validateur uuid javascript">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/javascript-uuid-generator/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/javascript-uuid-generator/">
 
-    <meta property="og:title" content="Générateur UUID JavaScript — crypto.randomUUID() &amp; uuid npm">
-    <meta property="og:description" content="Générez des UUID en JavaScript avec les méthodes natives ou la bibliothèque uuid. Copiez le code instantanément. 100 % côté client.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/">
-    <meta property="og:site_name" content="DevToolbox">
+<meta property="og:title" content="Générateur d'UUID JavaScript — v4, v7, ULID, NanoID, extraits de code (2026)">
+<meta property="og:description" content="Générez des UUID v4, v7, v1, ULID et NanoID. Mode par lot, 6 formats de sortie, code en 5 langages, validateur d'UUID. 100% côté client.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/">
+<meta property="og:site_name" content="DevToolbox">
 
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Générateur UUID JavaScript">
-    <meta name="twitter:description" content="Générez des UUID en JS. Copiez le code pour crypto.randomUUID() et uuid npm.">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"WebApplication",
+  "name":"Générateur d'UUID JavaScript",
+  "url":"https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/",
+  "description":"Générez des UUID v4, v7, v1, ULID et NanoID en JavaScript. Mode par lot, options de format, extraits de code en 5 langages, validateur d'UUID.",
+  "applicationCategory":"DeveloperApplication","operatingSystem":"Any",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},
+  "author":{"@type":"Person","name":"Mathias Kouadio"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Outils","item":"https://www.devstoolsbox.dev/outils/"},
+    {"@type":"ListItem","position":3,"name":"Générateur d'UUID JavaScript","item":"https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Quelle est la différence entre UUID v4 et UUID v7 en JavaScript ?","acceptedAnswer":{"@type":"Answer","text":"UUID v4 est purement aléatoire (122 bits d'entropie). UUID v7 intègre le timestamp Unix actuel en millisecondes dans les 48 premiers bits, ce qui le rend triable dans le temps. Cela rend v7 nettement meilleur pour les clés primaires de base de données, car les insertions séquentielles provoquent beaucoup moins de fragmentation d'index B-tree."}},
+    {"@type":"Question","name":"Dois-je utiliser crypto.randomUUID() ou le paquet npm uuid ?","acceptedAnswer":{"@type":"Answer","text":"Utilisez crypto.randomUUID() pour UUID v4 si vous ciblez Node.js 19+ ou les navigateurs modernes — il ne nécessite aucune dépendance et est l'option la plus rapide. Utilisez le paquet npm uuid si vous avez besoin d'autres versions d'UUID (v1, v3, v5, v7) ou si vous devez prendre en charge des environnements plus anciens."}},
+    {"@type":"Question","name":"Qu'est-ce qu'un ULID et quand l'utiliser à la place d'un UUID ?","acceptedAnswer":{"@type":"Answer","text":"ULID (Universally Unique Lexicographically Sortable Identifier) est un identifiant de 26 caractères encodé en Base32. Les 10 premiers caractères encodent le timestamp et les 16 derniers sont aléatoires. Contrairement à UUID, les ULID sont triables en tant que chaînes, ce qui les rend idéaux pour les cas où vous voulez des identifiants compatibles URL qui se trient chronologiquement."}},
+    {"@type":"Question","name":"La génération d'UUID est-elle sûre dans le navigateur ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Tous les navigateurs modernes exposent window.crypto.getRandomValues() qui utilise un générateur de nombres pseudo-aléatoires cryptographiquement sécurisé (CSPRNG). C'est la même source de hasard que crypto.randomUUID(). N'utilisez jamais Math.random() pour la génération d'UUID — il n'est pas cryptographiquement sécurisé."}}
+  ]
+}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-JRBW78KE29');
     </script>
-    <style>
-        :root {
-            --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
-            --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
-            --accent-green: #10b981; --accent-green-bg: #d1fae5;
-            --text: #0f172a; --text2: #374151; --text3: #64748b;
-            --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
-            --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
-        }
-        body.dark {
-            --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
-            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
-            --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
-            --shadow: 0 4px 16px rgba(0,0,0,0.3);
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-            background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
-            transition: background 0.3s, color 0.3s;
-        }
-        .container { max-width:960px; margin:0 auto; }
+    <!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-HlpMMJ_kCCYxp8OttpLql.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+<style>
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;--surface3:#e8edf3;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+  --v4-color:#7c3aed;--v7-color:#0891b2;--v1-color:#d97706;
+  --ulid-color:#10b981;--nano-color:#ec4899;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;--surface3:#252e3f;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:980px;margin:0 auto}
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
-        .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
-        .logo::before { content:'🛠️'; }
-        .header-right { display:flex; gap:8px; align-items:center; }
-        .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
-        .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
-        .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px;align-items:center}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
-        .breadcrumb a { color:var(--primary); text-decoration:none; }
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:18px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
 
-        .seo-hook {
-            background:var(--primary-light); border-left:4px solid var(--primary);
-            padding:10px 16px; border-radius:8px; margin-bottom:20px;
-            font-size:0.92rem; color:var(--text2);
-        }
+.tool-hero{margin-bottom:18px}
+.tool-hero h1{font-size:1.85rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:6px}
+.tool-hero p{color:var(--text2);font-size:.95rem;max-width:680px}
 
-        .tool-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
-        }
-        h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
-        .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
 
-        .display-box {
-            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
-        }
-        .uuid-display {
-            flex:1; min-width:280px; padding:12px 16px;
-            font-family:var(--mono); font-size:1.1rem; font-weight:600;
-            background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
-            color:var(--text); word-break:break-all;
-        }
-        .method-selector { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
-        .method-btn {
-            padding:8px 16px; border-radius:30px; font-weight:600; font-size:0.85rem;
-            border:1px solid var(--border); background:var(--surface); color:var(--text);
-            cursor:pointer; transition:all 0.2s; font-family:inherit;
-        }
-        .method-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
-        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
-        .btn {
-            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
-            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
-            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
-            font-family:inherit; white-space:nowrap;
-        }
-        .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
-        .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
-        .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
-        .btn-sm { padding:5px 13px; font-size:0.78rem; }
+/* ── version tabs ── */
+.ver-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.ver-tab{padding:8px 16px;border-radius:40px;border:1.5px solid var(--border);background:var(--surface2);font-weight:700;font-size:.8rem;cursor:pointer;font-family:inherit;transition:.18s;white-space:nowrap}
+.ver-tab:hover{border-color:var(--primary);color:var(--primary)}
+.ver-tab.v4{--tc:var(--v4-color)}.ver-tab.v7{--tc:var(--v7-color)}.ver-tab.v1{--tc:var(--v1-color)}.ver-tab.ulid{--tc:var(--ulid-color)}.ver-tab.nano{--tc:var(--nano-color)}
+.ver-tab.active{background:var(--tc);color:#fff;border-color:var(--tc)}
+.ver-badge{font-size:.65rem;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:5px;vertical-align:middle;background:rgba(255,255,255,.25)}
 
-        /* Article section */
-        .article-section {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
-        }
-        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
-        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
-        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
-        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
-        .article-section li { margin-bottom:6px; font-size:0.93rem; }
-        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
-        .article-section a { color:var(--primary); text-decoration:none; }
-        .article-section a:hover { text-decoration:underline; }
-        .faq-item { margin-bottom:20px; }
-        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+/* ── options bar ── */
+.options-bar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.opt-group{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--text2)}
+.opt-group label{font-weight:500;white-space:nowrap}
+.opt-group input[type="number"],.opt-group select{padding:5px 9px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.82rem;font-family:inherit}
+.opt-group input[type="number"]{width:70px}
+.opt-sep{width:1px;height:20px;background:var(--border)}
+.check-label{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text2);cursor:pointer;white-space:nowrap}
+.check-label input{accent-color:var(--primary);cursor:pointer}
 
-        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
-        .footer a { color:var(--primary); text-decoration:none; }
-        .toast-msg {
-            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
-            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
-            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
-        }
-        body.dark .toast-msg { color:var(--text); background:var(--surface); }
+/* ── output area ── */
+.output-row{display:flex;gap:10px;align-items:stretch;margin-bottom:14px}
+.uuid-output{flex:1;font-family:var(--mono);font-size:1rem;font-weight:600;padding:13px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);min-height:50px;word-break:break-all;line-height:1.6;white-space:pre-wrap;max-height:240px;overflow-y:auto;transition:border-color .2s}
+.uuid-output.bulk{font-size:.82rem;font-weight:400}
 
-        @media (max-width:640px) {
-            body { padding:12px; }
-            h1 { font-size:1.5rem; }
-            .tool-card, .article-section { padding:18px; }
-            .uuid-display { font-size:0.95rem; }
-        }
-    </style>
+/* ── buttons ── */
+.btn{padding:7px 16px;border-radius:40px;font-weight:600;font-size:.82rem;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-hover);color:#fff;transform:translateY(-1px)}
+.btn-lg{padding:10px 22px;font-size:.88rem}
+.action-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+
+/* ── version info banner ── */
+.ver-info{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.82rem;color:var(--text2);margin-bottom:14px;line-height:1.6}
+.ver-info strong{color:var(--text)}
+.ver-info .rec-badge{background:var(--pass-bg);color:var(--pass);font-size:.7rem;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.04em}
+
+/* ── code snippets ── */
+.lang-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:-1px}
+.lang-tab{padding:6px 13px;border-radius:8px 8px 0 0;border:1px solid var(--border);border-bottom:none;background:var(--surface2);color:var(--text2);font-size:.77rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.lang-tab.active{background:var(--code-bg);color:var(--code-color);border-color:var(--code-bg)}
+.code-block{display:none;position:relative}
+.code-block.visible{display:block}
+.code-block pre{background:var(--code-bg);color:var(--code-color);padding:16px;border-radius:0 12px 12px 12px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.65;margin:0}
+.copy-code-btn{position:absolute;top:8px;right:8px;padding:4px 10px;font-size:.72rem;font-weight:700;border-radius:99px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);cursor:pointer;transition:.15s}
+.copy-code-btn:hover{background:rgba(255,255,255,.15);color:#fff}
+
+/* ── validator ── */
+.validator-input{width:100%;padding:12px 14px;font-family:var(--mono);font-size:.88rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);outline:none;transition:border-color .2s}
+.validator-input:focus{border-color:var(--primary)}
+.validator-result{margin-top:10px;padding:12px 14px;border-radius:10px;font-size:.85rem;display:none}
+.val-ok{background:var(--pass-bg);color:var(--pass)}
+.val-err{background:var(--fail-bg);color:var(--fail)}
+.val-info{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin-top:8px;font-size:.82rem}
+.val-label{font-weight:700;color:var(--text);white-space:nowrap}
+.val-value{font-family:var(--mono);color:var(--text2)}
+
+/* ── history ── */
+.history-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto}
+.hist-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;font-family:var(--mono);font-size:.78rem;color:var(--text2)}
+.hist-item:hover{border-color:var(--primary)}
+.hist-badge{font-size:.63rem;font-weight:800;padding:1px 6px;border-radius:99px;white-space:nowrap;text-transform:uppercase}
+.hist-val{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-copy{margin-left:auto;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700;border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--text3);flex-shrink:0;transition:.15s}
+.hist-copy:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ── export panel ── */
+.export-formats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.fmt-btn{padding:6px 14px;border-radius:40px;border:1px solid var(--border);background:var(--surface2);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--text2);font-family:inherit;transition:.15s}
+.fmt-btn:hover{border-color:var(--primary);color:var(--primary)}
+.fmt-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── article ── */
+.article-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:28px}
+.article-section h2{font-size:1.3rem;font-weight:800;margin-top:28px;margin-bottom:10px}
+.article-section h2:first-of-type{margin-top:0}
+.article-section h3{font-size:1.05rem;font-weight:700;margin-top:18px;margin-bottom:6px}
+.article-section p{color:var(--text2);font-size:.9rem;margin-bottom:10px;line-height:1.8}
+.article-section code{background:var(--code-bg);color:var(--code-color);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.85em}
+.article-section pre{background:var(--code-bg);color:var(--code-color);padding:14px;border-radius:10px;overflow-x:auto;margin:10px 0;font-family:var(--mono);font-size:.8rem;line-height:1.6}
+.article-section a{color:var(--primary);text-decoration:none}
+.article-section a:hover{text-decoration:underline}
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:12px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 12px;color:var(--text2);font-size:.88rem;line-height:1.8}
+.compare-table{width:100%;border-collapse:collapse;font-size:.82rem;margin:12px 0}
+.compare-table th,.compare-table td{border:1px solid var(--border);padding:7px 12px;text-align:left}
+.compare-table th{background:var(--surface2);font-weight:700}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--surface);padding:10px 20px;border-radius:40px;font-size:.85rem;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);z-index:1000}
+body.dark .toast{background:var(--surface);color:var(--text)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
 </head>
-<body id="rootBody">
-<div class="container">
-    <header class="header">
-        <a href="/fr/" class="logo">DevToolbox</a>
-        <div class="header-right">
-            <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
-                <span id="themeIcon">&#9790;</span>
-                <span id="themeLabel">Sombre</span>
-            </button>
-            <div class="lang-switch">
-                <a href="/tools/javascript-uuid-generator/" class="lang-btn">EN</a>
-                <a href="/fr/outils/generateur-uuid-javascript/" class="lang-btn active" aria-current="page">FR</a>
-            </div>
-        </div>
-    </header>
+<body>
+<div class="page">
 
-    <div class="breadcrumb">
-        <a href="/fr/">Accueil</a> &rsaquo;
-        <a href="/fr/outils/">Outils</a> &rsaquo;
-        <span>Générateur UUID JavaScript</span>
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
     </div>
-
-    <div class="seo-hook">
-        Besoin d’un <strong>générateur UUID en JavaScript</strong> ? Utilisez <code>crypto.randomUUID()</code> ou le paquet <strong>uuid npm</strong>. Cet outil vous montre les deux méthodes avec du code prêt à copier. Aucune donnée ne quitte votre navigateur.
+    <div class="pill-group">
+      <a href="/tools/javascript-uuid-generator/" class="pill-btn">EN</a>
+      <a href="/fr/outils/generateur-uuid-javascript/" class="pill-btn active">FR</a>
     </div>
+  </div>
+</header>
 
-    <main>
-        <div class="tool-card">
-            <h1>Générateur UUID JavaScript</h1>
-            <div class="subhead">Générez des UUID directement dans votre navigateur en utilisant les mêmes API disponibles dans Node.js et les navigateurs modernes. Basculez entre <code>crypto.randomUUID()</code> et l’approche <strong>uuid npm</strong>, puis copiez l’extrait de code pour votre projet.</div>
+<nav class="breadcrumb" aria-label="Fil d'Ariane">
+  <ol>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/outils/">Outils</a></li>
+    <li aria-current="page">Générateur d'UUID JavaScript</li>
+  </ol>
+</nav>
 
-            <div class="display-box">
-                <div class="uuid-display" id="uuidDisplay" aria-label="UUID généré">550e8400-e29b-41d4-a716-446655440000</div>
-                <button class="btn btn-sm" data-copy="uuidDisplay" aria-label="Copier l’UUID">Copier</button>
-            </div>
-
-            <div class="method-selector">
-                <button class="method-btn active" data-method="crypto">crypto.randomUUID()</button>
-                <button class="method-btn" data-method="npm">uuid npm (v4)</button>
-            </div>
-
-            <div class="options-row">
-                <button class="btn btn-primary" id="generateBtn">Générer un UUID</button>
-                <button class="btn btn-outline btn-sm" id="copyCodeBtn">Copier le code</button>
-                <button class="btn btn-outline btn-sm" id="shareBtn">Partager</button>
-            </div>
-        </div>
-
-        <section class="article-section" aria-label="Documentation">
-            <h2>Comment générer un UUID en JavaScript</h2>
-            <p>
-                Deux méthodes principales permettent de créer des UUID dans les applications JavaScript modernes :
-            </p>
-            <ul>
-                <li><strong><code>crypto.randomUUID()</code></strong> – intégrée aux navigateurs et à Node.js (≥19). Elle renvoie une chaîne UUID v4 instantanément.</li>
-                <li><strong>le paquet npm <code>uuid</code></strong> – la bibliothèque la plus populaire pour générer des UUID en Node.js. Elle prend en charge les versions v1, v3, v4, v5 et v7.</li>
-            </ul>
-            <p>
-                Notre outil illustre les deux méthodes et fournit le code exact que vous pouvez coller dans votre projet.
-            </p>
-
-            <h3>Exemple avec <code>crypto.randomUUID()</code></h3>
-            <pre><code>// Navigateurs modernes et Node.js (v19+)
-const id = crypto.randomUUID();
-console.log(id); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
-            <p>C’est la méthode la plus simple et la plus rapide. Elle est disponible dans tous les navigateurs récents et ne nécessite aucune dépendance externe.</p>
-
-            <h3>Exemple avec le paquet npm <code>uuid</code></h3>
-            <pre><code>// Installez avec : npm install uuid
-import { v4 as uuidv4 } from 'uuid';
-const id = uuidv4();
-console.log(id); // "550e8400-e29b-41d4-a716-446655440000"</code></pre>
-            <p>Le paquet <code>uuid</code> est la référence pour les projets Node.js, offrant une API cohérente pour toutes les versions d’UUID. Il est maintenu par la fondation OpenJS et largement adopté.</p>
-
-            <h3>Quelle méthode choisir ?</h3>
-            <ul>
-                <li>Utilisez <code>crypto.randomUUID()</code> si vous n’avez besoin que de la version 4 et que vous ciblez des environnements modernes (navigateurs, Node.js ≥19).</li>
-                <li>Utilisez le paquet <code>uuid</code> si vous avez besoin d’autres versions d’UUID (v1, v3, v5, v7) ou si vous devez prendre en charge des versions plus anciennes de Node.js.</li>
-            </ul>
-
-            <h3>Foire Aux Questions</h3>
-            <div class="faq-item">
-                <div class="faq-question">Quelle est la différence entre <code>crypto.randomUUID()</code> et le paquet npm <code>uuid</code> ?</div>
-                <p><code>crypto.randomUUID()</code> est intégré au runtime JavaScript et génère uniquement des UUID v4. Le paquet npm <code>uuid</code> est une bibliothèque externe qui prend en charge toutes les versions d’UUID et fonctionne dans des environnements plus anciens.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">Puis‑je utiliser <code>crypto.randomUUID()</code> dans Node.js ?</div>
-                <p>Oui, à partir de Node.js 19. Elle est disponible à la fois dans le module <code>crypto</code> et comme fonction globale dans les versions récentes de Node.js.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">Comment générer un UUID v1 ou v5 en JavaScript ?</div>
-                <p>La méthode intégrée <code>crypto.randomUUID()</code> ne produit que des v4. Pour générer des v1 ou v5, utilisez le paquet <code>uuid</code> : <code>import { v1, v5 } from 'uuid'</code>.</p>
-            </div>
-
-            <h3>Autres outils utiles</h3>
-            <ul>
-                <li><a href="/fr/outils/generateur-uuid/">Générateur UUID / ULID</a> — toutes les versions d’UUID et ULID en lot</li>
-                <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a> — UUID triables dans le temps</li>
-                <li><a href="/fr/outils/python-uuid-to-string/">Python UUID to String</a> — convertisseur de formats pour développeurs Python</li>
-                <li><a href="/fr/outils/generateur-nanoid/">Générateur NanoID</a> — identifiants courts et compatibles URL</li>
-            </ul>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
-    </footer>
+<main>
+<div class="tool-hero">
+  <h1>Générateur d'UUID JavaScript</h1>
+  <p>Générez des UUID v4, v7, v1, ULID et NanoID directement dans votre navigateur. Mode par lot, 6 formats de sortie, extraits de code en 5 langages, validateur d'UUID. 100% côté client.</p>
 </div>
 
-<div id="toast" class="toast-msg" role="status" aria-live="polite"></div>
+<!-- ══════════════════════════════════
+     GÉNÉRATEUR PRINCIPAL
+══════════════════════════════════ -->
+<div class="panel">
 
-<!-- JSON-LD -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Générateur UUID JavaScript",
-  "url": "https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/",
-  "description": "Générez des UUID en JavaScript avec crypto.randomUUID() ou le paquet uuid npm. 100 % côté client.",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Any",
-  "browserRequirements": "Nécessite JavaScript.",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    { "@type": "Question", "name": "Quelle est la différence entre crypto.randomUUID() et le paquet npm uuid ?", "acceptedAnswer": { "@type": "Answer", "text": "crypto.randomUUID() est intégré et génère uniquement des UUID v4. Le paquet uuid supporte toutes les versions." } },
-    { "@type": "Question", "name": "Puis-je utiliser crypto.randomUUID() dans Node.js ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, à partir de Node.js 19. Elle est disponible dans le module crypto et comme fonction globale." } }
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
-    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
-    { "@type": "ListItem", "position": 3, "name": "Générateur UUID JavaScript", "item": "https://www.devstoolsbox.dev/fr/outils/generateur-uuid-javascript/" }
-  ]
-}
-</script>
+  <!-- Onglets de version -->
+  <div class="ver-tabs">
+    <button class="ver-tab v4 active" onclick="setVer('v4')">UUID v4 <span class="ver-badge">aléatoire</span></button>
+    <button class="ver-tab v7" onclick="setVer('v7')">UUID v7 <span class="ver-badge">triable</span></button>
+    <button class="ver-tab v1" onclick="setVer('v1')">UUID v1 <span class="ver-badge">timestamp</span></button>
+    <button class="ver-tab ulid" onclick="setVer('ulid')">ULID <span class="ver-badge">triable</span></button>
+    <button class="ver-tab nano" onclick="setVer('nano')">NanoID <span class="ver-badge">court</span></button>
+  </div>
+
+  <!-- Info version -->
+  <div class="ver-info" id="verInfo"></div>
+
+  <!-- Options -->
+  <div class="options-bar">
+    <div class="opt-group">
+      <label>Nombre</label>
+      <input type="number" id="countInput" value="1" min="1" max="500">
+    </div>
+    <div class="opt-sep"></div>
+    <div class="opt-group">
+      <label>Format</label>
+      <select id="fmtSelect">
+        <option value="std">Standard (minuscules)</option>
+        <option value="upper">Majuscules</option>
+        <option value="nohyp">Sans tirets</option>
+        <option value="braces">Accolades {…}</option>
+        <option value="urn">Préfixe URN</option>
+        <option value="squote">Guillemets simples</option>
+        <option value="dquote">Guillemets doubles</option>
+      </select>
+    </div>
+    <div class="opt-sep" id="nanolen-sep" style="display:none"></div>
+    <div class="opt-group" id="nanolen-group" style="display:none">
+      <label>Longueur</label>
+      <input type="number" id="nanoLen" value="21" min="6" max="64">
+    </div>
+  </div>
+
+  <!-- Sortie -->
+  <div class="output-row">
+    <div class="uuid-output" id="uuidOutput" aria-label="Identifiant généré">—</div>
+  </div>
+
+  <!-- Actions -->
+  <div class="action-row">
+    <button class="btn btn-primary btn-lg" onclick="generate()">⚡ Générer</button>
+    <button class="btn" onclick="copyOutput()">⧉ Tout copier</button>
+    <button class="btn" id="exportBtn" onclick="toggleExport()">↓ Exporter</button>
+    <button class="btn" onclick="generate(); addToHistory()">⊕ Ajouter à l'historique</button>
+    <span style="margin-left:auto;font-size:.75rem;color:var(--text3)" id="genCount"></span>
+  </div>
+
+  <!-- Panneau d'export -->
+  <div id="exportPanel" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+    <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px">Exporter comme</div>
+    <div class="export-formats">
+      <button class="fmt-btn active" data-fmt="text" onclick="setExportFmt('text')">Texte brut</button>
+      <button class="fmt-btn" data-fmt="json" onclick="setExportFmt('json')">Tableau JSON</button>
+      <button class="fmt-btn" data-fmt="csv" onclick="setExportFmt('csv')">CSV</button>
+      <button class="fmt-btn" data-fmt="sql" onclick="setExportFmt('sql')">SQL VALUES</button>
+      <button class="fmt-btn" data-fmt="jsarr" onclick="setExportFmt('jsarr')">Tableau JS const</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="copyExport()">⧉ Copier l'export</button>
+      <button class="btn" onclick="downloadExport()">↓ Télécharger</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     EXTRAITS DE CODE
+══════════════════════════════════ -->
+<div class="panel">
+  <div style="font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:14px">Extraits de code</div>
+  <div class="lang-tabs">
+    <button class="lang-tab active" onclick="switchLang('js')">JavaScript</button>
+    <button class="lang-tab" onclick="switchLang('ts')">TypeScript</button>
+    <button class="lang-tab" onclick="switchLang('python')">Python</button>
+    <button class="lang-tab" onclick="switchLang('go')">Go</button>
+    <button class="lang-tab" onclick="switchLang('java')">Java</button>
+    <button class="lang-tab" onclick="switchLang('php')">PHP</button>
+  </div>
+
+  <div class="code-block visible" id="code-js">
+    <pre id="snippet-js"></pre>
+    <button class="copy-code-btn" onclick="copySnippet('js')">Copier</button>
+  </div>
+  <div class="code-block" id="code-ts"><pre id="snippet-ts"></pre><button class="copy-code-btn" onclick="copySnippet('ts')">Copier</button></div>
+  <div class="code-block" id="code-python"><pre id="snippet-python"></pre><button class="copy-code-btn" onclick="copySnippet('python')">Copier</button></div>
+  <div class="code-block" id="code-go"><pre id="snippet-go"></pre><button class="copy-code-btn" onclick="copySnippet('go')">Copier</button></div>
+  <div class="code-block" id="code-java"><pre id="snippet-java"></pre><button class="copy-code-btn" onclick="copySnippet('java')">Copier</button></div>
+  <div class="code-block" id="code-php"><pre id="snippet-php"></pre><button class="copy-code-btn" onclick="copySnippet('php')">Copier</button></div>
+</div>
+
+<!-- ══════════════════════════════════
+     VALIDATEUR D'UUID
+══════════════════════════════════ -->
+<div class="panel">
+  <div style="font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Validateur et inspecteur d'UUID / ULID</div>
+  <input class="validator-input" id="valInput" placeholder="Collez un UUID, ULID ou NanoID pour l'inspecter…" oninput="validateInput()" spellcheck="false" autocomplete="off">
+  <div class="validator-result" id="valResult"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     HISTORIQUE
+══════════════════════════════════ -->
+<div class="panel" id="historyPanel" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Récents — 20 derniers générés</div>
+    <button class="btn" style="font-size:.72rem;padding:4px 12px" onclick="clearHistory()">Effacer</button>
+  </div>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     ARTICLE
+══════════════════════════════════ -->
+<section class="article-section" itemscope itemtype="https://schema.org/Article">
+  <meta itemprop="author" content="Mathias Kouadio">
+  <meta itemprop="datePublished" content="2026-06-08">
+
+  <h2>UUID v4 vs v7 vs v1 vs ULID vs NanoID — choisir le bon identifiant</h2>
+  <p>Ces cinq types d'identifiants résolvent le même problème : générer un identifiant unique sans coordination entre les serveurs. Mais ils font des compromis différents entre le hasard, la triabilité, la taille et la performance en base de données.</p>
+
+  <table class="compare-table">
+    <thead><tr><th>Type</th><th>Taille</th><th>Triable</th><th>Entropie</th><th>Idéal pour</th></tr></thead>
+    <tbody>
+      <tr><td><strong>UUID v4</strong></td><td>36 car.</td><td>Non</td><td>122 bits</td><td>Usage général, APIs, tout ID unique</td></tr>
+      <tr><td><strong>UUID v7</strong></td><td>36 car.</td><td>Oui ✅</td><td>74 bits</td><td>Clés primaires de base, logs d'événements</td></tr>
+      <tr><td><strong>UUID v1</strong></td><td>36 car.</td><td>Oui (tri par champs)</td><td>~62 bits</td><td>Systèmes hérités, corrélation de logs</td></tr>
+      <tr><td><strong>ULID</strong></td><td>26 car.</td><td>Oui ✅</td><td>80 bits</td><td>IDs triables compatibles URL</td></tr>
+      <tr><td><strong>NanoID</strong></td><td>21 car.</td><td>Non</td><td>~126 bits</td><td>IDs courts pour URLs, clés côté client</td></tr>
+    </tbody>
+  </table>
+
+  <h2>UUID v7 — pourquoi c'est important pour les bases de données</h2>
+  <p>UUID v4 est purement aléatoire. Cela signifie que les insertions dans un index B-tree (que possède chaque clé primaire) sont aléatoires — chaque nouvelle ligne atterrit à un emplacement imprévisible dans l'index, provoquant des divisions de pages et une fragmentation constantes. À 100 millions de lignes, cela peut rendre les insertions d'UUID v4 3× plus lentes que les insertions d'entiers séquentiels.</p>
+  <p>UUID v7 intègre le timestamp Unix actuel dans les 48 premiers bits. Les nouvelles lignes se trient toujours après les existantes (dans la même milliseconde, elles se trient aléatoirement). Cela rend les insertions d'index presque séquentielles — beaucoup plus proches de la performance BIGINT tout en conservant tous les avantages d'un identifiant unique distribué.</p>
+  <pre><code>// Structure UUID v7
+018f4d1a-3b2c-7def-9abc-123456789abc
+└──────────────┘ └──────────────────┘
+   48 bits Unix        74 bits aléatoires
+   timestamp (ms)     (bits de version + variant)</code></pre>
+
+  <h2>crypto.randomUUID() vs le paquet npm uuid</h2>
+  <p>Utilisez <code>crypto.randomUUID()</code> lorsque vous n'avez besoin que d'UUID v4 et que vous ciblez des environnements modernes (tous les navigateurs, Node.js 19+). Il ne nécessite aucune dépendance et est l'option la plus rapide — implémenté nativement en C++ dans V8.</p>
+  <p>Utilisez le paquet npm <code>uuid</code> lorsque vous avez besoin d'autres versions d'UUID (v1, v3, v5, v7), lorsque vous devez prendre en charge des versions plus anciennes de Node.js (v10-v18), ou lorsque vous avez besoin d'UUID déterministes (v3/v5 utilisent un hachage espace de noms + nom).</p>
+  <pre><code>// crypto.randomUUID() — aucune installation nécessaire
+const id = crypto.randomUUID();
+
+// uuid npm — toutes les versions
+import { v4, v7 } from 'uuid'; // npm install uuid
+const idV4 = v4();
+const idV7 = v7(); // triable dans le temps, recommandé pour les bases de données</code></pre>
+
+  <h2>ULID vs UUID — quand choisir ULID</h2>
+  <p>ULID (Universally Unique Lexicographically Sortable Identifier) fait 26 caractères en Base32 Crockford. Contrairement à UUID, il se trie correctement en tant que chaîne simple sans analyse spéciale. Cela le rend utile lorsque vous voulez des identifiants ordonnés chronologiquement qui fonctionnent dans les chemins d'URL, les noms de fichiers et les comparaisons de chaînes sans avoir besoin d'un type UUID spécial dans votre base de données.</p>
+  <pre><code>// ULID se trie chronologiquement en tant que chaîne
+const ids = ['01HZBQ7G4K...', '01HZBQ7G5M...', '01HZBQ7G7X...'];
+ids.sort(); // ← déjà dans l'ordre de création ! Le tri UUID v4 est aléatoire.</code></pre>
+
+  <h2>Math.random() est-il sûr pour la génération d'UUID ?</h2>
+  <p>Non. <code>Math.random()</code> est un générateur de nombres pseudo-aléatoires — il est déterministe et prévisible si la graine est connue. Les UUID générés avec <code>Math.random()</code> peuvent entrer en collision à des volumes bien plus faibles que ce que leur entropie de 122 bits suggère. Utilisez toujours <code>crypto.getRandomValues()</code> ou <code>crypto.randomUUID()</code>, qui utilisent le CSPRNG du système d'exploitation (générateur de nombres pseudo-aléatoires cryptographiquement sécurisé).</p>
+
+  <h2>Foire aux questions</h2>
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Quelle est la différence entre UUID v4 et UUID v7 en JavaScript ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">UUID v4 est purement aléatoire (122 bits d'entropie) et n'a pas d'ordre temporel. UUID v7 (RFC 9562, 2024) intègre le timestamp Unix actuel en millisecondes dans les 48 premiers bits, ce qui le rend triable dans le temps. Pour les clés primaires de base de données, v7 est nettement meilleur car les insertions séquentielles provoquent beaucoup moins de fragmentation d'index B-tree par rapport aux insertions aléatoires de v4. Le paquet npm <code>uuid</code> (v9+) prend en charge les deux.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Dois-je utiliser crypto.randomUUID() ou le paquet npm uuid ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Utilisez <code>crypto.randomUUID()</code> pour UUID v4 si vous ciblez Node.js 19+ ou les navigateurs modernes — il ne nécessite aucune dépendance et est l'option la plus rapide. Utilisez le paquet npm <code>uuid</code> si vous avez besoin d'UUID v7 (recommandé pour les bases de données), v1, v3 ou v5, ou si vous devez prendre en charge des versions plus anciennes de Node.js (v10-v18).</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Qu'est-ce qu'un ULID et quand l'utiliser à la place d'un UUID ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">ULID est un identifiant de 26 caractères encodé en Base32. Ses 10 premiers caractères encodent le timestamp en millisecondes et les 16 restants sont aléatoires. Contrairement à UUID, les ULID se trient lexicographiquement dans l'ordre de création en tant que chaînes simples — aucune analyse n'est nécessaire. Utilisez ULID lorsque vous voulez des identifiants compatibles URL qui se trient chronologiquement et fonctionnent dans des environnements où le type UUID n'est pas pris en charge.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">La génération d'UUID est-elle sûre côté client dans le navigateur ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Oui. Tous les navigateurs modernes exposent <code>window.crypto.getRandomValues()</code> qui utilise le CSPRNG du système d'exploitation. <code>crypto.randomUUID()</code> utilise cette même source. N'utilisez jamais <code>Math.random()</code> pour la génération d'UUID — il n'est pas cryptographiquement sécurisé. Les UUID générés par cet outil ont les mêmes propriétés de sécurité que ceux générés côté serveur.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3 style="margin-top:28px">Outils associés</h3>
+  <ul style="margin-left:20px;color:var(--text2);font-size:.88rem;line-height:2.2">
+    <li><a href="/fr/outils/generateur-uuid/">Générateur d'UUID / ULID</a> — toutes les versions d'UUID en lot</li>
+    <li><a href="/fr/outils/convertisseur-timestamp/">Convertisseur de timestamp Unix</a> — décodez le timestamp intégré dans UUID v7 et v1</li>
+    <li><a href="/fr/outils/verificateur-previsibilite-uuid/">Vérificateur de prévisibilité UUID</a> — auditez la prévisibilité d'un UUID v1</li>
+    <li><a href="/fr/blog/nanoid-vs-uuid-vs-shortid-vs-cuid2/">NanoID vs UUID vs ShortID vs Cuid2 — guide comparatif</a></li>
+  </ul>
+</section>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits côté client pour les développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/fr/outils/contact/">Contact</a></p>
+</footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script>
-(function(){
-    /* ── Thème ── */
-    const savedTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
-    let currentTheme = savedTheme;
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon   = document.getElementById('themeIcon');
-    const themeLabel  = document.getElementById('themeLabel');
-    function applyTheme(t) {
-        document.body.classList.remove('dark');
-        if (t==='dark'){ document.body.classList.add('dark'); themeIcon.textContent='\u2600'; themeLabel.textContent='Clair'; }
-        else if (t==='light'){ themeIcon.textContent='\u263D'; themeLabel.textContent='Sombre'; }
-        else { const d=window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark',d); themeIcon.textContent=d?'\u2600':'\u263D'; themeLabel.textContent=d?'Clair':'Sombre'; }
-        localStorage.setItem('devtoolbox-theme',t); currentTheme=t;
+/* ════════════════════════════════════════════
+   GÉNÉRATEURS
+════════════════════════════════════════════ */
+function uuidV4() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b, x => x.toString(16).padStart(2,'0')).join('');
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+}
+
+function uuidV7() {
+  const ms = Date.now();
+  const b = new Uint8Array(16);
+  crypto.getRandomValues(b);
+  const msHex = ms.toString(16).padStart(12, '0');
+  for (let i = 0; i < 6; i++) b[i] = parseInt(msHex.slice(i*2, i*2+2), 16);
+  b[6] = (b[6] & 0x0f) | 0x70;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b, x => x.toString(16).padStart(2,'0')).join('');
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+}
+
+function uuidV1() {
+  const now = Date.now();
+  const OFFSET = 122192928000000000n;
+  const t = BigInt(now) * 10000n + OFFSET + BigInt(Math.floor(Math.random() * 10000));
+  const timeLow  = (t & 0xFFFFFFFFn).toString(16).padStart(8, '0');
+  const timeMid  = ((t >> 32n) & 0xFFFFn).toString(16).padStart(4, '0');
+  const timeHi   = (((t >> 48n) & 0x0FFFn) | 0x1000n).toString(16).padStart(4, '0');
+  const b = crypto.getRandomValues(new Uint8Array(8));
+  const clkHi   = ((b[0] & 0x3f) | 0x80).toString(16).padStart(2,'0');
+  const clkLow  = b[1].toString(16).padStart(2,'0');
+  const node    = Array.from(b.slice(2), x => x.toString(16).padStart(2,'0')).join('');
+  return `${timeLow}-${timeMid}-${timeHi}-${clkHi}${clkLow}-${node}`;
+}
+
+const ULID_CHAR = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+function generateULID() {
+  const ms = Date.now();
+  let t = ms, ts = '';
+  for (let i = 9; i >= 0; i--) { ts = ULID_CHAR[t % 32] + ts; t = Math.floor(t / 32); }
+  const rb = crypto.getRandomValues(new Uint8Array(10));
+  let rn = 0n;
+  for (const b of rb) rn = (rn << 8n) | BigInt(b);
+  let rs = '';
+  for (let i = 15; i >= 0; i--) { rs = ULID_CHAR[Number(rn % 32n)] + rs; rn /= 32n; }
+  return ts + rs;
+}
+
+const NANO_ALPHA = 'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
+function generateNano(size = 21) {
+  const b = crypto.getRandomValues(new Uint8Array(size));
+  return Array.from(b, x => NANO_ALPHA[x & 63]).join('');
+}
+
+/* ════════════════════════════════════════════
+   FORMAT
+════════════════════════════════════════════ */
+function applyFormat(id, fmt) {
+  switch(fmt) {
+    case 'upper':  return id.toUpperCase();
+    case 'nohyp':  return id.replace(/-/g, '');
+    case 'braces': return `{${id}}`;
+    case 'urn':    return `urn:uuid:${id}`;
+    case 'squote': return `'${id}'`;
+    case 'dquote': return `"${id}"`;
+    default:       return id;
+  }
+}
+
+/* ════════════════════════════════════════════
+   ÉTAT
+════════════════════════════════════════════ */
+let currentVer = 'v4';
+let generatedIds = [];
+let history = [];
+let exportFmt = 'text';
+let currentLang = 'js';
+
+const VER_INFO = {
+  v4: '<strong>UUID v4</strong> — 122 bits de hasard cryptographique. Aucune structure, aucun ordre. Le standard universel pour les identifiants uniques à usage général. Utilise <code>crypto.randomUUID()</code> nativement.',
+  v7: '<strong>UUID v7</strong> <span class="rec-badge">Recommandé pour les bases de données</span> — timestamp Unix de 48 bits en millisecondes + 74 bits aléatoires. Triable dans le temps : les insertions séquentielles provoquent beaucoup moins de fragmentation d\'index que v4. Défini dans la RFC 9562 (mai 2024).',
+  v1: '<strong>UUID v1</strong> — timestamp grégorien de 60 bits + séquence d\'horloge + ID de nœud (aléatoire dans le navigateur — l\'adresse MAC réelle n\'est pas accessible pour des raisons de confidentialité). Triable dans le temps mais l\'ordre des champs de timestamp n\'est pas évident.',
+  ulid: '<strong>ULID</strong> — timestamp de 48 bits + 80 bits aléatoires, encodé en 26 caractères Base32 Crockford. Se trie correctement en tant que chaîne simple. Compatible URL, sans tirets, compact.',
+  nano: '<strong>NanoID</strong> — identifiant aléatoire compatible URL utilisant un alphabet de 64 caractères. Longueur personnalisable. 21 caractères (par défaut) fournissent ~126 bits d\'entropie, similaires à UUID v4 mais plus courts.'
+};
+
+/* ════════════════════════════════════════════
+   CHANGER DE VERSION
+════════════════════════════════════════════ */
+function setVer(ver) {
+  currentVer = ver;
+  document.querySelectorAll('.ver-tab').forEach(t => {
+    const match = t.getAttribute('onclick')?.includes(`'${ver}'`);
+    t.classList.toggle('active', !!match);
+  });
+  document.getElementById('verInfo').innerHTML = VER_INFO[ver] || '';
+  const nanoGroup = document.getElementById('nanolen-group');
+  const nanoSep   = document.getElementById('nanolen-sep');
+  nanoGroup.style.display = ver === 'nano' ? 'flex' : 'none';
+  nanoSep.style.display   = ver === 'nano' ? 'block' : 'none';
+  generate();
+  updateSnippets();
+}
+
+/* ════════════════════════════════════════════
+   GÉNÉRER
+════════════════════════════════════════════ */
+function genOne() {
+  switch(currentVer) {
+    case 'v4':   return uuidV4();
+    case 'v7':   return uuidV7();
+    case 'v1':   return uuidV1();
+    case 'ulid': return generateULID();
+    case 'nano': return generateNano(parseInt(document.getElementById('nanoLen').value)||21);
+  }
+}
+
+function generate() {
+  const n = Math.min(500, Math.max(1, parseInt(document.getElementById('countInput').value)||1));
+  const fmt = document.getElementById('fmtSelect').value;
+  generatedIds = Array.from({length:n}, genOne);
+  const formatted = generatedIds.map(id => applyFormat(id, fmt));
+  const out = document.getElementById('uuidOutput');
+  out.textContent = formatted.join('\n');
+  out.classList.toggle('bulk', n > 1);
+  document.getElementById('genCount').textContent = n > 1 ? `${n} générés` : '';
+  updateSnippets();
+}
+
+/* ════════════════════════════════════════════
+   COPIER / EXPORTER
+════════════════════════════════════════════ */
+function copyOutput() {
+  const text = document.getElementById('uuidOutput').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Copié !')).catch(() => toast('Échec de la copie'));
+}
+
+function getExportContent(fmt, ids) {
+  const list = ids.map(id => applyFormat(id, document.getElementById('fmtSelect').value));
+  switch(fmt) {
+    case 'json':  return JSON.stringify(list, null, 2);
+    case 'csv':   return 'id\n' + list.join('\n');
+    case 'sql':   return 'INSERT INTO enregistrements (id) VALUES\n' + list.map(id => `  ('${id.replace(/'/g,"''")}')` ).join(',\n') + ';';
+    case 'jsarr': return `const ids = [\n${list.map(id=>`  "${id}"`).join(',\n')}\n];`;
+    default:      return list.join('\n');
+  }
+}
+
+function toggleExport() {
+  const p = document.getElementById('exportPanel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function setExportFmt(fmt) {
+  exportFmt = fmt;
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.toggle('active', b.dataset.fmt === fmt));
+}
+
+function copyExport() {
+  const content = getExportContent(exportFmt, generatedIds);
+  navigator.clipboard.writeText(content).then(() => toast('Export copié !')).catch(() => toast('Échec'));
+}
+
+function downloadExport() {
+  const ext = { json:'json', csv:'csv', sql:'sql', jsarr:'js', text:'txt' }[exportFmt]||'txt';
+  const content = getExportContent(exportFmt, generatedIds);
+  const blob = new Blob([content], { type:'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`uuids.${ext}`; a.click();
+  URL.revokeObjectURL(url);
+  toast(`Téléchargé sous uuids.${ext}`);
+}
+
+/* ════════════════════════════════════════════
+   EXTRAITS DE CODE
+════════════════════════════════════════════ */
+const SNIPPETS = {
+  v4: {
+    js: `// UUID v4 — crypto.randomUUID() (aucune dépendance, Node.js 19+, tous les navigateurs modernes)
+const id = crypto.randomUUID();
+console.log(id); // "550e8400-e29b-41d4-a716-446655440000"
+
+// Pour les environnements plus anciens — paquet npm uuid
+// npm install uuid
+import { v4 as uuidv4 } from 'uuid';
+const id2 = uuidv4();`,
+    ts: `// UUID v4 — TypeScript
+// Aucun type nécessaire — crypto.randomUUID() renvoie une chaîne
+const id: string = crypto.randomUUID();
+
+// Avec uuid npm (npm install uuid @types/uuid)
+import { v4 as uuidv4 } from 'uuid';
+const id2: string = uuidv4();`,
+    python: `import uuid
+
+# UUID v4 — cryptographiquement sécurisé
+id = str(uuid.uuid4())
+print(id)  # "550e8400-e29b-41d4-a716-446655440000"
+
+# Générer N UUIDs
+ids = [str(uuid.uuid4()) for _ in range(10)]`,
+    go: `package main
+
+import (
+    "fmt"
+    "github.com/google/uuid" // go get github.com/google/uuid
+)
+
+func main() {
+    id := uuid.New()
+    fmt.Println(id.String())
+    // "550e8400-e29b-41d4-a716-446655440000"
+}`,
+    java: `import java.util.UUID;
+
+// UUID v4 — intégré dans la bibliothèque standard Java
+String id = UUID.randomUUID().toString();
+System.out.println(id);
+// "550e8400-e29b-41d4-a716-446655440000"`,
+    php: `<?php
+// UUID v4 — PHP 7+ avec ramsey/uuid
+// composer require ramsey/uuid
+use Ramsey\\Uuid\\Uuid;
+$id = Uuid::uuid4()->toString();
+echo $id; // "550e8400-e29b-41d4-a716-446655440000"
+
+// Sans bibliothèque (PHP 7.4+)
+function uuidV4(): string {
+    $data = random_bytes(16);
+    $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+    $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+}`
+  },
+  v7: {
+    js: `// UUID v7 — triable dans le temps, recommandé pour les clés primaires de base
+// npm install uuid  (v9+)
+import { v7 as uuidv7 } from 'uuid';
+const id = uuidv7();
+// "018f4d1a-3b2c-7def-9abc-123456789abc"
+//  └──────────────┘ ← timestamp Unix ms sur 48 bits
+
+// Ou implémentez sans bibliothèque :
+function uuidV7() {
+  const ms = Date.now();
+  const b = new Uint8Array(16);
+  crypto.getRandomValues(b);
+  const msHex = ms.toString(16).padStart(12, '0');
+  for (let i = 0; i < 6; i++) b[i] = parseInt(msHex.slice(i*2, i*2+2), 16);
+  b[6] = (b[6] & 0x0f) | 0x70; // version 7
+  b[8] = (b[8] & 0x3f) | 0x80; // variant
+  const h = Array.from(b, x => x.toString(16).padStart(2,'0')).join('');
+  return \`\${h.slice(0,8)}-\${h.slice(8,12)}-\${h.slice(12,16)}-\${h.slice(16,20)}-\${h.slice(20)}\`;
+}`,
+    ts: `// UUID v7 — TypeScript
+import { v7 as uuidv7 } from 'uuid'; // npm install uuid @types/uuid
+const id: string = uuidv7();`,
+    python: `# UUID v7 — Python 3.13+ (natif)
+import uuid
+id = str(uuid.uuid7())
+
+# Python < 3.13 : utilisez le paquet uuid7
+# pip install uuid7
+from uuid7 import uuid7
+id = str(uuid7())`,
+    go: `// UUID v7
+package main
+import (
+    "fmt"
+    "github.com/google/uuid"
+)
+func main() {
+    id, _ := uuid.NewV7()
+    fmt.Println(id.String())
+}`,
+    java: `// UUID v7 — nécessite une bibliothèque
+// Maven : com.fasterxml.uuid:java-uuid-generator
+import com.fasterxml.uuid.Generators;
+String id = Generators.timeBasedEpochGenerator().generate().toString();`,
+    php: `<?php
+// UUID v7 via ramsey/uuid
+// composer require ramsey/uuid
+use Ramsey\\Uuid\\Uuid;
+$id = Uuid::uuid7()->toString();
+echo $id;`
+  },
+  v1: {
+    js: `// UUID v1 — timestamp + nœud aléatoire (MAC non accessible dans le navigateur)
+import { v1 as uuidv1 } from 'uuid'; // npm install uuid
+const id = uuidv1();
+
+// Extraire le timestamp de création d'un v1
+import { parse as uuidParse } from 'uuid';
+const bytes = uuidParse(id);
+const timeLow = bytes.slice(0,4);
+const timeMid = bytes.slice(4,6);
+const timeHi  = bytes.slice(6,8);
+// ... réassembler et soustraire le décalage grégorien`,
+    ts: `import { v1 as uuidv1 } from 'uuid';
+const id: string = uuidv1();`,
+    python: `import uuid
+id = str(uuid.uuid1())  # Utilise l'adresse MAC réelle si disponible`,
+    go: `import "github.com/google/uuid"
+id, _ := uuid.NewUUID() // v1`,
+    java: `import com.fasterxml.uuid.Generators;
+String id = Generators.timeBasedGenerator().generate().toString();`,
+    php: `use Ramsey\\Uuid\\Uuid;
+$id = Uuid::uuid1()->toString();`
+  },
+  ulid: {
+    js: `// ULID — compatible URL, triable lexicographiquement
+// npm install ulid
+import { ulid } from 'ulid';
+const id = ulid();
+// "01HZBQ7G4KXY8PQRSTVWXYZ012"
+
+// Ou avec un timestamp spécifique
+const id2 = ulid(Date.now());
+
+// ULID se trie comme une chaîne dans l'ordre de création
+const ids = [ulid(), ulid(), ulid()];
+ids.sort(); // Déjà chronologique !`,
+    ts: `import { ulid } from 'ulid'; // npm install ulid
+const id: string = ulid();`,
+    python: `# pip install python-ulid
+from ulid import ULID
+id = str(ULID())`,
+    go: `// go get github.com/oklog/ulid/v2
+import (
+    "math/rand"
+    "time"
+    "github.com/oklog/ulid/v2"
+)
+t := ulid.Timestamp(time.Now())
+id := ulid.MustNew(t, rand.New(rand.NewSource(time.Now().UnixNano())))`,
+    java: `// io.azam.ulidj:ulidj dans Maven
+String id = UlidCreator.getUlid().toString();`,
+    php: `// composer require robinvdvleuten/ulid
+use Robinvdvleuten\\Ulid\\Ulid;
+$id = (string) Ulid::generate();`
+  },
+  nano: {
+    js: `// NanoID — identifiants courts et compatibles URL
+// npm install nanoid
+import { nanoid } from 'nanoid';
+const id = nanoid();      // 21 car. : "V1StGXR8_Z5jdHi6B-myT"
+const id8 = nanoid(8);    // Longueur personnalisée : "Uakgb_J3"
+
+// Alphabet personnalisé
+import { customAlphabet } from 'nanoid';
+const shortId = customAlphabet('0123456789abcdef', 10);
+// "4f90d13a42" — hex uniquement, 10 car.
+
+// Navigateur — aucune installation nécessaire (utilise crypto.getRandomValues)
+// Pour SSR, importez depuis 'nanoid/non-secure' si nécessaire`,
+    ts: `import { nanoid, customAlphabet } from 'nanoid';
+const id: string = nanoid(21);`,
+    python: `# pip install nanoid
+from nanoid import generate
+id = generate()       # "V1StGXR8_Z5jdHi6B-myT"
+id8 = generate(size=8)`,
+    go: `// go get github.com/matoous/go-nanoid/v2
+import gonanoid "github.com/matoous/go-nanoid/v2"
+id, _ := gonanoid.New()   // 21 car.`,
+    java: `// com.aventrix.jnanoid:jnanoid dans Maven
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
+String id = NanoIdUtils.randomNanoId();`,
+    php: `// composer require hidehalo/nanoid-php
+$factory = new \\Hidehalo\\Nanoid\\Client();
+$id = $factory->formattedId($size = 21);`
+  }
+};
+
+function updateSnippets() {
+  const snippets = SNIPPETS[currentVer] || SNIPPETS.v4;
+  Object.keys(snippets).forEach(lang => {
+    const el = document.getElementById(`snippet-${lang}`);
+    if (el) el.textContent = snippets[lang];
+  });
+}
+
+function switchLang(lang) {
+  currentLang = lang;
+  const langs = ['js','ts','python','go','java','php'];
+  document.querySelectorAll('.lang-tab').forEach((t,i) => {
+    t.classList.toggle('active', langs[i] === lang);
+  });
+  document.querySelectorAll('.code-block').forEach(b => {
+    b.classList.toggle('visible', b.id === `code-${lang}`);
+  });
+}
+
+function copySnippet(lang) {
+  const el = document.getElementById(`snippet-${lang}`);
+  if (el) navigator.clipboard.writeText(el.textContent).then(() => toast('Code copié !')).catch(() => toast('Échec'));
+}
+
+/* ════════════════════════════════════════════
+   VALIDATEUR
+════════════════════════════════════════════ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-([1-8])[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ULID_RE = /^[0-9A-Z]{26}$/;
+
+function validateInput() {
+  const val = document.getElementById('valInput').value.trim();
+  const res = document.getElementById('valResult');
+  if (!val) { res.style.display='none'; return; }
+  res.style.display = 'block';
+
+  const uuidM = val.match(UUID_RE);
+  if (uuidM) {
+    const ver = parseInt(uuidM[1]);
+    let info = `<div class="val-info">
+      <span class="val-label">Type</span><span class="val-value">UUID v${ver}</span>
+      <span class="val-label">Version</span><span class="val-value">${['','basée sur le temps (grégorien)','sécurité DCE','basée sur MD5','aléatoire','basée sur SHA-1','','triable dans le temps (ms Unix)'][ver]||'inconnue'}</span>`;
+
+    if (ver === 7) {
+      const hex = val.replace(/-/g,'').slice(0,12);
+      const ms = parseInt(hex, 16);
+      const dt = new Date(ms).toISOString();
+      info += `<span class="val-label">Timestamp</span><span class="val-value">${dt} (${ms}ms)</span>`;
     }
-    themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
-    applyTheme(savedTheme);
-
-    /* ── Toast ── */
-    function showToast(msg) {
-        const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
-        clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
+    if (ver === 1) {
+      try {
+        const hex = val.replace(/-/g,'');
+        const timeLow = hex.slice(0,8);
+        const timeMid = hex.slice(8,12);
+        const timeHi  = hex.slice(12,16);
+        const t100ns = BigInt('0x'+timeHi.slice(1)+timeMid+timeLow);
+        const OFFSET = 122192928000000000n;
+        const unixMs = Number((t100ns - OFFSET) / 10000n);
+        info += `<span class="val-label">Timestamp</span><span class="val-value">${new Date(unixMs).toISOString()}</span>`;
+      } catch {}
     }
+    info += `<span class="val-label">Valide</span><span class="val-value">✅ UUID valide</span>
+    </div>`;
+    res.className = 'validator-result val-ok';
+    res.innerHTML = `✅ UUID v${ver} valide${info}`;
+    return;
+  }
 
-    // Génération UUID v4 (identique à crypto.randomUUID)
-    function generateUUIDv4() {
-        if (crypto.randomUUID) {
-            return crypto.randomUUID();
-        }
-        // Fallback pour les anciens navigateurs
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
+  if (ULID_RE.test(val)) {
+    const ts = val.slice(0,10).split('').reduce((acc, c) => acc * 32 + ULID_CHAR.indexOf(c), 0);
+    res.className = 'validator-result val-ok';
+    res.innerHTML = `✅ ULID valide <div class="val-info">
+      <span class="val-label">Type</span><span class="val-value">ULID</span>
+      <span class="val-label">Timestamp</span><span class="val-value">${new Date(ts).toISOString()} (${ts}ms)</span>
+      <span class="val-label">Longueur</span><span class="val-value">26 caractères (Base32 Crockford)</span>
+    </div>`;
+    return;
+  }
 
-    // Simulation de uuid npm v4 (même résultat)
-    function generateUUIDnpm() {
-        return generateUUIDv4();
-    }
+  if (/^[0-9a-f]{32}$/i.test(val)) {
+    const formatted = `${val.slice(0,8)}-${val.slice(8,12)}-${val.slice(12,16)}-${val.slice(16,20)}-${val.slice(20)}`;
+    const verN = parseInt(val[12], 16);
+    res.className = 'validator-result val-ok';
+    res.innerHTML = `✅ UUID sans tirets (v${verN}) <div class="val-info"><span class="val-label">Formaté</span><span class="val-value">${formatted}</span></div>`;
+    return;
+  }
 
-    const uuidDisplay = document.getElementById('uuidDisplay');
-    const methodBtns = document.querySelectorAll('.method-btn');
-    let currentMethod = 'crypto';
+  if (/^[A-Za-z0-9_-]{6,64}$/.test(val)) {
+    res.className = 'validator-result val-ok';
+    res.innerHTML = `ℹ️ Ressemble à un NanoID ou un ID court personnalisé <div class="val-info">
+      <span class="val-label">Type</span><span class="val-value">NanoID / personnalisé</span>
+      <span class="val-label">Longueur</span><span class="val-value">${val.length} caractères</span>
+      <span class="val-label">Alphabet</span><span class="val-value">Compatible URL (A-Z, a-z, 0-9, _, -)</span>
+    </div>`;
+    return;
+  }
 
-    methodBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            methodBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentMethod = btn.dataset.method;
-            updateDisplay();
-        });
-    });
+  res.className = 'validator-result val-err';
+  res.innerHTML = `❌ Format UUID, ULID ou NanoID non reconnu.`;
+}
 
-    function updateDisplay() {
-        let uuid;
-        if (currentMethod === 'crypto') {
-            uuid = generateUUIDv4();
-        } else {
-            uuid = generateUUIDnpm();
-        }
-        uuidDisplay.textContent = uuid;
-    }
+const ULID_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
-    document.getElementById('generateBtn').addEventListener('click', updateDisplay);
+/* ════════════════════════════════════════════
+   HISTORIQUE
+════════════════════════════════════════════ */
+function addToHistory() {
+  const fmt = document.getElementById('fmtSelect').value;
+  generatedIds.forEach(id => {
+    history.unshift({ id: applyFormat(id, fmt), ver: currentVer, raw: id });
+  });
+  history = history.slice(0, 20);
+  renderHistory();
+}
 
-    // Copier l'UUID
-    document.querySelectorAll('[data-copy]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.dataset.copy;
-            const el = document.getElementById(targetId);
-            if (el) {
-                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copié !'));
-            }
-        });
-    });
+function renderHistory() {
+  const panel = document.getElementById('historyPanel');
+  const list  = document.getElementById('historyList');
+  if (!history.length) { panel.style.display='none'; return; }
+  panel.style.display = 'block';
+  const verColors = { v4:'background:rgba(124,58,237,.15);color:var(--v4-color)', v7:'background:rgba(8,145,178,.15);color:var(--v7-color)', v1:'background:rgba(217,119,6,.15);color:var(--v1-color)', ulid:'background:rgba(16,185,129,.15);color:var(--ulid-color)', nano:'background:rgba(236,72,153,.15);color:var(--nano-color)' };
+  list.innerHTML = history.map((h,i) => `
+    <div class="hist-item">
+      <span class="hist-badge" style="${verColors[h.ver]||''}">${h.ver}</span>
+      <span class="hist-val" title="${escHtml(h.id)}">${escHtml(h.id)}</span>
+      <button class="hist-copy" onclick="copyText('${escHtml(h.id)}')">Copier</button>
+    </div>`).join('');
+}
 
-    // Copier le code
-    document.getElementById('copyCodeBtn').addEventListener('click', () => {
-        let code;
-        if (currentMethod === 'crypto') {
-            code = `const id = crypto.randomUUID();\nconsole.log(id); // "${uuidDisplay.textContent}"`;
-        } else {
-            code = `import { v4 as uuidv4 } from 'uuid';\nconst id = uuidv4();\nconsole.log(id); // "${uuidDisplay.textContent}"`;
-        }
-        navigator.clipboard.writeText(code).then(() => showToast('Code copié !'));
-    });
+function clearHistory() {
+  history = [];
+  renderHistory();
+}
 
-    // Partager
-    document.getElementById('shareBtn').addEventListener('click', () => {
-        const state = {
-            method: currentMethod,
-            uuid: uuidDisplay.textContent
-        };
-        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
-        window.location.hash = hash;
-        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copiée !'));
-    });
+/* ════════════════════════════════════════════
+   AIDES
+════════════════════════════════════════════ */
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-    function loadFromHash() {
-        if (window.location.hash) {
-            try {
-                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
-                if (state.method) {
-                    currentMethod = state.method;
-                    document.querySelector(`.method-btn[data-method="${state.method}"]`)?.classList.add('active');
-                }
-                updateDisplay();
-            } catch(e){}
-        }
-    }
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => toast('Copié !')).catch(() => toast('Échec'));
+}
 
-    // Génération initiale
-    updateDisplay();
-    loadFromHash();
+let toastTid;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(toastTid); toastTid = setTimeout(() => { el.style.opacity = '0'; }, 2200);
+}
+
+/* ── Thème ── */
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Clair' : '🌙 Sombre';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function initTheme() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') { document.body.classList.add('dark'); document.getElementById('themeBtn').textContent = '☀️ Clair'; }
 })();
+
+/* ── Init ── */
+setVer('v4');
 </script>
 </body>
 </html>
