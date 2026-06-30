@@ -1,24 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Cron Expression Generator Online | Job Scheduler</title>
-    <meta name="description" content="Create and validate cron expressions easily. Visual builder, natural language explanation, next executions. Supports Linux, AWS, GCP.">
-    <meta name="keywords" content="cron expression generator, cron every 5 minutes, cron job daily, cron every monday, cron aws, cron gcp, cron scheduler">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://www.devstoolsbox.dev/tools/cron-generator/">
-    <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/cron-generator/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-cron/">
-    <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/cron-generator/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cron Expression Generator and Explainer, Timezones, Overlap Detection, AWS/K8s/GitHub Actions</title>
+<meta name="description" content="Build, validate and understand cron expressions. Multi-timezone preview, overlap detection, reverse generator from plain English, and platform-specific validation for AWS EventBridge, Kubernetes CronJob, and GitHub Actions. Free, 100% client-side.">
+<meta name="keywords" content="cron expression generator, cron timezone converter, cron overlap detector, cron natural language, aws eventbridge cron, kubernetes cronjob validator, github actions cron, reverse cron generator, quartz cron 2026">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/cron-generator/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/cron-generator/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/generateur-cron/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/cron-generator/">
 
-    <meta property="og:title" content="Cron Expression Generator">
-    <meta property="og:description" content="Create and understand cron expressions with a visual builder. Next executions, presets, exports.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.devstoolsbox.dev/tools/cron-generator/">
-    <meta name="twitter:card" content="summary">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
+<meta property="og:title" content="Cron Expression Generator, Timezones, Overlap Detection, Multi-Platform">
+<meta property="og:description" content="Build cron expressions visually, preview across timezones, detect job overlaps, and validate for AWS, Kubernetes and GitHub Actions.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/cron-generator/">
+<meta property="og:site_name" content="DevToolbox">
+<meta property="og:image" content="https://www.devstoolsbox.dev/og/cron-generator-cover.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cron Expression Generator, Timezones &amp; Overlap Detection">
+<meta name="twitter:description" content="Build, validate and simulate cron schedules with timezone preview, overlap detection, and reverse generation.">
+<meta name="twitter:image" content="https://www.devstoolsbox.dev/og/cron-generator-cover.webp">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebApplication",
+  "name":"Cron Expression Generator & Explainer",
+  "url":"https://www.devstoolsbox.dev/tools/cron-generator/",
+  "description":"Build and validate cron expressions with a visual editor, preview execution times across multiple timezones simultaneously, detect job overlaps based on duration, generate expressions from plain English, and validate against AWS EventBridge, Kubernetes CronJob, and GitHub Actions specific requirements. 100% client-side.",
+  "applicationCategory":"DeveloperApplication",
+  "operatingSystem":"Any",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/tools/about/"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"How is this different from crontab.guru?","acceptedAnswer":{"@type":"Answer","text":"crontab.guru covers standard 5-field cron well, but it doesn't support multi-timezone comparison, job overlap detection, reverse generation from plain English, or platform-specific validation for AWS EventBridge, Kubernetes CronJob, and GitHub Actions. This tool adds all of those on top of the same visual builder experience."}},
+    {"@type":"Question","name":"How does the overlap detector work?","acceptedAnswer":{"@type":"Answer","text":"Enter how long your job typically takes to run. The tool calculates the interval between consecutive scheduled executions and flags a conflict if a run could still be in progress when the next one starts — the classic cause of overlapping cron job instances piling up on a busy server."}},
+    {"@type":"Question","name":"Can I see what time my cron job runs in different cities?","acceptedAnswer":{"@type":"Answer","text":"Yes. The Timezone Preview tab shows the next execution time converted simultaneously into several major timezones (Paris, New York, Tokyo, London, and others), accounting for current DST offsets. This is essential when your server runs in UTC but your team is distributed across regions."}},
+    {"@type":"Question","name":"What is the reverse generator and how do I use it?","acceptedAnswer":{"@type":"Answer","text":"Type a plain English schedule like 'every weekday at 9am' or 'every 15 minutes' into the Reverse Generator tab, and the tool converts it into a valid cron expression. It recognizes common patterns for daily, weekly, and interval-based schedules without requiring you to know cron syntax."}},
+    {"@type":"Question","name":"What platform-specific cron differences does this tool check?","acceptedAnswer":{"@type":"Answer","text":"AWS EventBridge always runs in UTC and requires a ? in either the day-of-month or day-of-week field. Kubernetes CronJob supports an explicit IANA timeZone field since v1.25 but uses standard 5-field syntax otherwise. GitHub Actions workflows always run in UTC and can be delayed during periods of high GitHub Actions load. The Multi-Platform tab checks your expression against each of these rules."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Tools","item":"https://www.devstoolsbox.dev/tools/"},
+    {"@type":"ListItem","position":3,"name":"Cron Expression Generator","item":"https://www.devstoolsbox.dev/tools/cron-generator/"}
+  ]
+}
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
@@ -31,686 +77,931 @@
   window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
   plausible.init()
 </script>
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+  --code-bg:#0f172a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:1020px;margin:0 auto}
 
-    <style>
-        /* ----- Variables & Reset (identical to French version) ----- */
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --radius: 16px;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
-        }
-        body.dark {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --primary: #3b82f6;
-            --primary-dark: #60a5fa;
-            --text: #f1f5f9;
-            --text-light: #94a3b8;
-            --border: #334155;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: background 0.2s, color 0.2s;
-        }
-        .container { max-width: 1200px; width: 100%; margin: 0 auto; }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .logo { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--primary); text-decoration: none; }
-        .header-right { display: flex; align-items: center; gap: 12px; }
-        .theme-toggle {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 40px;
-            padding: 6px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500;
-            color: var(--text-light); display: flex; align-items: center; gap: 6px;
-        }
-        .lang-switch { display: flex; gap: 6px; background: var(--surface); padding: 4px; border-radius: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .lang-btn {
-            padding: 6px 14px; border-radius: 32px; border: none; background: transparent;
-            font-weight: 500; cursor: pointer; color: var(--text-light); text-decoration: none; font-size: 0.83rem;
-        }
-        .lang-btn.active { background: var(--primary); color: white; }
+/* HEADER */
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
 
-        .tool-card {
-            background: var(--surface); border-radius: var(--radius); padding: 32px;
-            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
-        }
-        h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
-        .subhead { color: var(--text-light); margin-bottom: 28px; font-size: 1rem; }
+/* BREADCRUMB */
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
 
-        .cron-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-        @media (max-width: 800px) { .cron-layout { grid-template-columns: 1fr; } }
+/* TOOL CARD */
+.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:24px}
+h1{font-size:1.85rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:6px}
+.subhead{color:var(--text3);font-size:.88rem;margin-bottom:20px}
 
-        .panel {
-            background: var(--bg);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border);
-        }
+/* SECTION TABS */
+.section-tabs{display:flex;gap:4px;background:var(--surface2);padding:3px;border-radius:10px;border:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
+.section-tab{padding:8px 14px;border-radius:7px;border:none;background:transparent;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--text3);transition:.15s;font-family:inherit;white-space:nowrap}
+.section-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
 
-        .expression-box {
-            background: var(--surface);
-            border: 1.5px solid var(--primary);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .expression-input {
-            width: 100%;
-            font-family: 'SF Mono', monospace;
-            font-size: 1.2rem;
-            border: none;
-            background: transparent;
-            color: var(--text);
-            outline: none;
-        }
+/* EXPRESSION INPUT (shared across tabs) */
+.expr-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.cron-input{flex:1;min-width:240px;padding:12px 16px;font-family:var(--mono);font-size:1rem;font-weight:600;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);outline:none;transition:border .2s;letter-spacing:.03em}
+.cron-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.cron-input.valid{border-color:var(--pass)}
+.cron-input.invalid{border-color:var(--fail)}
+.sel{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:.8rem;cursor:pointer;outline:none}
+.sel:focus{border-color:var(--primary)}
 
-        .natural-explanation {
-            background: #eef2ff;
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin: 16px 0;
-            font-weight: 500;
-            border-left: 4px solid var(--primary);
-        }
-        body.dark .natural-explanation { background: #1e3a5f; }
+.validity-row{min-height:20px;font-size:.8rem;margin-bottom:10px}
 
-        .slider-group {
-            margin-bottom: 20px;
-        }
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-        .slider-label { font-weight: 600; font-size: 0.9rem; }
-        .slider-value { font-family: monospace; color: var(--primary); }
-        input[type="range"] { width: 100%; }
+/* PRESETS */
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.preset-chip{padding:4px 11px;border-radius:20px;font-size:.74rem;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:var(--mono);transition:.15s}
+.preset-chip:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 
-        .presets {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 20px 0;
-        }
-        .preset-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 6px 14px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: var(--text);
-        }
+/* GRID LAYOUT */
+.cron-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:800px){.cron-layout{grid-template-columns:1fr}}
+.panel{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.panel h3{font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:12px}
 
-        .next-executions {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            background: var(--surface);
-            font-family: monospace;
-            font-size: 0.85rem;
-        }
+/* SLIDERS */
+.slider-group{margin-bottom:14px}
+.slider-header{display:flex;justify-content:space-between;margin-bottom:5px}
+.slider-label{font-weight:600;font-size:.82rem;color:var(--text2)}
+.slider-value{font-family:var(--mono);color:var(--primary);font-weight:700;font-size:.82rem}
+input[type=range]{width:100%;accent-color:var(--primary)}
 
-        .stats {
-            margin-top: 16px;
-            font-size: 0.9rem;
-        }
-        .warning-badge {
-            background: var(--warning);
-            color: black;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
+/* NATURAL LANGUAGE BOX */
+.nl-box{background:var(--pass-bg);border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;font-size:.92rem;font-weight:600;color:#065f46;margin-bottom:14px}
+body.dark .nl-box{color:#6ee7b7}
 
-        .btn {
-            padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; border: none;
-            cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--text);
-            border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-primary { background: var(--primary); color: white; border-color: var(--primary-dark); }
-        .btn-primary:hover { background: var(--primary-dark); }
+/* EXEC LIST */
+.exec-list{max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.exec-item{display:flex;gap:8px;align-items:center;padding:7px 12px;border-bottom:.5px solid var(--border);font-family:var(--mono);font-size:.78rem}
+.exec-item:last-child{border-bottom:none}
+.exec-item:nth-child(even){background:var(--surface2)}
+.exec-num{color:var(--text3);min-width:22px;font-size:.7rem}
 
-        .article-section {
-            background: var(--surface); border-radius: var(--radius); padding: 32px;
-            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 32px;
-        }
-        .faq-item { margin-bottom: 24px; }
-        .faq-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+/* STATS */
+.stat-row{display:flex;justify-content:space-between;font-size:.85rem;padding:6px 0;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border-bottom:none}
+.stat-row span:last-child{font-weight:700;color:var(--primary);font-family:var(--mono)}
 
-        .footer { text-align: center; color: var(--text-light); margin-top: 24px; }
-        .toast-msg {
-            position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg);
-            padding: 10px 20px; border-radius: 40px; opacity: 0; transition: opacity 0.3s;
-            pointer-events: none; box-shadow: var(--shadow); z-index: 1000;
-        }
-        body.dark .toast-msg { color: var(--text); background: var(--surface); }
-    </style>
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:40px;font-weight:600;font-size:.83rem;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap}
+.btn:hover{background:var(--surface2);transform:translateY(-1px)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-sm{padding:6px 12px;font-size:.76rem;width:100%;justify-content:center}
+.btn-col{display:flex;flex-direction:column;gap:8px}
+
+/* TIMEZONE GRID */
+.tz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.tz-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.tz-name{font-size:.74rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.tz-time{font-family:var(--mono);font-size:1rem;font-weight:800;color:var(--primary)}
+.tz-date{font-size:.72rem;color:var(--text3);margin-top:2px}
+.tz-offset{font-size:.7rem;color:var(--text3);margin-top:4px}
+
+/* OVERLAP */
+.overlap-input-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.overlap-result{padding:16px 18px;border-radius:10px;font-size:.9rem;margin-bottom:14px}
+.overlap-result.ok{background:var(--pass-bg);border:1px solid #6ee7b7;color:#065f46}
+.overlap-result.conflict{background:var(--fail-bg);border:1px solid #fca5a5;color:#991b1b}
+body.dark .overlap-result.ok{color:#6ee7b7}
+body.dark .overlap-result.conflict{color:#fca5a5}
+.overlap-timeline{position:relative;height:70px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-top:10px}
+.overlap-bar{position:absolute;top:18px;height:34px;border-radius:6px;font-size:.68rem;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;overflow:hidden;white-space:nowrap}
+
+/* REVERSE GENERATOR */
+.reverse-input{width:100%;padding:13px 16px;font-size:.95rem;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);outline:none;margin-bottom:12px;font-family:inherit}
+.reverse-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.reverse-examples{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.reverse-result{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;display:none}
+.reverse-result.show{display:block}
+.reverse-expr{font-family:var(--mono);font-size:1.3rem;font-weight:800;color:var(--primary);margin-bottom:6px}
+
+/* PLATFORM CHECKS */
+.platform-card{border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.platform-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.platform-name{font-weight:800;font-size:.95rem}
+.platform-badge{font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+.platform-badge.ok{background:var(--pass-bg);color:#065f46}
+.platform-badge.warn{background:var(--warn-bg);color:#92400e}
+body.dark .platform-badge.ok{color:#6ee7b7}
+body.dark .platform-badge.warn{color:#fcd34d}
+.platform-notes{font-size:.83rem;color:var(--text2);line-height:1.6}
+.platform-notes code{background:var(--code-bg);color:var(--code-color);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:.85em}
+
+/* ARTICLE */
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:24px}
+.article-card h2{font-size:1.25rem;font-weight:800;margin-top:28px;margin-bottom:10px;letter-spacing:-.015em;scroll-margin-top:24px}
+.article-card h2:first-of-type{margin-top:0}
+.article-card p{color:var(--text2);margin-bottom:12px;font-size:.92rem;line-height:1.8}
+.article-card ul,.article-card ol{margin-left:20px;margin-bottom:12px;color:var(--text2)}
+.article-card li{font-size:.92rem;margin-bottom:5px;line-height:1.7}
+.article-card code{background:var(--code-bg);color:var(--code-color);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.87em}
+.article-card a{color:var(--primary)}
+.article-card a:hover{text-decoration:underline}
+.article-card strong{color:var(--text)}
+
+.plain-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0;border-radius:10px;overflow:hidden}
+.plain-table th{background:var(--surface2);padding:9px 12px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)}
+.plain-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.plain-table tr:last-child td{border-bottom:none}
+.plain-table code{background:var(--code-bg);color:var(--code-color);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:.85em}
+
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:11px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.85rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:14px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 11px;color:var(--text2);font-size:.88rem;line-height:1.8}
+
+.callout{padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0;font-size:.88rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout strong{color:var(--text)}
+
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.ref-list li{font-size:.8rem;color:var(--text3);display:flex;gap:7px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0}
+.ref-list a{color:var(--primary)}
+
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:16px 18px;margin-top:20px}
+.related-tools h3{font-size:.82rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.related-tools li a{font-size:.85rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--bg);padding:9px 20px;border-radius:40px;font-size:.84rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:1000}
+.toast.show{opacity:1}
+
+@media(max-width:600px){
+  body{padding:12px}
+  h1{font-size:1.5rem}
+  .tool-card,.article-card{padding:18px}
+}
+</style>
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <a href="/" class="logo">DevToolbox</a>
-        <div class="header-right">
-            <button class="theme-toggle" id="themeToggle">
-                <span id="themeIcon">🌙</span>
-                <span id="themeLabel">Dark</span>
-            </button>
-            <div class="lang-switch">
-                <a href="/tools/cron-generator/" class="lang-btn active">EN</a>
-                <a href="/fr/outils/generateur-cron/" class="lang-btn">FR</a>
-            </div>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/cron-generator/" class="pill-btn active">EN</a>
+      <a href="/fr/outils/generateur-cron/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tools/">Tools</a></li>
+    <li aria-current="page">Cron Expression Generator</li>
+  </ol>
+</nav>
+
+<main>
+<!-- ══════════════════════════════════════
+     TOOL CARD
+══════════════════════════════════════ -->
+<div class="tool-card">
+  <h1>Cron Expression Generator &amp; Explainer</h1>
+  <p class="subhead">Build, validate, and understand cron expressions — with multi-timezone preview, overlap detection, and platform-specific checks that crontab.guru doesn't have.</p>
+
+  <!-- SHARED EXPRESSION BAR -->
+  <div class="expr-bar">
+    <input type="text" class="cron-input" id="cronInput" value="0 9 * * 1-5" spellcheck="false" autocomplete="off" aria-label="Cron expression">
+    <select class="sel" id="cronType">
+      <option value="standard">Standard (5 fields)</option>
+      <option value="extended">With seconds (6 fields)</option>
+    </select>
+  </div>
+  <div class="validity-row" id="validityRow"></div>
+
+  <div class="presets" id="presets"></div>
+
+  <!-- SECTION TABS -->
+  <div class="section-tabs" id="sectionTabs">
+    <button class="section-tab active" data-section="builder">🛠 Builder</button>
+    <button class="section-tab" data-section="timezone">🌍 Timezones</button>
+    <button class="section-tab" data-section="overlap">⚠ Overlap Check</button>
+    <button class="section-tab" data-section="reverse">💬 Plain English</button>
+    <button class="section-tab" data-section="platforms">☁️ AWS / K8s / GH Actions</button>
+  </div>
+
+  <!-- ══ BUILDER ══ -->
+  <div id="sec-builder">
+    <div class="cron-layout">
+      <div>
+        <div class="nl-box" id="naturalExplanation">—</div>
+        <div class="panel">
+          <h3>Visual builder</h3>
+          <div id="sliderContainer"></div>
         </div>
-    </header>
-
-    <main>
-        <div class="tool-card">
-            <h1>Cron Expression Generator</h1>
-            <div class="subhead">Build, understand, and validate cron expressions. Visual builder, natural language explanation, next executions.</div>
-
-            <div class="cron-layout">
-                <!-- Left: expression and builder -->
-                <div>
-                    <div class="expression-box">
-                        <input type="text" class="expression-input" id="cronExpression" placeholder="* * * * *" value="0 9 * * 1" spellcheck="false">
-                        <div style="display: flex; gap: 8px; margin-top: 8px;">
-                            <select id="cronType" style="padding:6px 10px; border-radius:6px; background:var(--surface); color:var(--text);">
-                                <option value="standard">Standard (5 fields)</option>
-                                <option value="extended">With seconds (6 fields)</option>
-                            </select>
-                            <span id="validationBadge" class="badge-valid" style="padding:4px 12px;">Valid</span>
-                        </div>
-                    </div>
-
-                    <div class="natural-explanation" id="naturalExplanation">
-                        Every Monday at 9:00 AM
-                    </div>
-
-                    <!-- Visual builder (sliders) -->
-                    <div class="panel">
-                        <h3 style="margin-bottom:16px;">Visual Builder</h3>
-                        <div id="sliderContainer"></div>
-                    </div>
-
-                    <div class="presets">
-                        <button class="preset-btn" data-preset="0 0 * * *">Daily at midnight</button>
-                        <button class="preset-btn" data-preset="0 9 * * 1">Every Monday 9AM</button>
-                        <button class="preset-btn" data-preset="*/5 * * * *">Every 5 minutes</button>
-                        <button class="preset-btn" data-preset="0 0 1 * *">1st of month</button>
-                        <button class="preset-btn" data-preset="0 0 * * 0">Sunday midnight</button>
-                        <button class="preset-btn" data-preset="@hourly">@hourly</button>
-                        <button class="preset-btn" data-preset="@daily">@daily</button>
-                    </div>
-                </div>
-
-                <!-- Right: executions and stats -->
-                <div>
-                    <div class="panel">
-                        <h3>Next Executions</h3>
-                        <div class="next-executions" id="nextExecutionsList">
-                            Calculating...
-                        </div>
-                        <div class="stats">
-                            <div style="display:flex; justify-content:space-between;">
-                                <span>Executions per year:</span>
-                                <span id="executionsPerYear">52</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                                <span>Next:</span>
-                                <span id="nextExecutionDate">--</span>
-                            </div>
-                            <div id="execWarning" style="margin-top:12px;"></div>
-                        </div>
-                    </div>
-
-                    <div class="panel">
-                        <h3>Export</h3>
-                        <div style="display:flex; flex-direction:column; gap:8px;">
-                            <button class="btn btn-outline btn-sm" data-copy="linux">📋 Copy for Linux (crontab)</button>
-                            <button class="btn btn-outline btn-sm" data-copy="docker">📋 Copy for Docker</button>
-                            <button class="btn btn-outline btn-sm" data-copy="aws">📋 Copy for AWS (6 fields)</button>
-                            <button class="btn btn-outline btn-sm" data-copy="gcp">📋 Copy for GCP</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div>
+        <div class="panel" style="margin-bottom:14px">
+          <h3>Next 10 executions</h3>
+          <div class="exec-list" id="execList"></div>
         </div>
-
-        <!-- FAQ SECTION -->
-                <section class="article-section">
-    <h2>Understanding Cron Expressions</h2>
-    <p>
-        A cron expression is a string used to schedule recurring tasks automatically. 
-        It is widely used in Linux servers, cloud platforms like AWS, and backend systems. 
-        This cron generator helps you build and validate expressions easily without errors.
-    </p>
-    
-    <h3>Frequently Asked Questions</h3>
-
-    <div class="faq-item">
-        <div class="faq-question">What is a cron expression?</div>
-        <p>A cron expression is a schedule format made of 5 or 6 fields that define when a task should run. It is commonly used for automation tasks like backups, scripts, or scheduled jobs.</p>
+        <div class="panel">
+          <h3>Stats</h3>
+          <div class="stat-row"><span>Runs per year (est.)</span><span id="yearlyStat">—</span></div>
+          <div class="stat-row"><span>Detected format</span><span id="formatStat">—</span></div>
+          <div class="btn-col" style="margin-top:14px">
+            <button class="btn btn-sm" data-copy="linux">📋 Copy for Linux crontab</button>
+            <button class="btn btn-sm" data-copy="docker">📋 Copy for Docker label</button>
+            <button class="btn btn-sm" data-copy="aws">📋 Copy for AWS (6 fields, UTC)</button>
+            <button class="btn btn-sm" data-copy="k8s">📋 Copy for Kubernetes CronJob</button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="faq-item">
-        <div class="faq-question">What is the difference between Linux cron and AWS cron?</div>
-        <p>Linux cron uses 5 fields: minute, hour, day of month, month, and day of week. AWS (CloudWatch Events) adds a sixth field for seconds and supports additional features like year and special characters.</p>
+  <!-- ══ TIMEZONES ══ -->
+  <div id="sec-timezone" style="display:none">
+    <p style="font-size:.85rem;color:var(--text3);margin-bottom:14px">Your expression's next execution, shown simultaneously in major timezones. Assumes the expression itself runs in <strong>UTC</strong> — typical for cloud schedulers.</p>
+    <div class="tz-grid" id="tzGrid"></div>
+  </div>
+
+  <!-- ══ OVERLAP ══ -->
+  <div id="sec-overlap" style="display:none">
+    <p style="font-size:.85rem;color:var(--text3);margin-bottom:10px">Enter how long your job typically takes to run. The tool checks whether a run could still be in progress when the next one is scheduled to start.</p>
+    <div class="overlap-input-row">
+      <label class="opt-label" style="font-size:.8rem;color:var(--text3);font-weight:600">Job duration</label>
+      <input type="number" class="sel" id="jobDuration" value="5" min="0" style="width:80px">
+      <select class="sel" id="jobDurationUnit">
+        <option value="seconds">seconds</option>
+        <option value="minutes" selected>minutes</option>
+        <option value="hours">hours</option>
+      </select>
+      <button class="btn btn-primary btn-sm" id="checkOverlapBtn" style="width:auto">Check overlap</button>
     </div>
+    <div id="overlapOutput"></div>
+  </div>
 
-    <div class="faq-item">
-        <div class="faq-question">How do I run a cron job every 5 minutes?</div>
-        <p>Use <code>*/5 * * * *</code>. The <code>*/5</code> syntax means "every 5 minutes".</p>
-    </div>
+  <!-- ══ REVERSE GENERATOR ══ -->
+  <div id="sec-reverse" style="display:none">
+    <p style="font-size:.85rem;color:var(--text3);margin-bottom:10px">Describe your schedule in plain English — no cron syntax required.</p>
+    <input type="text" class="reverse-input" id="reverseInput" placeholder="e.g. every weekday at 9am, every 15 minutes, every Sunday at midnight" autocomplete="off">
+    <div class="reverse-examples" id="reverseExamples"></div>
+    <button class="btn btn-primary" id="reverseGenBtn">💬 Generate expression</button>
+    <div class="reverse-result" id="reverseResult"></div>
+  </div>
 
-    <div class="faq-item">
-        <div class="faq-question">How do I run a cron job every day?</div>
-        <p>Use <code>0 0 * * *</code> to run a task every day at midnight.</p>
-    </div>
+  <!-- ══ PLATFORMS ══ -->
+  <div id="sec-platforms" style="display:none">
+    <p style="font-size:.85rem;color:var(--text3);margin-bottom:14px">Each platform has subtle rule differences. Here's how your current expression fares on each one.</p>
+    <div id="platformChecks"></div>
+  </div>
 
-    <div class="faq-item">
-        <div class="faq-question">What do special values like @hourly or @daily mean?</div>
-        <p>These are shortcuts (macros). For example: <code>@hourly</code> = "0 * * * *", <code>@daily</code> = "0 0 * * *", <code>@weekly</code> = "0 0 * * 0".</p>
-    </div>
+</div><!-- /tool-card -->
 
-    <div class="faq-item">
-        <div class="faq-question">What are the valid ranges for cron fields?</div>
-        <p>Minute: 0–59, Hour: 0–23, Day of month: 1–31, Month: 1–12, Day of week: 0–7 (0 and 7 both represent Sunday).</p>
-    </div>
+<!-- ══════════════════════════════════════
+     ARTICLE
+══════════════════════════════════════ -->
+<section class="article-card">
+  <h2>Why this tool exists alongside crontab.guru</h2>
+  <p>crontab.guru is excellent at one thing: explaining a standard 5-field cron expression in plain English. It does that well and has earned its place as the go-to quick reference. But production cron usage today rarely stops at "what does this mean" — teams run jobs across timezone-distributed servers, schedule on platforms with their own quirks (AWS forces UTC, Kubernetes wants an explicit IANA timezone, GitHub Actions can silently delay runs), and need to know before deploying whether two overlapping schedules will collide.</p>
+  <p>This tool keeps the visual builder experience you'd expect, then adds the five capabilities below that solve real deployment problems rather than just syntax questions.</p>
 
-    <div class="faq-item">
-        <div class="faq-question">How do I schedule a cron job on weekdays only?</div>
-        <p>Use <code>0 9 * * 1-5</code> to run a task at 9 AM from Monday to Friday.</p>
-    </div>
+  <h2>Multi-timezone preview</h2>
+  <p>A cron expression has no inherent timezone — the same <code>0 9 * * 1-5</code> means 9 AM wherever the scheduler's clock is set. If your team is split between Paris, New York, and Tokyo, "9 AM" needs a frame of reference. The Timezones tab computes the next run and displays it converted into each major timezone simultaneously, using the browser's <code>Intl.DateTimeFormat</code> API so DST offsets are always current.</p>
 
-    <div class="faq-item">
-        <div class="faq-question">Can I test or validate a cron expression?</div>
-        <p>Yes, our tool validates your cron expression in real time and shows upcoming execution times to help you avoid errors.</p>
-    </div>
+  <h2>Overlap detection — the silent server killer</h2>
+  <p>A job scheduled every 15 minutes that takes 20 minutes to run doesn't fail — it queues up. After a few hours, a server can be running a dozen overlapping instances of the same job, exhausting database connections or memory. The Overlap Check tab asks for your job's typical duration and compares it against the actual interval between scheduled runs, flagging a conflict before you find out the hard way in production.</p>
 
-    <div class="faq-item">
-        <div class="faq-question">Why is my cron job not running?</div>
-        <p>Common issues include incorrect syntax, timezone problems, missing permissions, or the cron service not running on your system.</p>
-    </div>
+  <h2>Reverse generation from plain English</h2>
+  <p>Not every developer who needs a cron expression wants to learn cron syntax first. The Plain English tab recognizes common phrasings — "every weekday at 9am", "every 15 minutes", "every Sunday at midnight", "twice a day at 8am and 6pm" — and converts them directly into a valid expression. It's not a full natural-language parser, but it covers the schedules that account for the vast majority of real-world cron usage.</p>
 
-    <div class="faq-item">
-        <div class="faq-question">Is my data sent to a server?</div>
-        <p>No, everything runs locally in your browser. Your cron expressions are never sent or stored on any server.</p>
-    </div>
+  <h2>Platform-specific validation</h2>
+  <div style="overflow-x:auto">
+  <table class="plain-table">
+    <thead><tr><th>Platform</th><th>Key difference</th><th>Common trap</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AWS EventBridge</strong></td><td>6 fields, always UTC, requires <code>?</code> in day-of-month or day-of-week</td><td>Forgetting the UTC offset when migrating from a local-time crontab</td></tr>
+      <tr><td><strong>Kubernetes CronJob</strong></td><td>Standard 5 fields, optional <code>spec.timeZone</code> since v1.25</td><td>Assuming the cluster's system timezone applies without setting <code>timeZone</code> explicitly</td></tr>
+      <tr><td><strong>GitHub Actions</strong></td><td>Standard 5 fields, always UTC, <code>schedule:</code> trigger in workflow YAML</td><td>Runs can be delayed by several minutes during periods of high platform load — never rely on exact timing</td></tr>
+    </tbody>
+  </table>
+  </div>
 
+  <h2>Frequently asked questions</h2>
+  <div>
+    <details class="faq-item">
+      <summary>How is this different from crontab.guru?</summary>
+      <div class="faq-answer">crontab.guru covers standard 5-field cron well, but it doesn't support multi-timezone comparison, job overlap detection, reverse generation from plain English, or platform-specific validation for AWS EventBridge, Kubernetes CronJob, and GitHub Actions. This tool adds all of those on top of the same visual builder experience.</div>
+    </details>
+    <details class="faq-item">
+      <summary>How does the overlap detector work?</summary>
+      <div class="faq-answer">Enter how long your job typically takes to run. The tool calculates the interval between consecutive scheduled executions and flags a conflict if a run could still be in progress when the next one starts — the classic cause of overlapping cron job instances piling up on a busy server.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Can I see what time my cron job runs in different cities?</summary>
+      <div class="faq-answer">Yes. The Timezone Preview tab shows the next execution time converted simultaneously into several major timezones (Paris, New York, Tokyo, London, and others), accounting for current DST offsets. This is essential when your server runs in UTC but your team is distributed across regions.</div>
+    </details>
+    <details class="faq-item">
+      <summary>What is the reverse generator and how do I use it?</summary>
+      <div class="faq-answer">Type a plain English schedule like "every weekday at 9am" or "every 15 minutes" into the Plain English tab, and the tool converts it into a valid cron expression. It recognizes common patterns for daily, weekly, and interval-based schedules without requiring you to know cron syntax.</div>
+    </details>
+    <details class="faq-item">
+      <summary>What platform-specific cron differences does this tool check?</summary>
+      <div class="faq-answer">AWS EventBridge always runs in UTC and requires a <code>?</code> in either the day-of-month or day-of-week field. Kubernetes CronJob supports an explicit IANA <code>timeZone</code> field since v1.25 but uses standard 5-field syntax otherwise. GitHub Actions workflows always run in UTC and can be delayed during periods of high GitHub Actions load. The Platforms tab checks your expression against each of these rules.</div>
+    </details>
+  </div>
+
+  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+    <h3 style="font-size:.82rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">References</h3>
+    <ul class="ref-list">
+      <li><a href="https://www.man7.org/linux/man-pages/man5/crontab.5.html" target="_blank" rel="noopener">crontab(5) — Linux man page</a></li>
+      <li><a href="https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html" target="_blank" rel="noopener">AWS EventBridge — Scheduled rules</a></li>
+      <li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/" target="_blank" rel="noopener">Kubernetes Documentation — CronJob</a></li>
+      <li><a href="https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule" target="_blank" rel="noopener">GitHub Actions — schedule event documentation</a></li>
+      <li><a href="https://www.iana.org/time-zones" target="_blank" rel="noopener">IANA Time Zone Database</a></li>
+    </ul>
+  </div>
+
+  <div class="related-tools">
+    <h3>Related tools</h3>
+    <ul>
+      <li><a href="/tools/cron-expression-evaluator/">→ Cron Expression Evaluator</a> — deep validation with OR-trap detection, calendar view, CSV/JSON/iCal export</li>
+      <li><a href="/tools/unix-timestamp-converter/">→ Unix Timestamp Converter</a> — convert epoch timestamps from your cron logs</li>
+      <li><a href="/tools/blog/cron-expression-generator-guide/">→ Cron Expressions: Complete Guide</a> — operators, OR trap, DST pitfalls, systemd timers</li>
+      <li><a href="/tools/blog/cron-generator-guide/">→ Build &amp; Deploy a Real Cron Job</a> — from writing the script to monitoring it in production</li>
+      <li><a href="/tools/env-validator/">→ .env Validator</a> — check the environment variables your cron scripts depend on</li>
+    </ul>
+  </div>
 </section>
-            
-    </main>
+</main>
 
-    <footer class="footer">
-        <p>© 2025 DevToolbox — 100% client-side tools for developers and sysadmins.</p>
-    </footer>
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers.
+  <a href="/tools/blog/">Blog</a> | <a href="/tools/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
 </div>
 
-<div id="toast" class="toast-msg">Copied!</div>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Cron Expression Generator",
-  "url": "https://www.devstoolsbox.dev/tools/cron-generator/",
-  "description": "Create and validate cron expressions with a visual builder. Natural language explanation, next executions.",
-  "applicationCategory": "DeveloperApplication"
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What is a cron expression?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A cron expression is a schedule format made of 5 or 6 fields that define when a task should run. It is commonly used for automation tasks like backups, scripts, or scheduled jobs."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is the difference between Linux cron and AWS cron?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Linux cron uses 5 fields while AWS cron uses 6 fields including seconds and supports additional features like year and special characters."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How do I run a cron job every 5 minutes?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Use the expression */5 * * * * to run a task every 5 minutes."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How do I run a cron job every day?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Use the expression 0 0 * * * to run a task every day at midnight."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What do special values like @hourly or @daily mean?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "These are macros where @hourly equals 0 * * * * and @daily equals 0 0 * * *."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What are the valid ranges for cron fields?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Minute ranges from 0 to 59, hour from 0 to 23, day of month from 1 to 31, month from 1 to 12, and day of week from 0 to 7 where both 0 and 7 represent Sunday."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How do I schedule a cron job on weekdays only?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Use 0 9 * * 1-5 to run a task at 9 AM from Monday to Friday."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I test or validate a cron expression?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, this tool validates cron expressions in real time and shows upcoming execution times."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Why is my cron job not running?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Common issues include incorrect syntax, timezone configuration, missing permissions, or the cron service not running."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is my data secure?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, all processing is done locally in your browser and no data is sent to any server."
-      }
-    }
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
-    { "@type": "ListItem", "position": 2, "name": "Tools", "item": "https://www.devstoolsbox.dev/tools/" },
-    { "@type": "ListItem", "position": 3, "name": "Cron Generator", "item": "https://www.devstoolsbox.dev/tools/cron-generator/" }
-  ]
-}
-</script>
+<div class="toast" id="toast"></div>
 
 <script>
-(function(){
-    // Theme
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const themeLabel = document.getElementById('themeLabel');
-    let currentTheme = localStorage.getItem('devtoolbox-theme') || 'auto';
-    function applyTheme(t) {
-        document.body.classList.remove('dark', 'light');
-        if (t === 'dark') { document.body.classList.add('dark'); themeIcon.textContent = '☀️'; themeLabel.textContent = 'Light'; }
-        else if (t === 'light') { document.body.classList.remove('dark'); themeIcon.textContent = '🌙'; themeLabel.textContent = 'Dark'; }
-        else { const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.classList.toggle('dark', prefersDark); themeIcon.textContent = prefersDark ? '☀️' : '🌙'; themeLabel.textContent = prefersDark ? 'Light' : 'Dark'; }
-        localStorage.setItem('devtoolbox-theme', t); currentTheme = t;
+(function () {
+'use strict';
+
+/* ── THEME ── */
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+window.toggleTheme = toggleTheme;
+(function () {
+  const s = localStorage.getItem('devtoolbox-theme') ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (s === 'dark') { document.body.classList.add('dark'); document.getElementById('themeBtn').textContent = '☀️ Light'; }
+})();
+
+/* ── TOAST ── */
+function toast(msg, dur = 1800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), dur);
+}
+async function copyText(text, label = 'Copied!') {
+  try { await navigator.clipboard.writeText(text); toast('✅ ' + label); }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); toast('✅ ' + label);
+  }
+}
+
+/* ── SECTION SWITCHING ── */
+const sections = ['builder', 'timezone', 'overlap', 'reverse', 'platforms'];
+function showSection(name) {
+  sections.forEach(s => { document.getElementById(`sec-${s}`).style.display = s === name ? '' : 'none'; });
+  document.querySelectorAll('.section-tab').forEach(t => t.classList.toggle('active', t.dataset.section === name));
+  if (name === 'timezone') renderTimezones();
+  if (name === 'platforms') renderPlatformChecks();
+}
+document.querySelectorAll('.section-tab').forEach(t => t.addEventListener('click', () => showSection(t.dataset.section)));
+
+/* ── PRESETS ── */
+const PRESETS = [
+  ['Daily midnight', '0 0 * * *'],
+  ['Weekdays 9AM',   '0 9 * * 1-5'],
+  ['Every 5 min',    '*/5 * * * *'],
+  ['Every 15min 8-5','*/15 8-17 * * 1-5'],
+  ['Monthly 1st',    '0 0 1 * *'],
+  ['Sunday midnight','0 0 * * 0'],
+  ['@hourly',        '@hourly'],
+  ['@daily',         '@daily'],
+];
+const presetsEl = document.getElementById('presets');
+PRESETS.forEach(([label, expr]) => {
+  const b = document.createElement('button');
+  b.className = 'preset-chip'; b.textContent = label; b.title = expr;
+  b.addEventListener('click', () => { cronInput.value = expr; updateAll(); });
+  presetsEl.appendChild(b);
+});
+
+/* ── MACROS ── */
+const MACROS = { '@hourly':'0 * * * *','@daily':'0 0 * * *','@weekly':'0 0 * * 0','@monthly':'0 0 1 * *','@yearly':'0 0 1 1 *' };
+
+/* ── PARSER ── */
+function parseToken(token, min, max) {
+  if (token === '*') return { type: 'all' };
+  if (token === '?') return { type: 'all' };
+  if (token.startsWith('*/')) {
+    const step = parseInt(token.slice(2));
+    if (!isNaN(step) && step >= 1) return { type: 'step', step, start: min, end: max };
+    return null;
+  }
+  const parts = token.split(',');
+  const values = [];
+  for (const p of parts) {
+    if (p.includes('-')) {
+      const [a, b] = p.split('-').map(Number);
+      if (isNaN(a) || isNaN(b)) return null;
+      for (let v = a; v <= b; v++) values.push(v);
+    } else {
+      const v = parseInt(p);
+      if (isNaN(v)) return null;
+      values.push(v);
     }
-    themeToggle.addEventListener('click', ()=> applyTheme(currentTheme === 'dark' ? 'light' : 'dark'));
-    applyTheme(currentTheme);
+  }
+  for (const v of values) if (v < min || v > max) return null;
+  return { type: 'list', values: [...new Set(values)].sort((a,b)=>a-b) };
+}
 
-    // Toast
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.textContent = msg; t.style.opacity = '1';
-        setTimeout(() => t.style.opacity = '0', 2000);
+function parseExpression(rawExpr, extended) {
+  let expr = rawExpr.trim();
+  if (MACROS[expr.toLowerCase()]) { expr = MACROS[expr.toLowerCase()]; extended = false; }
+  const parts = expr.split(/\s+/);
+  const required = extended ? 6 : 5;
+  if (parts.length !== required) return { error: `Expected ${required} fields, got ${parts.length}` };
+  const ranges = extended
+    ? [[0,59],[0,59],[0,23],[1,31],[1,12],[0,7]]
+    : [[0,59],[0,23],[1,31],[1,12],[0,7]];
+  const parsed = [];
+  for (let i = 0; i < required; i++) {
+    const [min, max] = ranges[i];
+    const f = parseToken(parts[i], min, max);
+    if (!f) return { error: `Invalid value in field ${i+1}: "${parts[i]}"` };
+    parsed.push(f);
+  }
+  return { parsed, extended, error: null };
+}
+
+function matchField(value, field) {
+  if (!field || field.type === 'all') return true;
+  if (field.type === 'step') return value >= field.start && value <= field.end && (value - field.start) % field.step === 0;
+  if (field.type === 'list') return field.values.includes(value);
+  return false;
+}
+
+/* ── DATE HELPERS ── */
+function nextMinute(d) { d.setMinutes(d.getMinutes()+1,0,0); }
+function nextHour(d) { d.setHours(d.getHours()+1,0,0,0); }
+function nextDay(d) { d.setDate(d.getDate()+1); d.setHours(0,0,0,0); }
+function nextMonth(d) { d.setMonth(d.getMonth()+1,1); d.setHours(0,0,0,0); }
+
+function dateInTz(date, tz) {
+  try {
+    const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false });
+    const p = Object.fromEntries(fmt.formatToParts(date).map(x => [x.type, x.value]));
+    return new Date(`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}`);
+  } catch { return date; }
+}
+
+function generateOccurrences(parseResult, count, tz) {
+  const { parsed, extended } = parseResult;
+  const hasSeconds = extended;
+  let secIdx=-1, minIdx, hrIdx, domIdx, monIdx, dowIdx;
+  if (hasSeconds) { secIdx=0; minIdx=1; hrIdx=2; domIdx=3; monIdx=4; dowIdx=5; }
+  else { minIdx=0; hrIdx=1; domIdx=2; monIdx=3; dowIdx=4; }
+  const secField = secIdx>=0?parsed[secIdx]:null;
+  const minField=parsed[minIdx], hrField=parsed[hrIdx], domField=parsed[domIdx], monField=parsed[monIdx], dowField=parsed[dowIdx];
+  const orTrap = domField.type!=='all' && dowField.type!=='all';
+
+  const results = [];
+  const current = new Date();
+  current.setSeconds(0,0);
+  if (!hasSeconds) current.setMinutes(current.getMinutes()+1);
+  else current.setSeconds(current.getSeconds()+1,0);
+
+  let loops=0; const maxLoops = count*20000;
+  while (results.length < count && loops < maxLoops) {
+    loops++;
+    const tzD = tz ? dateInTz(current, tz) : current;
+    const sec=tzD.getSeconds(), min=tzD.getMinutes(), hr=tzD.getHours(), dom=tzD.getDate(), mon=tzD.getMonth()+1, dow=tzD.getDay();
+    if (!matchField(mon, monField)) { nextMonth(current); continue; }
+    const domMatch = matchField(dom, domField), dowMatch = matchField(dow, dowField);
+    const dayOk = orTrap ? (domMatch||dowMatch) : (domMatch&&dowMatch);
+    if (!dayOk) { nextDay(current); continue; }
+    if (!matchField(hr, hrField)) { nextHour(current); continue; }
+    if (!matchField(min, minField)) { nextMinute(current); continue; }
+    if (hasSeconds && secField && !matchField(sec, secField)) { current.setSeconds(current.getSeconds()+1,0); continue; }
+    results.push(new Date(current));
+    if (hasSeconds) current.setSeconds(current.getSeconds()+1,0);
+    else nextMinute(current);
+  }
+  return results;
+}
+
+function naturalLanguage(parseResult) {
+  const { parsed, extended } = parseResult;
+  const minIdx = extended?1:0, hrIdx=extended?2:1, domIdx=extended?3:2, monIdx=extended?4:3, dowIdx=extended?5:4;
+  const min=parsed[minIdx], hr=parsed[hrIdx], dom=parsed[domIdx], mon=parsed[monIdx], dow=parsed[dowIdx];
+  const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  let timePart;
+  if (hr.type==='all' && min.type==='all') timePart='every minute';
+  else if (hr.type==='all' && min.type==='step') timePart=`every ${min.step} minutes`;
+  else if (hr.type==='list' && min.type==='list') {
+    timePart = 'at ' + hr.values.flatMap(h=>min.values.map(m=>`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`)).join(', ');
+  } else if (hr.type==='step') timePart = `every ${hr.step} hours`;
+  else timePart = 'at the scheduled time';
+
+  let dowPart = null;
+  if (dow.type==='list') {
+    if (JSON.stringify(dow.values)===JSON.stringify([1,2,3,4,5])) dowPart='on weekdays';
+    else if (dow.values.length===1) dowPart=`on ${DAYS[dow.values[0]%7]}s`;
+    else dowPart=`on ${dow.values.map(d=>DAYS[d%7]).join(', ')}`;
+  }
+  let domPart = null;
+  if (dom.type==='list') domPart = dom.values.length===1 ? `on day ${dom.values[0]}` : `on days ${dom.values.join(', ')}`;
+  let monPart = null;
+  if (mon.type==='list') monPart = mon.values.length===1 ? `in ${MONTHS[mon.values[0]]}` : `in ${mon.values.map(v=>MONTHS[v]).join(', ')}`;
+
+  let s = timePart.charAt(0).toUpperCase()+timePart.slice(1);
+  if (dowPart||domPart) s += `, ${dowPart||domPart}`;
+  if (monPart) s += `, ${monPart}`;
+  return s + '.';
+}
+
+function estimateYearly(parseResult) {
+  const { parsed, extended } = parseResult;
+  const minIdx = extended?1:0, hrIdx=extended?2:1, domIdx=extended?3:2, monIdx=extended?4:3;
+  function count(f, total) {
+    if (!f || f.type==='all') return total;
+    if (f.type==='step') return Math.floor(total/f.step);
+    if (f.type==='list') return f.values.length;
+    return 1;
+  }
+  const minPer=count(parsed[minIdx],60), hrPer=count(parsed[hrIdx],24), domPer=count(parsed[domIdx],30), monPer=count(parsed[monIdx],12);
+  return (minPer*hrPer*domPer*monPer).toLocaleString();
+}
+
+/* ── STATE ── */
+const cronInput = document.getElementById('cronInput');
+const cronType = document.getElementById('cronType');
+let lastParseResult = null;
+
+/* ── SLIDERS (Builder tab) ── */
+const FIELD_NAMES_STD = ['Minute','Hour','Day of month','Month','Day of week'];
+const FIELD_RANGES_STD = [[0,59],[0,23],[1,31],[1,12],[0,7]];
+function buildSliders(parts, extended) {
+  const names = extended ? ['Second',...FIELD_NAMES_STD] : FIELD_NAMES_STD;
+  const ranges = extended ? [[0,59],...FIELD_RANGES_STD] : FIELD_RANGES_STD;
+  let html = '';
+  names.forEach((name,i) => {
+    const field = parts[i];
+    let displayVal = '*';
+    if (field) {
+      if (field.type==='all') displayVal='*';
+      else if (field.type==='step') displayVal=`*/${field.step}`;
+      else if (field.type==='list') displayVal=field.values.join(',');
     }
-    async function copyText(text) { try { await navigator.clipboard.writeText(text); showToast('Copied!'); } catch { showToast('Copy failed'); } }
-
-    // DOM Elements
-    const cronInput = document.getElementById('cronExpression');
-    const cronType = document.getElementById('cronType');
-    const validationBadge = document.getElementById('validationBadge');
-    const naturalExplanation = document.getElementById('naturalExplanation');
-    const nextExecutionsList = document.getElementById('nextExecutionsList');
-    const executionsPerYearSpan = document.getElementById('executionsPerYear');
-    const nextExecutionDateSpan = document.getElementById('nextExecutionDate');
-    const execWarning = document.getElementById('execWarning');
-    const sliderContainer = document.getElementById('sliderContainer');
-
-    const FIELD_NAMES = ['Minute', 'Hour', 'Day of Month', 'Month', 'Day of Week'];
-    const FIELD_RANGES = [[0,59], [0,23], [1,31], [1,12], [0,7]];
-    const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-    function buildSliders(parts) {
-        const extended = cronType.value === 'extended';
-        const allFields = extended 
-            ? ['Second', ...FIELD_NAMES] 
-            : FIELD_NAMES;
-        const allRanges = extended 
-            ? [[0,59], ...FIELD_RANGES] 
-            : FIELD_RANGES;
-        
-        let html = '';
-        allFields.forEach((name, idx) => {
-            const val = parts[idx] || '*';
-            const range = allRanges[idx];
-            html += `<div class="slider-group">
-                <div class="slider-header">
-                    <span class="slider-label">${name}</span>
-                    <span class="slider-value" id="sliderVal${idx}">${val}</span>
-                </div>
-                <input type="range" min="${range[0]}" max="${range[1]}" value="${val === '*' ? range[0] : val}" step="1" data-field="${idx}" class="cron-slider">
-            </div>`;
-        });
-        sliderContainer.innerHTML = html;
-
-        document.querySelectorAll('.cron-slider').forEach(slider => {
-            slider.addEventListener('input', function() {
-                const fieldIdx = parseInt(this.dataset.field);
-                const newVal = this.value;
-                const currentParts = cronInput.value.trim().split(/\s+/);
-                const extended = cronType.value === 'extended';
-                const totalFields = extended ? 6 : 5;
-                
-                while (currentParts.length < totalFields) currentParts.push('*');
-                currentParts[fieldIdx] = newVal;
-                cronInput.value = currentParts.join(' ');
-                updateUI();
-            });
-        });
-    }
-
-    function parseCron(expr) {
-        expr = expr.trim();
-        const macros = { '@hourly':'0 * * * *', '@daily':'0 0 * * *', '@weekly':'0 0 * * 0', '@monthly':'0 0 1 * *', '@yearly':'0 0 1 1 *' };
-        if (macros[expr]) expr = macros[expr];
-        
-        const parts = expr.split(/\s+/);
-        const extended = cronType.value === 'extended';
-        const required = extended ? 6 : 5;
-        
-        if (parts.length !== required) return { valid: false, error: `Expected ${required} fields` };
-        
-        const ranges = extended ? [[0,59],[0,59],[0,23],[1,31],[1,12],[0,7]] : [[0,59],[0,23],[1,31],[1,12],[0,7]];
-        for (let i=0; i<required; i++) {
-            const part = parts[i];
-            const range = ranges[i];
-            if (!/^(\*|(\*\/)?\d+(-\d+)?(,\d+(-\d+)?)*)$/.test(part) && part !== '*') {
-                return { valid: false, error: `Invalid token in field ${i+1}` };
-            }
-        }
-        return { valid: true, parts };
-    }
-
-    function generateExplanation(parts, extended) {
-        const offset = extended ? 1 : 0;
-        const min = parts[offset] || '*';
-        const hour = parts[offset+1] || '*';
-        const day = parts[offset+2] || '*';
-        const month = parts[offset+3] || '*';
-        const dow = parts[offset+4] || '*';
-        
-        if (min === '*' && hour === '*' && day === '*' && month === '*' && dow === '*') return 'Every minute';
-        let text = '';
-        if (min.startsWith('*/')) text = `Every ${min.split('/')[1]} minutes`;
-        else if (min !== '*') text = `At minute ${min}`;
-        
-        if (hour !== '*') text += (text?', ':'') + `at ${hour}:00`;
-        if (day !== '*') text += ` on day ${day}`;
-        if (month !== '*') text += ` in ${MONTH_NAMES[month-1] || month}`;
-        if (dow !== '*') {
-            const days = dow.split(',').map(d => DAY_NAMES[d] || d).join(',');
-            text += ` on ${days}`;
-        }
-        return text || 'Custom schedule';
-    }
-
-    function computeNextExecutions(expr, extended) {
-        const now = new Date();
-        const executions = [];
-        let current = new Date(now);
-        const parts = expr.split(/\s+/);
-        const baseIdx = extended ? 1 : 0;
-        const minutePart = parts[baseIdx] || '*';
-        const hourPart = parts[baseIdx+1] || '*';
-        
-        if (!minutePart.includes('*') && !hourPart.includes('*')) {
-            const minute = parseInt(minutePart);
-            const hour = parseInt(hourPart);
-            for (let i=0; i<10; i++) {
-                const d = new Date(current);
-                d.setMinutes(minute);
-                d.setHours(hour);
-                d.setSeconds(0);
-                if (d <= now) d.setDate(d.getDate()+1);
-                current = new Date(d.getTime() + 24*60*60*1000);
-                executions.push(d);
-            }
-        } else {
-            for (let i=0; i<10; i++) {
-                const d = new Date(current);
-                d.setMinutes(0);
-                d.setHours(d.getHours()+1);
-                current = d;
-                executions.push(d);
-            }
-        }
-        return executions;
-    }
-
-    function estimateYearlyExecutions(parts, extended) {
-        return Math.round(525600 / estimateIntervalMinutes(parts, extended));
-    }
-
-    function estimateIntervalMinutes(parts, extended) {
-        const minPart = parts[extended?1:0];
-        if (minPart.startsWith('*/')) return parseInt(minPart.split('/')[1]);
-        return 60;
-    }
-
-    function updateUI() {
-        const expr = cronInput.value.trim();
-        const extended = cronType.value === 'extended';
-        const validation = parseCron(expr);
-        
-        if (validation.valid) {
-            validationBadge.textContent = 'Valid';
-            validationBadge.style.background = '#dcfce7';
-            validationBadge.style.color = '#15803d';
-            
-            const parts = validation.parts;
-            buildSliders(parts);
-            const explanation = generateExplanation(parts, extended);
-            naturalExplanation.textContent = explanation;
-            
-            const executions = computeNextExecutions(expr, extended);
-            nextExecutionsList.innerHTML = executions.map(d => d.toLocaleString('en-US')).join('<br>');
-            if (executions.length) nextExecutionDateSpan.textContent = executions[0].toLocaleString('en-US');
-            
-            const yearly = Math.round(estimateYearlyExecutions(parts, extended));
-            executionsPerYearSpan.textContent = yearly;
-            if (yearly > 8760) execWarning.innerHTML = '<span class="warning-badge">Warning: more than once per hour!</span>';
-            else execWarning.innerHTML = '';
-        } else {
-            validationBadge.textContent = 'Invalid';
-            validationBadge.style.background = '#fee2e2';
-            validationBadge.style.color = '#991b1b';
-            naturalExplanation.textContent = 'Invalid expression';
-        }
-    }
-
-    cronInput.addEventListener('input', updateUI);
-    cronType.addEventListener('change', updateUI);
-    
-    document.querySelectorAll('[data-preset]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            cronInput.value = btn.dataset.preset;
-            updateUI();
-        });
+    const sliderVal = field && field.type==='list' ? field.values[0] : ranges[i][0];
+    html += `<div class="slider-group">
+      <div class="slider-header"><span class="slider-label">${name}</span><span class="slider-value" id="sv${i}">${displayVal}</span></div>
+      <input type="range" min="${ranges[i][0]}" max="${ranges[i][1]}" value="${sliderVal}" data-idx="${i}" class="cron-slider">
+    </div>`;
+  });
+  document.getElementById('sliderContainer').innerHTML = html;
+  document.querySelectorAll('.cron-slider').forEach(s => {
+    s.addEventListener('input', function() {
+      const idx = parseInt(this.dataset.idx);
+      const current = cronInput.value.trim().split(/\s+/);
+      const total = extended ? 6 : 5;
+      while (current.length < total) current.push('*');
+      current[idx] = this.value;
+      cronInput.value = current.join(' ');
+      document.getElementById(`sv${idx}`).textContent = this.value;
+      updateAll(false);
     });
+  });
+}
 
-    document.querySelectorAll('[data-copy]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            let expr = cronInput.value;
-            const type = btn.dataset.copy;
-            if (type === 'aws' || type === 'gcp') {
-                if (cronType.value !== 'extended') {
-                    expr = '0 ' + expr;
-                }
-            }
-            copyText(expr);
-        });
-    });
+/* ── MAIN UPDATE ── */
+function updateAll(rebuildSliders = true) {
+  const expr = cronInput.value;
+  const extended = cronType.value === 'extended';
+  const pr = parseExpression(expr, extended);
+  const validRow = document.getElementById('validityRow');
 
-    updateUI();
+  if (pr.error) {
+    cronInput.classList.add('invalid'); cronInput.classList.remove('valid');
+    validRow.innerHTML = `<span style="color:var(--fail)">❌ ${pr.error}</span>`;
+    lastParseResult = null;
+    return;
+  }
+  cronInput.classList.add('valid'); cronInput.classList.remove('invalid');
+  validRow.innerHTML = `<span style="color:var(--pass)">✅ Valid expression</span>`;
+  lastParseResult = pr;
+
+  if (rebuildSliders) buildSliders(pr.parsed, pr.extended);
+
+  document.getElementById('naturalExplanation').textContent = naturalLanguage(pr);
+  const occs = generateOccurrences(pr, 10);
+  document.getElementById('execList').innerHTML = occs.map((d,i) =>
+    `<div class="exec-item"><span class="exec-num">#${i+1}</span><span>${d.toLocaleString('en-US',{weekday:'short',year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false})}</span></div>`
+  ).join('') || '<div class="exec-item">No occurrences found</div>';
+  document.getElementById('yearlyStat').textContent = estimateYearly(pr);
+  document.getElementById('formatStat').textContent = pr.extended ? '6-field (extended)' : '5-field (standard)';
+}
+
+cronInput.addEventListener('input', () => updateAll());
+cronType.addEventListener('change', () => updateAll());
+
+/* ── COPY BUTTONS ── */
+document.querySelectorAll('[data-copy]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    let expr = cronInput.value;
+    const type = btn.dataset.copy;
+    if ((type === 'aws' || type === 'k8s') && cronType.value !== 'extended' && type==='aws') expr = '0 ' + expr;
+    let label = 'Copied for ' + type.toUpperCase();
+    if (type === 'k8s') {
+      expr = `schedule: "${expr}"\ntimeZone: "UTC"  # IANA name, e.g. "Europe/Paris"`;
+      label = 'Kubernetes CronJob snippet copied';
+    } else if (type === 'docker') {
+      expr = `# Use with a sidecar like mcuadros/ofelia\nschedule: "@every 5m"  # or cron syntax depending on the scheduler image`;
+      label = 'Docker scheduling snippet copied';
+    }
+    copyText(expr, label);
+  });
+});
+
+/* ── TIMEZONES TAB ── */
+const TIMEZONES = [
+  ['UTC','UTC'], ['Paris','Europe/Paris'], ['London','Europe/London'],
+  ['New York','America/New_York'], ['Los Angeles','America/Los_Angeles'],
+  ['Tokyo','Asia/Tokyo'], ['Sydney','Australia/Sydney'], ['Dubai','Asia/Dubai'],
+  ['Abidjan','Africa/Abidjan'], ['São Paulo','America/Sao_Paulo'], ['Mumbai','Asia/Kolkata'],
+];
+function renderTimezones() {
+  const grid = document.getElementById('tzGrid');
+  if (!lastParseResult) { grid.innerHTML = '<div class="empty-state">Enter a valid expression above.</div>'; return; }
+  const occs = generateOccurrences(lastParseResult, 1, 'UTC');
+  if (!occs.length) { grid.innerHTML = '<div class="empty-state">No upcoming occurrence found.</div>'; return; }
+  const next = occs[0];
+  grid.innerHTML = TIMEZONES.map(([label, tz]) => {
+    const local = dateInTz(next, tz);
+    const offset = ((local - next) / 3600000).toFixed(0);
+    return `<div class="tz-card">
+      <div class="tz-name">${label}</div>
+      <div class="tz-time">${local.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>
+      <div class="tz-date">${local.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+      <div class="tz-offset">UTC${offset>=0?'+':''}${offset}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── OVERLAP CHECK ── */
+document.getElementById('checkOverlapBtn').addEventListener('click', () => {
+  const out = document.getElementById('overlapOutput');
+  if (!lastParseResult) { out.innerHTML = '<div class="empty-state">Enter a valid expression first.</div>'; return; }
+  const durationVal = parseFloat(document.getElementById('jobDuration').value) || 0;
+  const unit = document.getElementById('jobDurationUnit').value;
+  const durationMs = unit === 'seconds' ? durationVal*1000 : unit === 'hours' ? durationVal*3600000 : durationVal*60000;
+
+  const occs = generateOccurrences(lastParseResult, 6);
+  if (occs.length < 2) { out.innerHTML = '<div class="empty-state">Not enough occurrences to compute an interval.</div>'; return; }
+
+  const intervals = [];
+  for (let i=1; i<occs.length; i++) intervals.push(occs[i] - occs[i-1]);
+  const minInterval = Math.min(...intervals);
+  const conflict = durationMs > minInterval;
+
+  const fmtMs = ms => {
+    const s = ms/1000;
+    if (s < 60) return `${Math.round(s)}s`;
+    if (s < 3600) return `${Math.round(s/60)}m`;
+    return `${(s/3600).toFixed(1)}h`;
+  };
+
+  let html = `<div class="overlap-result ${conflict?'conflict':'ok'}">
+    ${conflict ? '⚠️ <strong>Overlap risk detected.</strong>' : '✅ <strong>No overlap detected.</strong>'}
+    Your job takes ${fmtMs(durationMs)}, and the shortest interval between scheduled runs is ${fmtMs(minInterval)}.
+    ${conflict ? ' A new run can start before the previous one finishes — instances will pile up over time.' : ' Each run should finish comfortably before the next one starts.'}
+  </div>`;
+
+  if (conflict) {
+    html += `<div class="callout callout-info">
+      <strong>Fixes:</strong> wrap the job with <code>flock</code> on Linux to skip overlapping runs, set <code>concurrencyPolicy: Forbid</code> on a Kubernetes CronJob, or simply increase the interval between runs to exceed the job's typical duration.
+    </div>`;
+  }
+
+  // Simple timeline visualization (first 4 runs)
+  const totalSpan = occs[3] - occs[0] || 1;
+  html += `<div class="overlap-timeline">`;
+  for (let i=0; i<4 && i<occs.length; i++) {
+    const startPct = ((occs[i]-occs[0])/totalSpan)*90;
+    const widthPct = Math.min((durationMs/totalSpan)*90, 90-startPct);
+    const color = conflict ? 'var(--fail)' : 'var(--pass)';
+    html += `<div class="overlap-bar" style="left:${startPct}%;width:${Math.max(widthPct,4)}%;background:${color}">#${i+1}</div>`;
+  }
+  html += `</div>`;
+
+  out.innerHTML = html;
+});
+
+/* ── REVERSE GENERATOR ── */
+const REVERSE_EXAMPLES = [
+  'every weekday at 9am', 'every 15 minutes', 'every Sunday at midnight',
+  'every hour', 'daily at 6:30pm', 'every 30 minutes', 'first of every month at noon'
+];
+document.getElementById('reverseExamples').innerHTML = REVERSE_EXAMPLES.map(ex =>
+  `<button class="preset-chip" data-rex="${ex}">${ex}</button>`
+).join('');
+document.querySelectorAll('[data-rex]').forEach(b => {
+  b.addEventListener('click', () => { document.getElementById('reverseInput').value = b.dataset.rex; runReverse(); });
+});
+
+function parseTimeStr(str) {
+  // matches "9am", "9:30am", "18:00", "6:30pm"
+  const m = str.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+  if (!m) return null;
+  let h = parseInt(m[1]); const min = m[2] ? parseInt(m[2]) : 0;
+  const ampm = m[3] ? m[3].toLowerCase() : null;
+  if (ampm === 'pm' && h < 12) h += 12;
+  if (ampm === 'am' && h === 12) h = 0;
+  return { h, min };
+}
+
+function reverseGenerate(text) {
+  const s = text.toLowerCase().trim();
+  const DOW = { sunday:0, monday:1, tuesday:2, wednesday:3, thursday:4, friday:5, saturday:6 };
+
+  // every N minutes/hours
+  let m = s.match(/every\s+(\d+)\s*min(ute)?s?/);
+  if (m) return { expr: `*/${m[1]} * * * *`, explain: `Every ${m[1]} minutes` };
+
+  m = s.match(/every\s+(\d+)\s*hours?/);
+  if (m) return { expr: `0 */${m[1]} * * *`, explain: `Every ${m[1]} hours` };
+
+  if (/every\s+hour/.test(s)) return { expr: '0 * * * *', explain: 'Every hour on the hour' };
+  if (/every\s+minute/.test(s)) return { expr: '* * * * *', explain: 'Every minute' };
+
+  // first of month
+  m = s.match(/first\s+(of\s+)?(the\s+)?month.*?at\s+(.+)/);
+  if (m) { const t = parseTimeStr(m[3]); if (t) return { expr: `${t.min} ${t.h} 1 * *`, explain: `On the 1st of every month at ${String(t.h).padStart(2,'0')}:${String(t.min).padStart(2,'0')}` }; }
+
+  // every weekday at TIME
+  m = s.match(/every\s+week\s*day.*?at\s+(.+)/) || s.match(/weekdays?\s+at\s+(.+)/);
+  if (m) { const t = parseTimeStr(m[1]); if (t) return { expr: `${t.min} ${t.h} * * 1-5`, explain: `Every weekday at ${String(t.h).padStart(2,'0')}:${String(t.min).padStart(2,'0')}` }; }
+
+  // every <day> at TIME
+  for (const [name, num] of Object.entries(DOW)) {
+    const re = new RegExp(`every\\s+${name}.*?at\\s+(.+)`);
+    m = s.match(re);
+    if (m) { const t = parseTimeStr(m[1]); if (t) return { expr: `${t.min} ${t.h} * * ${num}`, explain: `Every ${name.charAt(0).toUpperCase()+name.slice(1)} at ${String(t.h).padStart(2,'0')}:${String(t.min).padStart(2,'0')}` }; }
+    if (new RegExp(`every\\s+${name}\\b`).test(s) && !m) {
+      return { expr: `0 0 * * ${num}`, explain: `Every ${name.charAt(0).toUpperCase()+name.slice(1)} at midnight` };
+    }
+  }
+
+  // daily at TIME / every day at TIME
+  m = s.match(/(?:daily|every\s+day).*?at\s+(.+)/);
+  if (m) { const t = parseTimeStr(m[1]); if (t) return { expr: `${t.min} ${t.h} * * *`, explain: `Every day at ${String(t.h).padStart(2,'0')}:${String(t.min).padStart(2,'0')}` }; }
+
+  if (/daily|every\s+day/.test(s)) return { expr: '0 0 * * *', explain: 'Every day at midnight' };
+
+  // twice a day at X and Y
+  m = s.match(/at\s+(.+?)\s+and\s+(.+)/);
+  if (m) {
+    const t1 = parseTimeStr(m[1]); const t2 = parseTimeStr(m[2]);
+    if (t1 && t2) return { expr: `0 ${t1.h},${t2.h} * * *`, explain: `Every day at ${String(t1.h).padStart(2,'0')}:00 and ${String(t2.h).padStart(2,'0')}:00` };
+  }
+
+  // generic "at TIME"
+  m = s.match(/at\s+(.+)/);
+  if (m) { const t = parseTimeStr(m[1]); if (t) return { expr: `${t.min} ${t.h} * * *`, explain: `Every day at ${String(t.h).padStart(2,'0')}:${String(t.min).padStart(2,'0')}` }; }
+
+  return null;
+}
+
+function runReverse() {
+  const text = document.getElementById('reverseInput').value;
+  const result = document.getElementById('reverseResult');
+  if (!text.trim()) { result.classList.remove('show'); return; }
+  const parsed = reverseGenerate(text);
+  if (!parsed) {
+    result.classList.add('show');
+    result.innerHTML = `<div style="color:var(--fail)">❌ Couldn't recognize this pattern. Try one of the examples above, or use the Builder tab directly.</div>`;
+    return;
+  }
+  result.classList.add('show');
+  result.innerHTML = `<div class="reverse-expr">${parsed.expr}</div>
+    <div style="color:var(--text2);font-size:.88rem;margin-bottom:10px">${parsed.explain}</div>
+    <button class="btn btn-primary btn-sm" id="useReverseBtn" style="width:auto">Use this expression</button>`;
+  document.getElementById('useReverseBtn').addEventListener('click', () => {
+    cronInput.value = parsed.expr;
+    cronType.value = 'standard';
+    updateAll();
+    showSection('builder');
+    toast('✅ Expression applied to Builder');
+  });
+}
+document.getElementById('reverseGenBtn').addEventListener('click', runReverse);
+document.getElementById('reverseInput').addEventListener('keydown', e => { if (e.key === 'Enter') runReverse(); });
+
+/* ── PLATFORM CHECKS ── */
+function renderPlatformChecks() {
+  const container = document.getElementById('platformChecks');
+  if (!lastParseResult) { container.innerHTML = '<div class="empty-state">Enter a valid expression above.</div>'; return; }
+  const expr = cronInput.value.trim();
+  const parts = expr.split(/\s+/);
+  const { parsed, extended } = lastParseResult;
+  const domIdx = extended?3:2, dowIdx = extended?5:4;
+  const domField = parsed[domIdx], dowField = parsed[dowIdx];
+  const bothSpecified = domField.type !== 'all' && dowField.type !== 'all';
+
+  const checks = [
+    {
+      name: 'AWS EventBridge', ok: !extended || parts.length===6,
+      notes: `Requires 6 fields with a leading seconds value and always runs in <strong>UTC</strong>. ${bothSpecified ? 'Your expression specifies both day-of-month and day-of-week — AWS requires one of them to be <code>?</code> instead of a value.' : 'Looks compatible — remember to convert your intended local time to UTC before deploying.'}`,
+      warn: bothSpecified
+    },
+    {
+      name: 'Kubernetes CronJob', ok: !extended,
+      notes: extended
+        ? 'Kubernetes CronJob uses standard 5-field cron — remove the seconds field for this platform.'
+        : `Standard 5-field syntax is supported directly. Add <code>spec.timeZone: "Europe/Paris"</code> (or your IANA zone) on Kubernetes 1.25+ to avoid relying on the cluster's system timezone.`,
+      warn: extended
+    },
+    {
+      name: 'GitHub Actions', ok: !extended,
+      notes: extended
+        ? 'GitHub Actions workflow <code>schedule:</code> triggers use standard 5-field cron — remove the seconds field.'
+        : 'Compatible. Workflows always run in UTC, and GitHub explicitly warns that scheduled runs can be delayed during periods of high load — avoid relying on exact timing for anything time-critical.',
+      warn: extended
+    },
+  ];
+
+  container.innerHTML = checks.map(c => `
+    <div class="platform-card">
+      <div class="platform-header">
+        <span class="platform-name">${c.name}</span>
+        <span class="platform-badge ${c.warn ? 'warn' : 'ok'}">${c.warn ? 'Check needed' : 'Compatible'}</span>
+      </div>
+      <div class="platform-notes">${c.notes}</div>
+    </div>
+  `).join('');
+}
+
+/* ── INIT ── */
+updateAll();
 })();
 </script>
 </body>
