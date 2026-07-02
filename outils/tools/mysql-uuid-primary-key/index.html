@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySQL UUID Primary Key Generator — UUID() Examples</title>
-    <meta name="description" content="Generate UUIDs for MySQL tables. Copy SQL code using UUID(), create tables with UUID primary keys, and understand UUID vs AUTO_INCREMENT. 100% client‑side.">
-    <meta name="keywords" content="mysql uuid primary key, mysql uuid(), mysql uuid example, uuid column mysql, mysql uuid trigger, uuid vs auto_increment, mysql 8 uuid">
+    <title>MySQL UUID Primary Key Generator — UUID(), UUID_TO_BIN() &amp; Performance</title>
+    <meta name="description" content="Generate UUIDs for MySQL tables. Live UUID_TO_BIN(uuid, swap_flag) binary preview, storage size comparison, CREATE TABLE/trigger code, GIPK mode, and UUID vs AUTO_INCREMENT performance guidance. 100% client‑side.">
+    <meta name="keywords" content="mysql uuid primary key, mysql uuid(), uuid_to_bin swap_flag, mysql uuid example, uuid column mysql, mysql uuid trigger, uuid vs auto_increment, mysql 8 uuid, gipk mode">
     <meta name="robots" content="index, follow">
     <meta name="author" content="DevToolbox">
     <link rel="canonical" href="https://www.devstoolsbox.dev/tools/mysql-uuid-primary-key/">
@@ -13,21 +13,22 @@
     <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/uuid-mysql/">
     <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/mysql-uuid-primary-key/">
 
-    <meta property="og:title" content="MySQL UUID Primary Key Generator">
-    <meta property="og:description" content="Create UUID primary keys in MySQL. Copy SQL with UUID() and understand best practices.">
+    <meta property="og:title" content="MySQL UUID Primary Key Generator — UUID_TO_BIN Preview">
+    <meta property="og:description" content="Generate MySQL-accurate UUIDs, preview UUID_TO_BIN(uuid, swap_flag) binary output, compare storage sizes, and copy production-ready SQL.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.devstoolsbox.dev/tools/mysql-uuid-primary-key/">
     <meta property="og:site_name" content="DevToolbox">
 
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="MySQL UUID Primary Key">
-    <meta name="twitter:description" content="Generate UUIDs for MySQL and learn how to use them as primary keys.">
+    <meta name="twitter:description" content="Generate UUIDs for MySQL, preview UUID_TO_BIN binary output, and learn how to use them as primary keys without wrecking InnoDB performance.">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-JRBW78KE29');
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JRBW78KE29');
     </script>
     <!-- Privacy-friendly analytics by Plausible -->
 <script async src="https://plausible.io/js/pa-HlpMMJ_kCCYxp8OttpLql.js"></script>
@@ -35,12 +36,12 @@
   window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
   plausible.init()
 </script>
-
     <style>
         :root {
             --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
             --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
-            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --pass: #10b981; --warn: #f59e0b; --fail: #ef4444;
+            --pass-bg: #d1fae5; --warn-bg: #fef3c7; --fail-bg: #fee2e2;
             --text: #0f172a; --text2: #374151; --text3: #64748b;
             --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
             --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
@@ -48,7 +49,10 @@
         }
         body.dark {
             --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
-            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --primary-hover: #8b5cf6; --primary-light: rgba(167,139,250,0.1);
+            --pass: #34d399; --warn: #fbbf24; --fail: #f87171;
+            --pass-bg: #064e3b; --warn-bg: #451a03; --fail-bg: #450a0a;
+            --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
             --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
             --shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
@@ -58,7 +62,7 @@
             background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
             transition: background 0.3s, color 0.3s;
         }
-        .container { max-width:960px; margin:0 auto; }
+        .container { max-width:1050px; margin:0 auto; }
 
         .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
         .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
@@ -69,7 +73,10 @@
         .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
 
         .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
-        .breadcrumb a { color:var(--primary); text-decoration:none; }
+        .breadcrumb ol { display:flex; list-style:none; flex-wrap:wrap; gap:4px; }
+        .breadcrumb li+li::before { content:'/'; margin:0 6px; color:var(--text3); }
+        .breadcrumb a { color:var(--text2); text-decoration:none; }
+        .breadcrumb a:hover { color:var(--primary); }
 
         .seo-hook {
             background:var(--primary-light); border-left:4px solid var(--primary);
@@ -84,16 +91,14 @@
         h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
         .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
 
-        .display-box {
-            display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;
-        }
+        .display-box { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
         .uuid-display {
             flex:1; min-width:280px; padding:12px 16px;
             font-family:var(--mono); font-size:1.1rem; font-weight:600;
             background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
             color:var(--text); word-break:break-all;
         }
-        .options-row { display:flex; gap:16px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+        .options-row { display:flex; gap:10px; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
         .btn {
             padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
             cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
@@ -104,22 +109,102 @@
         .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
         .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
         .btn-sm { padding:5px 13px; font-size:0.78rem; }
+        .btn-cta { display:flex; justify-content:center; text-align:center; margin:28px auto; max-width:360px; background:var(--primary); color:#fff; border-color:var(--primary); padding:13px 24px; font-size:0.92rem; text-decoration:none; }
+        .btn-cta:hover { background:var(--primary-hover); }
 
-        /* Article section */
-        .article-section {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
-        }
-        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
-        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
-        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
-        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
-        .article-section li { margin-bottom:6px; font-size:0.93rem; }
-        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
-        .article-section a { color:var(--primary); text-decoration:none; }
-        .article-section a:hover { text-decoration:underline; }
-        .faq-item { margin-bottom:20px; }
-        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+        /* Binary preview grid */
+        .bin-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:12px; margin-bottom:20px; }
+        .bin-card { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px; }
+        .bin-card.recommended { border-color:var(--pass); }
+        .bin-label { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text3); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; }
+        .bin-label .rec-tag { background:var(--pass-bg); color:var(--pass); padding:1px 8px; border-radius:20px; font-size:0.66rem; }
+        .bin-value { font-family:var(--mono); font-size:0.82rem; font-weight:600; color:var(--text); word-break:break-all; margin-bottom:8px; }
+
+        /* Storage size comparison */
+        .size-compare { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap:10px; margin-bottom:20px; }
+        .size-item { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
+        .size-item .size-num { font-size:1.5rem; font-weight:800; color:var(--primary); }
+        .size-item .size-label { font-size:0.75rem; color:var(--text3); margin-top:2px; }
+        .size-item.best { border-color:var(--pass); }
+        .size-item.best .size-num { color:var(--pass); }
+        .size-item.worst .size-num { color:var(--warn); }
+
+        /* Code blocks with copy */
+        .code-block-wrapper { margin:14px 0; border-radius:12px; overflow:hidden; border:1px solid var(--border); }
+        .code-block-header { display:flex; justify-content:space-between; align-items:center; background:var(--code-bg); padding:8px 14px; }
+        .code-block-title { color:var(--text3); font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+        .code-copy-btn { background:transparent; border:1px solid #374151; color:var(--code-color); padding:3px 11px; border-radius:20px; font-size:0.72rem; cursor:pointer; font-family:inherit; }
+        .code-copy-btn:hover { background:rgba(255,255,255,0.1); }
+        .code-block { background:var(--code-bg); color:var(--code-color); padding:16px 18px; font-family:var(--mono); font-size:0.83rem; overflow-x:auto; line-height:1.65; }
+        .code-block .comment { color:#6b7280; }
+        .code-block .keyword { color:#c084fc; }
+        .code-block .string { color:#34d399; }
+        .code-block .func { color:#60a5fa; }
+
+        /* Article standard */
+        .article-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:36px; box-shadow:var(--shadow); margin-bottom:28px; }
+        .article-meta { display:flex; gap:14px; flex-wrap:wrap; font-size:0.83rem; color:var(--text3); margin-bottom:20px; }
+        .article-meta a { color:var(--primary); text-decoration:none; }
+        .article-card h1 { font-size:2rem; font-weight:800; letter-spacing:-.025em; line-height:1.25; }
+        .toc { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin:20px 0 32px; }
+        .toc-title { font-size:.78rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text3); margin-bottom:10px; }
+        .toc ol { padding-left:20px; }
+        .toc a { color:var(--text2); text-decoration:none; font-size:0.9rem; line-height:2; }
+        .toc a:hover { color:var(--primary); }
+        .article-card h2 { font-size:1.5rem; font-weight:800; margin-top:44px; margin-bottom:14px; scroll-margin-top:24px; letter-spacing:-.015em; }
+        .article-card h3 { font-size:1.15rem; font-weight:700; margin-top:24px; margin-bottom:10px; }
+        .article-card p { color:var(--text2); margin-bottom:16px; font-size:0.97rem; line-height:1.85; }
+        .article-card ul, .article-card ol { margin-left:20px; margin-bottom:16px; color:var(--text2); }
+        .article-card li { margin-bottom:6px; font-size:0.93rem; }
+        .article-card code { background:var(--surface2); color:var(--text); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-card a { color:var(--primary); text-decoration:none; }
+        .article-card a:hover { text-decoration:underline; }
+
+        .callout { padding:14px 18px; border-radius:0 12px 12px 0; margin:16px 0; border-left:4px solid; font-size:0.92rem; }
+        .callout-info { background:var(--primary-light); border-color:var(--primary); }
+        .callout-warn { background:var(--warn-bg); border-color:var(--warn); }
+        .callout-fail { background:var(--fail-bg); border-color:var(--fail); }
+        .callout-pass { background:var(--pass-bg); border-color:var(--pass); }
+
+        .dec-table { width:100%; border-collapse:collapse; margin:20px 0; border-radius:12px; overflow:hidden; font-size:0.87rem; }
+        .dec-table th { background:var(--pass); color:#fff; padding:11px 12px; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; }
+        .dec-table td { padding:11px 12px; border-bottom:1px solid var(--border); color:var(--text2); }
+        .dec-table tr:last-child td { border-bottom:none; }
+
+        .sev-badge { display:inline-block; padding:3px 11px; border-radius:20px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+        .sev-critical { background:var(--fail-bg); color:var(--fail); }
+        .sev-high { background:var(--warn-bg); color:var(--warn); }
+        .sev-medium { background:var(--primary-light); color:var(--primary); }
+        .sev-low { background:var(--pass-bg); color:var(--pass); }
+
+        .ap-card { border:1px solid var(--border); border-radius:14px; padding:22px; margin:20px 0; background:var(--surface2); }
+        .ap-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+        .ap-name { font-weight:800; font-size:1.02rem; }
+        .ap-number { color:var(--primary); margin-right:6px; }
+        .danger-tag, .fix-tag { display:inline-block; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; margin:10px 0 6px; }
+        .danger-tag { color:var(--fail); }
+        .fix-tag { color:var(--pass); }
+
+        .faq-item { border-top:1px solid var(--border); padding:14px 0; }
+        .faq-item summary { display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-weight:700; font-size:0.95rem; list-style:none; }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after { content:'＋'; color:var(--primary); font-size:1.2rem; transition:transform 0.2s; }
+        .faq-item[open] summary::after { transform:rotate(45deg); }
+        .faq-answer { padding-top:10px; color:var(--text2); font-size:0.92rem; }
+
+        .references { margin-top:20px; }
+        .ref-list { list-style:none; margin-left:0 !important; }
+        .ref-list li { font-size:0.83rem; margin-bottom:8px; }
+        .ref-list a { color:var(--text2); text-decoration:none; }
+        .ref-list a::before { content:'→ '; color:var(--primary); font-weight:700; }
+        .ref-list a:hover { color:var(--primary); }
+
+        .related-tools { background:var(--primary-light); border:1px solid rgba(124,58,237,.2); border-radius:14px; padding:22px; margin-top:24px; }
+        .related-tools h3 { text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; color:var(--primary); margin-bottom:12px; margin-top:0; }
+        .related-tools ul { list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px; margin-left:0; }
+        .related-tools a { color:var(--text2); text-decoration:none; font-size:0.88rem; }
+        .related-tools a::before { content:'→ '; color:var(--primary); font-weight:700; }
+        .related-tools a:hover { color:var(--primary); }
 
         .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
         .footer a { color:var(--primary); text-decoration:none; }
@@ -133,7 +218,7 @@
         @media (max-width:640px) {
             body { padding:12px; }
             h1 { font-size:1.5rem; }
-            .tool-card, .article-section { padding:18px; }
+            .tool-card, .article-card { padding:18px; }
             .uuid-display { font-size:0.95rem; }
         }
     </style>
@@ -154,100 +239,210 @@
         </div>
     </header>
 
-    <div class="breadcrumb">
-        <a href="/">Home</a> &rsaquo;
-        <a href="/tools/">Tools</a> &rsaquo;
-        <span>MySQL UUID Primary Key</span>
-    </div>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol>
+            <li><a href="/">Home</a></li>
+            <li><a href="/tools/">Tools</a></li>
+            <li><span>MySQL UUID Primary Key</span></li>
+        </ol>
+    </nav>
 
     <div class="seo-hook">
-        Need a <strong>MySQL UUID primary key</strong>? Use <code>UUID()</code> to generate unique identifiers. Copy SQL code for table creation, inserts, and understand UUID vs AUTO_INCREMENT. No data leaves your browser.
+        Need a <strong>MySQL UUID primary key</strong>? Generate an accurate <code>UUID()</code>-style identifier, preview exactly what <code>UUID_TO_BIN(uuid, swap_flag)</code> stores, compare storage sizes, and copy production-ready SQL — including the swap-flag trick that actually fixes InnoDB index fragmentation. No data leaves your browser.
     </div>
 
     <main>
         <div class="tool-card">
-            <h1>MySQL UUID Primary Key (UUID)</h1>
-            <div class="subhead">Generate UUIDs and instantly see the SQL code to create a table with a UUID primary key in MySQL, insert rows, and query. Uses the built‑in <code>UUID()</code> function, with options for <code>CHAR(36)</code> or <code>BINARY(16)</code> storage.</div>
+            <h1>MySQL UUID Primary Key Generator</h1>
+            <div class="subhead">Generates a UUID in the same v1 layout MySQL's <code>UUID()</code> produces (timestamp + node), and shows exactly what gets stored as <code>CHAR(36)</code> vs <code>BINARY(16)</code> — with and without the ordering swap flag.</div>
 
             <div class="display-box">
                 <div class="uuid-display" id="uuidDisplay" aria-label="Generated UUID">550e8400-e29b-41d4-a716-446655440000</div>
-                <button class="btn btn-sm" data-copy="uuidDisplay" aria-label="Copy UUID">Copy</button>
+                <button class="btn btn-sm" id="copyUuidBtn" aria-label="Copy UUID">Copy</button>
             </div>
-
             <div class="options-row">
                 <button class="btn btn-primary" id="generateBtn">Generate UUID</button>
-                <button class="btn btn-outline btn-sm" id="copyTableCodeBtn">Copy CREATE TABLE</button>
-                <button class="btn btn-outline btn-sm" id="copyInsertCodeBtn">Copy INSERT</button>
-                <button class="btn btn-outline btn-sm" id="shareBtn">Share</button>
+                <button class="btn btn-outline btn-sm" id="shareBtn">Share this UUID</button>
+            </div>
+            <div class="detected-format" id="privacyNote" style="font-size:0.76rem; color:var(--text3); margin-bottom:16px;">Node bytes are randomized in your browser (not your real MAC address) — MySQL's own <code>UUID()</code> embeds the server's actual MAC-derived node ID, which is one reason not to expose these values publicly.</div>
+
+            <div class="bin-grid">
+                <div class="bin-card">
+                    <div class="bin-label">CHAR(36) — as stored literally</div>
+                    <div class="bin-value" id="charValue">—</div>
+                    <button class="btn btn-sm" data-copy="charValue">Copy</button>
+                </div>
+                <div class="bin-card">
+                    <div class="bin-label">UUID_TO_BIN(uuid) — no swap</div>
+                    <div class="bin-value" id="binNoSwap">—</div>
+                    <button class="btn btn-sm" data-copy="binNoSwap">Copy</button>
+                </div>
+                <div class="bin-card recommended">
+                    <div class="bin-label">UUID_TO_BIN(uuid, 1) <span class="rec-tag">recommended</span></div>
+                    <div class="bin-value" id="binSwap">—</div>
+                    <button class="btn btn-sm" data-copy="binSwap">Copy</button>
+                </div>
+            </div>
+
+            <div class="size-compare">
+                <div class="size-item worst"><div class="size-num">146 B</div><div class="size-label">VARCHAR(36) utf8mb4 index key_len</div></div>
+                <div class="size-item"><div class="size-num">36 B</div><div class="size-label">CHAR(36) ASCII</div></div>
+                <div class="size-item best"><div class="size-num">16 B</div><div class="size-label">BINARY(16)</div></div>
+            </div>
+
+            <div class="options-row" style="margin-top:4px;">
+                <button class="btn btn-outline btn-sm" id="copyTableCharBtn">Copy CREATE TABLE (CHAR 36)</button>
+                <button class="btn btn-outline btn-sm" id="copyTableBinBtn">Copy CREATE TABLE (BINARY 16, ordered)</button>
+                <button class="btn btn-outline btn-sm" id="copyInsertCodeBtn">Copy SELECT / decode</button>
             </div>
         </div>
 
-        <section class="article-section" aria-label="Documentation">
-            <h2>How to use UUID as a primary key in MySQL</h2>
-            <p>
-                MySQL does not have a native UUID data type, but you can store UUIDs in <code>CHAR(36)</code> or <code>BINARY(16)</code> columns. The <code>UUID()</code> function returns a 36‑character string (with hyphens).
-            </p>
+        <article class="article-card" aria-label="Documentation">
+            <div class="article-meta">
+                <time datetime="2026-07-02">July 2, 2026</time>
+                <span>&middot; 12 min read</span>
+                <span>&middot; By <a href="/tools/about/">Mathias Kouadio</a></span>
+            </div>
+            <h1>MySQL UUID Primary Keys: UUID_TO_BIN, the Swap Flag, and Why It Matters</h1>
 
-            <h3>1. Create a table with a UUID primary key (CHAR(36))</h3>
-            <pre><code id="createTableCode">CREATE TABLE users (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);</code></pre>
-            <p>This uses MySQL 8.0.13+ expression default. For earlier versions, use a trigger.</p>
+            <nav class="toc" aria-label="Table of contents">
+                <div class="toc-title">On this page</div>
+                <ol>
+                    <li><a href="#incident">Two rows, wrong place</a></li>
+                    <li><a href="#decision-table">Quick decision table</a></li>
+                    <li><a href="#pitfalls">Common MySQL UUID pitfalls</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#references">References</a></li>
+                </ol>
+            </nav>
 
-            <h3>2. Insert rows — the UUID is generated automatically</h3>
-            <pre><code id="insertCode">INSERT INTO users (name, email)
-VALUES ('Alice', 'alice@example.com');
-SELECT * FROM users;</code></pre>
+            <p id="incident">A table using <code>VARCHAR(36) DEFAULT (UUID()) PRIMARY KEY</code> looked fine in every test — a handful of rows, instant inserts. Then two new rows landed in production, and instead of appearing at the end of the table, they showed up in the middle. InnoDB had to physically relocate existing rows to make room, because the new UUIDs sorted lower than rows already on disk. On a small table that's invisible. On a table with a billion rows, that's the clustered index rebalancing constantly, unable to keep up. Switching the column to <code>BINARY(16)</code> only fixed the storage footprint — the row still landed mid-table, because the raw bytes of a v1 UUID don't increase in a straight line. The part everyone misses is the <code>swap_flag</code> argument to <code>UUID_TO_BIN()</code>, which is what actually makes inserts sequential again.</p>
 
-            <h3>3. Using a trigger for older MySQL versions</h3>
-            <pre><code>CREATE TRIGGER before_insert_users
-BEFORE INSERT ON users
-FOR EACH ROW
-SET NEW.id = UUID();</code></pre>
+            <p>This page generates a UUID in MySQL's own v1 layout, shows you the exact bytes <code>UUID_TO_BIN()</code> would store with and without that flag, and gives you SQL you can paste straight into a migration.</p>
 
-            <h3>4. Storing as BINARY(16) for performance</h3>
-            <p>You can store UUIDs in a <code>BINARY(16)</code> column for a smaller footprint:</p>
-            <pre><code>CREATE TABLE users_bin (
-    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID())),
+            <h2 id="decision-table">Quick decision table</h2>
+            <table class="dec-table">
+                <thead><tr><th>#</th><th>Situation</th><th>Severity</th><th>Consequence</th><th>Fix</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td><code>UUID_TO_BIN(uuid)</code> used without the swap flag</td><td>High</td><td>Still fragments the clustered index — binary storage alone doesn't fix ordering</td><td>Use <code>UUID_TO_BIN(uuid, 1)</code> / <code>BIN_TO_UUID(id, 1)</code> consistently</td></tr>
+                    <tr><td>2</td><td>UUID stored as <code>VARCHAR(36)</code> with utf8mb4</td><td>Medium</td><td>Index key length up to 146 bytes vs 16 for <code>BINARY(16)</code></td><td>Use <code>BINARY(16)</code> for the column</td></tr>
+                    <tr><td>3</td><td><code>UUID()</code> output exposed in a public API or URL</td><td>High</td><td>Leaks server MAC-derived node ID and creation timestamp</td><td>Never expose raw <code>UUID()</code> values externally; use an app-generated v4 instead</td></tr>
+                    <tr><td>4</td><td>Needing UUID v4 (random) as a MySQL default)</td><td>Medium</td><td>No built-in v4 function; custom functions can't be used as <code>DEFAULT</code></td><td>Generate v4 in application code, or use GIPK mode with a <code>UNIQUE</code> column</td></tr>
+                    <tr><td>5</td><td>Generating security tokens with <code>RAND()</code> or <code>UUID()</code> in SQL</td><td>Critical</td><td><code>RAND()</code> is not cryptographically secure; <code>UUID()</code> is guessable/predictable in sequence</td><td>Generate tokens in application code with a CSPRNG</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-info">MySQL's built-in <code>UUID()</code> function only ever produces <strong>version 1</strong> (timestamp + node) UUIDs — RFC 4122 style. There is no native v4 function; MySQL simply doesn't ship one.</div>
+
+            <button class="btn btn-cta" onclick="document.getElementById('uuidDisplay').scrollIntoView({behavior:'smooth'})">🔍 Try the generator above</button>
+
+            <h2 id="pitfalls">Common MySQL UUID pitfalls</h2>
+
+            <div class="ap-card">
+                <div class="ap-header"><div class="ap-name"><span class="ap-number">01</span>Storing as BINARY(16) without the swap flag</div><span class="sev-badge sev-high">High</span></div>
+                <p>A UUID v1's byte layout puts <code>time_low</code> — the fastest-changing part — first. Converting to binary without reordering still scatters new rows across the clustered index, because the leading bytes still don't increase monotonically over time.</p>
+                <div class="danger-tag">Avoid</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">sql</span></div><div class="code-block">CREATE TABLE users (
+    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID())),  <span class="comment">-- no swap_flag: still fragments</span>
     name VARCHAR(100) NOT NULL
-);</code></pre>
-
-            <h3>Why use UUID instead of AUTO_INCREMENT?</h3>
-            <ul>
-                <li><strong>Distributed systems</strong> — UUIDs can be generated on multiple nodes without collisions.</li>
-                <li><strong>Security</strong> — UUIDs don't expose the number of records.</li>
-                <li><strong>Portability</strong> — UUIDs are easier to merge across databases.</li>
-            </ul>
-
-            <h3>Frequently Asked Questions</h3>
-            <div class="faq-item">
-                <div class="faq-question">Which UUID version does <code>UUID()</code> produce?</div>
-                <p>MySQL's <code>UUID()</code> generates a UUID v1 (timestamp‑based) that may expose the MAC address. For random UUIDs (v4), use <code>UUID_TO_BIN(UUID())</code> with a trigger or application code.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">Is a UUID primary key slower than an auto‑increment in MySQL?</div>
-                <p>UUIDs are larger and may cause index fragmentation, especially if using random UUIDs. For InnoDB, consider using <code>BINARY(16)</code> and ordering by a timestamp column to reduce page splits.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">Can I use <code>UUID()</code> as a default value in MySQL?</div>
-                <p>Yes, starting from MySQL 8.0.13, you can use <code>DEFAULT (UUID())</code> for <code>CHAR(36)</code> columns. For earlier versions, a trigger is required.</p>
+);</div></div>
+                <div class="fix-tag">Fix</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">sql</span></div><div class="code-block">CREATE TABLE users (
+    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID(), 1)),  <span class="comment">-- swap_flag=1: time-high moves first, inserts stay sequential</span>
+    name VARCHAR(100) NOT NULL
+);
+<span class="comment">-- always read it back with the matching flag</span>
+SELECT BIN_TO_UUID(id, 1) AS id, name FROM users;</div></div>
             </div>
 
-            <h3>Other useful tools</h3>
-            <ul>
-                <li><a href="/tools/uuid-generator/">UUID / ULID Generator</a> — generate batches of identifiers</li>
-                <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> — time‑sortable UUIDs</li>
-                <li><a href="/tools/postgresql-uuid-primary-key/">PostgreSQL UUID Primary Key</a> — compare with the PostgreSQL approach</li>
-                <li><a href="/tools/cron-expression-evaluator/">Cron Expression Evaluator</a> — schedule your MySQL maintenance tasks</li>
-            </ul>
-        </section>
+            <div class="ap-card">
+                <div class="ap-header"><div class="ap-name"><span class="ap-number">02</span>VARCHAR(36) instead of BINARY(16)</div><span class="sev-badge sev-medium">Medium</span></div>
+                <p>With the <code>utf8mb4</code> charset, a <code>VARCHAR(36)</code> primary key index can carry a key length as high as 146 bytes (36 characters × 4 bytes/char, plus a length prefix). <code>BINARY(16)</code> is fixed at 16 bytes — that difference is duplicated across <em>every secondary index</em> on the table, since InnoDB stores the primary key in each one.</p>
+                <div class="fix-tag">Fix</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">sql</span></div><div class="code-block">-- prefer BINARY(16) over CHAR(36)/VARCHAR(36) whenever you control the schema
+id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID(), 1))</div></div>
+            </div>
+
+            <div class="ap-card">
+                <div class="ap-header"><div class="ap-name"><span class="ap-number">03</span>Needing UUID v4 as a MySQL default</div><span class="sev-badge sev-medium">Medium</span></div>
+                <p>MySQL only permits a small set of built-in, deterministic-enough functions in a <code>DEFAULT</code> expression. Custom stored functions and installed components — including any hand-written v4 generator — raise <code>ER_DEFAULT_VAL_GENERATED_NAMED_FUNCTION_IS_NOT_ALLOWED</code> when used as a column default.</p>
+                <div class="danger-tag">Doesn't work</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">sql</span></div><div class="code-block">-- fails: custom/component functions can't be a DEFAULT expression
+id BINARY(16) DEFAULT (UUID_TO_BIN(my_uuid_v4()))</div></div>
+                <div class="fix-tag">Fix</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">sql</span></div><div class="code-block">-- MySQL 8.0.30+: GIPK mode — let InnoDB manage a hidden auto_increment PK,
+-- and keep your app-generated v4 as a plain UNIQUE column
+SET sql_generate_invisible_primary_key = 1;
+
+CREATE TABLE users (
+    uuid BINARY(16) NOT NULL UNIQUE,  <span class="comment">-- v4, generated in application code</span>
+    name VARCHAR(100) NOT NULL
+);
+<span class="comment">-- INSERT INTO users (uuid, name) VALUES (UUID_TO_BIN(?), ?);  -- ? = app-generated v4</span></div></div>
+            </div>
+
+            <div class="ap-card">
+                <div class="ap-header"><div class="ap-name"><span class="ap-number">04</span>Treating UUID() as safe to expose publicly</div><span class="sev-badge sev-high">High</span></div>
+                <p>A v1 UUID encodes the exact creation timestamp and a node identifier derived from the server's MAC address. Returning raw <code>UUID()</code> values in an API response leaks both to anyone who can parse a UUID.</p>
+                <div class="fix-tag">Fix</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">sql</span></div><div class="code-block">-- keep UUID() for internal, ordered primary keys only.
+-- for anything user-facing (API tokens, public IDs), generate a v4
+-- in application code and store it separately if needed.</div></div>
+            </div>
+
+            <h2 id="faq">Frequently asked questions</h2>
+
+            <details class="faq-item">
+                <summary>Which UUID version does MySQL's UUID() produce?<span></span></summary>
+                <div class="faq-answer">Always version 1 — timestamp plus a MAC-derived node identifier, per RFC 4122. MySQL has no built-in function for version 4 (random) UUIDs.</div>
+            </details>
+            <details class="faq-item">
+                <summary>What does the swap_flag argument to UUID_TO_BIN actually do?<span></span></summary>
+                <div class="faq-answer">It swaps the time-low and time-high hex groups of the UUID before converting to binary, so the most significant timestamp bits come first. That makes successive UUIDs compare as increasing values, which keeps InnoDB inserts at the end of the clustered index instead of scattering them.</div>
+            </details>
+            <details class="faq-item">
+                <summary>Is a UUID primary key slower than AUTO_INCREMENT in MySQL?</summary>
+                <div class="faq-answer">Yes, if it's a plain v1 or v4 UUID stored without ordering — random insert positions cause page splits and rebalancing. With <code>BINARY(16)</code> and the swap flag, insert performance gets close to AUTO_INCREMENT, though the key is still 16 bytes versus 4 or 8 for an integer.</div>
+            </details>
+            <details class="faq-item">
+                <summary>Can I use UUID() as a DEFAULT value in MySQL?<span></span></summary>
+                <div class="faq-answer">Yes — since MySQL 8.0.13, expression defaults like <code>DEFAULT (UUID_TO_BIN(UUID(), 1))</code> are supported directly in <code>CREATE TABLE</code>, without needing a trigger. This works because <code>UUID()</code> and <code>UUID_TO_BIN()</code> are built-in functions; custom functions are not permitted the same way.</div>
+            </details>
+            <details class="faq-item">
+                <summary>How do I get real UUID v4 values in MySQL?<span></span></summary>
+                <div class="faq-answer">Generate them in application code (every mainstream language has a secure v4 generator) and pass them in on insert. If you still want InnoDB to manage an efficient sequential primary key, enable GIPK mode and store the v4 as a plain <code>UNIQUE BINARY(16)</code> column instead of the primary key.</div>
+            </details>
+            <details class="faq-item">
+                <summary>Is my UUID generated on a server somewhere?<span></span></summary>
+                <div class="faq-answer">No — everything on this page runs in your browser via JavaScript. The node bytes are randomized locally rather than reflecting any real hardware address.</div>
+            </details>
+
+            <div class="references" id="references">
+                <h3 style="text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">References</h3>
+                <ul class="ref-list">
+                    <li><a href="https://dev.mysql.com/doc/refman/8.0/en/data-type-defaults.html" target="_blank" rel="noopener">MySQL 8.0 docs — Data Type Default Values</a></li>
+                    <li><a href="https://dev.mysql.com/doc/refman/8.0/en/miscellaneous-functions.html#function_uuid-to-bin" target="_blank" rel="noopener">MySQL 8.0 docs — UUID_TO_BIN() / BIN_TO_UUID()</a></li>
+                    <li><a href="https://dev.mysql.com/doc/refman/8.0/en/create-table-gipks.html" target="_blank" rel="noopener">MySQL 8.0 docs — Generated Invisible Primary Keys (GIPK)</a></li>
+                    <li><a href="https://blogs.oracle.com/mysql/mysql-uuids" target="_blank" rel="noopener">Oracle MySQL Blog — MySQL &amp; UUIDs (Frédéric Descamps)</a></li>
+                </ul>
+            </div>
+
+            <button class="btn btn-cta" onclick="document.getElementById('uuidDisplay').scrollIntoView({behavior:'smooth'})">🔍 Open the UUID generator</button>
+
+            <div class="related-tools">
+                <h3>Related DevToolbox tools</h3>
+                <ul>
+                    <li><a href="/tools/python-uuid-to-string/">Python UUID Toolkit</a></li>
+                    <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a></li>
+                    <li><a href="/tools/postgresql-uuid-primary-key/">PostgreSQL UUID Primary Key</a></li>
+                    <li><a href="/tools/cron-expression-evaluator/">Cron Expression Evaluator</a></li>
+                </ul>
+            </div>
+        </article>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2025 <a href="/">DevToolbox</a> — 100% client‑side tools for developers.</p>
+        <p>&copy; 2026 DevToolbox — Free tools for developers. <a href="/tools/blog/">Blog</a> | <a href="/tools/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
     </footer>
 </div>
 
@@ -260,11 +455,25 @@ SET NEW.id = UUID();</code></pre>
   "@type": "WebApplication",
   "name": "MySQL UUID Primary Key Generator",
   "url": "https://www.devstoolsbox.dev/tools/mysql-uuid-primary-key/",
-  "description": "Generate UUID primary keys for MySQL tables. Copy SQL code using UUID(). 100% client‑side.",
+  "description": "Generate UUID primary keys for MySQL tables, preview UUID_TO_BIN(uuid, swap_flag) binary output, and copy SQL code. 100% client‑side.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "browserRequirements": "Requires JavaScript.",
+  "author": { "@type": "Person", "name": "Mathias Kouadio", "url": "https://www.devstoolsbox.dev/about/" },
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "MySQL UUID Primary Keys: UUID_TO_BIN, the Swap Flag, and Why It Matters",
+  "description": "How MySQL UUID primary keys fragment InnoDB's clustered index, and how UUID_TO_BIN(uuid, 1) fixes it, with storage size comparisons and GIPK mode for UUID v4.",
+  "author": { "@type": "Person", "name": "Mathias Kouadio", "url": "https://www.devstoolsbox.dev/about/" },
+  "publisher": { "@type": "Organization", "name": "DevToolbox", "logo": { "@type": "ImageObject", "url": "https://www.devstoolsbox.dev/logo.png" } },
+  "datePublished": "2026-07-02",
+  "dateModified": "2026-07-02",
+  "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/mysql-uuid-primary-key/"
 }
 </script>
 <script type="application/ld+json">
@@ -272,9 +481,11 @@ SET NEW.id = UUID();</code></pre>
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    { "@type": "Question", "name": "Which UUID version does UUID() produce?", "acceptedAnswer": { "@type": "Answer", "text": "UUID() generates UUID v1 (timestamp-based). For random UUIDs (v4), use application code or a trigger with UUID()." } },
-    { "@type": "Question", "name": "Is a UUID primary key slower than an auto-increment in MySQL?", "acceptedAnswer": { "@type": "Answer", "text": "UUIDs are larger and may cause index fragmentation. Use BINARY(16) and consider ordering to mitigate." } },
-    { "@type": "Question", "name": "Can I use UUID() as a default value in MySQL?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, from MySQL 8.0.13 you can use DEFAULT (UUID()). For earlier versions, a trigger is needed." } }
+    { "@type": "Question", "name": "Which UUID version does MySQL's UUID() produce?", "acceptedAnswer": { "@type": "Answer", "text": "Always version 1 — timestamp plus a MAC-derived node identifier. MySQL has no built-in function for version 4 UUIDs." } },
+    { "@type": "Question", "name": "What does the swap_flag argument to UUID_TO_BIN do?", "acceptedAnswer": { "@type": "Answer", "text": "It swaps the time-low and time-high hex groups so the most significant timestamp bits come first, keeping successive UUIDs in increasing order for InnoDB." } },
+    { "@type": "Question", "name": "Is a UUID primary key slower than AUTO_INCREMENT in MySQL?", "acceptedAnswer": { "@type": "Answer", "text": "Yes without ordering, due to page splits from random insert positions. With BINARY(16) and the swap flag, performance approaches AUTO_INCREMENT." } },
+    { "@type": "Question", "name": "Can I use UUID() as a DEFAULT value in MySQL?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, since MySQL 8.0.13, expression defaults like DEFAULT (UUID_TO_BIN(UUID(), 1)) work directly in CREATE TABLE." } },
+    { "@type": "Question", "name": "How do I get real UUID v4 values in MySQL?", "acceptedAnswer": { "@type": "Answer", "text": "Generate them in application code and insert them, optionally using GIPK mode to keep an efficient hidden auto_increment primary key." } }
   ]
 }
 </script>
@@ -314,70 +525,151 @@ SET NEW.id = UUID();</code></pre>
         clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
     }
 
-    // Generate UUID v1-style (simulating MySQL's UUID() output – timestamp based)
-    function generateUUIDv1() {
-        // We'll use crypto.randomUUID for simplicity, but note MySQL uses v1.
-        // To be accurate, we can show a timestamp-based UUID, but for demo we'll still use v4
-        // because actual MySQL UUID() uses the server's MAC and timestamp, not reproducible in JS.
-        if (crypto.randomUUID) return crypto.randomUUID();
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
+    /* ── Copy button delegation (works for any [data-copy] or .code-copy-btn) ── */
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('code-copy-btn')) {
+            const wrapper = e.target.closest('.code-block-wrapper');
+            const block = wrapper && wrapper.querySelector('.code-block');
+            if (block) navigator.clipboard.writeText(block.textContent.trim()).then(()=>showToast('Copied!'));
+        }
+        if (e.target.dataset && e.target.dataset.copy) {
+            const el = document.getElementById(e.target.dataset.copy);
+            if (el && el.textContent !== '—') navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copied!'));
+        }
+    });
+
+    /* ── Byte helpers ── */
+    function randomBytes(n) { const a = new Uint8Array(n); crypto.getRandomValues(a); return a; }
+    function bytesToHex(bytes) { return Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''); }
+
+    /* ── Generate a UUID in MySQL's actual v1 layout ──
+       Uses BigInt throughout to avoid float-precision loss on the 100ns timestamp,
+       and a correctly-sized 14-bit clock sequence (not a single reused random byte).
+       The node bytes are randomized locally (never a real MAC) with the multicast
+       bit set, signalling — as RFC 9562 recommends — that this is not hardware-derived. */
+    function generateMysqlUuid() {
+        const ts100ns = BigInt(Date.now()) * 10000n + 122192928000000000n; // 100ns since 1582-10-15
+        const time_low = ts100ns & 0xffffffffn;
+        const time_mid = (ts100ns >> 32n) & 0xffffn;
+        const time_hi = ((ts100ns >> 48n) & 0x0fffn) | 0x1000n; // version 1
+        const tl = time_low.toString(16).padStart(8,'0');
+        const tm = time_mid.toString(16).padStart(4,'0');
+        const th = time_hi.toString(16).padStart(4,'0');
+        const clockSeqBytes = randomBytes(2);
+        clockSeqBytes[0] = (clockSeqBytes[0] & 0x3f) | 0x80; // RFC 4122 variant '10'
+        const cs = bytesToHex(clockSeqBytes);
+        const nodeBytes = randomBytes(6);
+        nodeBytes[0] |= 0x01; // multicast bit: marks this as a non-hardware node id
+        const node = bytesToHex(nodeBytes);
+        return `${tl}-${tm}-${th}-${cs}-${node}`;
+    }
+
+    /* ── Mirrors MySQL's UUID_TO_BIN(uuid, swap_flag) exactly ──
+       swap_flag=1 moves time_hi_and_version in front of time_mid and time_low,
+       so successive values compare as increasing bytes (verified against
+       MySQL's own documented example: 37c5752d-1fa5-11ed-... , swap=1 ->
+       11ED1FA537C5752DBA36C8CB9E32DF8E). */
+    function uuidToBinHex(uuidStr, swap) {
+        const hex = uuidStr.replace(/-/g,'').toLowerCase();
+        const time_low = hex.slice(0,8);
+        const time_mid = hex.slice(8,12);
+        const time_hi = hex.slice(12,16);
+        const rest = hex.slice(16); // clock_seq (2 bytes) + node (6 bytes) = 20 hex chars
+        const ordered = swap ? (time_hi + time_mid + time_low) : (time_low + time_mid + time_hi);
+        return (ordered + rest).toUpperCase();
     }
 
     const uuidDisplay = document.getElementById('uuidDisplay');
-    let currentUUID = generateUUIDv1();
-    uuidDisplay.textContent = currentUUID;
+    let currentUUID = generateMysqlUuid();
+
+    function render(uuid) {
+        uuidDisplay.textContent = uuid;
+        document.getElementById('charValue').textContent = uuid;
+        document.getElementById('binNoSwap').textContent = '0x' + uuidToBinHex(uuid, false);
+        document.getElementById('binSwap').textContent = '0x' + uuidToBinHex(uuid, true);
+    }
+    render(currentUUID);
 
     document.getElementById('generateBtn').addEventListener('click', () => {
-        currentUUID = generateUUIDv1();
-        uuidDisplay.textContent = currentUUID;
+        currentUUID = generateMysqlUuid();
+        render(currentUUID);
+    });
+    document.getElementById('copyUuidBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(currentUUID).then(()=>showToast('Copied!'));
     });
 
-    // Copy UUID
-    document.querySelectorAll('[data-copy]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.dataset.copy;
-            const el = document.getElementById(targetId);
-            if (el) {
-                navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copied!'));
-            }
-        });
+    /* ── Copy CREATE TABLE / SELECT code blocks (built dynamically so they always
+       reflect the currently generated UUID as an inline example comment) ── */
+    document.getElementById('copyTableCharBtn').addEventListener('click', () => {
+        const code =
+`CREATE TABLE users (
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- example current value: ${currentUUID}`;
+        navigator.clipboard.writeText(code).then(() => showToast('CREATE TABLE (CHAR 36) copied!'));
     });
 
-    // Copy CREATE TABLE code (static)
-    document.getElementById('copyTableCodeBtn').addEventListener('click', () => {
-        const code = document.getElementById('createTableCode').textContent;
-        navigator.clipboard.writeText(code).then(() => showToast('CREATE TABLE code copied!'));
+    document.getElementById('copyTableBinBtn').addEventListener('click', () => {
+        const code =
+`-- MySQL 8.0.13+: expression default works directly, no trigger needed
+CREATE TABLE users (
+    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID(), 1)),
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- for MySQL < 8.0.13, use a trigger instead:
+DELIMITER $$
+CREATE TRIGGER before_insert_users
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+    IF NEW.id IS NULL THEN
+        SET NEW.id = UUID_TO_BIN(UUID(), 1);
+    END IF;
+END$$
+DELIMITER ;
+-- example current value: 0x${uuidToBinHex(currentUUID, true)}`;
+        navigator.clipboard.writeText(code).then(() => showToast('CREATE TABLE (BINARY 16) copied!'));
     });
 
-    // Copy INSERT code (static)
     document.getElementById('copyInsertCodeBtn').addEventListener('click', () => {
-        const code = document.getElementById('insertCode').textContent;
-        navigator.clipboard.writeText(code).then(() => showToast('INSERT code copied!'));
+        const code =
+`INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com');
+
+-- CHAR(36) table: read back as-is
+SELECT id, name FROM users;
+
+-- BINARY(16) table with swap flag: always decode with the matching flag
+SELECT BIN_TO_UUID(id, 1) AS id, name FROM users;
+
+-- looking up by a known UUID string:
+SELECT * FROM users WHERE id = UUID_TO_BIN('${currentUUID}', 1);`;
+        navigator.clipboard.writeText(code).then(() => showToast('SELECT / decode code copied!'));
     });
 
-    // Share
+    /* ── Share (plain query param — simpler and inspectable) ── */
     document.getElementById('shareBtn').addEventListener('click', () => {
-        const state = { uuid: currentUUID };
-        const hash = btoa(encodeURIComponent(JSON.stringify(state)));
-        window.location.hash = hash;
-        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copied!'));
+        const url = new URL(window.location.href);
+        url.hash = '';
+        url.searchParams.set('uuid', currentUUID);
+        navigator.clipboard.writeText(url.toString()).then(()=>showToast('URL copied!'));
+        window.history.replaceState(null, '', url.toString());
     });
 
-    function loadFromHash() {
-        if (window.location.hash) {
-            try {
-                const state = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
-                if (state.uuid) {
-                    currentUUID = state.uuid;
-                    uuidDisplay.textContent = currentUUID;
-                }
-            } catch(e){}
+    function loadFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const shared = params.get('uuid');
+        if (shared && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(shared)) {
+            currentUUID = shared.toLowerCase();
+            render(currentUUID);
         }
     }
-    loadFromHash();
+    loadFromQuery();
 })();
 </script>
 </body>
