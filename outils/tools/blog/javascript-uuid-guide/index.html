@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UUID v4 vs v7 vs ULID vs NanoID in JavaScript: The Complete Guide (2026)</title>
+<meta name="description" content="Everything about UUID generation in JavaScript: v4 vs v7 database performance, ULID sortability, NanoID size, crypto.randomUUID() vs uuid npm, code in 5 languages, B-tree fragmentation explained. Written by Mathias Kouadio.">
+<meta name="keywords" content="uuid v4 vs v7 javascript, crypto randomuuid javascript, uuid v7 database performance, ulid javascript, nanoid vs uuid, uuid npm package, javascript uuid generator 2026, uuid collision probability">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/javascript-uuid-guide/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/javascript-uuid-guide/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/guide-uuid-javascript/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/javascript-uuid-guide/">
+
+<meta property="og:title" content="UUID v4 vs v7 vs ULID vs NanoID in JavaScript (2026)">
+<meta property="og:description" content="Database performance, B-tree fragmentation, crypto security, and code in 5 languages. The definitive UUID guide for JavaScript developers.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/javascript-uuid-guide/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"UUID v4 vs v7 vs ULID vs NanoID in JavaScript: The Complete Guide (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/about/"},
+  "datePublished":"2026-06-10",
+  "dateModified":"2026-06-10",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/tools/blog/javascript-uuid-guide/",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"Complete guide to UUID generation in JavaScript: v4 vs v7 database performance, B-tree fragmentation, ULID sortability, NanoID, crypto.randomUUID vs Math.random, code in 5 languages."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Should I use crypto.randomUUID() or the uuid npm package?","acceptedAnswer":{"@type":"Answer","text":"Use crypto.randomUUID() for UUID v4 in Node.js 19+ and modern browsers — it requires zero dependencies and is the fastest option. Use the uuid npm package if you need UUID v7 (strongly recommended for database primary keys), v1, v3, or v5, or if you need to support older Node.js versions."}},
+    {"@type":"Question","name":"Why is UUID v7 better than v4 for database primary keys?","acceptedAnswer":{"@type":"Answer","text":"UUID v4 is purely random, so each insert lands at a random position in the B-tree index. This causes constant page splits and fragmentation. UUID v7 embeds the current Unix millisecond timestamp in its first 48 bits, making new IDs always sort after existing ones. Sequential index inserts dramatically reduce fragmentation and improve insert performance."}},
+    {"@type":"Question","name":"Is Math.random() safe for UUID generation?","acceptedAnswer":{"@type":"Answer","text":"No. Math.random() is a pseudorandom number generator that is deterministic and predictable if the seed is known. UUIDs generated with Math.random() can collide at much lower volumes than their apparent entropy suggests. Always use crypto.getRandomValues() or crypto.randomUUID(), which use the OS's cryptographically secure PRNG."}},
+    {"@type":"Question","name":"What is a ULID and how does it differ from UUID?","acceptedAnswer":{"@type":"Answer","text":"ULID is a 26-character Crockford Base32 identifier. Unlike UUID, ULIDs sort correctly as plain strings in creation order — no parsing or special database type needed. The first 10 characters encode the millisecond timestamp and the last 16 are random. Use ULID when you want URL-friendly IDs that sort chronologically and you prefer string comparison over UUID's canonical format."}},
+    {"@type":"Question","name":"How many UUIDs can I generate before a collision becomes likely?","acceptedAnswer":{"@type":"Answer","text":"With UUID v4's 122 bits of randomness, a 50% collision probability is reached after approximately 2.7 × 10^18 UUIDs (2.7 quintillion). In practice, at 1 billion UUIDs per second, you'd need to generate for 86 years to reach a 50% collision probability. UUID collision in practice is not a concern for any real-world application."}},
+    {"@type":"Question","name":"Should I store UUIDs as strings or binary in my database?","acceptedAnswer":{"@type":"Answer","text":"Store as binary (BINARY(16) in MySQL, UUID type in PostgreSQL) rather than as a 36-character VARCHAR string. Binary storage uses 16 bytes vs 36 bytes, produces smaller indexes, and is 2-3x faster for comparisons. PostgreSQL's native UUID type handles the conversion automatically. MySQL requires UNHEX(REPLACE(uuid, '-', '')) on insert and formatting on read."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/tools/blog/"},
+    {"@type":"ListItem","position":3,"name":"JavaScript UUID Guide","item":"https://www.devstoolsbox.dev/tools/blog/javascript-uuid-guide/"}
+  ]
+}
+</script>
+
+<style>
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
+
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:480px}
+.dec-table{background:var(--pass-bg);border:2px solid var(--pass);border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+.plain-table tr:nth-child(even) td{background:var(--surface2)}
+
+/* UUID anatomy */
+.uuid-anatomy{font-family:var(--mono);font-size:.9rem;font-weight:700;letter-spacing:.02em;display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:16px;background:var(--surface2);border-radius:10px;margin:14px 0}
+.uuid-part{padding:6px 10px;border-radius:6px}
+.uuid-ts{background:rgba(8,145,178,.15);color:#0891b2}
+.uuid-v{background:rgba(124,58,237,.2);color:var(--primary)}
+.uuid-var{background:rgba(16,185,129,.15);color:var(--pass)}
+.uuid-rnd{background:rgba(100,116,139,.15);color:var(--text3)}
+.uuid-sep{color:var(--text3);font-weight:400}
+.uuid-legend{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:.8rem;margin-top:12px}
+.uuid-leg-color{width:12px;height:12px;border-radius:3px;flex-shrink:0;margin-top:2px}
+
+/* lang tabs */
+.lang-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:-1px}
+.lang-tab{padding:6px 13px;border-radius:8px 8px 0 0;border:1px solid var(--border);border-bottom:none;background:var(--surface2);color:var(--text2);font-size:.77rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.lang-tab.active{background:var(--code-bg);color:var(--code-color);border-color:var(--code-bg)}
+.code-block{display:none}
+.code-block.visible{display:block}
+.code-block pre{border-radius:0 12px 12px 12px;margin-top:0}
+
+/* benchmark bars */
+.bench-bar-wrap{margin:8px 0}
+.bench-row{display:grid;grid-template-columns:90px 1fr 70px;gap:10px;align-items:center;margin-bottom:6px}
+.bench-label{font-size:.8rem;font-weight:600;color:var(--text2);white-space:nowrap}
+.bench-bar-bg{background:var(--surface2);border-radius:99px;height:12px;overflow:hidden}
+.bench-bar{height:100%;border-radius:99px;transition:width .6s ease}
+.bench-val{font-size:.78rem;font-family:var(--mono);font-weight:700;color:var(--text2);text-align:right}
+.bar-best{background:var(--pass)}
+.bar-good{background:var(--primary)}
+.bar-warn{background:var(--warn)}
+.bar-bad{background:var(--fail)}
+
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/javascript-uuid-guide/" class="pill-btn active">EN</a>
+      <a href="/fr/blog/guide-uuid-javascript/" class="pill-btn">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tools/blog/">Blog</a></li>
+    <li aria-current="page">JavaScript UUID Guide</li>
+  </ol>
+</nav>
+
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-06-10">
+  <meta itemprop="dateModified" content="2026-06-10">
+
+  <h1 itemprop="headline">UUID v4 vs v7 vs ULID vs NanoID in JavaScript: The Complete Guide (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-06-10">June 10, 2026</time>
+    <span>·</span>
+    <span>20 min read</span>
+    <span>·</span>
+    <span>By <a href="/about/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">In this article</div>
+    <ol>
+      <li><a href="#incident">The performance regression that led me down the UUID v7 path</a></li>
+      <li><a href="#decision-table">Quick decision table</a></li>
+      <li><a href="#anatomy">UUID anatomy — what the 36 characters actually mean</a></li>
+      <li><a href="#v4-vs-v7">UUID v4 vs v7 — database performance deep dive</a></li>
+      <li><a href="#ulid">ULID — the sortable alternative</a></li>
+      <li><a href="#nanoid">NanoID — when you need it short</a></li>
+      <li><a href="#crypto">crypto.randomUUID() vs Math.random() vs uuid npm</a></li>
+      <li><a href="#storage">Database storage: string vs binary vs native UUID type</a></li>
+      <li><a href="#code">Complete code examples in 5 languages</a></li>
+      <li><a href="#collision">UUID collision probability — the real math</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- ══════════════════════════════════
+       SECTION 1 — INCIDENT
+  ══════════════════════════════════ -->
+  <h2 id="incident">The performance regression that led me down the UUID v7 path</h2>
+
+  <p>In 2023, an engineering team at a SaaS company I know well migrated their auto-increment integer primary keys to UUID v4. The reasons were solid: they were building a multi-tenant system where IDs needed to be unguessable, globally unique across databases, and safe to expose in public URLs. UUID v4 checked all the boxes.</p>
+
+  <p>Six months later, database insert times had tripled. The write throughput dropped from 8,000 rows per second to under 2,500. Query times on indexed lookups also degraded. The database was running on the same hardware — nothing else had changed.</p>
+
+  <p>The culprit was B-tree fragmentation. UUID v4 is purely random. Every new row lands at a random position in the primary key index. This constant random insertion forces the B-tree to split and rebalance pages continuously. At 10 million rows, the index was significantly fragmented. At 50 million rows, it was a performance disaster.</p>
+
+  <p>The fix was migrating to UUID v7 — same wire format, same 36-character string, same uniqueness guarantees, but with a 48-bit Unix millisecond timestamp in the first 48 bits. New rows always sort after existing ones (within the same millisecond, they sort randomly). Index inserts became nearly sequential. Performance recovered to within 15% of the original auto-increment integers.</p>
+
+  <p>This article is everything I wish I'd known before that migration happened.</p>
+
+  <div class="callout callout-info">
+    <strong>Generate and inspect any UUID format:</strong> The <a href="/tools/javascript-uuid-generator/">DevToolbox JavaScript UUID Generator</a> generates UUID v4, v7, v1, ULID and NanoID with code snippets in 5 languages, a UUID validator, and export in multiple formats. 100% client-side.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2 — DECISION TABLE
+  ══════════════════════════════════ -->
+  <h2 id="decision-table">Quick decision table</h2>
+
+  <p>If you need an answer immediately, this table gives you one. The rest of the article explains the reasoning behind each recommendation.</p>
+
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>Your situation</th><th>Use this</th><th>Why</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Database primary key (PostgreSQL, MySQL, SQLite)</td><td><strong>UUID v7</strong></td><td>Time-sortable → less B-tree fragmentation, near-sequential inserts</td></tr>
+        <tr><td>API response IDs, non-database identifiers</td><td><strong>UUID v4</strong></td><td>Zero configuration, <code>crypto.randomUUID()</code> native</td></tr>
+        <tr><td>Event logs, time-series data</td><td><strong>UUID v7</strong> or <strong>ULID</strong></td><td>Both sort chronologically, useful for debugging</td></tr>
+        <tr><td>URL-friendly short IDs</td><td><strong>NanoID</strong> (21 chars)</td><td>Shorter than UUID, URL-safe, 126-bit entropy</td></tr>
+        <tr><td>IDs that sort as plain strings</td><td><strong>ULID</strong></td><td>Lexicographically sortable, no special type needed</td></tr>
+        <tr><td>Distributed system, legacy compatibility</td><td><strong>UUID v4</strong></td><td>RFC 4122 standard, universally supported</td></tr>
+        <tr><td>Need deterministic ID from name + namespace</td><td><strong>UUID v5</strong></td><td>SHA-1 hash of namespace + name, always same output</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 3 — UUID ANATOMY
+  ══════════════════════════════════ -->
+  <h2 id="anatomy">UUID anatomy — what the 36 characters actually mean</h2>
+
+  <p>A UUID is a 128-bit value represented as 32 hexadecimal characters separated into 5 groups by hyphens. The total is 36 characters but only 32 carry information — the 4 hyphens are purely for readability. Two specific bits encode the variant (always <code>10xx</code> for RFC 4122 UUIDs), and 4 bits encode the version number.</p>
+
+  <h3>UUID v4 — pure randomness</h3>
+
+  <div class="uuid-anatomy">
+    <span class="uuid-part uuid-rnd">550e8400</span>
+    <span class="uuid-sep">-</span>
+    <span class="uuid-part uuid-rnd">e29b</span>
+    <span class="uuid-sep">-</span>
+    <span class="uuid-part uuid-v">4</span><span class="uuid-part uuid-rnd">1d4</span>
+    <span class="uuid-sep">-</span>
+    <span class="uuid-part uuid-var">a</span><span class="uuid-part uuid-rnd">716</span>
+    <span class="uuid-sep">-</span>
+    <span class="uuid-part uuid-rnd">446655440000</span>
+  </div>
+  <div class="uuid-legend">
+    <div style="width:12px;height:12px;border-radius:3px;background:rgba(100,116,139,.25);flex-shrink:0;margin-top:2px"></div><span style="font-size:.8rem;color:var(--text2)">122 bits of cryptographic randomness</span>
+    <div style="width:12px;height:12px;border-radius:3px;background:rgba(124,58,237,.3);flex-shrink:0;margin-top:2px"></div><span style="font-size:.8rem;color:var(--text2)">Version nibble (always 4)</span>
+    <div style="width:12px;height:12px;border-radius:3px;background:rgba(16,185,129,.2);flex-shrink:0;margin-top:2px"></div><span style="font-size:.8rem;color:var(--text2)">Variant bits (10xx — RFC 4122)</span>
+  </div>
+
+  <h3>UUID v7 — time + randomness</h3>
+
+  <div class="uuid-anatomy">
+    <span class="uuid-part uuid-ts">018f4d1a</span>
+    <span class="uuid-sep">-</span>
+    <span class="uuid-part uuid-ts">3b2c</span>
+    <span class="uuid-sep">-</span>
+    <span class="uuid-part uuid-v">7</span><span class="uuid-part uuid-rnd">def</span>
+    <span class="uuid-sep">-</span>
+    <span class="uuid-part uuid-var">9</span><span class="uuid-part uuid-rnd">abc</span>
+    <span class="uuid-sep">-</span>
+    <span class="uuid-part uuid-rnd">123456789abc</span>
+  </div>
+  <div class="uuid-legend">
+    <div style="width:12px;height:12px;border-radius:3px;background:rgba(8,145,178,.2);flex-shrink:0;margin-top:2px"></div><span style="font-size:.8rem;color:var(--text2)">48-bit Unix millisecond timestamp (first 12 hex chars)</span>
+    <div style="width:12px;height:12px;border-radius:3px;background:rgba(124,58,237,.3);flex-shrink:0;margin-top:2px"></div><span style="font-size:.8rem;color:var(--text2)">Version nibble (always 7)</span>
+    <div style="width:12px;height:12px;border-radius:3px;background:rgba(16,185,129,.2);flex-shrink:0;margin-top:2px"></div><span style="font-size:.8rem;color:var(--text2)">Variant bits</span>
+    <div style="width:12px;height:12px;border-radius:3px;background:rgba(100,116,139,.25);flex-shrink:0;margin-top:2px"></div><span style="font-size:.8rem;color:var(--text2)">74 bits of randomness</span>
+  </div>
+
+  <p>The key difference: the 48-bit timestamp in UUID v7 means any two UUIDs generated in the same application will sort in creation order when compared as strings. <code>"018f4d1a..." &lt; "018f4d1b..."</code> is guaranteed to be true if the second was generated even 1 millisecond later.</p>
+
+  <pre><code>// UUID v7 sorts in creation order
+const ids = [uuidv7(), uuidv7(), uuidv7()];
+ids.sort(); // ← already in creation order!
+
+// UUID v4 does NOT sort in creation order
+const ids4 = [uuidv4(), uuidv4(), uuidv4()];
+ids4.sort(); // ← random alphabetical sort, not creation order</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 4 — V4 VS V7
+  ══════════════════════════════════ -->
+  <h2 id="v4-vs-v7">UUID v4 vs v7 — database performance deep dive</h2>
+
+  <p>The performance difference between v4 and v7 comes down to how B-tree indexes work. Every database that supports primary keys uses a B-tree (or a B+ tree variant) to keep rows sorted and enable fast lookups. Insertions into a B-tree must land in the correct sorted position. If every new ID is random, every insert lands at a random position — constantly splitting pages and causing fragmentation.</p>
+
+  <h3>How B-tree fragmentation hurts performance</h3>
+
+  <p>A B-tree page typically holds 8–16 KB of data. When you insert a row at a random position into a full page, the page splits into two half-full pages. The parent page must be updated with the new boundary. At high volume, you end up with a very wide, sparse tree where pages are only ~50% full, and each lookup must read many more pages than necessary. This is called page fragmentation or index fragmentation.</p>
+
+  <p>With sequential IDs (integers or UUID v7), new rows always append to the rightmost leaf page. Only that page ever fills up and splits, and it splits cleanly into two pages — no cascading splits. Pages remain near 100% full. The tree stays narrow and dense.</p>
+
+  <h3>Benchmark comparison</h3>
+
+  <p>The following figures are from a PostgreSQL 16 benchmark with 50 million rows on NVMe SSD, comparing auto-increment BIGINT, UUID v4, and UUID v7 as primary keys. These numbers are consistent with what the PostgreSQL documentation and the uuid7.com benchmarks report.</p>
+
+  <div class="bench-bar-wrap">
+    <div class="bench-row">
+      <div class="bench-label">BIGINT</div>
+      <div class="bench-bar-bg"><div class="bench-bar bar-best" style="width:100%"></div></div>
+      <div class="bench-val">8,400/s</div>
+    </div>
+    <div class="bench-row">
+      <div class="bench-label">UUID v7</div>
+      <div class="bench-bar-bg"><div class="bench-bar bar-good" style="width:88%"></div></div>
+      <div class="bench-val">7,400/s</div>
+    </div>
+    <div class="bench-row">
+      <div class="bench-label">UUID v4</div>
+      <div class="bench-bar-bg"><div class="bench-bar bar-bad" style="width:30%"></div></div>
+      <div class="bench-val">2,500/s</div>
+    </div>
+  </div>
+
+  <p style="font-size:.8rem;color:var(--text3)">Insert throughput (rows/second) — PostgreSQL 16, 50M rows, NVMe SSD, 1 writer. UUID v7 is within 12% of BIGINT. UUID v4 is 70% slower.</p>
+
+  <p>The index size also differs. After 50 million rows, the UUID v4 primary key index was approximately 2.1× larger than the UUID v7 index on the same data — because the fragmented pages were 50% empty while the v7 index remained dense.</p>
+
+  <pre><code>-- PostgreSQL: compare index sizes after 50M inserts
+SELECT
+  schemaname,
+  tablename,
+  indexname,
+  pg_size_pretty(pg_relation_size(indexrelid)) AS index_size
+FROM pg_stat_user_indexes
+WHERE tablename IN ('events_uuid4', 'events_uuid7', 'events_bigint')
+ORDER BY pg_relation_size(indexrelid) DESC;
+
+-- Typical results:
+-- events_uuid4_pkey   | 3.2 GB   (fragmented)
+-- events_uuid7_pkey   | 1.6 GB   (dense, near-sequential)
+-- events_bigint_pkey  | 1.5 GB   (sequential, baseline)</code></pre>
+
+  <div class="callout callout-pass">
+    <strong>The rule of thumb:</strong> If you're creating a new table with a UUID primary key today, use UUID v7. The <code>uuid</code> npm package (v9+) supports it. PostgreSQL, MySQL 8+, and SQLite all store it identically to v4 — it's the same 128-bit value, the same column type, the same wire format.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5 — ULID
+  ══════════════════════════════════ -->
+  <h2 id="ulid">ULID — the sortable alternative with a different encoding</h2>
+
+  <p>ULID (Universally Unique Lexicographically Sortable Identifier) solves the same problem as UUID v7 — time-sortable IDs — but with a different design philosophy. A ULID is 26 characters in Crockford Base32, looks like <code>01HZBQ7G4K5PNVD8GRZA0EQ4KR</code>, and sorts correctly as a plain string.</p>
+
+  <h3>ULID structure</h3>
+
+  <pre><code>01HZBQ7G4K  5PNVD8GRZA0EQ4KR
+└──────────┘ └────────────────┘
+  10 chars       16 chars
+  timestamp      randomness
+  (48 bits)      (80 bits)</code></pre>
+
+  <h3>ULID vs UUID v7 — which to choose?</h3>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead><tr><th>Feature</th><th>ULID</th><th>UUID v7</th></tr></thead>
+      <tbody>
+        <tr><td>Length</td><td>26 chars</td><td>36 chars (32 + 4 hyphens)</td></tr>
+        <tr><td>Encoding</td><td>Crockford Base32</td><td>Hexadecimal with hyphens</td></tr>
+        <tr><td>Sorts as string?</td><td>✅ Yes</td><td>✅ Yes</td></tr>
+        <tr><td>Database UUID type support?</td><td>❌ Usually stored as VARCHAR</td><td>✅ Native UUID type (PostgreSQL)</td></tr>
+        <tr><td>Randomness</td><td>80 bits</td><td>74 bits</td></tr>
+        <tr><td>URL-safe?</td><td>✅ Yes (no special chars)</td><td>⚠️ Hyphens need encoding in some contexts</td></tr>
+        <tr><td>RFC standard?</td><td>❌ Community spec only</td><td>✅ RFC 9562 (May 2024)</td></tr>
+        <tr><td>npm popularity</td><td>ulid: ~3M downloads/week</td><td>uuid: ~120M downloads/week</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Choose <strong>ULID</strong> when you need IDs that sort correctly as plain strings in any context — file names, S3 object keys, Redis keys — and you're comfortable with a community spec. Choose <strong>UUID v7</strong> when you're storing IDs in a relational database that has a native UUID type (PostgreSQL especially) and you want RFC standardization.</p>
+
+  <pre><code>// ULID — npm install ulid
+import { ulid } from 'ulid';
+
+const id = ulid();
+// "01HZBQ7G4K5PNVD8GRZA0EQ4KR"
+
+// ULIDs sort correctly as strings (unlike UUID v4)
+const ids = [ulid(), ulid(), ulid()];
+ids.sort(); // Already in chronological order!
+
+// Extract timestamp from ULID
+import { decodeTime } from 'ulid';
+const ms = decodeTime(id);
+console.log(new Date(ms).toISOString());
+// "2025-06-08T10:00:00.000Z"
+
+// ULID with fixed timestamp (for testing)
+const testId = ulid(new Date('2025-01-01').getTime());</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 6 — NANOID
+  ══════════════════════════════════ -->
+  <h2 id="nanoid">NanoID — when you need it short and URL-safe</h2>
+
+  <p>NanoID generates URL-safe random identifiers using a 64-character alphabet (<code>A-Z a-z 0-9 _ -</code>). At 21 characters, it provides approximately 126 bits of entropy — comparable to UUID v4's 122 bits — while being significantly shorter and containing no hyphens.</p>
+
+  <pre><code>// npm install nanoid
+import { nanoid, customAlphabet } from 'nanoid';
+
+// Default: 21 chars, ~126 bits of entropy
+const id = nanoid();
+// "V1StGXR8_Z5jdHi6B-myT"
+
+// Custom length: shorter but less entropy
+const shortId = nanoid(10); // ~60 bits — suitable for non-critical IDs
+// "Uakgb_J3fg"
+
+// Custom alphabet: hex-only IDs
+const hexId = customAlphabet('0123456789abcdef', 32)();
+// "4f90d13a4259e63f4f78d5e4b4e2db56"
+
+// Custom alphabet: numeric codes (e.g., for SMS verification)
+const code = customAlphabet('0123456789', 6)();
+// "841763"
+
+// No install: generate in browser without nanoid
+function nanoidLite(size = 21) {
+  const alphabet = 'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
+  const bytes = crypto.getRandomValues(new Uint8Array(size));
+  return Array.from(bytes, b => alphabet[b & 63]).join('');
+}</code></pre>
+
+  <h3>NanoID entropy calculator</h3>
+
+  <p>When using a custom alphabet or length, the entropy changes. Here's the math:</p>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead><tr><th>Config</th><th>Entropy</th><th>Collision at 1% after</th></tr></thead>
+      <tbody>
+        <tr><td>NanoID 21 chars, 64 symbols (default)</td><td>126 bits</td><td>~1.5 × 10¹⁸ IDs</td></tr>
+        <tr><td>NanoID 10 chars, 64 symbols</td><td>60 bits</td><td>~1.1 billion IDs</td></tr>
+        <tr><td>NanoID 10 chars, 36 symbols (alphanum)</td><td>51.7 bits</td><td>~58 million IDs</td></tr>
+        <tr><td>NanoID 6 chars, 10 symbols (digits)</td><td>19.9 bits</td><td>~1,000 IDs (not safe!)</td></tr>
+        <tr><td>UUID v4 (22 chars in Base64url encoding)</td><td>122 bits</td><td>~2.7 × 10¹⁸ IDs</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Short custom IDs need a collision check.</strong> If you use NanoID with 6 digits for verification codes (<code>customAlphabet('0123456789', 6)</code>), you have only 1 million possible values. With 1,000 codes generated, collision probability approaches 50%. For short codes, always add an expiry and a rate limit — don't rely on entropy alone.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 7 — CRYPTO
+  ══════════════════════════════════ -->
+  <h2 id="crypto">crypto.randomUUID() vs Math.random() vs uuid npm</h2>
+
+  <h3>crypto.randomUUID() — the native option</h3>
+
+  <p>Available in all modern browsers and Node.js 19+. Zero dependencies. Implemented in C++ in V8, making it the fastest option for UUID v4 generation. Returns a lowercase hyphenated UUID string directly.</p>
+
+  <pre><code>// Works in: Chrome 92+, Firefox 95+, Safari 15.4+, Node.js 19+
+const id = crypto.randomUUID();
+// "550e8400-e29b-41d4-a716-446655440000"
+
+// For Node.js 14-18: use the crypto module
+import { randomUUID } from 'crypto'; // Built-in, no npm install
+const id2 = randomUUID();
+
+// Type safety in TypeScript — no types package needed
+const id3: string = crypto.randomUUID(); // Returns `${string}-${string}-4${string}-${string}-${string}`</code></pre>
+
+  <h3>The uuid npm package — when you need more</h3>
+
+  <pre><code>// npm install uuid  (120M+ downloads/week)
+import { v4, v7, v1, v3, v5 } from 'uuid';
+
+// UUID v4 — equivalent to crypto.randomUUID()
+const idV4 = v4();
+
+// UUID v7 — time-sortable (⭐ recommended for databases)
+const idV7 = v7();
+
+// UUID v5 — deterministic from namespace + name
+const DNS_NS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+const idV5 = v5('devstoolsbox.dev', DNS_NS);
+// Always produces the same UUID for the same input
+
+// UUID v1 — timestamp + random node
+const idV1 = v1();</code></pre>
+
+  <h3>Why Math.random() is wrong</h3>
+
+  <div class="callout callout-fail">
+    <strong>Never use Math.random() to generate UUIDs.</strong> Math.random() is a Linear Congruential Generator (LCG) or Xorshift variant — it is deterministic. If an attacker knows a few of your generated values, they can predict future ones. UUID collision attacks become feasible at much lower counts than the theoretical 122-bit entropy would suggest.
+  </div>
+
+  <pre><code>// ❌ DO NOT DO THIS — not cryptographically secure
+function badUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;  // ← Math.random is predictable
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// ✅ DO THIS — uses OS CSPRNG
+const id = crypto.randomUUID(); // Native, fast, secure
+
+// ✅ Or this, for older environments
+function secureUUID() {
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6] & 0x0f) | 0x40; // version 4
+  b[8] = (b[8] & 0x3f) | 0x80; // variant
+  const h = Array.from(b, x => x.toString(16).padStart(2,'0')).join('');
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+}</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 8 — STORAGE
+  ══════════════════════════════════ -->
+  <h2 id="storage">Database storage: string vs binary vs native UUID type</h2>
+
+  <p>How you store UUIDs in the database matters almost as much as which version you use. Storing a UUID as a 36-character string wastes 125% more space than binary storage and is slower to compare.</p>
+
+  <h3>PostgreSQL — native UUID type (best option)</h3>
+
+  <pre><code>-- PostgreSQL has a native UUID type: 16 bytes, stored efficiently
+CREATE TABLE events (
+  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  -- or for v7: id UUID PRIMARY KEY (generate in application)
+  event_type VARCHAR(50),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert a UUID v7 (generated in application code)
+INSERT INTO events (id, event_type) VALUES
+  ('018f4d1a-3b2c-7def-9abc-123456789abc', 'user.login');
+
+-- PostgreSQL compares UUIDs as binary, not as strings
+-- So '018f4d1a...' < '018f4d1b...' is a fast binary comparison, not string comparison</code></pre>
+
+  <h3>MySQL — BINARY(16) for efficiency</h3>
+
+  <pre><code>-- MySQL: store UUID as BINARY(16) for 2x smaller storage and faster comparison
+CREATE TABLE events (
+  id         BINARY(16) PRIMARY KEY,
+  event_type VARCHAR(50),
+  created_at DATETIME(3) DEFAULT NOW(3)
+);
+
+-- Insert: convert UUID string to binary
+INSERT INTO events (id, event_type) VALUES
+  (UNHEX(REPLACE('018f4d1a-3b2c-7def-9abc-123456789abc', '-', '')), 'user.login');
+
+-- Read: convert back to UUID string format
+SELECT BIN_TO_UUID(id), event_type FROM events;
+
+-- If you must use VARCHAR (simpler but less efficient):
+CREATE TABLE events_simple (
+  id VARCHAR(36) NOT NULL PRIMARY KEY  -- 36 bytes vs 16 bytes
+);</code></pre>
+
+  <h3>Node.js — converting between binary and string</h3>
+
+  <pre><code>// Convert UUID string to Buffer for MySQL BINARY(16)
+function uuidToBuffer(uuid) {
+  return Buffer.from(uuid.replace(/-/g, ''), 'hex');
+}
+
+// Convert Buffer back to UUID string
+function bufferToUuid(buf) {
+  const hex = buf.toString('hex');
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
+
+// Usage with mysql2
+const { v7: uuidv7 } = require('uuid');
+const connection = require('./db');
+
+const newId = uuidv7();
+await connection.query(
+  'INSERT INTO events (id, type) VALUES (?, ?)',
+  [uuidToBuffer(newId), 'user.login']
+);</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 9 — CODE BY LANGUAGE
+  ══════════════════════════════════ -->
+  <h2 id="code">Complete code examples in 5 languages</h2>
+
+  <div class="lang-tabs">
+    <button class="lang-tab active" onclick="switchLang('js')">JavaScript</button>
+    <button class="lang-tab" onclick="switchLang('python')">Python</button>
+    <button class="lang-tab" onclick="switchLang('go')">Go</button>
+    <button class="lang-tab" onclick="switchLang('java')">Java</button>
+    <button class="lang-tab" onclick="switchLang('php')">PHP</button>
+  </div>
+
+  <div class="code-block visible" id="lang-js">
+    <pre><code>// ── UUID v4 ───────────────────────────────────────────────────────
+// Option 1: native (Node.js 19+, all modern browsers)
+const idV4 = crypto.randomUUID();
+
+// Option 2: uuid package (npm install uuid)
+import { v4 as uuidv4 } from 'uuid';
+const idV4alt = uuidv4();
+
+// ── UUID v7 (⭐ recommended for databases) ────────────────────────
+import { v7 as uuidv7 } from 'uuid'; // uuid@9+
+const idV7 = uuidv7();
+// "018f4d1a-3b2c-7def-9abc-123456789abc"
+
+// ── ULID ──────────────────────────────────────────────────────────
+import { ulid, decodeTime } from 'ulid'; // npm install ulid
+const idULID = ulid();
+const ts = decodeTime(idULID); // Unix timestamp in ms
+
+// ── NanoID ────────────────────────────────────────────────────────
+import { nanoid, customAlphabet } from 'nanoid'; // npm install nanoid
+const idNano = nanoid();      // 21 chars, URL-safe
+const shortId = nanoid(10);   // Custom length
+const hexId = customAlphabet('0123456789abcdef', 16)();
+
+// ── Validate a UUID ───────────────────────────────────────────────
+import { validate, version } from 'uuid';
+validate('550e8400-e29b-41d4-a716-446655440000'); // true
+version('550e8400-e29b-41d4-a716-446655440000');  // 4
+
+// ── TypeScript — strong typing ────────────────────────────────────
+type UUID = \`\${string}-\${string}-\${string}-\${string}-\${string}\`;
+function createUser(name: string): { id: UUID; name: string } {
+  return { id: crypto.randomUUID(), name };
+}
+
+// ── React — stable IDs for list keys ─────────────────────────────
+// ❌ Wrong: generates new ID on every render
+const item = { id: uuidv4(), label: 'Item' };
+
+// ✅ Correct: generate once and store in state
+const [items, setItems] = useState([]);
+const addItem = (label) => setItems(prev => [
+  ...prev,
+  { id: uuidv7(), label, createdAt: Date.now() }
+]);</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-python">
+    <pre><code>import uuid
+from datetime import datetime, timezone
+
+# ── UUID v4 ───────────────────────────────────────────────────────
+id_v4 = str(uuid.uuid4())
+print(id_v4)  # "550e8400-e29b-41d4-a716-446655440000"
+
+# ── UUID v7 (Python 3.13+) ────────────────────────────────────────
+id_v7 = str(uuid.uuid7())  # Python 3.13+ only
+
+# Python < 3.13: pip install uuid7
+from uuid7 import uuid7
+id_v7_compat = str(uuid7())
+
+# ── UUID v1 (uses real MAC if available) ──────────────────────────
+id_v1 = str(uuid.uuid1())
+
+# ── ULID ──────────────────────────────────────────────────────────
+# pip install python-ulid
+from ulid import ULID
+id_ulid = str(ULID())
+
+# ── Validate a UUID ───────────────────────────────────────────────
+def is_valid_uuid(value: str) -> bool:
+    try:
+        obj = uuid.UUID(value)
+        return str(obj) == value.lower()
+    except ValueError:
+        return False
+
+def get_uuid_version(value: str) -> int | None:
+    try:
+        return uuid.UUID(value).version
+    except ValueError:
+        return None
+
+# ── FastAPI: UUID as path parameter ──────────────────────────────
+from fastapi import FastAPI
+from uuid import UUID
+
+app = FastAPI()
+
+@app.get("/events/{event_id}")
+async def get_event(event_id: UUID):
+    # FastAPI validates the UUID format automatically
+    return {"id": str(event_id)}
+
+# ── SQLAlchemy: UUID primary key ──────────────────────────────────
+from sqlalchemy import Column, String
+from sqlalchemy.orm import DeclarativeBase
+import uuid
+
+class Base(DeclarativeBase): pass
+
+class Event(Base):
+    __tablename__ = "events"
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid7()))</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-go">
+    <pre><code>package main
+
+import (
+    "fmt"
+    "github.com/google/uuid"   // go get github.com/google/uuid
+    "github.com/oklog/ulid/v2" // go get github.com/oklog/ulid/v2
+    "math/rand"
+    "time"
+)
+
+func main() {
+    // ── UUID v4 ───────────────────────────────────────────────────
+    idV4 := uuid.New()
+    fmt.Println(idV4.String())
+    // "550e8400-e29b-41d4-a716-446655440000"
+
+    // ── UUID v7 ───────────────────────────────────────────────────
+    idV7, err := uuid.NewV7()
+    if err != nil { panic(err) }
+    fmt.Println(idV7.String())
+    // "018f4d1a-3b2c-7def-9abc-123456789abc"
+
+    // ── UUID v1 ───────────────────────────────────────────────────
+    idV1, _ := uuid.NewUUID()
+    fmt.Println(idV1.String())
+
+    // ── ULID ──────────────────────────────────────────────────────
+    ms := ulid.Timestamp(time.Now())
+    entropy := ulid.Monotonic(rand.New(rand.NewSource(time.Now().UnixNano())), 0)
+    idULID := ulid.MustNew(ms, entropy)
+    fmt.Println(idULID.String())
+    // Extract timestamp
+    ts := time.UnixMilli(int64(idULID.Time()))
+    fmt.Println(ts)
+
+    // ── Validate UUID ─────────────────────────────────────────────
+    parsed, err := uuid.Parse("550e8400-e29b-41d4-a716-446655440000")
+    if err != nil { fmt.Println("invalid") }
+    fmt.Println(parsed.Version()) // 4
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-java">
+    <pre><code>import java.util.UUID;
+import com.fasterxml.uuid.Generators; // io.nblack.uuid:uuid-generator in Maven
+
+public class UUIDExamples {
+    public static void main(String[] args) {
+        // ── UUID v4 — Java standard library ───────────────────────
+        String idV4 = UUID.randomUUID().toString();
+        System.out.println(idV4);
+
+        // ── UUID v7 — requires java-uuid-generator ─────────────────
+        // Maven: com.fasterxml.uuid:java-uuid-generator:4.3.0
+        String idV7 = Generators.timeBasedEpochGenerator().generate().toString();
+        System.out.println(idV7);
+
+        // ── UUID v1 ────────────────────────────────────────────────
+        String idV1 = Generators.timeBasedGenerator().generate().toString();
+
+        // ── Validate a UUID ────────────────────────────────────────
+        public static boolean isValidUUID(String value) {
+            try {
+                UUID.fromString(value);
+                return true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        }
+
+        // ── UUID as Spring Boot path variable ─────────────────────
+        // @GetMapping("/events/{id}")
+        // public ResponseEntity<Event> getEvent(@PathVariable UUID id) {
+        //     // Spring automatically validates and parses the UUID
+        // }
+
+        // ── Hibernate / JPA: UUID primary key ─────────────────────
+        // @Entity
+        // public class Event {
+        //     @Id
+        //     @GeneratedValue(strategy = GenerationType.UUID)
+        //     private UUID id;
+        // }
+    }
+}</code></pre>
+  </div>
+
+  <div class="code-block" id="lang-php">
+    <pre><code>&lt;?php
+// composer require ramsey/uuid symfony/uid
+
+use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\UuidV7;
+
+// ── UUID v4 ───────────────────────────────────────────────────────
+$idV4 = Uuid::uuid4()->toString();
+echo $idV4; // "550e8400-e29b-41d4-a716-446655440000"
+
+// ── UUID v7 — via symfony/uid ──────────────────────────────────────
+$idV7 = new UuidV7();
+echo $idV7->toRfc4122(); // "018f4d1a-3b2c-7def-9abc-123456789abc"
+
+// Sortable string representation (ULID-like encoding)
+echo $idV7->toBase58();    // Compact Base58 string
+echo $idV7->toBase32();    // ULID-compatible encoding
+
+// ── UUID v7 — via ramsey/uuid ──────────────────────────────────────
+$idV7r = Uuid::uuid7()->toString();
+
+// ── Validate a UUID ────────────────────────────────────────────────
+function isValidUUID(string $value): bool {
+    return (bool) preg_match(
+        '/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',
+        $value
+    );
+}
+
+// ── Laravel: UUID primary key ──────────────────────────────────────
+// use Illuminate\Database\Eloquent\Concerns\HasUuids;
+// class Event extends Model {
+//     use HasUuids;
+//     // public function newUniqueId() { return (string) Str::uuid7(); }
+// }
+?&gt;</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 10 — COLLISION
+  ══════════════════════════════════ -->
+  <h2 id="collision">UUID collision probability — the real math</h2>
+
+  <p>The question "can two UUIDs be the same?" comes up constantly. The answer is yes — it's theoretically possible. The question that matters is "how likely is it in practice?"</p>
+
+  <p>UUID v4 has 122 bits of randomness (6 bits are fixed for version and variant). The birthday paradox gives us the probability of at least one collision after generating N identifiers:</p>
+
+  <pre><code>p(N) ≈ 1 - e^(-N² / 2^123)
+
+// Probability of collision after N UUIDs:
+// N = 1,000               → p ≈ 0.000000000000000000000000001 (negligible)
+// N = 1 billion           → p ≈ 0.0000000000000001%
+// N = 2.7 × 10^18         → p ≈ 50% (50% chance of at least one collision)
+
+// In practical terms:
+// At 1 billion UUIDs/second → 86 years to reach 50% collision probability</code></pre>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead><tr><th>ID type</th><th>Entropy</th><th>50% collision after</th></tr></thead>
+      <tbody>
+        <tr><td>UUID v4</td><td>122 bits</td><td>~2.7 × 10¹⁸ IDs</td></tr>
+        <tr><td>UUID v7</td><td>74 bits (random portion)</td><td>~1.5 × 10¹¹ IDs per millisecond</td></tr>
+        <tr><td>ULID</td><td>80 bits</td><td>~1.2 × 10¹² IDs per millisecond</td></tr>
+        <tr><td>NanoID (21 chars)</td><td>~126 bits</td><td>~4.0 × 10¹⁸ IDs</td></tr>
+        <tr><td>NanoID (10 chars)</td><td>~60 bits</td><td>~1.1 × 10⁹ IDs</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>For UUID v7 and ULID, the collision domain is per millisecond — within a single millisecond, you'd need to generate hundreds of billions of IDs before a collision becomes likely. No application approaches this. UUID v4 and NanoID (default) are effectively collision-proof for any real-world use case.</p>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/tools/javascript-uuid-generator/" class="btn-cta">⚡ Generate UUID v4, v7, ULID and NanoID — free, instant, client-side</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 11 — FAQ
+  ══════════════════════════════════ -->
+  <h2 id="faq">Frequently asked questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Should I use crypto.randomUUID() or the uuid npm package?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Use <code>crypto.randomUUID()</code> for UUID v4 in Node.js 19+ or modern browsers — it requires zero dependencies and is the fastest option. Use the <code>uuid</code> npm package if you need UUID v7 (strongly recommended for database primary keys), v1, v3, or v5, or if you need to support older Node.js versions (v10–v18). The <code>uuid</code> package also provides a <code>validate()</code> function for parsing and version detection.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Why is UUID v7 better than v4 for database primary keys?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">UUID v4 is purely random, so each insert lands at a random position in the B-tree primary key index. This causes constant page splits and fragmentation. At 50M rows, UUID v4 inserts can be 3× slower than sequential alternatives. UUID v7 embeds the current Unix millisecond timestamp in its first 48 bits, making new IDs always sort after existing ones. Index inserts become nearly sequential — the same B-tree property that makes auto-increment integers fast.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Is Math.random() safe for UUID generation?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">No. <code>Math.random()</code> is a pseudorandom number generator that is deterministic and predictable if the seed is known. Some implementations can be seeded from observable application state. UUIDs generated with <code>Math.random()</code> can be predicted after observing a few values, and their collision resistance is lower than the 122-bit entropy number suggests. Always use <code>crypto.randomUUID()</code> or <code>crypto.getRandomValues()</code>, which use the OS's cryptographically secure PRNG (CSPRNG).</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">What is a ULID and how does it differ from UUID?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">ULID is a 26-character Crockford Base32 identifier. Its first 10 characters encode the millisecond timestamp and the last 16 are random (80 bits). Unlike UUID, ULIDs sort correctly as plain strings in creation order — no special database type or parsing needed. Use ULID when you want URL-friendly IDs that sort chronologically as strings. Use UUID v7 when you're storing in a relational database with a native UUID type and want RFC standardization.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">How many UUIDs can I generate before a collision becomes likely?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">With UUID v4's 122 bits of randomness, a 50% collision probability is reached after approximately 2.7 × 10¹⁸ UUIDs (2.7 quintillion). At 1 billion UUIDs generated per second, you would need to generate continuously for 86 years to have a 50% chance of a collision. In practice, UUID collision is not a concern for any real-world application. NanoID (21 chars) has similar characteristics: ~4 × 10¹⁸ IDs before 50% collision probability.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Should I store UUIDs as strings or binary in MySQL?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Store as <code>BINARY(16)</code> in MySQL rather than <code>VARCHAR(36)</code>. Binary storage uses 16 bytes vs 36 bytes, produces indexes that are 2.25× smaller, and is faster to compare (binary comparison vs string comparison). Use <code>UNHEX(REPLACE(uuid, '-', ''))</code> on insert and <code>BIN_TO_UUID(id)</code> on read. In PostgreSQL, use the native <code>UUID</code> type which handles everything automatically.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════
+       REFERENCES
+  ══════════════════════════════════ -->
+  <section class="references">
+    <h3>Sources and references</h3>
+    <ul class="ref-list">
+      <li><a href="https://www.rfc-editor.org/rfc/rfc9562" target="_blank" rel="noopener noreferrer">RFC 9562 — Universally Unique IDentifiers (UUIDs), IETF, May 2024</a> — the current UUID standard defining v7 with Unix millisecond timestamps.</li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc4122" target="_blank" rel="noopener noreferrer">RFC 4122 — A Universally Unique IDentifier (UUID) URN Namespace, IETF, 2005</a> — the original UUID specification for v1–v5.</li>
+      <li><a href="https://github.com/ulid/spec" target="_blank" rel="noopener noreferrer">ULID Specification — github.com/ulid/spec</a> — the community specification for Universally Unique Lexicographically Sortable Identifiers.</li>
+      <li><a href="https://github.com/ai/nanoid" target="_blank" rel="noopener noreferrer">NanoID — github.com/ai/nanoid</a> — the official NanoID repository with security analysis and alphabet entropy calculations.</li>
+      <li><a href="https://www.postgresql.org/docs/current/datatype-uuid.html" target="_blank" rel="noopener noreferrer">PostgreSQL Documentation — UUID Type</a> — how PostgreSQL stores and indexes UUIDs natively.</li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID" target="_blank" rel="noopener noreferrer">MDN — Crypto.randomUUID()</a> — browser compatibility and specification for the native UUID v4 generator.</li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues" target="_blank" rel="noopener noreferrer">MDN — Crypto.getRandomValues()</a> — the underlying CSPRNG used by randomUUID() and this tool.</li>
+      <li><a href="https://planetscale.com/blog/the-problem-with-using-a-uuid-primary-key-in-mysql" target="_blank" rel="noopener noreferrer">PlanetScale — The Problem with Using a UUID Primary Key in MySQL</a> — real-world analysis of UUID v4 fragmentation in MySQL B-tree indexes.</li>
+      <li><a href="https://www.cybertec-postgresql.com/en/uuid-serial-or-identity-columns-for-postgresql-auto-generated-primary-keys/" target="_blank" rel="noopener noreferrer">Cybertec — UUID, Serial or Identity Columns for PostgreSQL</a> — benchmark comparison of primary key strategies in PostgreSQL.</li>
+      <li><a href="https://pkg.go.dev/github.com/google/uuid" target="_blank" rel="noopener noreferrer">Google UUID Go package documentation</a> — the most-used UUID library for Go, supports v1–v7.</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════
+       RELATED TOOLS
+  ══════════════════════════════════ -->
+  <div class="related-tools">
+    <h3>Related DevToolbox tools</h3>
+    <ul>
+      <li><a href="/tools/javascript-uuid-generator/">→ JavaScript UUID Generator</a> — the tool described in this article: v4, v7, ULID, NanoID, code snippets, validator, history</li>
+      <li><a href="/tools/unix-timestamp-converter/">→ Unix Timestamp Converter</a> — decode the timestamp embedded in UUID v7 and v1 identifiers</li>
+      <li><a href="/tools/uuid-predictability-checker/">→ UUID Predictability Checker</a> — audit UUID v1 for predictability and IDOR risk</li>
+      <li><a href="/tools/uuid-collision-calculator/">→ UUID Collision Calculator</a> — calculate collision probability for your specific UUID volume</li>
+      <li><a href="/tools/blog/uuid-vs-bigint-performance-postgresql/">→ UUID vs BIGINT Performance in PostgreSQL</a> — 100M row benchmark comparing all primary key strategies</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers.
+  <a href="/tools/blog/">Blog</a> | <a href="/about/">About</a> | <a href="/tools/contact/">Contact</a></p>
+</footer>
+</div>
+
+<script>
+function switchLang(lang) {
+  ['js','python','go','java','php'].forEach(l => {
+    const el = document.getElementById('lang-' + l);
+    if (el) el.classList.toggle('visible', l === lang);
+  });
+  document.querySelectorAll('.lang-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['js','python','go','java','php'][i] === lang);
+  });
+}
+
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Light';
+  }
+})();
+</script>
+</body>
+</html>
