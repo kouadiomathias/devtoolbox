@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formateur & Analyseur SQL en ligne PostgreSQL, MySQL, SQLite, BigQuery | DevToolbox</title>
+<meta name="description" content="Formatez du SQL pour n'importe quel dialecte (PostgreSQL, MySQL, SQLite, SQL Server, BigQuery, Snowflake). Détecte les anti-patterns, explique les requêtes en langage clair, convertit entre dialectes. 100% côté client.">
+<meta name="keywords" content="formateur sql, beautifier sql, détecteur anti-pattern sql, formateur postgresql, formateur mysql, sql en langage naturel, convertisseur dialecte sql, outil sql en ligne">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/formateur-sql/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/formateur-sql/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/sql-formatter/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/sql-formatter/">
+
+<meta property="og:title" content="Formateur & Analyseur SQL PostgreSQL, MySQL, BigQuery, Snowflake">
+<meta property="og:description" content="Formatez du SQL, détectez les anti-patterns, obtenez une explication en langage clair, convertissez entre dialectes. 100% côté client.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/formateur-sql/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"WebApplication",
+  "name":"Formateur & Analyseur SQL",
+  "url":"https://www.devstoolsbox.dev/fr/outils/formateur-sql/",
+  "description":"Formatez du SQL pour n'importe quel dialecte, détectez les anti-patterns, obtenez une explication en langage clair, convertissez entre dialectes. 100% côté client.",
+  "applicationCategory":"DeveloperApplication","operatingSystem":"Any",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},
+  "author":{"@type":"Person","name":"Mathias Kouadio"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Outils","item":"https://www.devstoolsbox.dev/outils/"},
+    {"@type":"ListItem","position":3,"name":"Formateur SQL","item":"https://www.devstoolsbox.dev/fr/outils/formateur-sql/"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Pourquoi SELECT * est une mauvaise pratique ?","acceptedAnswer":{"@type":"Answer","text":"SELECT * récupère toutes les colonnes y compris celles inutiles, empêchant les scans d'index seuls, cassant le code applicatif lors de l'ajout ou de la suppression de colonnes, et gaspillant de la bande passante réseau."}},
+    {"@type":"Question","name":"Pourquoi NOT IN avec une sous-requête est dangereux ?","acceptedAnswer":{"@type":"Answer","text":"Si la sous-requête renvoie une valeur NULL, NOT IN ne renvoie aucune ligne — filtrant silencieusement tout. Utilisez NOT EXISTS ou LEFT JOIN ... WHERE IS NULL à la place."}},
+    {"@type":"Question","name":"Mes requêtes SQL sont-elles envoyées à un serveur ?","acceptedAnswer":{"@type":"Answer","text":"Non. Tout le formatage, l'analyse et la conversion se font entièrement dans votre navigateur. Vos requêtes SQL ne quittent jamais votre machine."}}
+  ]
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sql-formatter@15.4.0/dist/sql-formatter.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<style>
+/* (Le CSS reste inchangé par rapport à la version anglaise) */
+:root {
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:1200px;margin:0 auto}
+
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px;align-items:center}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:18px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+.tool-hero{margin-bottom:20px}
+.tool-hero h1{font-size:1.85rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:6px}
+.tool-hero p{color:var(--text2);font-size:.95rem;max-width:680px}
+
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+.btn{padding:7px 16px;border-radius:40px;font-weight:600;font-size:.82rem;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-hover);color:#fff;transform:translateY(-1px)}
+select{padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.82rem;cursor:pointer;font-family:inherit}
+select:focus{outline:none;border-color:var(--primary)}
+.check-label{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text2);cursor:pointer;white-space:nowrap}
+.check-label input{accent-color:var(--primary)}
+.toolbar-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+
+.editors-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.editors-grid{grid-template-columns:1fr}}
+.editor-col h3{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.sql-textarea{width:100%;min-height:260px;padding:14px;font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);outline:none;resize:vertical;transition:border-color .2s}
+.sql-textarea:focus{border-color:var(--primary)}
+.output-wrap{position:relative}
+.output-pre{width:100%;min-height:260px;padding:14px;font-family:var(--mono);font-size:.82rem;line-height:1.65;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;overflow:auto;white-space:pre;margin:0;word-break:normal}
+body.dark .output-pre .hljs{background:transparent}
+.copy-output-btn{position:absolute;top:8px;right:8px;padding:4px 10px;font-size:.72rem;font-weight:700;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text3);cursor:pointer;transition:.15s}
+.copy-output-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+.char-count{font-size:.72rem;color:var(--text3);font-weight:400}
+
+.action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.spacer{flex:1}
+
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:7px 16px;border-radius:40px;border:1px solid var(--border);background:var(--surface2);font-weight:600;font-size:.8rem;cursor:pointer;color:var(--text2);transition:.15s;font-family:inherit}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+.ap-rows{display:flex;flex-direction:column;gap:0}
+.ap-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--border)}
+.ap-row:last-child{border-bottom:none}
+.sev-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.sev-critical{background:#dc2626}
+.sev-high{background:#ea580c}
+.sev-medium{background:var(--warn)}
+.sev-low{background:var(--pass)}
+.sev-info{background:var(--primary)}
+.ap-content{}
+.ap-name{font-weight:700;font-size:.85rem;color:var(--text);margin-bottom:3px}
+.ap-msg{font-size:.82rem;color:var(--text2);line-height:1.6}
+.ap-fix{font-size:.77rem;color:var(--text3);margin-top:3px;line-height:1.5}
+.ap-fix code{background:var(--code-bg);color:var(--code-color);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:.78em}
+.sev-tag{font-size:.68rem;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap;align-self:start;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.tag-critical{background:var(--fail-bg);color:var(--fail)}
+.tag-high{background:#fff0e8;color:#c2410c}
+.tag-medium{background:var(--warn-bg);color:#b45309}
+.tag-low{background:var(--pass-bg);color:var(--pass)}
+.tag-info{background:rgba(124,58,237,.1);color:var(--primary)}
+body.dark .tag-high{background:#4a1a00;color:#fb923c}
+.ap-all-pass{display:flex;align-items:center;gap:10px;padding:12px;background:var(--pass-bg);border-radius:10px;color:var(--pass);font-weight:600;font-size:.88rem}
+
+.explain-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:.9rem;color:var(--text2);line-height:1.8}
+.explain-box strong{color:var(--text)}
+.explain-box code{background:var(--code-bg);color:var(--code-color);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.85em}
+
+.conv-grid{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.conv-arrow{font-size:1.2rem;color:var(--text3);text-align:center}
+.conv-result{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:var(--mono);font-size:.8rem;line-height:1.7;max-height:280px;overflow:auto;white-space:pre-wrap}
+
+.section-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px}
+.badge-pass{background:var(--pass-bg);color:var(--pass)}
+.badge-warn{background:var(--warn-bg);color:#b45309}
+.badge-fail{background:var(--fail-bg);color:var(--fail)}
+
+.article-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:28px}
+.article-section h2{font-size:1.3rem;font-weight:800;margin-top:28px;margin-bottom:10px}
+.article-section h2:first-of-type{margin-top:0}
+.article-section h3{font-size:1.05rem;font-weight:700;margin-top:18px;margin-bottom:6px}
+.article-section p{color:var(--text2);font-size:.9rem;margin-bottom:10px;line-height:1.8}
+.article-section code{background:var(--code-bg);color:var(--code-color);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:.85em}
+.article-section pre{background:var(--code-bg);color:var(--code-color);padding:14px;border-radius:10px;overflow-x:auto;margin:10px 0;font-family:var(--mono);font-size:.8rem;line-height:1.6}
+.article-section a{color:var(--primary);text-decoration:none}
+.article-section a:hover{text-decoration:underline}
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:12px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.9rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 12px;color:var(--text2);font-size:.88rem;line-height:1.8}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--surface);padding:10px 20px;border-radius:40px;font-size:.85rem;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);z-index:1000}
+body.dark .toast{background:var(--surface);color:var(--text)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/sql-formatter/" class="pill-btn">EN</a>
+      <a href="/fr/outils/formateur-sql/" class="pill-btn active">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Fil d'Ariane">
+  <ol>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/fr/outils/">Outils</a></li>
+    <li aria-current="page">Formateur SQL</li>
+  </ol>
+</nav>
+
+<main>
+<div class="tool-hero">
+  <h1>Formateur &amp; Analyseur SQL</h1>
+  <p>Formatez du SQL pour n'importe quel dialecte, détectez les anti-patterns, obtenez une explication en langage clair de ce que fait votre requête, et convertissez entre dialectes. 100% côté client votre SQL ne quitte jamais votre navigateur.</p>
+</div>
+
+<div class="panel">
+  <div class="toolbar">
+    <select id="dialectSel" title="Dialecte SQL cible">
+      <option value="postgresql">PostgreSQL</option>
+      <option value="mysql">MySQL / MariaDB</option>
+      <option value="sqlite">SQLite</option>
+      <option value="sql">SQL Standard</option>
+      <option value="tsql">SQL Server (T-SQL)</option>
+      <option value="bigquery">BigQuery</option>
+      <option value="snowflake">Snowflake</option>
+      <option value="redshift">Redshift</option>
+      <option value="spark">Spark SQL</option>
+    </select>
+    <select id="kwCase" title="Casse des mots-clés">
+      <option value="upper">MAJUSCULES</option>
+      <option value="lower">minuscules</option>
+      <option value="preserve">Conserver la casse</option>
+    </select>
+    <select id="indentSel" title="Indentation">
+      <option value="2">2 espaces</option>
+      <option value="4">4 espaces</option>
+      <option value="tab">Tabulation</option>
+    </select>
+    <div class="toolbar-sep"></div>
+    <label class="check-label"><input type="checkbox" id="inlineParams"> Paramètres en ligne</label>
+    <div class="toolbar-sep"></div>
+    <button class="btn btn-primary" id="formatBtn">Formater SQL</button>
+    <button class="btn" id="minifyBtn">Minifier</button>
+    <button class="btn" id="clearBtn">Effacer</button>
+  </div>
+
+  <div class="editors-grid">
+    <div class="editor-col">
+      <h3>
+        SQL d'entrée
+        <span class="char-count" id="inputCount">0 car.</span>
+      </h3>
+      <textarea class="sql-textarea" id="sqlInput" spellcheck="false" autocomplete="off"
+        placeholder="Collez votre requête SQL ici…&#10;&#10;SELECT u.id, u.nom, COUNT(o.id) as nb_commandes&#10;FROM utilisateurs u&#10;LEFT JOIN commandes o ON u.id = o.user_id&#10;WHERE u.date_creation > '2024-01-01'&#10;GROUP BY u.id, u.nom&#10;ORDER BY nb_commandes DESC&#10;LIMIT 10;"></textarea>
+      <div class="action-row">
+        <button class="btn" onclick="pasteSQL()">Coller</button>
+        <button class="btn" onclick="loadExample('select')">Exemple SELECT</button>
+        <button class="btn" onclick="loadExample('insert')">Exemple INSERT</button>
+        <span class="spacer"></span>
+        <button class="btn btn-primary" onclick="runAll()">Analyser &amp; Formater ▶</button>
+      </div>
+    </div>
+    <div class="editor-col">
+      <h3>
+        Résultat formaté
+        <span class="char-count" id="outputCount">—</span>
+      </h3>
+      <div class="output-wrap">
+        <pre class="output-pre" id="sqlOutput"><code class="language-sql" id="sqlOutputCode">Formatez votre SQL pour voir le résultat ici.</code></pre>
+        <button class="copy-output-btn" onclick="copyOutput()">⧉ Copier</button>
+      </div>
+      <div class="action-row">
+        <button class="btn" id="dlBtn" onclick="downloadSQL()" style="display:none">↓ Télécharger .sql</button>
+        <button class="btn" id="explainQBtn" onclick="generateExplain()" style="display:none" title="Générer la commande EXPLAIN ANALYZE">EXPLAIN ANALYZE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="apPanel" style="display:none">
+  <div class="section-title">
+    🔍 Analyse des anti-patterns
+    <span class="sec-badge" id="apBadge"></span>
+  </div>
+  <div id="apRows"></div>
+</div>
+
+<div class="panel" id="explainPanel" style="display:none">
+  <div class="section-title">📖 Explication de la requête</div>
+  <div class="explain-box" id="explainBox"></div>
+</div>
+
+<div class="panel" id="extraPanel" style="display:none">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('converter')">⚙️ Convertisseur de dialecte</button>
+    <button class="tab" onclick="switchTab('explain')">⚡ EXPLAIN ANALYZE</button>
+  </div>
+
+  <div id="tab-converter">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+      <select id="convFrom" style="min-width:140px">
+        <option value="mysql">MySQL</option>
+        <option value="postgresql">PostgreSQL</option>
+        <option value="sqlite">SQLite</option>
+        <option value="tsql">SQL Server</option>
+      </select>
+      <span style="font-size:1.3rem;color:var(--text3)">→</span>
+      <select id="convTo" style="min-width:140px">
+        <option value="postgresql">PostgreSQL</option>
+        <option value="mysql">MySQL</option>
+        <option value="sqlite">SQLite</option>
+        <option value="tsql">SQL Server</option>
+      </select>
+      <button class="btn btn-primary" onclick="convertDialect()">Convertir</button>
+      <button class="btn" onclick="copyConv()">⧉ Copier le résultat</button>
+    </div>
+    <div class="conv-result" id="convResult">Sélectionnez les dialectes source et cible, puis cliquez sur Convertir pour traduire votre requête.</div>
+    <p style="font-size:.75rem;color:var(--text3);margin-top:8px">La conversion gère les différences de mots-clés, les alias de types et les noms de fonctions. Vérifiez toujours le résultat avant de l'exécuter en production.</p>
+  </div>
+
+  <div id="tab-explain" style="display:none">
+    <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px">Copiez ces commandes pour les exécuter dans votre base de données et analyser les performances de la requête.</p>
+    <div class="conv-result" id="explainCommands">Formatez d'abord une requête SELECT pour générer les commandes EXPLAIN.</div>
+    <button class="btn" style="margin-top:10px" onclick="copyExplain()">⧉ Copier</button>
+  </div>
+</div>
+
+<section class="article-section" itemscope itemtype="https://schema.org/Article">
+  <meta itemprop="author" content="Mathias Kouadio">
+  <meta itemprop="datePublished" content="2026-06-08">
+
+  <h2>Anti-patterns SQL détectés par cet outil</h2>
+
+  <h3>SELECT *  le tueur silencieux de performance</h3>
+  <p>Sélectionner toutes les colonnes avec <code>SELECT *</code> a trois conséquences réelles. Cela empêche les scans d'index seuls — la base de données doit lire la ligne complète même si votre clause WHERE pourrait être satisfaite par un index seul. Cela casse le code applicatif lorsque des colonnes sont ajoutées ou supprimées. Et cela gaspille la bande passante réseau en transférant des données que vous n'utilisez jamais.</p>
+
+  <h3>NOT IN avec une sous-requête</h3>
+  <p>C'est l'un des motifs SQL les plus dangereux. Si la sous-requête renvoie une valeur <code>NULL</code>, <code>NOT IN</code> ne renvoie aucune ligne — chaque ligne est silencieusement filtrée. Cela provoque des bugs de production quasiment impossibles à déboguer sans connaître ce comportement. Utilisez <code>NOT EXISTS</code> ou <code>LEFT JOIN ... WHERE IS NULL</code> à la place.</p>
+  <pre>- Dangereux : ne renvoie rien si la sous-requête contient un NULL
+SELECT id FROM commandes WHERE user_id NOT IN (SELECT id FROM utilisateurs);
+
+  Sûr : NOT EXISTS gère correctement NULL
+SELECT id FROM commandes o WHERE NOT EXISTS (
+  SELECT 1 FROM utilisateurs u WHERE u.id = o.user_id
+);
+
+  Également sûr : motif anti-jointure LEFT JOIN
+SELECT o.id FROM commandes o
+LEFT JOIN utilisateurs u ON u.id = o.user_id
+WHERE u.id IS NULL;</pre>
+
+  <h3>Fonctions sur des colonnes indexées dans les clauses WHERE</h3>
+  <p>Appliquer une fonction à une colonne indexée dans une clause WHERE empêche la base de données d'utiliser cet index. La fonction doit être évaluée pour chaque ligne, ce qui entraîne un parcours complet de la table.</p>
+  <pre>-- ❌ L'index sur date_creation ne peut pas être utilisé
+WHERE YEAR(date_creation) = 2024
+
+-- ✅ L'index peut être utilisé avec une condition de plage
+WHERE date_creation >= '2024-01-01' AND date_creation < '2025-01-01'</pre>
+
+  <h3>Jointure cartésienne (condition JOIN manquante)</h3>
+  <p>Un <code>FROM table1, table2</code> sans condition de jointure produit un produit cartésien — chaque ligne de table1 associée à chaque ligne de table2. Sur des tables de 1 000 lignes chacune, cela fait 1 000 000 de lignes. C'est presque toujours une erreur.</p>
+
+  <h3>WHERE manquant sur UPDATE ou DELETE</h3>
+  <p>Un <code>UPDATE utilisateurs SET actif = false</code> sans clause WHERE met à jour chaque ligne de la table. C'est l'une des causes les plus fréquentes de corruption de données en production. Cet outil signale toute instruction UPDATE ou DELETE sans clause WHERE comme un problème Critique.</p>
+
+  <h2>Différences entre dialectes référence rapide</h2>
+  <pre> AUTO_INCREMENT (MySQL) vs SERIAL / IDENTITY (PostgreSQL)
+ MySQL :
+CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY);
+ PostgreSQL :
+CREATE TABLE users (id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY);
+ ou plus court :
+CREATE TABLE users (id BIGSERIAL PRIMARY KEY);
+
+ LIMIT avec OFFSET
+ MySQL : LIMIT offset, count
+SELECT * FROM users LIMIT 20, 10;
+ PostgreSQL / SQLite / SQL Standard :
+SELECT * FROM users LIMIT 10 OFFSET 20;
+
+ Comparaison avec gestion de NULL
+ MySQL : IFNULL(val, defaut)
+SELECT IFNULL(nom, 'Inconnu') FROM users;
+ PostgreSQL / SQL Standard : COALESCE
+SELECT COALESCE(nom, 'Inconnu') FROM users;
+
+ Agrégation de chaînes
+ MySQL : GROUP_CONCAT
+SELECT GROUP_CONCAT(nom ORDER BY nom SEPARATOR ', ') FROM users;
+ PostgreSQL : STRING_AGG
+SELECT STRING_AGG(nom, ', ' ORDER BY nom) FROM users;</pre>
+
+  <h2>Foire aux questions</h2>
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Pourquoi SELECT * est une mauvaise pratique ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">SELECT * récupère toutes les colonnes y compris celles inutiles, empêchant les scans d'index seuls, cassant le code applicatif lors de l'ajout ou de la suppression de colonnes, et gaspillant de la bande passante réseau. Listez toujours uniquement les colonnes dont vous avez réellement besoin.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Pourquoi NOT IN avec une sous-requête est dangereux ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Si la sous-requête renvoie une valeur NULL, NOT IN ne renvoie aucune ligne — filtrant silencieusement tout. Les comparaisons avec NULL utilisant != ou NOT IN renvoient UNKNOWN, et aucune ligne ne satisfait UNKNOWN. Utilisez NOT EXISTS ou un motif anti-jointure LEFT JOIN à la place.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Mes requêtes SQL sont-elles envoyées à un serveur ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Non. Tout le formatage, l'analyse, l'explication et la conversion se font entièrement dans votre navigateur via JavaScript. Vos requêtes SQL ne quittent jamais votre machine. C'est particulièrement important pour le SQL contenant des noms de tables ou de colonnes qui révèlent votre schéma de base de données.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Que change réellement le convertisseur de dialecte ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Le convertisseur gère les différences courantes : AUTO_INCREMENT vs SERIAL/IDENTITY, la syntaxe LIMIT, les fonctions de gestion de NULL (IFNULL vs COALESCE), l'agrégation de chaînes (GROUP_CONCAT vs STRING_AGG), les guillemets d'identifiants (backticks vs doubles guillemets) et les alias de types. Il ne réécrit pas les procédures stockées complexes ni les fonctionnalités spécifiques à un dialecte sans équivalent direct.</p>
+      </div>
+    </details>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Qu'est-ce que EXPLAIN ANALYZE ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">EXPLAIN ANALYZE (PostgreSQL) ou EXPLAIN (MySQL) affiche le plan d'exécution de la requête — comment la base de données prévoit d'exécuter votre requête : quels index elle utilise, quelle stratégie de jointure elle choisit, combien de lignes elle estime qu'elle va parcourir. C'est le premier outil à utiliser pour diagnostiquer des requêtes lentes.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3 style="margin-top:28px">Outils connexes</h3>
+  <ul style="margin-left:20px;color:var(--text2);font-size:.88rem;line-height:2.2">
+    <li><a href="/fr/outils/formateur-json/">Formateur JSON</a> — formatez les données JSON que vous interrogez depuis votre base</li>
+    <li><a href="/fr/outils/convertisseur-json-csv/">Convertisseur JSON ↔ CSV</a> — convertissez les données d'export de base entre formats</li>
+    <li><a href="/fr/outils/convertisseur-timestamp/">Convertisseur de timestamp Unix</a> — décodez les timestamps UNIX de vos résultats de requête</li>
+    <li><a href="/fr/outils/comparateur-texte/">Comparateur de texte</a> — comparez deux versions d'une migration SQL avant de l'exécuter</li>
+  </ul>
+</section>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a>  Outils gratuits côté client pour les développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/fr/outils/contact/">Contact</a></p>
+</footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ═════════════════════════════════════════
+   RÈGLES D'ANTI-PATTERNS (traduites)
+═════════════════════════════════════════ */
+const AP_RULES = [
+  {
+    id:'select-star', name:'SELECT * détecté', sev:'medium',
+    check:(sql)=> /SELECT\s+\*/i.test(sql) && !/SELECT\s+COUNT\s*\(\s*\*\s*\)/i.test(sql),
+    msg:'Sélectionner toutes les colonnes empêche les scans d\'index seuls, casse le code applicatif lorsque le schéma change et gaspille la bande passante.',
+    fix:'Listez uniquement les colonnes dont vous avez besoin : <code>SELECT id, nom, email FROM ...</code>'
+  },
+  {
+    id:'not-in-null', name:'NOT IN avec une sous-requête', sev:'high',
+    check:(sql)=> /NOT\s+IN\s*\(\s*SELECT/i.test(sql),
+    msg:'Si la sous-requête renvoie un NULL, NOT IN renvoie silencieusement zéro ligne. C\'est une source très courante de bugs en production.',
+    fix:'Utilisez <code>NOT EXISTS</code> ou <code>LEFT JOIN ... WHERE IS NULL</code> à la place.'
+  },
+  {
+    id:'update-no-where', name:'UPDATE sans WHERE', sev:'critical',
+    check:(sql)=> {
+      const stmts = sql.split(';');
+      return stmts.some(s => /^\s*UPDATE\s+/i.test(s.trim()) && !/WHERE\s+/i.test(s));
+    },
+    msg:'Cet UPDATE n\'a pas de clause WHERE — il modifiera <strong>chaque ligne</strong> de la table.',
+    fix:'Ajoutez une clause WHERE : <code>UPDATE utilisateurs SET actif = false WHERE id = 42;</code>'
+  },
+  {
+    id:'delete-no-where', name:'DELETE sans WHERE', sev:'critical',
+    check:(sql)=> {
+      const stmts = sql.split(';');
+      return stmts.some(s => /^\s*DELETE\s+FROM\s+/i.test(s.trim()) && !/WHERE\s+/i.test(s));
+    },
+    msg:'Ce DELETE n\'a pas de clause WHERE — il supprimera <strong>chaque ligne</strong> de la table.',
+    fix:'Ajoutez une clause WHERE. Si vous voulez vraiment tout supprimer, utilisez <code>TRUNCATE</code> qui est plus rapide et explicite.'
+  },
+  {
+    id:'func-on-column', name:'Fonction sur une colonne indexée dans WHERE', sev:'high',
+    check:(sql)=> /WHERE\s+(?:YEAR|MONTH|DAY|DATE|UPPER|LOWER|TRIM|LENGTH|CAST|CONVERT|SUBSTRING|TO_CHAR)\s*\(/i.test(sql),
+    msg:'Appliquer une fonction à une colonne indexée dans une clause WHERE empêche la base de données d\'utiliser cet index, provoquant un parcours complet de la table.',
+    fix:'Réécrivez la condition pour utiliser une plage : <code>WHERE date_creation >= \'2024-01-01\' AND date_creation < \'2025-01-01\'</code>'
+  },
+  {
+    id:'cartesian-join', name:'Possibilité de jointure cartésienne', sev:'high',
+    check:(sql)=> {
+      const hasImplicitJoin = /FROM\s+\w+\s*,\s*\w+/i.test(sql);
+      const hasWhereJoin    = /WHERE\s+\w+\.\w+\s*=\s*\w+\.\w+/i.test(sql);
+      return hasImplicitJoin && !hasWhereJoin;
+    },
+    msg:'L\'utilisation de tables séparées par des virgules dans FROM sans condition de jointure WHERE produit un produit cartésien — chaque ligne associée à chaque autre ligne.',
+    fix:'Utilisez la syntaxe JOIN explicite : <code>FROM table1 INNER JOIN table2 ON table1.id = table2.fk_id</code>'
+  },
+  {
+    id:'or-instead-of-in', name:'Plusieurs OR sur la même colonne', sev:'low',
+    check:(sql)=> {
+      const matches = sql.match(/(\w+)\s*=\s*['"]?\w+['"]?\s+OR\s+\1\s*=/gi);
+      return matches && matches.length > 1;
+    },
+    msg:'Plusieurs conditions OR sur la même colonne peuvent être simplifiées avec IN(), ce qui est plus propre et parfois plus rapide.',
+    fix:'Remplacez <code>col = \'a\' OR col = \'b\' OR col = \'c\'</code> par <code>col IN (\'a\', \'b\', \'c\')</code>'
+  },
+  {
+    id:'leading-wildcard', name:'Caractère générique en début de LIKE', sev:'medium',
+    check:(sql)=> /LIKE\s+['"]\s*%/i.test(sql),
+    msg:'Un caractère générique en tête (<code>LIKE \'%texte\'</code>) empêche la base de données d\'utiliser un index B-tree, provoquant un parcours complet.',
+    fix:'Utilisez un caractère générique en fin (<code>LIKE \'texte%\'</code>) quand c\'est possible, ou utilisez un index de recherche plein texte pour les recherches complexes.'
+  },
+  {
+    id:'select-distinct-overuse', name:'DISTINCT peut masquer des problèmes de JOIN', sev:'info',
+    check:(sql)=> /SELECT\s+DISTINCT/i.test(sql) && /JOIN/i.test(sql),
+    msg:'DISTINCT après un JOIN indique souvent que le JOIN produit des lignes en double qui ne devraient pas exister. Corrigez la condition du JOIN au lieu de masquer le symptôme.',
+    fix:'Vérifiez votre condition de JOIN. Vous pourriez avoir besoin d\'un type de jointure différent ou d\'une sous-requête.'
+  },
+  {
+    id:'nullable-not-null', name:'Comparaison à NULL avec = ou !=', sev:'high',
+    check:(sql)=> /\=\s*NULL|!=\s*NULL|<>\s*NULL/i.test(sql),
+    msg:'Comparer à NULL avec = ou != renvoie toujours UNKNOWN (pas TRUE). Cela filtre silencieusement toutes les lignes NULL.',
+    fix:'Utilisez <code>IS NULL</code> ou <code>IS NOT NULL</code> : <code>WHERE colonne IS NULL</code>'
+  }
+];
+
+/* ═════════════════════════════════════════
+   FORMATAGE SQL
+═════════════════════════════════════════ */
+function getFormatterOptions() {
+  const dialect = document.getElementById('dialectSel').value;
+  const kwCase  = document.getElementById('kwCase').value;
+  const indent  = document.getElementById('indentSel').value;
+  return {
+    language: dialect,
+    keywordCase: kwCase,
+    tabWidth: indent === 'tab' ? 1 : parseInt(indent),
+    useTabs: indent === 'tab',
+    linesBetweenQueries: 2,
+  };
+}
+
+function formatSQL() {
+  const sql = document.getElementById('sqlInput').value.trim();
+  if (!sql) return null;
+  try {
+    return sqlFormatter.format(sql, getFormatterOptions());
+  } catch(e) {
+    return `-- Erreur de formatage : ${e.message}\n\n${sql}`;
+  }
+}
+
+function minifySQL() {
+  const sql = document.getElementById('sqlInput').value.trim();
+  if (!sql) return null;
+  return sql
+    .replace(/--[^\n]*/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function setOutput(text) {
+  const codeEl = document.getElementById('sqlOutputCode');
+  codeEl.textContent = text;
+  hljs.highlightElement(codeEl);
+  document.getElementById('outputCount').textContent = text.length.toLocaleString() + ' car.';
+  document.getElementById('dlBtn').style.display = 'inline-flex';
+  document.getElementById('explainQBtn').style.display = /^\s*SELECT/i.test(text) ? 'inline-flex' : 'none';
+}
+
+/* ═════════════════════════════════════════
+   ANALYSE ANTI-PATTERNS
+═════════════════════════════════════════ */
+function runAntiPatterns(sql) {
+  const issues = AP_RULES.filter(r => r.check(sql));
+  const panel  = document.getElementById('apPanel');
+  const rows   = document.getElementById('apRows');
+  const badge  = document.getElementById('apBadge');
+  panel.style.display = 'block';
+
+  const criticals = issues.filter(i=>i.sev==='critical').length;
+  const highs     = issues.filter(i=>i.sev==='high').length;
+
+  if (issues.length === 0) {
+    badge.className = 'sec-badge badge-pass';
+    badge.textContent = '✅ Aucun problème';
+    rows.innerHTML = '<div class="ap-all-pass">✅ Aucun anti-pattern détecté — cette requête semble propre.</div>';
+    return;
+  }
+
+  const order = {critical:0,high:1,medium:2,low:3,info:4};
+  issues.sort((a,b)=>(order[a.sev]||9)-(order[b.sev]||9));
+
+  if (criticals > 0) { badge.className='sec-badge badge-fail'; badge.textContent=`🔴 ${criticals} critique`; }
+  else if (highs > 0) { badge.className='sec-badge badge-warn'; badge.textContent=`🟠 ${highs} risque élevé`; }
+  else { badge.className='sec-badge badge-warn'; badge.textContent=`${issues.length} avertissements`; }
+
+  rows.innerHTML = issues.map(i=>`
+    <div class="ap-row">
+      <div class="sev-dot sev-${i.sev}" style="margin-top:4px"></div>
+      <div class="ap-content">
+        <div class="ap-name">${escHtml(i.name)}</div>
+        <div class="ap-msg">${i.msg}</div>
+        ${i.fix?`<div class="ap-fix">Correction : ${i.fix}</div>`:''}
+      </div>
+      <div class="sev-tag tag-${i.sev}">${i.sev}</div>
+    </div>`).join('');
+}
+
+/* ═════════════════════════════════════════
+   EXPLICATION EN LANGAGE CLAIR
+═════════════════════════════════════════ */
+function explainSQL(sql) {
+  const s = sql.trim();
+  const panel = document.getElementById('explainPanel');
+  const box   = document.getElementById('explainBox');
+  panel.style.display = 'block';
+
+  try {
+    const upper = s.toUpperCase();
+    let desc = '';
+
+    if (/^\s*SELECT/i.test(s)) {
+      const distinct = /SELECT\s+DISTINCT/i.test(s) ? 'distincts ' : '';
+
+      const colMatch = s.match(/SELECT\s+(?:DISTINCT\s+)?([\s\S]+?)\s+FROM/i);
+      let cols = colMatch ? colMatch[1].trim() : '…';
+      cols = cols.length > 80 ? cols.slice(0,77)+'…' : cols;
+      const isStar = cols.trim() === '*';
+      const colDesc = isStar ? 'toutes les colonnes' : `<code>${escHtml(cols)}</code>`;
+
+      const fromMatch = s.match(/FROM\s+([\w."]+(?:\s+(?:AS\s+)?\w+)?)/i);
+      const fromTable = fromMatch ? `<code>${escHtml(fromMatch[1])}</code>` : 'une table';
+
+      const joins = s.match(/(?:LEFT|RIGHT|INNER|FULL|CROSS)?\s*(?:OUTER\s+)?JOIN\s+[\w."]+/gi);
+      const joinDesc = joins ? ` joint à ${joins.length} table(s) (${joins.map(j=>j.trim()).map(escHtml).join(', ')})` : '';
+
+      const whereMatch = s.match(/WHERE\s+([\s\S]+?)(?:\s+GROUP BY|\s+ORDER BY|\s+HAVING|\s+LIMIT|;|$)/i);
+      const whereDesc = whereMatch ? `, filtré où <code>${escHtml(whereMatch[1].trim().slice(0,100))}</code>` : '';
+
+      const groupMatch = s.match(/GROUP\s+BY\s+([\s\S]+?)(?:\s+HAVING|\s+ORDER BY|\s+LIMIT|;|$)/i);
+      const groupDesc = groupMatch ? `, regroupé par <code>${escHtml(groupMatch[1].trim())}</code>` : '';
+
+      const havingMatch = s.match(/HAVING\s+([\s\S]+?)(?:\s+ORDER BY|\s+LIMIT|;|$)/i);
+      const havingDesc = havingMatch ? `, conservant les groupes où <code>${escHtml(havingMatch[1].trim().slice(0,80))}</code>` : '';
+
+      const orderMatch = s.match(/ORDER\s+BY\s+([\s\S]+?)(?:\s+LIMIT|;|$)/i);
+      const orderDesc = orderMatch ? `, trié par <code>${escHtml(orderMatch[1].trim())}</code>` : '';
+
+      const limitMatch = s.match(/LIMIT\s+(\d+)/i);
+      const limitDesc = limitMatch ? `, retournant au maximum <strong>${limitMatch[1]}</strong> lignes` : '';
+
+      const aggs = [];
+      if (/COUNT\s*\(/i.test(s)) aggs.push('compte');
+      if (/SUM\s*\(/i.test(s))   aggs.push('somme');
+      if (/AVG\s*\(/i.test(s))   aggs.push('moyenne');
+      if (/MIN\s*\(/i.test(s))   aggs.push('minimum');
+      if (/MAX\s*\(/i.test(s))   aggs.push('maximum');
+      const aggDesc = aggs.length ? ` (utilise des agrégations : ${aggs.join(', ')})` : '';
+
+      const hasSubquery = (s.match(/SELECT/gi)||[]).length > 1;
+      const subDesc = hasSubquery ? ' <em>Contient une sous-requête.</em>' : '';
+
+      desc = `<strong>Requête de type SELECT</strong> — récupère ${distinct}${colDesc} depuis ${fromTable}${joinDesc}${aggDesc}${whereDesc}${groupDesc}${havingDesc}${orderDesc}${limitDesc}.${subDesc}`;
+
+    } else if (/^\s*INSERT/i.test(s)) {
+      const intoMatch = s.match(/INTO\s+([\w."]+)/i);
+      const table = intoMatch ? `<code>${escHtml(intoMatch[1])}</code>` : 'une table';
+      const isSelect = /INSERT\s+INTO[\s\S]+SELECT/i.test(s);
+      desc = `<strong>Requête INSERT</strong> — insère ${isSelect?'des lignes provenant d\'une instruction SELECT':'de nouvelles lignes'} dans ${table}.`;
+
+    } else if (/^\s*UPDATE/i.test(s)) {
+      const tableMatch = s.match(/UPDATE\s+([\w."]+)/i);
+      const table = tableMatch ? `<code>${escHtml(tableMatch[1])}</code>` : 'une table';
+      const hasWhere = /WHERE/i.test(s);
+      const setMatch = s.match(/SET\s+([\s\S]+?)(?:\s+WHERE|;|$)/i);
+      const setDesc = setMatch ? ` définit <code>${escHtml(setMatch[1].trim().slice(0,100))}</code>` : '';
+      const safetyNote = !hasWhere ? ' <strong style="color:var(--fail)">⚠️ Aucune clause WHERE — affecte toutes les lignes.</strong>' : '';
+      desc = `<strong>Requête UPDATE</strong> — modifie des lignes dans ${table}${setDesc}.${safetyNote}`;
+
+    } else if (/^\s*DELETE/i.test(s)) {
+      const fromMatch = s.match(/FROM\s+([\w."]+)/i);
+      const table = fromMatch ? `<code>${escHtml(fromMatch[1])}</code>` : 'une table';
+      const hasWhere = /WHERE/i.test(s);
+      const safetyNote = !hasWhere ? ' <strong style="color:var(--fail)">⚠️ Aucune clause WHERE — supprime toutes les lignes.</strong>' : '';
+      desc = `<strong>Requête DELETE</strong> — supprime des lignes de ${table}.${safetyNote}`;
+
+    } else if (/^\s*CREATE\s+TABLE/i.test(s)) {
+      const tableMatch = s.match(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([\w."]+)/i);
+      const table = tableMatch ? `<code>${escHtml(tableMatch[1])}</code>` : 'une table';
+      desc = `<strong>CREATE TABLE</strong> — crée la table ${table} avec ses colonnes, contraintes et index.`;
+
+    } else if (/^\s*ALTER/i.test(s)) {
+      const tableMatch = s.match(/ALTER\s+TABLE\s+([\w."]+)/i);
+      const table = tableMatch ? `<code>${escHtml(tableMatch[1])}</code>` : 'une table';
+      desc = `<strong>ALTER TABLE</strong> — modifie la structure de la table ${table} (ajout/suppression/modification de colonnes ou contraintes).`;
+
+    } else if (/^\s*DROP/i.test(s)) {
+      desc = `<strong>Instruction DROP</strong> — supprime définitivement un objet de la base de données. <strong style="color:var(--fail)">⚠️ Cette action est irréversible.</strong>`;
+
+    } else if (/^\s*CREATE\s+INDEX/i.test(s)) {
+      const idxMatch = s.match(/CREATE\s+(?:UNIQUE\s+)?INDEX\s+(\w+)\s+ON\s+(\w+)/i);
+      desc = idxMatch
+        ? `<strong>CREATE INDEX</strong> — crée l'index <code>${escHtml(idxMatch[1])}</code> sur la table <code>${escHtml(idxMatch[2])}</code> pour accélérer les recherches.`
+        : `<strong>CREATE INDEX</strong> — crée un index pour améliorer les performances des requêtes.`;
+
+    } else if (/^\s*WITH/i.test(s)) {
+      const cteNames = [...s.matchAll(/(?:WITH|,)\s+(\w+)\s+AS\s*\(/gi)].map(m=>m[1]);
+      desc = `<strong>CTE (Common Table Expression)</strong> — définit ${cteNames.length} sous-requête(s) nommée(s) : ${cteNames.map(n=>`<code>${escHtml(n)}</code>`).join(', ')}. Les CTE améliorent la lisibilité et peuvent être référencées plusieurs fois dans la requête principale.`;
+
+    } else {
+      desc = `Instruction SQL détectée. Cet outil fournit des explications en langage naturel pour les instructions SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP et WITH (CTE).`;
+    }
+
+    box.innerHTML = desc;
+  } catch(e) {
+    box.textContent = 'Impossible d\'analyser la requête pour l\'explication.';
+  }
+}
+
+/* ═════════════════════════════════════════
+   CONVERTISSEUR DE DIALECTE
+═════════════════════════════════════════ */
+const CONV_RULES = {
+  mysql_postgresql: [
+    [/`([^`]+)`/g, '"$1"'],
+    [/AUTO_INCREMENT/gi, 'GENERATED ALWAYS AS IDENTITY'],
+    [/\bTINYINT\s*\(\s*1\s*\)/gi, 'BOOLEAN'],
+    [/\bINT\s+AUTO_INCREMENT/gi, 'BIGINT GENERATED ALWAYS AS IDENTITY'],
+    [/\bIFNULL\s*\(/gi, 'COALESCE('],
+    [/\bIF\s*\(\s*(.*?),\s*(.*?),\s*(.*?)\)/gi, 'CASE WHEN $1 THEN $2 ELSE $3 END'],
+    [/\bGROUP_CONCAT\s*\((.+?)\s+ORDER BY\s+(.+?)\s+SEPARATOR\s+(.+?)\)/gi, 'STRING_AGG($1, $3 ORDER BY $2)'],
+    [/\bGROUP_CONCAT\s*\((.+?)\s+SEPARATOR\s+(.+?)\)/gi, 'STRING_AGG($1, $2)'],
+    [/\bGROUP_CONCAT\s*\((.+?)\)/gi, 'STRING_AGG($1, \',\')'],
+    [/ENGINE\s*=\s*\w+/gi, ''],
+    [/DEFAULT\s+CHARSET\s*=\s*\w+/gi, ''],
+    [/LIMIT\s+(\d+)\s*,\s*(\d+)/gi, 'LIMIT $2 OFFSET $1'],
+    [/\bUNSIGNED\b/gi, ''],
+    [/\bTEXT\b/gi, 'TEXT'],
+    [/\bDATETIME\b/gi, 'TIMESTAMP'],
+    [/\bMEDIUMINT\b/gi, 'INTEGER'],
+  ],
+  postgresql_mysql: [
+    [/"([^"]+)"/g, '`$1`'],
+    [/GENERATED ALWAYS AS IDENTITY/gi, 'AUTO_INCREMENT'],
+    [/\bBIGSERIAL\b/gi, 'BIGINT AUTO_INCREMENT'],
+    [/\bSERIAL\b/gi, 'INT AUTO_INCREMENT'],
+    [/\bCOALESCE\s*\(/gi, 'IFNULL('],
+    [/STRING_AGG\s*\((.+?),\s*(.+?)\s+ORDER BY\s+(.+?)\)/gi, 'GROUP_CONCAT($1 ORDER BY $3 SEPARATOR $2)'],
+    [/STRING_AGG\s*\((.+?),\s*(.+?)\)/gi, 'GROUP_CONCAT($1 SEPARATOR $2)'],
+    [/LIMIT\s+(\d+)\s+OFFSET\s+(\d+)/gi, 'LIMIT $2, $1'],
+    [/\bTIMESTAMPTZ\b/gi, 'DATETIME'],
+    [/\bBOOLEAN\b/gi, 'TINYINT(1)'],
+  ],
+  mysql_sqlite: [
+    [/`([^`]+)`/g, '"$1"'],
+    [/AUTO_INCREMENT/gi, 'AUTOINCREMENT'],
+    [/\bINT\s+AUTO_INCREMENT/gi, 'INTEGER PRIMARY KEY AUTOINCREMENT'],
+    [/\bTINYINT\s*\(\s*1\s*\)/gi, 'INTEGER'],
+    [/\bIFNULL\s*\(/gi, 'IFNULL('],
+    [/ENGINE\s*=\s*\w+/gi, ''],
+    [/DEFAULT\s+CHARSET\s*=\s*\w+/gi, ''],
+    [/\bDATETIME\b/gi, 'TEXT'],
+    [/\bUNSIGNED\b/gi, ''],
+  ],
+  postgresql_sqlite: [
+    [/"([^"]+)"/g, '"$1"'],
+    [/GENERATED ALWAYS AS IDENTITY/gi, 'AUTOINCREMENT'],
+    [/\bBIGSERIAL\b/gi, 'INTEGER PRIMARY KEY AUTOINCREMENT'],
+    [/\bSERIAL\b/gi, 'INTEGER PRIMARY KEY AUTOINCREMENT'],
+    [/\bTIMESTAMPTZ\b/gi, 'TEXT'],
+    [/\bBOOLEAN\b/gi, 'INTEGER'],
+    [/\bCAST\((.+?)\s+AS\s+BOOLEAN\)/gi, 'CAST($1 AS INTEGER)'],
+  ],
+  sqlite_postgresql: [
+    [/AUTOINCREMENT/gi, 'GENERATED ALWAYS AS IDENTITY'],
+    [/INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT/gi, 'BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY'],
+    [/\bIFNULL\s*\(/gi, 'COALESCE('],
+  ],
+  tsql_postgresql: [
+    [/\bNVARCHAR\b/gi, 'VARCHAR'],
+    [/\bNTEXT\b/gi, 'TEXT'],
+    [/\bGETDATE\s*\(\s*\)/gi, 'NOW()'],
+    [/\bISNULL\s*\(/gi, 'COALESCE('],
+    [/\bLEN\s*\(/gi, 'LENGTH('],
+    [/\bCHARINDEX\s*\((.+?),\s*(.+?)\)/gi, 'STRPOS($2, $1)'],
+    [/\bSUBSTRING\s*\(/gi, 'SUBSTR('],
+    [/\bDATEDIFF\s*\(\s*\w+\s*,/gi, '-- DATEDIFF nécessite une réécriture manuelle :'],
+    [/\[(\w+)\]/g, '"$1"'],
+    [/\bIDENTITY\s*\(\s*1\s*,\s*1\s*\)/gi, 'GENERATED ALWAYS AS IDENTITY'],
+    [/\bBIT\b/gi, 'BOOLEAN'],
+    [/\bMONEY\b/gi, 'NUMERIC(19,4)'],
+    [/\bDATETIME\b/gi, 'TIMESTAMP'],
+    [/\bNOCOUNT\s+ON/gi, '-- NOCOUNT non disponible dans PostgreSQL'],
+  ],
+  postgresql_tsql: [
+    [/"([^"]+)"/g, '[$1]'],
+    [/\bNOW\s*\(\s*\)/gi, 'GETDATE()'],
+    [/\bCOALESCE\s*\(/gi, 'ISNULL('],
+    [/\bLENGTH\s*\(/gi, 'LEN('],
+    [/\bSTRPOS\s*\((.+?),\s*(.+?)\)/gi, 'CHARINDEX($2, $1)'],
+    [/GENERATED ALWAYS AS IDENTITY/gi, 'IDENTITY(1,1)'],
+    [/\bBOOLEAN\b/gi, 'BIT'],
+    [/\bTEXT\b/gi, 'NVARCHAR(MAX)'],
+    [/\bVARCHAR\b/gi, 'NVARCHAR'],
+    [/\bSERIAL\b/gi, 'INT IDENTITY(1,1)'],
+    [/\bBIGSERIAL\b/gi, 'BIGINT IDENTITY(1,1)'],
+  ]
+};
+
+function convertDialect() {
+  const from = document.getElementById('convFrom').value;
+  const to   = document.getElementById('convTo').value;
+  const sql  = document.getElementById('sqlInput').value.trim();
+  const out  = document.getElementById('convResult');
+
+  if (!sql) { out.textContent = 'Collez d\'abord votre SQL dans le panneau de saisie ci-dessus.'; return; }
+  if (from === to) { out.textContent = '-- Les dialectes source et cible sont identiques.'; return; }
+
+  const key = `${from}_${to}`;
+  const rules = CONV_RULES[key];
+
+  if (!rules) {
+    out.textContent = `-- La conversion directe de ${from} vers ${to} n'est pas encore prise en charge.\n-- Essayez de convertir via un dialecte intermédiaire.`;
+    return;
+  }
+
+  let result = sql;
+  rules.forEach(([pattern, replacement]) => {
+    result = result.replace(pattern, replacement);
+  });
+
+  try {
+    result = sqlFormatter.format(result, { language: to, keywordCase: 'upper', tabWidth: 2 });
+  } catch {}
+
+  out.textContent = result;
+}
+
+/* ═════════════════════════════════════════
+   GÉNÉRATION EXPLAIN ANALYZE
+═════════════════════════════════════════ */
+function generateExplain() {
+  const sql    = document.getElementById('sqlInput').value.trim();
+  const dialect = document.getElementById('dialectSel').value;
+  const out    = document.getElementById('explainCommands');
+  if (!sql || !/^\s*SELECT/i.test(sql)) {
+    out.textContent = 'EXPLAIN ANALYZE est disponible uniquement pour les instructions SELECT.';
+    return;
+  }
+  switchTab('explain');
+  document.getElementById('extraPanel').style.display = 'block';
+
+  const s = sql.replace(/;?\s*$/, '').trim();
+  let commands = '';
+
+  if (dialect === 'postgresql') {
+    commands = `-- PostgreSQL : Plan d'exécution complet avec temps réel
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+${s};
+
+-- Plan rapide sans exécuter la requête (sans ANALYZE)
+EXPLAIN
+${s};
+
+-- Format JSON pour pgAdmin / outils
+EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
+${s};`;
+  } else if (dialect === 'mysql' || dialect === 'mariadb') {
+    commands = `-- MySQL / MariaDB : Plan de requête de base
+EXPLAIN
+${s};
+
+-- MySQL 8.0+ / MariaDB 10.4+ : Analyse avec nombre réel de lignes
+ANALYZE
+${s};
+
+-- Format JSON
+EXPLAIN FORMAT=JSON
+${s};`;
+  } else if (dialect === 'sqlite') {
+    commands = `-- SQLite : Plan de requête
+EXPLAIN QUERY PLAN
+${s};
+
+-- Byte-code d'exécution (avancé)
+EXPLAIN
+${s};`;
+  } else if (dialect === 'tsql') {
+    commands = `-- SQL Server : Afficher le plan d'exécution
+SET STATISTICS IO ON;
+SET STATISTICS TIME ON;
+${s};
+
+-- Ou utiliser : Requête > Inclure le plan d'exécution réel (Ctrl+M dans SSMS)`;
+  } else {
+    commands = `EXPLAIN
+${s};`;
+  }
+
+  out.textContent = commands;
+}
+
+/* ═════════════════════════════════════════
+   ACTIONS PRINCIPALES
+═════════════════════════════════════════ */
+function runAll() {
+  const sql = document.getElementById('sqlInput').value.trim();
+  if (!sql) { toast('Collez d\'abord une requête SQL'); return; }
+  const formatted = formatSQL();
+  if (formatted) setOutput(formatted);
+  runAntiPatterns(sql);
+  explainSQL(sql);
+  document.getElementById('extraPanel').style.display = 'block';
+  generateExplain();
+}
+
+function downloadSQL() {
+  const code = document.getElementById('sqlOutputCode').textContent;
+  if (!code || code === 'Formatez votre SQL pour voir le résultat ici.') return;
+  const blob = new Blob([code], { type: 'text/plain' });
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'requete.sql'; a.click();
+  URL.revokeObjectURL(url);
+  toast('requete.sql téléchargée');
+}
+
+async function pasteSQL() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('sqlInput').value = text;
+    toast('Collé depuis le presse-papiers');
+  } catch { toast('Accès au presse-papiers refusé — collez manuellement'); }
+}
+
+function copyOutput() {
+  const code = document.getElementById('sqlOutputCode').textContent;
+  navigator.clipboard.writeText(code).then(() => toast('Résultat copié !')).catch(() => toast('Échec de la copie'));
+}
+
+function copyConv() {
+  const text = document.getElementById('convResult').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Conversion copiée !')).catch(() => toast('Échec de la copie'));
+}
+
+function copyExplain() {
+  const text = document.getElementById('explainCommands').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Commandes EXPLAIN copiées !')).catch(() => toast('Échec de la copie'));
+}
+
+/* ═════════════════════════════════════════
+   EXEMPLES
+═════════════════════════════════════════ */
+const EXAMPLES = {
+  select: `SELECT u.id, u.nom, u.email, COUNT(o.id) AS nb_commandes, SUM(o.total) AS total_depense
+FROM utilisateurs u
+LEFT JOIN commandes o ON u.id = o.user_id
+WHERE u.date_creation > '2024-01-01'
+AND u.actif = true
+AND u.pays NOT IN (SELECT code_pays FROM pays_bloques)
+GROUP BY u.id, u.nom, u.email
+HAVING COUNT(o.id) > 0
+ORDER BY total_depense DESC
+LIMIT 50;`,
+
+  insert: `INSERT INTO commandes (id, user_id, produit_id, quantite, prix_unitaire, statut, date_creation)
+SELECT gen_random_uuid(), u.id, p.id, 1, p.prix, 'en_attente', NOW()
+FROM utilisateurs u CROSS JOIN produits p
+WHERE u.actif = true AND p.stock > 0 AND p.categorie = 'electronique';
+
+UPDATE utilisateurs SET derniere_commande = NOW() WHERE id IN (SELECT user_id FROM commandes WHERE statut = 'en_attente');
+
+DELETE FROM sessions WHERE date_expiration < NOW() - INTERVAL '7 days';`
+};
+
+function loadExample(key) {
+  document.getElementById('sqlInput').value = EXAMPLES[key] || '';
+  runAll();
+}
+
+/* ═════════════════════════════════════════
+   UI
+═════════════════════════════════════════ */
+function switchTab(key) {
+  document.getElementById('tab-converter').style.display = key==='converter'?'block':'none';
+  document.getElementById('tab-explain').style.display   = key==='explain'?'block':'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active', (i===0&&key==='converter')||(i===1&&key==='explain'));
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTid;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(toastTid); toastTid = setTimeout(() => { el.style.opacity = '0'; }, 2400);
+}
+
+document.getElementById('sqlInput').addEventListener('input', () => {
+  const n = document.getElementById('sqlInput').value.length;
+  document.getElementById('inputCount').textContent = n.toLocaleString() + ' car.';
+});
+
+document.getElementById('sqlInput').addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') { e.preventDefault(); runAll(); }
+});
+
+document.getElementById('formatBtn').addEventListener('click', () => {
+  const f = formatSQL();
+  if (f) setOutput(f);
+});
+document.getElementById('minifyBtn').addEventListener('click', () => {
+  const m = minifySQL();
+  if (m) setOutput(m);
+});
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('sqlInput').value = '';
+  document.getElementById('sqlOutputCode').textContent = 'Formatez votre SQL pour voir le résultat ici.';
+  document.getElementById('outputCount').textContent = '—';
+  document.getElementById('apPanel').style.display = 'none';
+  document.getElementById('explainPanel').style.display = 'none';
+  document.getElementById('extraPanel').style.display = 'none';
+  document.getElementById('dlBtn').style.display = 'none';
+  document.getElementById('explainQBtn').style.display = 'none';
+  document.getElementById('inputCount').textContent = '0 car.';
+});
+
+/* ── Thème ── */
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Clair' : '🌙 Sombre';
+  document.getElementById('hljs-light').disabled = dark;
+  document.getElementById('hljs-dark').disabled  = !dark;
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function initTheme() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Clair';
+    document.getElementById('hljs-light').disabled = true;
+    document.getElementById('hljs-dark').disabled  = false;
+  }
+})();
+
+/* ── Initialisation avec l'exemple ── */
+document.getElementById('sqlInput').value = EXAMPLES.select;
+document.getElementById('inputCount').textContent = EXAMPLES.select.length.toLocaleString() + ' car.';
+runAll();
+</script>
+</body>
+</html>
