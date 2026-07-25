@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anti-patterns SQL : 10 erreurs qui tuent les performances et les données — Guide complet (2026)</title>
+<meta name="description" content="Les 10 anti-patterns SQL les plus dangereux avec des exemples de production réels : NOT IN avec NULL, SELECT *, fonctions sur colonnes indexées, jointures cartésiennes, requêtes N+1. EXPLAIN ANALYZE inclus. Par Mathias Kouadio.">
+<meta name="keywords" content="anti-patterns sql, not in null bug sql, select star performance, fonction sql colonne indexée, jointure cartésienne sql, problème requête n+1 sql, update sans where sql, bonnes pratiques sql 2026, anti-patterns postgresql, optimisation requête sql">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Mathias Kouadio">
+<link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/anti-patterns-sql/">
+<link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/blog/anti-patterns-sql/">
+<link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/sql-anti-patterns-guide/">
+<link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/sql-anti-patterns-guide/">
+
+<meta property="og:title" content="Anti-patterns SQL : 10 erreurs qui tuent les performances et les données (2026)">
+<meta property="og:description" content="Le DELETE sans WHERE, NOT IN avec NULL, SELECT *, les requêtes N+1 — expliqués avec leurs conséquences réelles en production et les corrections.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/anti-patterns-sql/">
+<meta property="og:site_name" content="DevToolbox">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Article",
+  "headline":"Anti-patterns SQL : 10 erreurs qui tuent les performances et les données — Guide complet (2026)",
+  "author":{"@type":"Person","name":"Mathias Kouadio","url":"https://www.devstoolsbox.dev/about/"},
+  "datePublished":"2026-06-10",
+  "dateModified":"2026-06-10",
+  "mainEntityOfPage":"https://www.devstoolsbox.dev/fr/blog/anti-patterns-sql/",
+  "publisher":{"@type":"Organization","name":"DevToolbox","url":"https://www.devstoolsbox.dev/"},
+  "description":"10 anti-patterns SQL avec des exemples de production : NOT IN avec NULL, SELECT *, fonctions sur colonnes indexées, jointures cartésiennes, UPDATE sans WHERE, requêtes N+1 et différences entre dialectes."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Pourquoi NOT IN avec une sous-requête renvoie-t-il zéro ligne ?","acceptedAnswer":{"@type":"Answer","text":"SQL utilise une logique à trois valeurs : VRAI, FAUX et INCONNU. Lorsqu'une sous-requête renvoie une valeur NULL, la comparaison NULL != valeur s'évalue à INCONNU, pas VRAI. NOT IN exige que toutes les comparaisons soient VRAIES, donc un seul NULL dans la sous-requête filtre silencieusement toutes les lignes. Utilisez NOT EXISTS ou un motif anti-jointure LEFT JOIN à la place."}},
+    {"@type":"Question","name":"Pourquoi SELECT * est une mauvaise pratique ?","acceptedAnswer":{"@type":"Answer","text":"SELECT * a trois coûts réels : il empêche les index-only scans (la base doit lire la ligne entière même si l'index contient toutes les données nécessaires), il casse le code applicatif lorsque des colonnes sont ajoutées ou supprimées, et il gaspille la bande passante réseau en transférant des colonnes que vous n'utilisez jamais. Listez toujours uniquement les colonnes dont votre requête a réellement besoin."}},
+    {"@type":"Question","name":"Qu'est-ce que le problème de requête N+1 ?","acceptedAnswer":{"@type":"Answer","text":"Le problème N+1 survient lorsque vous exécutez une requête pour obtenir N lignes, puis N requêtes supplémentaires pour récupérer les données liées à chaque ligne. Résultat : N+1 requêtes au lieu d'une seule jointure. C'est très courant dans le code utilisant un ORM avec chargement paresseux. La solution est d'utiliser le chargement immédiat (JOIN ou include() dans votre ORM) pour récupérer toutes les données liées en une seule requête."}},
+    {"@type":"Question","name":"Comment se protéger contre un UPDATE sans WHERE ?","acceptedAnswer":{"@type":"Answer","text":"Trois couches : (1) utilisez des transactions — enveloppez les mises à jour dans BEGIN/COMMIT pour pouvoir vérifier le nombre de lignes avant de valider ; (2) activez le mode de mise à jour sécurisée dans MySQL (SET SQL_SAFE_UPDATES = 1) qui bloque les mises à jour sans WHERE sur une clé indexée ; (3) utilisez la clause RETURNING dans PostgreSQL pour voir ce qui a réellement été modifié avant de valider."}},
+    {"@type":"Question","name":"Quelle est la différence entre NULL = NULL et NULL IS NULL en SQL ?","acceptedAnswer":{"@type":"Answer","text":"NULL = NULL s'évalue à INCONNU, pas VRAI — c'est la logique à trois valeurs de SQL. Pour vérifier NULL, utilisez toujours IS NULL ou IS NOT NULL. C'est pourquoi = NULL dans une clause WHERE ne correspond jamais à aucune ligne, même lorsque la colonne contient des valeurs NULL."}},
+    {"@type":"Question","name":"Pourquoi une fonction dans le WHERE empêche-t-elle l'utilisation d'un index ?","acceptedAnswer":{"@type":"Answer","text":"Lorsque vous appliquez une fonction à une colonne indexée (comme WHERE YEAR(created_at) = 2024), la base de données doit évaluer la fonction pour chaque ligne avant de pouvoir appliquer le filtre. Elle ne peut pas utiliser l'index car celui-ci stocke les valeurs brutes de la colonne, pas les résultats de la fonction. Réécrivez en condition de plage : WHERE created_at >= '2024-01-01' AND created_at < '2025-01-01' — cela permet à l'index d'être utilisé."}},
+    {"@type":"Question","name":"Comment EXPLAIN ANALYZE aide-t-il à identifier les anti-patterns ?","acceptedAnswer":{"@type":"Answer","text":"EXPLAIN ANALYZE exécute la requête et montre le plan d'exécution réel : quels index ont été utilisés, combien de lignes ont été analysées par rapport à l'estimation, et où le temps a été passé. Un Seq Scan (parcours séquentiel) sur une grande table est un signal d'alarme — cela signifie qu'aucun index n'a été utilisé. Comparez les lignes estimées et réelles pour repérer de mauvaises statistiques. Une jointure hachée (Hash Join) ou une boucle imbriquée (Nested Loop) avec un grand nombre de lignes suggère un index manquant ou une jointure cartésienne."}}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://www.devstoolsbox.dev/"},
+    {"@type":"ListItem","position":2,"name":"Blog","item":"https://www.devstoolsbox.dev/fr/blog/"},
+    {"@type":"ListItem","position":3,"name":"Guide des anti-patterns SQL","item":"https://www.devstoolsbox.dev/fr/blog/anti-patterns-sql/"}
+  ]
+}
+</script>
+
+<style>
+:root{
+  --bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;
+  --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,.08);
+  --text:#0f172a;--text2:#374151;--text3:#64748b;
+  --border:#e2e8f0;--shadow:0 4px 16px rgba(0,0,0,.06);
+  --radius:14px;--code-bg:#1e293b;--code-color:#e2e8f0;
+  --mono:'SF Mono','Menlo','Cascadia Code',monospace;
+  --pass:#10b981;--warn:#f59e0b;--fail:#ef4444;
+  --pass-bg:#d1fae5;--warn-bg:#fef3c7;--fail-bg:#fee2e2;
+}
+body.dark{
+  --bg:#0b0f19;--surface:#151a28;--surface2:#1d2333;
+  --primary:#a78bfa;--primary-hover:#8b5cf6;
+  --text:#f1f5f9;--text2:#cbd5e1;--text3:#94a3b8;
+  --border:#2d3548;--shadow:0 4px 16px rgba(0,0,0,.35);
+  --pass-bg:#064e3b;--warn-bg:#422006;--fail-bg:#450a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding:20px;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:860px;margin:0 auto}
+
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-weight:800;font-size:1.35rem;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo::before{content:'🛠️'}
+.header-controls{display:flex;gap:8px}
+.pill-group{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:3px;display:flex;box-shadow:var(--shadow)}
+.pill-btn{padding:6px 14px;border:none;background:transparent;font-weight:600;cursor:pointer;color:var(--text2);border-radius:32px;font-size:.8rem;transition:.18s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.pill-btn.active{background:var(--primary);color:#fff}
+
+.breadcrumb{font-size:.8rem;color:var(--text3);margin-bottom:20px}
+.breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.breadcrumb li{display:flex;align-items:center}
+.breadcrumb li+li::before{content:'/';margin:0 6px;color:var(--text3)}
+.breadcrumb a{color:var(--text2);text-decoration:none}
+.breadcrumb a:hover{color:var(--primary)}
+
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);margin-bottom:32px}
+@media(max-width:600px){.article-card{padding:20px}}
+
+h1{font-size:2rem;font-weight:800;letter-spacing:-.025em;line-height:1.25;margin-bottom:10px}
+.article-meta{font-size:.85rem;color:var(--text3);margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.article-meta time{color:var(--text2);font-weight:500}
+.article-meta a{color:var(--primary);text-decoration:none}
+h2{font-size:1.5rem;font-weight:800;margin-top:44px;margin-bottom:12px;letter-spacing:-.015em;scroll-margin-top:24px}
+h3{font-size:1.15rem;font-weight:700;margin-top:28px;margin-bottom:8px;color:var(--text)}
+h4{font-size:1rem;font-weight:700;margin-top:20px;margin-bottom:6px;color:var(--text2)}
+p{color:var(--text2);margin-bottom:16px;font-size:.97rem;line-height:1.85}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{color:var(--text)}
+ul,ol{margin-left:22px;margin-bottom:16px;color:var(--text2)}
+li{margin-bottom:7px;font-size:.97rem;line-height:1.75}
+code{background:var(--code-bg);color:var(--code-color);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:.88em}
+pre{background:var(--code-bg);color:var(--code-color);padding:18px;border-radius:12px;overflow-x:auto;margin:18px 0;font-family:var(--mono);font-size:.82rem;line-height:1.65}
+pre code{background:transparent;padding:0;font-size:inherit;border-radius:0}
+
+.callout{padding:14px 18px;border-radius:0 12px 12px 0;margin:20px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
+.callout-info{background:var(--primary-light);border-left:4px solid var(--primary)}
+.callout-warn{background:var(--warn-bg);border-left:4px solid var(--warn)}
+.callout-fail{background:var(--fail-bg);border-left:4px solid var(--fail)}
+.callout-pass{background:var(--pass-bg);border-left:4px solid var(--pass)}
+body.dark .callout-warn{background:#422006}
+body.dark .callout-fail{background:#450a0a}
+body.dark .callout-pass{background:#064e3b}
+.callout strong{color:var(--text)}
+
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0;border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+.dec-table{background:var(--pass-bg);border:2px solid var(--pass);border-radius:12px;overflow:hidden}
+.dec-table th,.dec-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.87rem}
+.dec-table th{background:var(--pass);color:#fff;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.dec-table tr:last-child td{border-bottom:none}
+.plain-table th,.plain-table td{border:1px solid var(--border);padding:9px 13px;text-align:left;font-size:.87rem}
+.plain-table th{background:var(--surface2);font-weight:700}
+.plain-table tr:nth-child(even) td{background:var(--surface2)}
+
+/* anti-pattern card */
+.ap-card{border:1px solid var(--border);border-radius:14px;padding:22px;margin:20px 0}
+.ap-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ap-name{font-weight:800;font-size:1.05rem;color:var(--text);font-family:inherit}
+.ap-number{font-size:1.3rem;font-weight:900;color:var(--primary);margin-right:8px;font-variant-numeric:tabular-nums}
+.sev-badge{font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;align-self:flex-start}
+.sev-critical{background:var(--fail-bg);color:var(--fail)}
+.sev-high{background:#fff0e8;color:#c2410c}
+.sev-medium{background:var(--warn-bg);color:#b45309}
+.sev-low{background:var(--pass-bg);color:var(--pass)}
+body.dark .sev-high{background:#4a1a00;color:#fb923c}
+.fix-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--pass);display:block;margin:14px 0 6px}
+.danger-tag{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--fail);display:block;margin:14px 0 6px}
+
+/* explain output */
+.explain-output{background:var(--code-bg);color:#86efac;padding:14px 16px;border-radius:10px;font-family:var(--mono);font-size:.78rem;line-height:1.7;margin:10px 0;overflow-x:auto}
+.explain-bad{color:#fca5a5}
+.explain-good{color:#86efac}
+.explain-neutral{color:#94a3b8}
+
+/* N+1 visual */
+.n1-box{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+@media(max-width:560px){.n1-box{grid-template-columns:1fr}}
+.n1-panel{border-radius:10px;padding:14px;border:1px solid var(--border)}
+.n1-bad{background:var(--fail-bg);border-color:var(--fail)}
+.n1-good{background:var(--pass-bg);border-color:var(--pass)}
+.n1-label{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.n1-bad .n1-label{color:var(--fail)}
+.n1-good .n1-label{color:var(--pass)}
+body.dark .n1-bad{background:var(--fail-bg)}
+body.dark .n1-good{background:var(--pass-bg)}
+
+.btn-cta{display:inline-block;background:var(--primary);color:#fff !important;padding:12px 24px;border-radius:40px;font-weight:700;font-size:.9rem;text-decoration:none !important;transition:.2s;margin:8px 0}
+.btn-cta:hover{background:var(--primary-hover);transform:translateY(-1px)}
+
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-item summary{list-style:none;padding:13px 0;cursor:pointer;font-weight:600;color:var(--text);font-size:.93rem;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'＋';font-size:.88rem;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:16px}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item[open] summary{color:var(--primary)}
+.faq-answer{padding:0 0 13px;color:var(--text2);font-size:.9rem;line-height:1.85}
+
+.references{margin-top:36px;padding-top:20px;border-top:1px solid var(--border)}
+.references h3{font-size:.95rem;margin-bottom:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ref-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.ref-list li{font-size:.83rem;color:var(--text3);display:flex;gap:8px}
+.ref-list li::before{content:'→';color:var(--primary);flex-shrink:0;margin-top:1px}
+.ref-list a{color:var(--primary)}
+
+.related-tools{background:var(--primary-light);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:18px 20px;margin-top:36px}
+.related-tools h3{font-size:.85rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.related-tools ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.related-tools li a{font-size:.88rem;color:var(--text2)}
+.related-tools li a:hover{color:var(--primary)}
+
+.toc{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.toc-title{font-size:.78rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.toc ol{margin-left:18px;margin-bottom:0}
+.toc li{font-size:.85rem;margin-bottom:4px}
+.toc a{color:var(--text2)}
+.toc a:hover{color:var(--primary)}
+
+.footer{text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:24px;color:var(--text3);font-size:.8rem}
+.footer a{color:var(--primary);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <a href="/" class="logo">DevToolbox</a>
+  <div class="header-controls">
+    <div class="pill-group">
+      <button class="pill-btn" id="themeBtn" onclick="toggleTheme()">🌙 Sombre</button>
+    </div>
+    <div class="pill-group">
+      <a href="/tools/blog/sql-anti-patterns-guide/" class="pill-btn">EN</a>
+      <a href="/fr/blog/anti-patterns-sql/" class="pill-btn active">FR</a>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Fil d'Ariane">
+  <ol>
+    <li><a href="/">Accueil</a></li>
+    <li><a href="/fr/blog/">Blog</a></li>
+    <li aria-current="page">Guide des anti-patterns SQL</li>
+  </ol>
+</nav>
+
+<main>
+<article itemscope itemtype="https://schema.org/Article" class="article-card">
+  <meta itemprop="datePublished" content="2026-06-10">
+  <meta itemprop="dateModified" content="2026-06-10">
+
+  <h1 itemprop="headline">Anti-patterns SQL : 10 erreurs qui tuent les performances et les données (2026)</h1>
+
+  <div class="article-meta">
+    <time datetime="2026-06-10">10 juin 2026</time>
+    <span>·</span>
+    <span>24 min de lecture</span>
+    <span>·</span>
+    <span>Par <a href="/a-propos/" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">Mathias Kouadio</span></a></span>
+  </div>
+
+  <nav class="toc" aria-label="Table des matières">
+    <div class="toc-title">Dans cet article</div>
+    <ol>
+      <li><a href="#incident">Le DELETE qui a vidé une table de production</a></li>
+      <li><a href="#decision-table">Référence rapide : les 10 anti-patterns</a></li>
+      <li><a href="#not-in-null">NOT IN avec NULL — le bug silencieux</a></li>
+      <li><a href="#select-star">SELECT * — trois coûts cachés</a></li>
+      <li><a href="#func-on-column">Fonctions sur colonnes indexées — le piège du parcours complet</a></li>
+      <li><a href="#update-delete-no-where">UPDATE / DELETE sans WHERE — la paire catastrophique</a></li>
+      <li><a href="#cartesian-join">Jointures cartésiennes — l'explosion accidentelle</a></li>
+      <li><a href="#null-comparison">Comparer avec = NULL — toujours faux</a></li>
+      <li><a href="#n-plus-1">Le problème des requêtes N+1 dans le code avec ORM</a></li>
+      <li><a href="#dialect-traps">Les différences entre dialectes qui causent des bugs silencieux lors d'une migration</a></li>
+      <li><a href="#explain-analyze">Comment utiliser EXPLAIN ANALYZE pour tous les trouver</a></li>
+      <li><a href="#faq">Foire aux questions</a></li>
+    </ol>
+  </nav>
+
+  <div itemprop="articleBody">
+
+  <!-- ══════════════════════════════════
+       SECTION 1 — INCIDENT
+  ══════════════════════════════════ -->
+  <h2 id="incident">Le DELETE qui a vidé une table de production</h2>
+
+  <p>C'était un vendredi après-midi. Un développeur d'une équipe que je connais exécutait un script de nettoyage pour supprimer les comptes de test de la base de données de production. La requête était censée être :</p>
+
+  <pre><code>DELETE FROM users WHERE email LIKE '%@test.example.com';</code></pre>
+
+  <p>Ce qui a réellement été exécuté :</p>
+
+  <pre><code>DELETE FROM users;</code></pre>
+
+  <p>La clause WHERE avait été accidentellement supprimée lors de l'édition du script. La requête s'est exécutée en 0,8 seconde. Les 340 000 utilisateurs ont disparu. L'application était instantanément hors service. La restauration a pris trois heures à partir d'une sauvegarde vieille de six heures, ce qui signifie que six heures d'inscriptions en production ont été définitivement perdues.</p>
+
+  <p>C'est l'anti-pattern SQL le plus spectaculaire, mais il est loin d'être le seul dangereux. Certains anti-patterns détruisent les données. D'autres détruisent silencieusement les performances — vous ne le remarquez que lorsque votre base de données traite 10 millions de lignes au lieu de 10 000 et que chaque appel API prend 8 secondes au lieu de 80 millisecondes. Quelques-uns sont des bugs de logique subtils qui produisent <em>des résultats faux</em> tout en paraissant parfaitement corrects — le motif NOT IN avec NULL étant le pire de tous.</p>
+
+  <p>Ce guide couvre les 10 motifs qui causent le plus de dégâts dans les systèmes de production réels, avec des exemples reproductibles et les corrections exactes.</p>
+
+  <div class="callout callout-info">
+    <strong>Détectez ces motifs automatiquement :</strong> Le <a href="/fr/outils/formateur-sql/">Formateur SQL DevToolbox</a> analyse vos requêtes pour détecter les 10 anti-patterns et les signale avant que vous n'exécutiez quoi que ce soit. Collez votre SQL pour obtenir une analyse instantanée — 100% côté client, rien n'est envoyé à un serveur.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 2 — DECISION TABLE
+  ══════════════════════════════════ -->
+  <h2 id="decision-table">Référence rapide : les 10 anti-patterns</h2>
+
+  <div class="table-wrap">
+    <table class="dec-table">
+      <thead>
+        <tr><th>#</th><th>Anti-pattern</th><th>Sévérité</th><th>Conséquence</th><th>Correction</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>NOT IN avec sous-requête renvoyant NULL</td><td>🔴 Critique</td><td>Renvoie zéro ligne — résultat faux silencieux</td><td>NOT EXISTS ou anti-jointure LEFT JOIN</td></tr>
+        <tr><td>2</td><td>UPDATE / DELETE sans WHERE</td><td>🔴 Critique</td><td>Modifie ou supprime chaque ligne</td><td>Transactions + vérification du nombre de lignes</td></tr>
+        <tr><td>3</td><td>Comparaison avec = NULL</td><td>🔴 Élevée</td><td>Ne correspond jamais — bug silencieux</td><td>IS NULL / IS NOT NULL</td></tr>
+        <tr><td>4</td><td>Fonction sur colonne indexée dans WHERE</td><td>🟠 Élevée</td><td>Parcours complet de table, index inutilisé</td><td>Condition de plage sur la colonne brute</td></tr>
+        <tr><td>5</td><td>Jointure cartésienne (pas de condition JOIN)</td><td>🟠 Élevée</td><td>N × M lignes, surcharge du serveur</td><td>JOIN explicite avec condition ON</td></tr>
+        <tr><td>6</td><td>SELECT *</td><td>🟡 Moyenne</td><td>Pas d'index-only scan, fragilité du schéma, gaspillage de bande passante</td><td>Lister uniquement les colonnes nécessaires</td></tr>
+        <tr><td>7</td><td>LIKE avec joker en début</td><td>🟡 Moyenne</td><td>Parcours complet, index inutilisé</td><td>Joker en fin ou index full-text</td></tr>
+        <tr><td>8</td><td>Requêtes N+1 dans le code avec ORM</td><td>🟡 Moyenne</td><td>100× plus de requêtes que nécessaire</td><td>Chargement immédiat / JOIN</td></tr>
+        <tr><td>9</td><td>DISTINCT masquant un problème de JOIN</td><td>🔵 Faible</td><td>Masque le vrai problème</td><td>Corriger la condition de JOIN</td></tr>
+        <tr><td>10</td><td>OR multiples sur la même colonne</td><td>🔵 Faible</td><td>Moins lisible, parfois plus lent</td><td>Remplacer par IN()</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 3 — NOT IN NULL
+  ══════════════════════════════════ -->
+  <h2 id="not-in-null">Anti-pattern 1 : NOT IN avec une sous-requête — le résultat faux silencieux</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">1</span>NOT IN avec NULL dans la sous-requête</div>
+      <span class="sev-badge sev-critical">Critique — résultats faux</span>
+    </div>
+
+    <p>C'est le bug SQL le plus dangereux car il ne produit aucune erreur. Votre requête s'exécute, renvoie des résultats, et tout semble normal — sauf que vous perdez des lignes qui devraient être présentes, ou vous n'obtenez aucune ligne alors que vous en attendez beaucoup.</p>
+
+    <p>La cause est la logique à trois valeurs de SQL. SQL n'a pas seulement VRAI et FAUX — il a VRAI, FAUX et INCONNU. Toute comparaison avec NULL s'évalue à INCONNU. Et voici le point critique : <code>NOT IN</code> filtre les lignes où la comparaison n'est pas VRAIE. INCONNU n'est pas VRAI. Donc toute ligne comparée à une valeur NULL dans la sous-requête est filtrée.</p>
+
+    <div class="danger-tag">Le bug reproductible</div>
+    <pre><code>-- Préparation : table users avec une ligne où country est NULL
+CREATE TABLE users (id INT, name VARCHAR(50), country VARCHAR(2));
+INSERT INTO users VALUES
+  (1, 'Alice', 'FR'),
+  (2, 'Bob',   'DE'),
+  (3, 'Carol', NULL);   -- ← Ce NULL est la bombe
+
+-- Pays bloqués
+CREATE TABLE blocked_countries (country_code VARCHAR(2));
+INSERT INTO blocked_countries VALUES ('US'), ('CN');
+
+-- Attendu : lignes 1, 2, 3 (aucune n'est US ou CN)
+-- Obtenu :   0 lignes (!)
+SELECT id, name FROM users
+WHERE country NOT IN (SELECT country_code FROM blocked_countries);
+
+-- Pourquoi ? Le NOT IN se développe en :
+-- WHERE country != 'US' AND country != 'CN'
+-- Pour la ligne 3 : NULL != 'US' → INCONNU ; INCONNU AND ... → INCONNU
+-- INCONNU n'est pas VRAI → la ligne 3 est filtrée
+-- Mais comme la ligne 3 est filtrée, la requête filtre aussi les lignes 1 et 2
+-- selon la façon dont l'optimiseur gère NULL dans la liste NOT IN.
+-- Le comportement exact dépend de la base de données, mais la règle la plus sûre est :
+-- n'utilisez jamais NOT IN si la sous-requête peut renvoyer NULL.</code></pre>
+
+    <div class="fix-tag">Correction 1 — NOT EXISTS (recommandé)</div>
+    <pre><code>-- NOT EXISTS gère correctement NULL
+-- Renvoie les lignes 1, 2, 3 comme attendu
+SELECT id, name FROM users u
+WHERE NOT EXISTS (
+  SELECT 1 FROM blocked_countries b
+  WHERE b.country_code = u.country
+);
+-- NOT EXISTS court-circuite correctement :
+-- Pour la ligne 3 (country = NULL) : la sous-requête WHERE NULL = country_code
+-- ne correspond jamais, donc NOT EXISTS est VRAI. La ligne 3 est incluse. ✓</code></pre>
+
+    <div class="fix-tag">Correction 2 — Motif anti-jointure LEFT JOIN</div>
+    <pre><code>-- Gère également NULL correctement, et souvent plus performant sur de grandes tables
+SELECT u.id, u.name
+FROM users u
+LEFT JOIN blocked_countries b ON u.country = b.country_code
+WHERE b.country_code IS NULL;
+-- Les lignes sans correspondance (y compris country NULL) sont renvoyées ✓</code></pre>
+
+    <div class="fix-tag">Correction 3 — Ajouter WHERE IS NOT NULL (si les NULL doivent être exclus)</div>
+    <pre><code>-- Si vous voulez exclure explicitement les pays NULL
+SELECT id, name FROM users
+WHERE country IS NOT NULL
+  AND country NOT IN (SELECT country_code FROM blocked_countries
+                      WHERE country_code IS NOT NULL);</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 4 — SELECT *
+  ══════════════════════════════════ -->
+  <h2 id="select-star">Anti-pattern 2 : SELECT * — trois coûts qui s'accumulent</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">2</span>SELECT * — l'habitude apparemment inoffensive</div>
+      <span class="sev-badge sev-medium">Moyenne — performance + fragilité</span>
+    </div>
+
+    <p>La plupart des développeurs savent que SELECT * est « mauvais ». Moins savent exactement pourquoi, ce qui signifie qu'ils ne savent pas quand cela importe vraiment par rapport à quand c'est acceptable. Il y a trois coûts distincts, et chacun s'aggrave avec l'échelle.</p>
+
+    <h4>Coût 1 — Pas d'index-only scans</h4>
+    <p>PostgreSQL (et d'autres bases) peut répondre à une requête entièrement depuis un index sans toucher aux lignes réelles de la table — un « index-only scan ». C'est beaucoup plus rapide car les index sont plus petits et plus susceptibles d'être en cache. SELECT * détruit cela : comme l'index ne contient pas toutes les colonnes, la base doit lire le tas (les données de la table) pour chaque ligne correspondante.</p>
+
+    <pre><code>-- Table avec un index sur (user_id)
+CREATE TABLE events (
+  id         UUID PRIMARY KEY,
+  user_id    BIGINT,
+  event_type VARCHAR(50),
+  payload    JSONB,    -- Potentiellement volumineux
+  created_at TIMESTAMPTZ
+);
+CREATE INDEX ON events(user_id);
+
+-- ❌ Force une lecture du tas pour chaque ligne — l'index seul ne suffit pas
+SELECT * FROM events WHERE user_id = 42;
+
+-- ✅ Index-only scan possible si l'index couvre les colonnes nécessaires
+SELECT id, event_type, created_at FROM events WHERE user_id = 42;
+
+-- Encore mieux : créer un index couvrant
+CREATE INDEX ON events(user_id) INCLUDE (id, event_type, created_at);
+-- Maintenant la requête ci-dessus ne touche jamais le tas</code></pre>
+
+    <h4>Coût 2 — Fragilité du schéma</h4>
+    <p>Votre frontend s'attend à ce que <code>users</code> ait 8 colonnes. Vous ajoutez une colonne <code>password_reset_token</code> pour une nouvelle fonctionnalité. Chaque endpoint API qui fait <code>SELECT * FROM users</code> expose maintenant ce token dans sa réponse. Ce n'est pas hypothétique — j'ai vu ce motif causer des incidents de sécurité en production. La « sécurité par accident » que SELECT * fournit est la pire : vous ne savez pas ce que vous exposez.</p>
+
+    <h4>Coût 3 — Bande passante inutile</h4>
+    <p>Si votre table <code>products</code> a une colonne <code>description TEXT</code> d'une moyenne de 2 Ko, et qu'une requête de liste qui renvoie 200 produits fait <code>SELECT *</code>, vous transférez 400 Ko de texte de description que la page de liste n'affiche jamais. À 100 requêtes par seconde, cela représente 40 Mo/s de trafic réseau inutile entre la base de données et l'application. Utilisez <code>SELECT id, nom, prix, miniature_url</code> pour la liste, et ne récupérez le produit complet (description incluse) que lorsqu'un utilisateur consulte la page de détail.</p>
+
+    <pre><code>-- ❌ Requête de liste — toutes les colonnes, y compris les volumineuses
+SELECT * FROM products WHERE category_id = 5 ORDER BY created_at DESC LIMIT 20;
+
+-- ✅ Requête de liste — uniquement ce que l'UI affiche
+SELECT id, name, price, stock, thumbnail_url, slug
+FROM products
+WHERE category_id = 5
+ORDER BY created_at DESC
+LIMIT 20;
+
+-- ✅ Requête de détail — produit complet quand l'utilisateur clique
+SELECT * FROM products WHERE slug = 'widget-pro-xl';
+-- (SELECT * est acceptable ici — nous avons besoin de tout)</code></pre>
+
+    <div class="callout callout-pass">
+      <strong>Quand SELECT * est acceptable :</strong> Dans une vue de détail qui a réellement besoin de toutes les colonnes, dans des scripts d'administration rapides ponctuels, ou pour interroger une petite table de référence avec un schéma stable. Le mot-clé est « intentionnellement » — vous savez exactement ce que vous sélectionnez, vous ne laissez pas le hasard décider.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 5 — FUNC ON COLUMN
+  ══════════════════════════════════ -->
+  <h2 id="func-on-column">Anti-pattern 3 : Fonctions sur colonnes indexées dans le WHERE</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">3</span>Fonction sur colonne indexée — le parcours complet invisible</div>
+      <span class="sev-badge sev-high">Élevée — performance</span>
+    </div>
+
+    <p>C'est probablement l'anti-pattern de performance le plus courant que je rencontre lors des revues de code. La requête a l'air propre, la logique est correcte, mais la base de données ignore l'index et lit chaque ligne de la table.</p>
+
+    <p>La raison est simple : un index sur <code>created_at</code> stocke les valeurs brutes des timestamps en ordre trié. Si vous appliquez <code>YEAR(created_at)</code> ou <code>DATE(created_at)</code> à la colonne, la base de données devrait évaluer la fonction pour chaque valeur stockée afin d'appliquer le filtre — ce qui annule l'intérêt de l'index. Elle bascule alors sur un parcours séquentiel.</p>
+
+    <pre><code>-- Supposons que events ait 50 millions de lignes et un index sur created_at
+
+-- ❌ Parcours complet : YEAR() empêche l'utilisation de l'index
+EXPLAIN ANALYZE
+SELECT COUNT(*) FROM events WHERE YEAR(created_at) = 2024;
+
+-- Sortie PostgreSQL (simplifiée) :
+-- Seq Scan on events  (cost=0.00..4289432.00 rows=5000000 ...)
+-- Durée d'exécution : 38 421 ms  ← 38 secondes !
+
+-- ✅ Condition de plage : l'index peut être utilisé
+EXPLAIN ANALYZE
+SELECT COUNT(*) FROM events
+WHERE created_at >= '2024-01-01' AND created_at < '2025-01-01';
+
+-- Sortie PostgreSQL :
+-- Index Scan using events_created_at_idx on events (cost=0.57..124832.00 rows=4987234 ...)
+-- Durée d'exécution : 312 ms  ← 0,3 seconde</code></pre>
+
+    <div class="fix-tag">Modèles de fonctions courants et leurs corrections</div>
+
+    <div class="table-wrap">
+      <table class="plain-table">
+        <thead><tr><th>Motif lent</th><th>Remplacement rapide</th></tr></thead>
+        <tbody>
+          <tr><td><code>WHERE YEAR(col) = 2024</code></td><td><code>WHERE col &gt;= '2024-01-01' AND col &lt; '2025-01-01'</code></td></tr>
+          <tr><td><code>WHERE DATE(col) = '2024-06-08'</code></td><td><code>WHERE col &gt;= '2024-06-08' AND col &lt; '2024-06-09'</code></td></tr>
+          <tr><td><code>WHERE MONTH(col) = 6</code></td><td><code>WHERE col &gt;= '2024-06-01' AND col &lt; '2024-07-01'</code></td></tr>
+          <tr><td><code>WHERE UPPER(email) = 'ALICE@...'</code></td><td>Stocker les emails en minuscules, ou utiliser citext / index insensible à la casse</td></tr>
+          <tr><td><code>WHERE TRIM(name) = 'Alice'</code></td><td>Nettoyer à l'insertion, pas à la requête</td></tr>
+          <tr><td><code>WHERE CAST(id AS TEXT) = '42'</code></td><td><code>WHERE id = 42</code> (type correct)</td></tr>
+          <tr><td><code>WHERE LENGTH(description) > 500</code></td><td>Stocker la longueur dans une colonne calculée avec son propre index</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Si vous avez vraiment besoin d'interroger fréquemment par le résultat d'une fonction, PostgreSQL prend en charge les <strong>index d'expression</strong> — un index construit sur la sortie de la fonction plutôt que sur la valeur brute de la colonne :</p>
+
+    <pre><code>-- Créer un index sur le résultat de la fonction
+CREATE INDEX ON users (LOWER(email));
+
+-- Cette requête utilise maintenant l'index
+SELECT id FROM users WHERE LOWER(email) = 'alice@example.com';
+
+-- PostgreSQL a aussi les colonnes générées (depuis la v12)
+ALTER TABLE events
+  ADD COLUMN event_year SMALLINT GENERATED ALWAYS AS (EXTRACT(YEAR FROM created_at)) STORED;
+CREATE INDEX ON events(event_year);
+
+-- Maintenant, c'est soutenu par un index
+SELECT COUNT(*) FROM events WHERE event_year = 2024;</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 6 — UPDATE DELETE
+  ══════════════════════════════════ -->
+  <h2 id="update-delete-no-where">Anti-patterns 4 et 5 : UPDATE et DELETE sans WHERE</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">4-5</span>UPDATE / DELETE sans WHERE</div>
+      <span class="sev-badge sev-critical">Critique — perte de données</span>
+    </div>
+
+    <p>Ces deux-là sont regroupés car le problème et les corrections sont identiques. Un <code>UPDATE users SET actif = false</code> sans clause WHERE touche chaque ligne. Sur une table de 5 millions d'utilisateurs, cela s'exécute silencieusement et se termine en quelques secondes — vous ne le découvrez que lorsque les utilisateurs commencent à appeler le support parce qu'ils ont été déconnectés.</p>
+
+    <div class="fix-tag">Correction 1 — Toujours utiliser des transactions avec vérification du nombre de lignes</div>
+    <pre><code>-- PostgreSQL : le modèle de mise à jour sécurisée
+BEGIN;
+
+-- Exécuter la mise à jour
+UPDATE users SET active = false WHERE email LIKE '%@domaine-obsolete.com';
+
+-- Vérifier combien de lignes ont été affectées AVANT de valider
+-- Si le nombre semble anormal, ROLLBACK
+SELECT COUNT(*) FROM users WHERE email LIKE '%@domaine-obsolete.com';
+-- Ou utiliser : GET DIAGNOSTICS row_count = ROW_COUNT; en PL/pgSQL
+
+-- Ne valider que si le compte est correct
+COMMIT;
+-- Si quelque chose ne va pas : ROLLBACK;</code></pre>
+
+    <div class="fix-tag">Correction 2 — Utiliser RETURNING pour voir ce qui a été modifié</div>
+    <pre><code>-- La clause RETURNING de PostgreSQL vous permet de voir les lignes affectées avant de valider
+BEGIN;
+
+-- Supprimer et voir ce que vous êtes sur le point de perdre
+DELETE FROM sessions
+WHERE expires_at < NOW() - INTERVAL '7 days'
+RETURNING id, user_id, created_at;
+
+-- Examinez la sortie. Si elle est correcte :
+COMMIT;
+-- Sinon :
+ROLLBACK;</code></pre>
+
+    <div class="fix-tag">Correction 3 — Mode sécurisé de MySQL et limites de lignes</div>
+    <pre><code>-- MySQL : activer les mises à jour sécurisées (bloque UPDATE/DELETE sans WHERE sur une clé)
+SET SQL_SAFE_UPDATES = 1;
+
+-- Maintenant, ceci est rejeté :
+UPDATE users SET active = false;  -- Erreur : pas de clause WHERE
+
+-- Et ajouter une LIMIT comme garde-fou lors de mises à jour en masse
+UPDATE users SET last_notified_at = NOW()
+WHERE notification_pending = true
+LIMIT 1000;  -- Empêche les mises à jour accidentelles de toute la table</code></pre>
+
+    <div class="fix-tag">Correction 4 — Suppression logique au lieu de DELETE</div>
+    <pre><code>-- Ajouter une colonne deleted_at à toutes les tables nécessitant une suppression
+ALTER TABLE users ADD COLUMN deleted_at TIMESTAMPTZ;
+
+-- "Supprimer" un utilisateur
+UPDATE users SET deleted_at = NOW() WHERE id = 42;
+
+-- Interroger les utilisateurs actifs
+SELECT * FROM users WHERE deleted_at IS NULL;
+
+-- Avantage : les suppressions massives accidentelles peuvent être récupérées
+-- en remettant simplement deleted_at à NULL
+UPDATE users SET deleted_at = NULL WHERE id = 42;</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 7 — CARTESIAN
+  ══════════════════════════════════ -->
+  <h2 id="cartesian-join">Anti-pattern 6 : Jointures cartésiennes</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">6</span>Jointure cartésienne — l'explosion combinatoire accidentelle</div>
+      <span class="sev-badge sev-high">Élevée — performance</span>
+    </div>
+
+    <p>Un produit cartésien signifie que chaque ligne de la table A est associée à chaque ligne de la table B. Sur deux tables de 1 000 lignes chacune, le résultat fait 1 000 000 de lignes. Sur deux tables de 100 000 lignes, c'est 10 milliards de lignes. Cela fera planter la plupart des serveurs de base de données ou provoquera des erreurs de mémoire avant de renvoyer des résultats.</p>
+
+    <pre><code>-- ❌ Jointure cartésienne accidentelle — syntaxe avec virgule sans condition WHERE
+SELECT o.id, u.name, o.total
+FROM orders o, users u;
+-- Si orders a 50 000 lignes et users 10 000 lignes :
+-- Résultat : 500 000 000 lignes
+-- Temps d'exécution : ne se terminera jamais sur un serveur normal
+
+-- ✅ JOIN explicite avec une condition
+SELECT o.id, u.name, o.total
+FROM orders o
+INNER JOIN users u ON u.id = o.user_id;
+-- Résultat : 50 000 lignes (une par commande)
+
+-- Détecter une jointure cartésienne dans la sortie d'EXPLAIN :
+-- PostgreSQL : "Nested Loop" sans condition de jointure affichée
+-- MySQL : "Using join buffer (flat, BNL join)" avec toutes les lignes
+-- Les lignes estimées seront le produit des deux tables</code></pre>
+
+    <p>Les jointures cartésiennes sont parfois intentionnelles — par exemple, pour générer une grille de tous les produits × tous les entrepôts. Dans ce cas, utilisez le mot-clé explicite <code>CROSS JOIN</code> pour clarifier l'intention :</p>
+
+    <pre><code>-- Produit cartésien intentionnel — utilisez CROSS JOIN explicitement
+SELECT p.id AS product_id, w.id AS warehouse_id
+FROM products p
+CROSS JOIN warehouses w;
+-- Intention claire : il s'agit d'un produit croisé complet</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 8 — NULL COMPARISON
+  ══════════════════════════════════ -->
+  <h2 id="null-comparison">Anti-pattern 7 : Comparer avec = NULL</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">7</span>WHERE colonne = NULL — toujours faux</div>
+      <span class="sev-badge sev-critical">Critique — résultats faux</span>
+    </div>
+
+    <p>C'est le bug de logique SQL le plus courant pour les développeurs venant d'autres langages. Dans la plupart des langages de programmation, <code>x == null</code> signifie « x est null ». En SQL, <code>colonne = NULL</code> s'évalue à INCONNU — et aucune ligne ne satisfait une condition qui s'évalue à INCONNU. La requête s'exécute avec succès et ne renvoie aucune ligne, même si la colonne contient de nombreuses valeurs NULL.</p>
+
+    <pre><code>-- Supposons que orders ait des lignes où shipping_date est NULL (pas encore expédié)
+INSERT INTO orders (id, customer_id, shipping_date) VALUES
+  (1, 10, '2025-06-01'),
+  (2, 11, NULL),          -- Pas encore expédié
+  (3, 12, NULL),          -- Pas encore expédié
+  (4, 13, '2025-06-05');
+
+-- ❌ Renvoie 0 ligne — NULL = NULL est INCONNU, pas VRAI
+SELECT id FROM orders WHERE shipping_date = NULL;
+
+-- ❌ Renvoie également 0 ligne
+SELECT id FROM orders WHERE shipping_date != NULL;
+
+-- ✅ Correct
+SELECT id FROM orders WHERE shipping_date IS NULL;
+-- Renvoie : lignes 2, 3
+
+-- ✅ Correct
+SELECT id FROM orders WHERE shipping_date IS NOT NULL;
+-- Renvoie : lignes 1, 4
+
+-- ❌ Souvent vu aussi dans des comparaisons sans COALESCE
+SELECT * FROM orders WHERE COALESCE(shipping_date, '1970-01-01') = '1970-01-01';
+-- Cela fonctionne mais c'est maladroit — préférez IS NULL</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 9 — N+1
+  ══════════════════════════════════ -->
+  <h2 id="n-plus-1">Anti-pattern 8 : Le problème des requêtes N+1</h2>
+
+  <div class="ap-card">
+    <div class="ap-header">
+      <div class="ap-name"><span class="ap-number">8</span>Requêtes N+1 — le piège des ORM</div>
+      <span class="sev-badge sev-medium">Moyenne — performance à l'échelle</span>
+    </div>
+
+    <p>Le problème N+1 est presque invisible en développement, quand votre base de données a 50 lignes. Il surgit en production avec 50 000 lignes, quand un seul endpoint API déclenche soudainement 50 001 requêtes par requête au lieu d'une seule.</p>
+
+    <p>Le motif : vous interrogez N utilisateurs, puis pour chaque utilisateur, vous chargez paresseusement ses commandes. Avec le chargement paresseux (par défaut de l'ORM), cela déclenche une requête séparée par utilisateur. N utilisateurs = N+1 requêtes au total.</p>
+
+    <div class="n1-box">
+      <div class="n1-panel n1-bad">
+        <div class="n1-label">❌ Motif N+1 (501 requêtes pour 500 utilisateurs)</div>
+        <pre style="margin:0;background:transparent;padding:0;font-size:.78rem"><code style="background:transparent;padding:0">-- Requête 1 : obtenir tous les utilisateurs
+SELECT * FROM users LIMIT 500;
+
+-- Requêtes 2 à 501 : une par utilisateur
+SELECT * FROM orders WHERE user_id = 1;
+SELECT * FROM orders WHERE user_id = 2;
+SELECT * FROM orders WHERE user_id = 3;
+-- ... 497 requêtes supplémentaires</code></pre>
+      </div>
+      <div class="n1-panel n1-good">
+        <div class="n1-label">✅ Motif JOIN (2 requêtes au total)</div>
+        <pre style="margin:0;background:transparent;padding:0;font-size:.78rem"><code style="background:transparent;padding:0">-- 1 requête : utilisateurs + commandes
+SELECT u.id, u.name,
+       o.id as order_id, o.total
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+ORDER BY u.id
+LIMIT 500;</code></pre>
+      </div>
+    </div>
+
+    <div class="fix-tag">Correction en SQL brut</div>
+    <pre><code>-- Récupérer les utilisateurs et leur nombre de commandes en une seule requête
+SELECT
+  u.id,
+  u.name,
+  u.email,
+  COUNT(o.id)   AS order_count,
+  COALESCE(SUM(o.total), 0) AS total_spent
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+WHERE u.active = true
+GROUP BY u.id, u.name, u.email
+ORDER BY total_spent DESC
+LIMIT 50;</code></pre>
+
+    <div class="fix-tag">Correction dans SQLAlchemy (Python)</div>
+    <pre><code># ❌ N+1 : le chargement paresseux déclenche une requête par utilisateur
+users = session.query(User).filter(User.active == True).limit(50).all()
+for user in users:
+    print(user.orders)  # ← Déclenche une requête ICI pour chaque utilisateur
+
+# ✅ Chargement immédiat : jointure en une seule requête
+from sqlalchemy.orm import joinedload
+
+users = (
+    session.query(User)
+    .options(joinedload(User.orders))  # Joint les commandes dans la même requête
+    .filter(User.active == True)
+    .limit(50)
+    .all()
+)
+for user in users:
+    print(user.orders)  # ← Déjà chargé, pas de requête supplémentaire</code></pre>
+
+    <div class="fix-tag">Correction dans TypeORM (Node.js)</div>
+    <pre><code>// ❌ N+1 : les relations ne sont pas chargées dans la requête principale
+const users = await User.find({ where: { active: true }, take: 50 });
+for (const user of users) {
+    const orders = await user.orders; // ← Requête par utilisateur !
+}
+
+// ✅ Chargement immédiat avec relations
+const users = await User.find({
+    where: { active: true },
+    relations: ['orders'],  // Chargé avec un JOIN ou une deuxième requête (lot)
+    take: 50
+});</code></pre>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 10 — DIALECT TRAPS
+  ══════════════════════════════════ -->
+  <h2 id="dialect-traps">Anti-pattern 9 : Les différences entre dialectes qui cassent lors d'une migration</h2>
+
+  <p>Migrer de MySQL vers PostgreSQL (ou vice-versa) est l'une des sources les plus courantes de bugs SQL subtils. Les requêtes semblent valides dans les deux dialectes mais renvoient des résultats différents — parfois un nombre de lignes différent, parfois un ordre différent, parfois une gestion différente de NULL.</p>
+
+  <h3>LIMIT avec OFFSET : syntaxe opposée entre MySQL et le SQL standard</h3>
+
+  <pre><code>-- MySQL : LIMIT offset, count (décalage d'abord, puis nombre)
+SELECT * FROM users ORDER BY id LIMIT 20, 10;
+-- Saute 20 lignes, renvoie les lignes 21-30
+
+-- PostgreSQL / SQLite / SQL standard : LIMIT count OFFSET offset
+SELECT * FROM users ORDER BY id LIMIT 10 OFFSET 20;
+-- Même résultat : lignes 21-30
+
+-- Un bug de migration courant : les développeurs portent la syntaxe MySQL vers PostgreSQL
+SELECT * FROM users ORDER BY id LIMIT 20, 10;
+-- PostgreSQL : erreur de syntaxe
+-- SQLite : analyse mais traite comme LIMIT 20 (ignore le deuxième paramètre dans certaines versions !)</code></pre>
+
+  <h3>Différences de gestion de NULL</h3>
+
+  <pre><code>-- Le tri des NULL diffère selon la base et la directive NULLS FIRST/LAST
+-- PostgreSQL : les NULL sont triés EN DERNIER par défaut en ASC, EN PREMIER en DESC
+-- MySQL : les NULL sont triés EN PREMIER en ASC
+-- SQL Server : les NULL sont triés EN PREMIER
+
+-- Pour un comportement cohérent entre bases, soyez toujours explicite :
+SELECT * FROM users ORDER BY subscription_date ASC NULLS LAST;
+-- Fonctionne dans PostgreSQL. MySQL ne supporte pas la syntaxe NULLS FIRST/LAST (utilisez une astuce ISNULL)</code></pre>
+
+  <h3>Sensibilité à la casse des chaînes</h3>
+
+  <pre><code>-- MySQL avec collation utf8_general_ci : insensible à la casse par défaut
+SELECT id FROM users WHERE email = 'ALICE@EXAMPLE.COM';
+-- Renvoie les lignes où email = 'alice@example.com' ← peut vous surprendre
+
+-- PostgreSQL : toujours sensible à la casse
+SELECT id FROM users WHERE email = 'ALICE@EXAMPLE.COM';
+-- Renvoie 0 ligne si stocké en 'alice@example.com'
+
+-- Sûr pour les deux : normalisez à l'insertion, interrogez en minuscules
+SELECT id FROM users WHERE email = LOWER('ALICE@EXAMPLE.COM');
+-- Ou mieux : imposez les minuscules au niveau applicatif</code></pre>
+
+  <h3>Rigueur de GROUP BY</h3>
+
+  <pre><code>-- MySQL (avec ONLY_FULL_GROUP_BY désactivé, ce qui était le défaut avant la 5.7) :
+-- Autorise la sélection de colonnes non agrégées qui ne sont pas dans le GROUP BY
+SELECT user_id, name, COUNT(*)  -- name n'est pas dans le GROUP BY
+FROM orders GROUP BY user_id;   -- MySQL (ancien défaut) : autorisé, valeur arbitraire pour name
+
+-- PostgreSQL (et MySQL 5.7+ avec ONLY_FULL_GROUP_BY) :
+-- Erreur : la colonne "name" doit apparaître dans GROUP BY ou être utilisée dans une fonction d'agrégat
+-- Correction : ajoutez name au GROUP BY ou utilisez un agrégat
+SELECT user_id, MAX(name) AS name, COUNT(*)
+FROM orders GROUP BY user_id;</code></pre>
+
+  <!-- ══════════════════════════════════
+       SECTION 11 — EXPLAIN ANALYZE
+  ══════════════════════════════════ -->
+  <h2 id="explain-analyze">Comment utiliser EXPLAIN ANALYZE pour tous les trouver</h2>
+
+  <p>Chaque anti-pattern de ce guide laisse une empreinte dans le plan d'exécution de la requête. Une fois que vous savez quoi chercher, EXPLAIN ANALYZE devient votre outil de débogage le plus puissant. Exécutez-le sur toute requête lente avant d'ajouter un index ou de réécrire la requête.</p>
+
+  <pre><code>-- PostgreSQL : plan d'exécution complet avec temps réel
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT u.id, u.name, COUNT(o.id) AS order_count
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+WHERE u.active = true
+GROUP BY u.id, u.name
+ORDER BY order_count DESC
+LIMIT 50;</code></pre>
+
+  <div class="explain-output">
+<span class="explain-neutral">Limit  (cost=12834.23..12834.35 rows=50) (actual time=342.1..342.2 rows=50)</span>
+<span class="explain-neutral">  ->  Sort  (cost=12834.23..12956.89 rows=49064) (actual time=342.1..342.1 rows=50)</span>
+<span class="explain-neutral">        Sort Key: (count(o.id)) DESC</span>
+<span class="explain-neutral">        ->  HashAggregate  (cost=8234.12..9707.88 rows=49064)</span>
+<span class="explain-bad">              ->  Seq Scan on users u  (cost=0.00..4123.00 rows=49064)  ← ⚠️ PARCOURS COMPLET</span>
+<span class="explain-neutral">                    Filter: (active = true)</span>
+<span class="explain-neutral">                    Rows Removed by Filter: 51000</span>
+<span class="explain-neutral">              ->  Hash</span>
+<span class="explain-good">                    ->  Index Scan using orders_user_id_idx on orders o  ← ✅ Index utilisé</span>
+<span class="explain-neutral">Planning Time: 2.3 ms</span>
+<span class="explain-bad">Execution Time: 342.6 ms  ← pourrait être de 12 ms avec un index sur users(active)</span>
+  </div>
+
+  <p>Le Seq Scan sur <code>users</code> vous indique que la colonne <code>active</code> n'a pas d'index. En ajouter un transformerait cela en Index Scan et réduirait considérablement le temps d'exécution.</p>
+
+  <div class="table-wrap">
+    <table class="plain-table">
+      <thead><tr><th>Ce que vous voyez dans EXPLAIN</th><th>Ce que cela signifie</th><th>Anti-pattern indiqué</th></tr></thead>
+      <tbody>
+        <tr><td><code>Seq Scan on grande_table</code></td><td>Parcours séquentiel complet, pas d'index utilisé</td><td>Fonction sur colonne, index manquant, pas de clause WHERE</td></tr>
+        <tr><td><code>Rows Removed by Filter: 9 900 000</code></td><td>La plupart des lignes sont rejetées après lecture</td><td>Mauvaise sélectivité, index manquant</td></tr>
+        <tr><td>Lignes estimées ≠ Lignes réelles (écart > 10×)</td><td>Statistiques obsolètes</td><td>Exécutez <code>ANALYZE nom_table</code></td></tr>
+        <tr><td>Coût très élevé pour un petit résultat</td><td>Stratégie de jointure coûteuse</td><td>Possible jointure cartésienne, index de JOIN manquant</td></tr>
+        <tr><td><code>Hash Join (cost=... rows=N×M)</code></td><td>Le résultat est le produit des deux tables</td><td>Jointure cartésienne — vérifiez la condition ON</td></tr>
+        <tr><td>Très long <code>Buffers: shared hit=0, read=N</code></td><td>Toutes les données lues depuis le disque, pas du cache</td><td>Table/index trop grand pour le buffer_pool — normal mais à noter</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code>-- MySQL EXPLAIN (utilisez EXPLAIN FORMAT=JSON pour plus de détails)
+EXPLAIN SELECT u.id, COUNT(o.id)
+FROM users u LEFT JOIN orders o ON o.user_id = u.id
+WHERE u.active = 1
+GROUP BY u.id;
+
+-- Cherchez :
+-- type: ALL      → parcours complet de table (mauvais)
+-- type: ref      → index utilisé (bon)
+-- type: const    → recherche sur une seule ligne (meilleur)
+-- rows: 1000000  → parcourt 1M de lignes (vérifiez si un index peut aider)
+-- Extra: Using temporary; Using filesort  → tri coûteux, envisagez un index</code></pre>
+
+  <div class="callout callout-info">
+    <strong>Formatez votre SQL avant de l'analyser :</strong> Le <a href="/fr/outils/formateur-sql/">Formateur SQL DevToolbox</a> non seulement formate vos requêtes, mais génère également des commandes EXPLAIN ANALYZE prêtes à être collées pour PostgreSQL, MySQL, SQLite et SQL Server — adaptées à votre dialecte.
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 12 — FAQ
+  ══════════════════════════════════ -->
+  <h2 id="faq">Foire aux questions</h2>
+
+  <div>
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Pourquoi NOT IN avec une sous-requête renvoie-t-il zéro ligne ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">SQL utilise une logique à trois valeurs : VRAI, FAUX et INCONNU. Toute comparaison impliquant NULL s'évalue à INCONNU. NOT IN exige que chaque comparaison soit VRAIE — un seul NULL dans la sous-requête propage l'INCONNU, et aucune ligne ne satisfait une condition qui s'évalue à INCONNU. Le résultat est zéro ligne, silencieusement. Utilisez NOT EXISTS, qui gère NULL correctement : <code>WHERE NOT EXISTS (SELECT 1 FROM t WHERE t.col = outer.col)</code>. Ou utilisez une anti-jointure LEFT JOIN : <code>LEFT JOIN t ON t.col = outer.col WHERE t.col IS NULL</code>.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Pourquoi SELECT * est considéré comme une mauvaise pratique ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Trois raisons : (1) il empêche les index-only scans — si un index contient toutes les colonnes dont vous avez besoin, la base peut répondre depuis l'index sans lire le tas, mais SELECT * force une lecture du tas à chaque fois ; (2) il casse le code applicatif lorsque des colonnes sont ajoutées ou supprimées — une nouvelle colonne ajoutée à une table apparaît soudainement dans chaque réponse d'API ; (3) il gaspille la bande passante réseau entre la base de données et le serveur d'application. Listez toujours les colonnes dont votre requête a réellement besoin. SELECT * est acceptable dans les requêtes de vue de détail et les scripts d'administration rapides, mais jamais dans les requêtes de listing ou de recherche en production.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Qu'est-ce que le problème de requête N+1 ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Le problème N+1 survient lorsque vous récupérez N enregistrements, puis exécutez une requête supplémentaire par enregistrement pour charger les données liées — soit un total de N+1 requêtes. Un exemple courant : récupérer 100 utilisateurs (1 requête), puis charger les commandes de chaque utilisateur séparément (100 requêtes) = 101 requêtes au total au lieu d'une ou deux. C'est presque invisible en développement avec de petits jeux de données, mais devient catastrophique en production. Corrigez-le avec le chargement immédiat dans votre ORM (joinedload dans SQLAlchemy, relations dans TypeORM) ou en écrivant une requête JOIN manuellement.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Comment me protéger contre un UPDATE ou DELETE accidentel sans WHERE ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Trois couches de protection : (1) utilisez toujours des transactions — enveloppez le UPDATE/DELETE dans BEGIN/COMMIT et vérifiez le nombre de lignes avant de valider ; (2) utilisez RETURNING (PostgreSQL) pour voir ce qui a réellement été modifié avant de valider ; (3) activez le mode SQL_SAFE_UPDATES de MySQL qui bloque les UPDATE/DELETE sans WHERE sur une clé indexée. Comme pratique d'équipe, n'exécutez jamais de scripts UPDATE/DELETE non testés directement en production — testez d'abord sur une base de données de staging avec une copie des données de production.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Quelle est la différence entre NULL = NULL et NULL IS NULL ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">NULL = NULL s'évalue à INCONNU en SQL — pas VRAI. C'est une décision de conception de la norme SQL. L'opérateur = suit la logique à trois valeurs, et toute comparaison impliquant NULL est INCONNUE. IS NULL est un prédicat spécial qui s'évalue à VRAI lorsque l'opérande est NULL, et FAUX sinon. Utilisez toujours IS NULL et IS NOT NULL pour vérifier les valeurs NULL. N'utilisez jamais = NULL, != NULL, ou &lt;&gt; NULL — ils ne correspondront jamais à aucune ligne.</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Pourquoi une fonction dans le WHERE empêche-t-elle l'utilisation d'un index ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">Un index B-tree stocke les valeurs brutes des colonnes dans un ordre trié. Lorsque vous appliquez une fonction à la colonne dans une clause WHERE (comme YEAR(created_at) ou LOWER(email)), la base de données ne peut pas utiliser l'index car elle devrait appliquer la fonction à chaque valeur indexée pour trouver les correspondances. Elle bascule sur un parcours complet de table. Corrigez en réécrivant la condition pour comparer la valeur brute de la colonne : au lieu de WHERE YEAR(created_at) = 2024, utilisez WHERE created_at &gt;= '2024-01-01' AND created_at &lt; '2025-01-01'. Pour les fonctions fréquemment utilisées, PostgreSQL supporte les index d'expression : CREATE INDEX ON users (LOWER(email)).</p>
+      </div>
+    </details>
+
+    <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <summary itemprop="name">Comment EXPLAIN ANALYZE aide-t-il à identifier les anti-patterns ?</summary>
+      <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+        <p itemprop="text">EXPLAIN ANALYZE exécute la requête et montre le plan d'exécution réel avec des temps réels. Signaux clés : un "Seq Scan" (parcours séquentiel) sur une grande table signifie qu'aucun index n'a été utilisé — cherchez un index manquant ou une fonction sur la colonne dans la clause WHERE. Un nombre très élevé de "Rows Removed by Filter" signifie que la plupart du travail est gaspillé. Une différence entre les lignes estimées et réelles indique des statistiques obsolètes — exécutez ANALYZE sur la table. Un "Hash Join" produisant de nombreuses lignes suggère une jointure cartésienne ou une condition de jointure manquante.</p>
+      </div>
+    </details>
+  </div>
+
+  <div style="text-align:center;margin:32px 0">
+    <a href="/fr/outils/formateur-sql/" class="btn-cta">🔍 Analysez votre SQL pour détecter les anti-patterns — gratuit, instantané, côté client</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       REFERENCES
+  ══════════════════════════════════ -->
+  <section class="references">
+    <h3>Sources et références</h3>
+    <ul class="ref-list">
+      <li><a href="https://www.postgresql.org/docs/current/using-explain.html" target="_blank" rel="noopener noreferrer">Documentation PostgreSQL — Utiliser EXPLAIN</a> — le guide de référence pour lire les plans d'exécution PostgreSQL.</li>
+      <li><a href="https://dev.mysql.com/doc/refman/8.0/en/execution-plan-information.html" target="_blank" rel="noopener noreferrer">Documentation MySQL 8.0 — Optimisation des requêtes avec EXPLAIN</a></li>
+      <li><a href="https://use-the-index-luke.com/" target="_blank" rel="noopener noreferrer">Use The Index, Luke — markuswinand.com</a> — le guide définitif de l'indexation SQL, utilisé comme référence par les professionnels des bases de données du monde entier.</li>
+      <li><a href="https://www.sqlite.org/queryplanner.html" target="_blank" rel="noopener noreferrer">Documentation du planificateur de requêtes SQLite</a> — couvre EXPLAIN QUERY PLAN et l'optimiseur SQLite.</li>
+      <li><a href="https://www.iso.org/standard/76583.html" target="_blank" rel="noopener noreferrer">ISO/IEC 9075 — Norme SQL (2016)</a> — la spécification formelle définissant la logique à trois valeurs et le comportement de NULL en SQL.</li>
+      <li><a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank" rel="noopener noreferrer">OWASP — Injection SQL</a> — les requêtes paramétrées comme défense contre les attaques par injection qui exploitent le SQL dynamique.</li>
+      <li><a href="https://sqlbolt.com/lesson/select_queries_with_nulls" target="_blank" rel="noopener noreferrer">SQLBolt — Requêtes avec NULL</a> — introduction pratique à la gestion de NULL dans les requêtes SQL.</li>
+      <li><a href="https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#joined-eager-loading" target="_blank" rel="noopener noreferrer">SQLAlchemy — Chargement immédiat par jointure</a> — documentation officielle pour résoudre le N+1 dans SQLAlchemy.</li>
+      <li><a href="https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-AGGREGATES" target="_blank" rel="noopener noreferrer">PostgreSQL — GROUP BY et HAVING</a> — rigueur du GROUP BY et comportement de ONLY_FULL_GROUP_BY.</li>
+      <li><a href="https://dev.mysql.com/doc/refman/8.0/en/group-by-handling.html" target="_blank" rel="noopener noreferrer">MySQL — Gestion du GROUP BY dans MySQL</a> — le mode ONLY_FULL_GROUP_BY de MySQL et son historique.</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════
+       RELATED TOOLS
+  ══════════════════════════════════ -->
+  <div class="related-tools">
+    <h3>Outils DevToolbox connexes</h3>
+    <ul>
+      <li><a href="/fr/outils/formateur-sql/">→ Formateur et analyseur SQL</a> — formatez SQL pour 9 dialectes, détectez les 10 anti-patterns, obtenez une explication en langage clair de votre requête</li>
+      <li><a href="/fr/outils/comparateur-texte/">→ Comparateur de texte</a> — comparez deux versions d'un script de migration SQL avant de l'exécuter en production</li>
+      <li><a href="/fr/outils/convertisseur-timestamp/">→ Convertisseur de timestamp Unix</a> — convertissez les timestamps stockés dans votre base de données en dates lisibles pour le débogage</li>
+      <li><a href="/fr/outils/formateur-json/">→ Formateur JSON</a> — formatez et inspectez les données des colonnes JSONB provenant des résultats de requêtes PostgreSQL</li>
+      <li><a href="/fr/blog/uuid-vs-bigint-performance-postgresql/">→ Article UUID vs BIGINT Performance</a> — quand utiliser UUID vs BIGINT comme clé primaire, avec des benchmarks sur 100M de lignes</li>
+    </ul>
+  </div>
+
+  </div><!-- /articleBody -->
+</article>
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour les développeurs.
+  <a href="/fr/blog/">Blog</a> | <a href="/a-propos/">À propos</a> | <a href="/fr/outils/contact/">Contact</a></p>
+</footer>
+</div>
+
+<script>
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Clair' : '🌙 Sombre';
+  localStorage.setItem('devtoolbox-theme', dark ? 'dark' : 'light');
+}
+(function() {
+  const s = localStorage.getItem('devtoolbox-theme') || 'light';
+  if (s === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️ Clair';
+  }
+})();
+</script>
+</body>
+</html>
