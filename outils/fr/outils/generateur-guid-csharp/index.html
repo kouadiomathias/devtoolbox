@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Générateur de GUID C# — System.Guid.NewGuid(), lot, validateur et extraits de code</title>
+<title>Générateur de GUID C#: System.Guid.NewGuid(), lot, validateur et extraits de code</title>
 <meta name="description" content="Générez des GUID C# par lot, validez n'importe quel GUID, convertissez entre les 5 formats (D, N, B, P, X), copiez du code C# prêt à l'emploi pour EF Core, ASP.NET Core et Dapper. Gratuit, 100% côté client.">
 <meta name="keywords" content="générateur guid c#, générateur guid par lot, validateur guid, system.guid newguid, convertisseur format guid, csharp uuid, guid ef core, asp.net guid, guid vs uuid csharp, uuid v7 dotnet">
 <meta name="robots" content="index, follow">
@@ -420,12 +420,12 @@ kbd{background:var(--surface2);border:1px solid var(--border);border-bottom:2px 
     <thead><tr><th>Méthode / Propriété</th><th>Renvoie</th><th>Quand l'utiliser</th></tr></thead>
     <tbody>
       <tr><td><code>Guid.NewGuid()</code></td><td>Nouvel UUID v4 aléatoire</td><td>Chaque fois que vous avez besoin d'un identifiant unique</td></tr>
-      <tr><td><code>new Guid()</code></td><td><code>Guid.Empty</code> (tout à zéro)</td><td>⚠️ Ne jamais utiliser comme véritable ID — c'est le bug GUID n°1 en .NET</td></tr>
+      <tr><td><code>new Guid()</code></td><td><code>Guid.Empty</code> (tout à zéro)</td><td>⚠️ Ne jamais utiliser comme véritable ID  c'est le bug GUID n°1 en .NET</td></tr>
       <tr><td><code>Guid.Empty</code></td><td><code>00000000-0000-…</code></td><td>Valeur sentinelle : vérifiez <code>if (id == Guid.Empty)</code></td></tr>
-      <tr><td><code>Guid.Parse(str)</code></td><td>Guid</td><td>Analyser une chaîne connue valide — lève une exception sur entrée invalide</td></tr>
-      <tr><td><code>Guid.TryParse(str, out id)</code></td><td>bool + Guid</td><td>Analyser une entrée utilisateur ou des données d'API — ne lève jamais d'exception</td></tr>
-      <tr><td><code>Guid.ParseExact(str,"N")</code></td><td>Guid</td><td>Analyser un format spécifique — échoue rapidement avec une erreur claire</td></tr>
-      <tr><td><code>Guid.CreateVersion7()</code></td><td>UUID v7 (monotone)</td><td>.NET 9+ — UUID triés dans le temps pour les clés primaires de base de données</td></tr>
+      <tr><td><code>Guid.Parse(str)</code></td><td>Guid</td><td>Analyser une chaîne connue valide, lève une exception sur entrée invalide</td></tr>
+      <tr><td><code>Guid.TryParse(str, out id)</code></td><td>bool + Guid</td><td>Analyser une entrée utilisateur ou des données d'API, ne lève jamais d'exception</td></tr>
+      <tr><td><code>Guid.ParseExact(str,"N")</code></td><td>Guid</td><td>Analyser un format spécifique, échoue rapidement avec une erreur claire</td></tr>
+      <tr><td><code>Guid.CreateVersion7()</code></td><td>UUID v7 (monotone)</td><td>.NET 9+, UUID triés dans le temps pour les clés primaires de base de données</td></tr>
     </tbody>
   </table>
   </div>
@@ -456,7 +456,7 @@ public Guid Id { get; set; } = new Guid();
 
 // ✅ CORRECT — génère un nouvel UUID v4 unique
 public Guid Id { get; set; } = Guid.NewGuid();</code></pre>
-  <p><code>new Guid()</code> appelle le constructeur sans paramètre, qui initialise chaque bit à zéro — identique à <code>Guid.Empty</code> et <code>default(Guid)</code>. Chaque entité que vous créez reçoit la même clé primaire tout à zéro. La première insertion en base de données réussit. Toutes les suivantes rencontrent une violation de contrainte de clé primaire — ou pire, écrasent silencieusement le premier enregistrement si votre gestion d'erreurs n'est pas stricte.</p>
+  <p><code>new Guid()</code> appelle le constructeur sans paramètre, qui initialise chaque bit à zéro, identique à <code>Guid.Empty</code> et <code>default(Guid)</code>. Chaque entité que vous créez reçoit la même clé primaire tout à zéro. La première insertion en base de données réussit. Toutes les suivantes rencontrent une violation de contrainte de clé primaire — ou pire, écrasent silencieusement le premier enregistrement si votre gestion d'erreurs n'est pas stricte.</p>
 
   <h2>Foire aux questions</h2>
   <div>
@@ -466,7 +466,7 @@ public Guid Id { get; set; } = Guid.NewGuid();</code></pre>
     </details>
     <details class="faq-item">
       <summary>Quelle est la différence entre Guid.NewGuid() et new Guid() ?</summary>
-      <div class="faq-answer"><code>Guid.NewGuid()</code> génère un UUID v4 aléatoire cryptographiquement unique à chaque appel. <code>new Guid()</code> — le constructeur sans paramètre — renvoie <code>Guid.Empty</code>, soit <code>00000000-0000-0000-0000-000000000000</code>. Chaque appel produit la même valeur tout à zéro. C'est le bug lié aux GUID le plus courant en .NET : utiliser <code>new Guid()</code> là où vous vouliez <code>Guid.NewGuid()</code>, provoquant des conflits de clé primaire ou des identifiants en double dans chaque enregistrement.</div>
+      <div class="faq-answer"><code>Guid.NewGuid()</code> génère un UUID v4 aléatoire cryptographiquement unique à chaque appel. <code>new Guid()</code>, le constructeur sans paramètre — renvoie <code>Guid.Empty</code>, soit <code>00000000-0000-0000-0000-000000000000</code>. Chaque appel produit la même valeur tout à zéro. C'est le bug lié aux GUID le plus courant en .NET : utiliser <code>new Guid()</code> là où vous vouliez <code>Guid.NewGuid()</code>, provoquant des conflits de clé primaire ou des identifiants en double dans chaque enregistrement.</div>
     </details>
     <details class="faq-item">
       <summary>Comment convertir un GUID en chaîne sans tirets ?</summary>
