@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime Complete Guide</title>
-    <meta name="description" content="The most requested primary key migration in Django, Rails, and Laravel, explained step by step. Add a public UUID without interrupting your service, with a 4-phase strategy, code examples, MySQL specifics, and a full rollback plan.">
-    <meta name="keywords" content="migrate serial to uuid, auto increment to uuid, django uuid migration, rails uuid primary key, laravel uuid migration, zero downtime migration uuid, postgresql uuid public id, mysql uuid migration">
+    <meta name="description" content="Add a public UUID to an existing PostgreSQL or MySQL table without locking writes: a race-free column rollout, batched backfill, lock-free NOT NULL, Django/Rails/Laravel code, and a rollback plan.">
+    <meta name="keywords" content="migrate serial to uuid, auto increment to uuid, django uuid migration, rails uuid primary key disable_ddl_transaction, laravel uuid migration, zero downtime migration uuid, postgresql uuid public id, mysql uuid migration, postgres set not null without lock">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Mathias Kouadio">
     <link rel="canonical" href="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
@@ -14,81 +14,72 @@
     <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
 
     <meta property="og:title" content="Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime">
-    <meta property="og:description" content="A 4-phase strategy to expose a public UUID without breaking your API, with Django, Rails, Laravel, MySQL examples, and rollback plan.">
+    <meta property="og:description" content="A race-free schema rollout, batched backfill, lock-free NOT NULL, and framework-specific code for Django, Rails, Laravel and MySQL.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
     <meta property="og:site_name" content="DevToolbox">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Migrate SERIAL to UUID Without Downtime">
-    <meta name="twitter:description" content="Add a UUID to your existing tables without interrupting service. Complete guide with decision table, validation scripts, and rollback.">
+    <meta name="twitter:description" content="Add a UUID to an existing table without locking writes — decision table, validation scripts, and rollback.">
 
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime — Complete Guide",
-            "author": { "@type": "Person", "name": "Mathias Kouadio" },
-            "datePublished": "2026-06-08",
-            "dateModified": "2026-06-08",
-            "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/",
-            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
-        }
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime — Complete Guide",
+        "description": "A race-free way to add a public UUID column to an existing table: forward-looking defaults, batched backfill, lock-free NOT NULL, CONCURRENTLY indexing, and framework-specific rollout code.",
+        "author": { "@type": "Person", "name": "Mathias Kouadio", "url": "https://www.devstoolsbox.dev/about/" },
+        "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/", "logo": { "@type": "ImageObject", "url": "https://www.devstoolsbox.dev/logo.png" } },
+        "datePublished": "2026-06-08",
+        "dateModified": "2026-07-04",
+        "mainEntityOfPage": "https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/"
+    }
     </script>
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                { "@type": "Question", "name": "Can I remove my old auto-increment id after the migration?", "acceptedAnswer": { "@type": "Answer", "text": "Keep it internally for joins. Don't expose it in the API, but don't delete it: all your foreign keys depend on it." } },
-                { "@type": "Question", "name": "How long does the migration take on a large table?", "acceptedAnswer": { "@type": "Answer", "text": "Adding a nullable column is almost instantaneous. Updating UUIDs takes a few seconds per million rows. The UNIQUE CONCURRENTLY index can take several minutes, but without blocking writes." } },
-                { "@type": "Question", "name": "Should I migrate foreign keys to UUID?", "acceptedAnswer": { "@type": "Answer", "text": "No, that's the best way to kill your performance. Keep FKs as BIGINT and use UUID only for external identification." } }
-            ]
-        }
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            { "@type": "Question", "name": "Can I remove my old auto-increment id after the migration?", "acceptedAnswer": { "@type": "Answer", "text": "Keep it internally for joins and foreign keys. Stop exposing it in the API, but never drop the column — your entire schema's referential integrity depends on it." } },
+            { "@type": "Question", "name": "Why add a DEFAULT to the column instead of just backfilling with UPDATE?", "acceptedAnswer": { "@type": "Answer", "text": "Without a default, any row inserted between adding the column and finishing the backfill has no public_id and later fails the NOT NULL step. Setting the default right after adding the column (itself a fast, non-blocking operation) closes that gap for every future insert before backfill even starts." } },
+            { "@type": "Question", "name": "Does adding a column with DEFAULT gen_random_uuid() lock the table?", "acceptedAnswer": { "@type": "Answer", "text": "Yes if you set the default in the same ADD COLUMN statement — a volatile default forces PostgreSQL to rewrite every existing row immediately, unlike a constant default. Add the column first with no default, then set the default in a separate, near-instant statement, and backfill existing rows separately." } },
+            { "@type": "Question", "name": "Why does my Rails migration fail with 'CREATE INDEX CONCURRENTLY cannot run inside a transaction block'?", "acceptedAnswer": { "@type": "Answer", "text": "Rails wraps every migration in a transaction by default, and PostgreSQL refuses to run CREATE INDEX CONCURRENTLY inside one. Add disable_ddl_transaction! at the top of the migration class to opt out." } },
+            { "@type": "Question", "name": "Should I migrate foreign keys to UUID too?", "acceptedAnswer": { "@type": "Answer", "text": "No. Foreign keys as BIGINT are 8 bytes and fast; converting them to UUID doubles the size of every join index involved for no benefit. Keep public_id for external identification only." } }
+        ]
+    }
     </script>
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
-                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
-                { "@type": "ListItem", "position": 3, "name": "Migrate SERIAL to UUID", "item": "https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/" }
-            ]
-        }
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.devstoolsbox.dev/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/tools/blog/" },
+            { "@type": "ListItem", "position": 3, "name": "Migrate SERIAL to UUID", "item": "https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/" }
+        ]
+    }
     </script>
-     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-JRBW78KE29');
-    </script>
-    <!-- Privacy-friendly analytics by Plausible -->
-<script async src="https://plausible.io/js/pa-HlpMMJ_kCCYxp8OttpLql.js"></script>
-<script>
-  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-  plausible.init()
-</script>
+
     <style>
         :root {
             --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
             --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
-            --accent-green: #10b981; --accent-green-bg: #d1fae5;
-            --accent-red: #ef4444; --accent-red-bg: #fee2e2;
-            --accent-amber: #f59e0b; --accent-amber-bg: #fef3c7;
+            --pass: #10b981; --warn: #f59e0b; --fail: #ef4444;
+            --pass-bg: #d1fae5; --warn-bg: #fef3c7; --fail-bg: #fee2e2;
             --text: #0f172a; --text2: #374151; --text3: #64748b;
             --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
             --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
             --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
-            --decision-bg: #f0fdf4; --decision-border: #10b981;
         }
         body.dark {
             --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
-            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --primary-hover: #8b5cf6; --primary-light: rgba(167,139,250,0.1);
+            --pass: #34d399; --warn: #fbbf24; --fail: #f87171;
+            --pass-bg: #064e3b; --warn-bg: #451a03; --fail-bg: #450a0a;
+            --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
             --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
             --shadow: 0 4px 16px rgba(0,0,0,0.3);
-            --decision-bg: #064e3b; --decision-border: #34d399;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -98,7 +89,7 @@
         }
         .container { max-width:900px; margin:0 auto; }
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
         .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
         .logo::before { content:'🛠️'; }
         .header-right { display:flex; gap:8px; align-items:center; }
@@ -106,74 +97,87 @@
         .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
         .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
 
-        .article-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
-        }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:8px; line-height:1.3; }
-        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; display: flex; gap: 16px; flex-wrap: wrap; }
-        .meta time { font-weight:500; color:var(--text2); }
-        h2 { font-size:1.5rem; margin-top:36px; margin-bottom:12px; font-weight:700; }
-        h3 { font-size:1.2rem; margin-top:28px; margin-bottom:8px; font-weight:600; }
-        p { margin-bottom:16px; color:var(--text2); }
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb ol { display:flex; list-style:none; flex-wrap:wrap; gap:4px; }
+        .breadcrumb li+li::before { content:'/'; margin:0 6px; color:var(--text3); }
+        .breadcrumb a { color:var(--text2); text-decoration:none; }
+        .breadcrumb a:hover { color:var(--primary); }
+
+        .article-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:36px; box-shadow:var(--shadow); margin-bottom:28px; }
+        .article-meta { display:flex; gap:14px; flex-wrap:wrap; font-size:0.83rem; color:var(--text3); margin-bottom:20px; }
+        .article-meta a { color:var(--primary); text-decoration:none; }
+        h1 { font-size:2rem; font-weight:800; letter-spacing:-.02em; margin-bottom:0; line-height:1.3; }
+
+        .toc { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin:20px 0 32px; }
+        .toc-title { font-size:.78rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text3); margin-bottom:10px; }
+        .toc ol { padding-left:20px; }
+        .toc a { color:var(--text2); text-decoration:none; font-size:0.9rem; line-height:2; }
+        .toc a:hover { color:var(--primary); }
+
+        h2 { font-size:1.5rem; margin-top:44px; margin-bottom:14px; font-weight:800; letter-spacing:-.015em; scroll-margin-top:24px; }
+        h3 { font-size:1.15rem; margin-top:24px; margin-bottom:8px; font-weight:700; }
+        p { margin-bottom:16px; color:var(--text2); font-size:0.97rem; line-height:1.85; }
         ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
-        li { margin-bottom:8px; }
+        li { margin-bottom:8px; font-size:0.93rem; }
         strong { color:var(--text); }
-        code {
-            background:var(--code-bg); color:var(--code-color); padding:2px 6px;
-            border-radius:4px; font-family:var(--mono); font-size:0.9em;
-        }
-        pre {
-            background:var(--code-bg); color:var(--code-color); padding:16px; border-radius:12px;
-            overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.5;
-        }
-        .table-responsive {
-            overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 24px 0; border-radius: 12px;
-        }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .decision-table {
-            background:var(--decision-bg); border:2px solid var(--decision-border); border-radius:12px;
-            overflow:hidden;
-        }
-        .decision-table th, .decision-table td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); }
-        .decision-table th {
-            background:var(--decision-border); color:#fff; font-weight:700;
-            font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;
-        }
-        .decision-table tr:last-child td { border-bottom:none; }
-        .benchmark-table th, .benchmark-table td { border:1px solid var(--border); padding:10px 14px; text-align:left; }
-        .benchmark-table th { background:var(--surface2); font-weight:600; }
-        .btn-tool {
-            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
-            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
-        }
-        .btn-tool:hover { background:var(--primary-hover); }
-        .footer { text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px; color:var(--text3); font-size:0.8rem; }
+        code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.9em; }
+        pre { background:var(--code-bg); color:var(--code-color); padding:16px 18px; border-radius:12px; overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.6; }
+        pre .comment { color:#6b7280; }
+        a { color: var(--primary); }
+        a:hover { text-decoration: underline; }
+
+        .table-responsive { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:20px 0; border-radius:12px; }
+        table { width:100%; border-collapse:collapse; min-width:560px; }
+        .dec-table th { background:var(--pass); color:#fff; padding:11px 12px; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; }
+        .dec-table td { padding:11px 12px; border-bottom:1px solid var(--border); color:var(--text2); }
+        .dec-table { border-radius:12px; overflow:hidden; font-size:0.87rem; }
+        .dec-table tr:last-child td { border-bottom:none; }
+
+        .sev-badge { display:inline-block; padding:3px 11px; border-radius:20px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+        .sev-critical { background:var(--fail-bg); color:var(--fail); }
+        .sev-high { background:var(--warn-bg); color:var(--warn); }
+        .sev-medium { background:var(--primary-light); color:var(--primary); }
+        .sev-low { background:var(--pass-bg); color:var(--pass); }
+
+        .ap-card { border:1px solid var(--border); border-radius:14px; padding:22px; margin:20px 0; background:var(--surface2); }
+        .ap-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+        .ap-name { font-weight:800; font-size:1.02rem; }
+        .ap-number { color:var(--primary); margin-right:6px; }
+        .danger-tag, .fix-tag { display:inline-block; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; margin:10px 0 6px; }
+        .danger-tag { color:var(--fail); }
+        .fix-tag { color:var(--pass); }
+
+        .callout { padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0; font-size:0.92rem; color:var(--text2); line-height:1.75; }
+        .callout-info { background:var(--primary-light); border-left:4px solid var(--primary); }
+        .callout-warn { background:var(--warn-bg); border-left:4px solid var(--warn); }
+        .callout-fail { background:var(--fail-bg); border-left:4px solid var(--fail); }
+        .callout-pass { background:var(--pass-bg); border-left:4px solid var(--pass); }
+        .callout strong { color:var(--text); }
+
+        .faq-item { border-top:1px solid var(--border); padding:14px 0; }
+        .faq-item summary { display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-weight:700; font-size:0.95rem; list-style:none; color:var(--text); }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after { content:'＋'; color:var(--primary); font-size:1.2rem; transition:transform 0.2s; }
+        .faq-item[open] summary::after { transform:rotate(45deg); }
+        .faq-answer { padding-top:10px; color:var(--text2); font-size:0.92rem; }
+
+        .references { margin-top:24px; font-size:0.9rem; }
+        .ref-list { list-style:none; padding-left:0; }
+        .ref-list li { font-size:0.85rem; margin-bottom:8px; color:var(--text3); }
+        .ref-list a::before { content:'→ '; color:var(--primary); font-weight:700; }
+
+        .related-tools { background:var(--primary-light); border:1px solid rgba(124,58,237,.2); border-radius:14px; padding:22px; margin-top:28px; }
+        .related-tools h3 { text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; color:var(--primary); margin-bottom:12px; margin-top:0; }
+        .related-tools ul { list-style:none; margin-left:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px; }
+        .related-tools li { margin-bottom: 0; }
+        .related-tools a { color:var(--text2); text-decoration:none; font-size:0.88rem; }
+        .related-tools a::before { content:'→ '; color:var(--primary); font-weight:700; }
+        .related-tools a:hover { color:var(--primary); }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
         .footer a { color:var(--primary); text-decoration:none; }
-        .warning-box {
-            background:var(--accent-amber-bg); border-left:4px solid var(--accent-amber);
-            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0;
-            font-size:0.9rem; color:var(--text2);
-        }
-        .references { margin-top: 32px; font-size: 0.9rem; }
-        .references h3 { margin-bottom: 8px; }
-        .references ul { list-style-type: disc; padding-left: 24px; color: var(--text2); }
-        .faq-item { margin-bottom: 16px; }
-        .faq-item summary {
-            font-weight: 600; color: var(--text); cursor: pointer; padding: 10px 0;
-            list-style: none; display: flex; justify-content: space-between; align-items: center;
-        }
-        .faq-item summary::-webkit-details-marker { display: none; }
-        .faq-item summary::after {
-            content: '＋'; font-size: 0.9rem; color: var(--text3);
-            transition: transform .2s; flex-shrink: 0; margin-left: 16px;
-        }
-        .faq-item[open] summary::after { transform: rotate(45deg); }
-        .faq-item .faq-answer { padding: 0 0 12px; color: var(--text2); line-height: 1.8; }
-        @media (max-width:600px) {
-            h1 { font-size:1.6rem; }
-            .article-card { padding:20px; }
-        }
+
+        @media (max-width:600px) { h1 { font-size:1.6rem; } .article-card { padding:20px; } }
     </style>
 </head>
 <body>
@@ -192,102 +196,166 @@
         </div>
     </header>
 
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol>
+            <li><a href="/">Home</a></li>
+            <li><a href="/tools/blog/">Blog</a></li>
+            <li><span>Migrate SERIAL to UUID</span></li>
+        </ol>
+    </nav>
+
     <main>
         <article itemscope itemtype="https://schema.org/Article" class="article-card">
             <meta itemprop="datePublished" content="2026-06-08">
+            <meta itemprop="dateModified" content="2026-07-04">
             <meta itemprop="author" content="Mathias Kouadio">
 
-            <h1 itemprop="headline">Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime</h1>
-            <div class="meta">
+            <div class="article-meta">
                 <time datetime="2026-06-08">June 8, 2026</time>
-                <span>·</span>
-                <span>14 min read</span>
-                <span>·</span>
-                <span>By Mathias Kouadio</span>
+                <span>&middot; updated July 4, 2026</span>
+                <span>&middot; 15 min read</span>
+                <span>&middot; By <a href="/about/">Mathias Kouadio</a></span>
             </div>
+            <h1 itemprop="headline">Migrating from SERIAL/AUTO_INCREMENT to UUID Without Downtime</h1>
+
+            <nav class="toc" aria-label="Table of contents">
+                <div class="toc-title">On this page</div>
+                <ol>
+                    <li><a href="#incident">The migration that failed on SET NOT NULL</a></li>
+                    <li><a href="#decision-table">Quick decision table</a></li>
+                    <li><a href="#schema">Adding the column without locking writes</a></li>
+                    <li><a href="#api">Rolling out public_id in your API</a></li>
+                    <li><a href="#mysql">MySQL specifics</a></li>
+                    <li><a href="#frameworks">Django, Rails, and Laravel</a></li>
+                    <li><a href="#validation">Monitoring, validation, and rollback</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#references">References</a></li>
+                </ol>
+            </nav>
 
             <div itemprop="articleBody">
-                <p>It's the question that comes up every week on Django, Rails, and Laravel forums: <strong>"How do I switch my auto‑incremented IDs to UUIDs without breaking production?"</strong> You have thousands of users, foreign keys everywhere, and you want to expose non‑enumerable public identifiers in your API. The good news: it's possible, without downtime, and without migrating your foreign keys. This article gives you the exact method, tested on PostgreSQL, with specific steps for MySQL, Django, Rails, Laravel, and a full rollback plan.</p>
+                <p id="incident">The plan looked safe on paper: add a nullable <code>public_id</code> column, backfill it with <code>UPDATE ... WHERE public_id IS NULL</code>, then run <code>ALTER TABLE ... SET NOT NULL</code>. The backfill finished. The <code>SET NOT NULL</code> failed — a handful of rows, inserted by the running application in the seconds between the backfill query finishing and the next migration step starting, had no <code>public_id</code> at all. Nothing was wrong with the backfill logic; the column simply didn't have a <em>default</em> yet, so every insert from the still-unmodified application code produced a fresh gap. The fix took one extra statement, added in the right place, before the backfill even ran.</p>
 
-                <h2>Decision Table — Choose Your Migration Strategy</h2>
+                <p>That's the detail most "add a UUID column" guides skip, and it's the difference between a migration that works in staging and one that fails under real concurrent writes. This guide covers the full sequence — a race-free column rollout, batched backfill, a lock-free way to enforce <code>NOT NULL</code> on Postgres 12+, framework-specific code for Django, Rails and Laravel, and a tested rollback plan — plus the golden rule almost every version of this migration gets right: never touch your foreign keys.</p>
+
+                <h2 id="decision-table">Quick decision table</h2>
                 <div class="table-responsive">
-                    <table class="decision-table">
-                        <thead>
-                            <tr><th>Situation</th><th>Recommended Strategy</th></tr>
-                        </thead>
+                    <table class="dec-table">
+                        <thead><tr><th>Situation</th><th>Severity if ignored</th><th>Recommended approach</th></tr></thead>
                         <tbody>
-                            <tr><td>PostgreSQL, table &lt; 10M rows</td><td>4 phases described here, migration in &lt; 30 min</td></tr>
-                            <tr><td>PostgreSQL, table &gt; 10M rows</td><td>Same strategy, budget 1‑2h for CONCURRENTLY index</td></tr>
-                            <tr><td>MySQL 8+, active table</td><td>ALTER TABLE + UUID() native, no CONCURRENTLY; use pt‑online‑schema‑change for large tables</td></tr>
-                            <tr><td>MySQL 5.7</td><td>Short maintenance window required; consider upgrading first</td></tr>
-                            <tr><td>Foreign keys on the table to migrate</td><td>Do not migrate FKs — keep BIGINT internally</td></tr>
-                            <tr><td>API with active external clients</td><td>Minimum 30‑day deprecation phase</td></tr>
+                            <tr><td>Setting a volatile DEFAULT in the same statement as ADD COLUMN</td><td><span class="sev-badge sev-high">High</span></td><td>Add the column first, set the default in a separate statement — avoids a full table rewrite</td></tr>
+                            <tr><td>No default while backfilling on an actively-written table</td><td><span class="sev-badge sev-high">High</span></td><td>Set the default before backfilling, so every concurrent insert is already covered</td></tr>
+                            <tr><td>Rails migration using <code>algorithm: :concurrently</code></td><td><span class="sev-badge sev-high">High</span></td><td>Add <code>disable_ddl_transaction!</code> — Postgres refuses CONCURRENTLY inside a transaction</td></tr>
+                            <tr><td>MySQL table with high write traffic</td><td><span class="sev-badge sev-medium">Medium</span></td><td>Use pt-online-schema-change or gh-ost instead of a direct ALTER TABLE</td></tr>
+                            <tr><td>Testing "is the index actually used" with a random UUID</td><td><span class="sev-badge sev-medium">Medium</span></td><td>Test against a UUID that actually exists in the table</td></tr>
+                            <tr><td>Tempted to migrate foreign keys to UUID too</td><td><span class="sev-badge sev-high">High</span></td><td>Don't — keep FKs as BIGINT, UUID is for external identification only</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <h2>Why this migration is so requested (and so poorly documented)</h2>
-                <p>SERIAL/BIGSERIAL are fast, compact, but they leak information: an attacker can infer your activity volume, and a simple loop is enough to enumerate your resources. Switching to a public UUID solves these security issues without touching your data integrity. The classic pitfall is wanting to replace the primary key itself — that's a mistake that blocks writes for hours. The strategy presented here is different: we add a column, migrate the API, and leave the old id internally.</p>
+                <h2>Why teams migrate away from SERIAL</h2>
+                <p><code>SERIAL</code>/<code>BIGSERIAL</code> (or <code>AUTO_INCREMENT</code> in MySQL) are fast and compact, but they leak information the moment they're exposed in a URL or API response: an attacker can estimate your growth rate, and a simple incrementing loop enumerates every resource you have. A public <code>UUID</code> column fixes that without touching the internal primary key or your join performance — which is exactly why the migration below never replaces the primary key itself, only adds alongside it.</p>
 
-                <h2>The zero‑downtime strategy in 4 phases (PostgreSQL)</h2>
+                <h2 id="schema">Adding the column without locking writes</h2>
+                <p>This sequence targets PostgreSQL 12+. Each step is chosen specifically to avoid the two failure modes that make this migration risky: a full table rewrite, and a long-held lock.</p>
 
-                <h3>Phase 1: add the UUID column without blocking writes</h3>
-                <p>On PostgreSQL, adding a nullable column is instantaneous. We'll create a <code>public_id</code> field that will hold the public UUID, while keeping <code>id</code> as the internal primary key.</p>
-                <pre><code>-- Add the column (instant, no lock)
+                <h3>Step 1 — add the column, then set the default separately</h3>
+                <p>Adding a column with no default is metadata-only and effectively instant, regardless of table size. Adding a <strong>volatile</strong> default like <code>gen_random_uuid()</code> in the same statement is not — Postgres has to write a distinct value into every existing row immediately, which means a full table rewrite under an exclusive lock. Splitting the two avoids that entirely, because setting a default on an already-existing column only affects future inserts:</p>
+                <pre><code>-- Step 1a: instant, metadata-only
 ALTER TABLE users ADD COLUMN public_id UUID;
 
--- Populate values for existing rows
-UPDATE users SET public_id = gen_random_uuid() WHERE public_id IS NULL;
+-- Step 1b: also fast — affects only rows inserted from now on,
+-- closing the race for any concurrent insert before backfill starts
+ALTER TABLE users ALTER COLUMN public_id SET DEFAULT gen_random_uuid();</code></pre>
 
--- Make the column NOT NULL once all rows are filled
+                <h3>Step 2 backfill existing rows in batches</h3>
+                <p>A single <code>UPDATE</code> over the whole table works for small tables, but on a large one it holds row locks for a long time and generates a burst of WAL and dead tuples for autovacuum to clean up. Batching by primary key range keeps each transaction short:</p>
+                <pre><code>DO $$
+DECLARE
+  batch_size INT := 5000;
+  rows_updated INT;
+BEGIN
+  LOOP
+    UPDATE users
+    SET public_id = gen_random_uuid()
+    WHERE id IN (
+      SELECT id FROM users WHERE public_id IS NULL LIMIT batch_size
+    );
+    GET DIAGNOSTICS rows_updated = ROW_COUNT;
+    EXIT WHEN rows_updated = 0;
+    COMMIT;
+  END LOOP;
+END $$;</code></pre>
+
+                <h3>Step 3  enforce NOT NULL without a long-held lock</h3>
+                <p>A plain <code>ALTER COLUMN ... SET NOT NULL</code> forces Postgres to scan the whole table to confirm no <code>NULL</code> values remain, while holding an <code>ACCESS EXCLUSIVE</code> lock for the entire scan. Since Postgres 12, you can validate the constraint separately first, so the final step is fast:</p>
+                <pre><code>-- Instant: enforced for new rows immediately, doesn't scan existing ones
+ALTER TABLE users ADD CONSTRAINT public_id_not_null
+  CHECK (public_id IS NOT NULL) NOT VALID;
+
+-- Scans the table, but only takes a lock that allows concurrent reads/writes
+ALTER TABLE users VALIDATE CONSTRAINT public_id_not_null;
+
+-- Fast: Postgres can trust the already-validated constraint instead of re-scanning
 ALTER TABLE users ALTER COLUMN public_id SET NOT NULL;
+ALTER TABLE users DROP CONSTRAINT public_id_not_null;</code></pre>
 
--- Create a unique index without blocking writes (CONCURRENTLY)
-CREATE UNIQUE INDEX CONCURRENTLY idx_users_public_id ON users(public_id);</code></pre>
-                <p>The <code>CONCURRENTLY</code> keyword is crucial: it builds the index in the background without locking the table. Expect a few minutes on a table with several million rows, but inserts continue normally.</p>
+                <h3>Step 4 — build the unique index CONCURRENTLY</h3>
+                <pre><code>CREATE UNIQUE INDEX CONCURRENTLY idx_users_public_id ON users(public_id);</code></pre>
+                <p><code>CONCURRENTLY</code> builds the index in the background without blocking reads or writes. Budget a few minutes on a multi-million-row table rather than treating it as instantaneous — measure on a staging copy of your real data rather than assuming a fixed duration.</p>
 
-                <h3>Phase 2: adapt the API to expose public_id</h3>
-                <p>Modify your serializers or views to return <code>public_id</code> instead of <code>id</code> in JSON responses. Here's a Django REST Framework example that fits the hybrid pattern:</p>
+                <div class="ap-card">
+                    <div class="ap-header"><div class="ap-name"><span class="ap-number">01</span>Backfilling before the column has a default</div><span class="sev-badge sev-high">High</span></div>
+                    <p>If you backfill before setting a default, every row the application inserts between the backfill query and the NOT NULL step has no <code>public_id</code> — exactly the incident this article opens with.</p>
+                    <div class="fix-tag">Fix</div>
+                    <pre><code>-- Order matters: default BEFORE backfill, always
+ALTER TABLE users ADD COLUMN public_id UUID;
+ALTER TABLE users ALTER COLUMN public_id SET DEFAULT gen_random_uuid();
+<span class="comment"> only now start backfilling existing NULL rows</span></code></pre>
+                </div>
+
+                <h2 id="api">Rolling out public_id in your API</h2>
+                <p>Once the column, backfill, constraint, and index are in place, the rollout to your API is a straightforward three-step deprecation, independent of the schema work above.</p>
+
+                <h3>Expose public_id alongside id</h3>
+                <p>Return <code>public_id</code> in API responses while <code>id</code> is still present internally. A Django REST Framework example that fits this hybrid pattern:</p>
                 <pre><code># serializers.py
 class ArticleSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='public_id', read_only=True)
-    
+
     class Meta:
         model = Article
         fields = ['id', 'title', 'content']
-        # 'id' in the API = public_id in the database
-        # the real id (BIGINT) is never exposed</code></pre>
-                <p>For Rails and Laravel, we'll cover the specifics in the framework sections below.</p>
+        # 'id' in the API response = public_id in the database;
+        # the internal BIGINT id is never exposed</code></pre>
 
-                <h3>Phase 3: deprecate the old id field</h3>
-                <p>Add an HTTP header <code>Deprecation: true</code> or a warning in the documentation for clients still using the old <code>id</code>. Give them a month to migrate. Monitor logs to identify the last calls with the old format.</p>
+                <h3>Deprecate the old id</h3>
+                <p>Add a <code>Deprecation: true</code> response header, or a documented warning, for any client path still keying on the old numeric id. Give a fixed window — 30 days is a reasonable default — and monitor access logs for the last calls using the old format before moving on.</p>
 
-                <h3>Phase 4: remove id from API responses (keep it internally)</h3>
-                <p>Once all clients have migrated, remove the <code>id</code> field from your API responses. Never delete the column from the database: it remains essential for joins and foreign keys.</p>
+                <h3>Remove id from responses (never from the database)</h3>
+                <p>Once logs show no remaining traffic on the old identifier, drop it from API responses. The underlying column and its foreign keys stay exactly as they are — this step only changes what the API returns, not the schema.</p>
 
-                <h2>MySQL specifics — what you need to know</h2>
-                <p>MySQL does not support <code>CONCURRENTLY</code> for index creation. For tables with high write traffic, use <strong>pt‑online‑schema‑change</strong> from Percona Toolkit to avoid locking. For smaller tables or maintenance windows, a direct <code>ALTER TABLE</code> works.</p>
-                <pre><code>-- MySQL 8.0+ : UUID() native but no CONCURRENTLY
--- Requires a short maintenance window or pt-online-schema-change
-
+                <h2 id="mysql">MySQL specifics</h2>
+                <p>MySQL has no equivalent of <code>CREATE INDEX CONCURRENTLY</code>. For an actively-written table, a plain <code>ALTER TABLE</code> can still block or seriously slow down writes depending on version and storage engine — use <strong>pt-online-schema-change</strong> (Percona Toolkit) or <strong>gh-ost</strong> (GitHub's online schema migration tool) instead of a direct ALTER on anything but a small table or an explicit maintenance window.</p>
+                <pre><code> Direct approach: fine for small tables or a maintenance window
 ALTER TABLE users ADD COLUMN public_id VARCHAR(36);
 UPDATE users SET public_id = UUID();
 ALTER TABLE users MODIFY public_id VARCHAR(36) NOT NULL;
 ALTER TABLE users ADD UNIQUE INDEX idx_users_public_id (public_id);
 
--- For large MySQL tables: use pt-online-schema-change
--- pt-online-schema-change --alter "ADD COLUMN public_id VARCHAR(36)" D=mydb,t=users</code></pre>
-                <p>To store UUIDs more efficiently, use <strong>BINARY(16)</strong> with <code>UUID_TO_BIN()</code> and <code>BIN_TO_UUID()</code> (MySQL 8.0+):</p>
-                <pre><code>-- Optimized storage: BINARY(16) instead of VARCHAR(36)
-ALTER TABLE users ADD COLUMN public_id BINARY(16);
-UPDATE users SET public_id = UUID_TO_BIN(UUID(), 1);  -- 1 = swap flag for ordered UUID v1
+ Large, actively-written table: use an online schema change tool instead
+ pt-online-schema-change alter "ADD COLUMN public_id VARCHAR(36)" D=mydb,t=users
+ or gh-ost alter="ADD COLUMN public_id VARCHAR(36)" database=mydb table=users</code></pre>
+                <p>For compact storage, use <code>BINARY(16)</code> with <code>UUID_TO_BIN()</code>/<code>BIN_TO_UUID()</code> (MySQL 8.0+) instead of a 36-character string — the swap flag keeps values roughly insertion-ordered, which matters for index locality:</p>
+                <pre><code>ALTER TABLE users ADD COLUMN public_id BINARY(16);
+UPDATE users SET public_id = UUID_TO_BIN(UUID(), 1);   swap_flag=1: ordered, index-friendly
 
--- Reading back
 SELECT BIN_TO_UUID(public_id, 1) as public_id FROM users LIMIT 5;</code></pre>
 
-                <h2>Complete example: Django</h2>
-                <p>Here is the recommended Django model for a progressive migration:</p>
-                <pre><code># models.py — recommended hybrid pattern
+                <h2 id="frameworks">Django, Rails, and Laravel</h2>
+
+                <h3>Django</h3>
+                <pre><code># models.py recommended hybrid pattern
 import uuid
 from django.db import models
 
@@ -295,59 +363,63 @@ class Article(models.Model):
     id = models.AutoField(primary_key=True)  # internal, fast FKs
     public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     title = models.CharField(max_length=200)
-    content = models.TextField()
-
-    # The API exposes public_id, never id</code></pre>
-                <p>In your Django REST Framework views, use <code>public_id</code> as the lookup field:</p>
-                <pre><code>class ArticleViewSet(viewsets.ModelViewSet):
+    content = models.TextField()</code></pre>
+                <pre><code># views.py look up by public_id, never id
+class ArticleViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
     lookup_field = 'public_id'</code></pre>
 
-                <h2>Complete example: Rails</h2>
-                <pre><code># db/migrate/20260608000001_add_public_id_to_articles.rb
+                <h3>Rails</h3>
+                <div class="ap-card">
+                    <div class="ap-header"><div class="ap-name"><span class="ap-number">02</span>Missing disable_ddl_transaction!</div><span class="sev-badge sev-high">High</span></div>
+                    <p>Rails wraps every migration in a transaction by default. PostgreSQL refuses to run <code>CREATE INDEX CONCURRENTLY</code> inside one and raises <code>PG::ActiveSqlTransaction: CREATE INDEX CONCURRENTLY cannot run inside a transaction block</code> — a very common first-run failure for exactly this migration.</p>
+                    <div class="fix-tag">Fix — and split the backfill into its own migration</div>
+                    <pre><code># db/migrate/20260608000001_add_public_id_to_articles.rb
 class AddPublicIdToArticles < ActiveRecord::Migration[7.1]
-  def up
+  def change
     add_column :articles, :public_id, :uuid
-    execute "UPDATE articles SET public_id = gen_random_uuid()"
-    change_column_null :articles, :public_id, false
-    add_index :articles, :public_id, unique: true, algorithm: :concurrently
-  end
-
-  def down
-    remove_column :articles, :public_id
+    change_column_default :articles, :public_id, -> { 'gen_random_uuid()' }
+    # backfill existing rows in a separate rake task or migration,
+    # batched the same way as the raw-SQL example above — not one
+    # giant UPDATE inside this migration
   end
 end
 
-# app/models/article.rb
-class Article < ApplicationRecord
-  before_create :set_public_id
+# db/migrate/20260608000002_add_public_id_index_to_articles.rb
+class AddPublicIdIndexToArticles < ActiveRecord::Migration[7.1]
+  disable_ddl_transaction!  # required for algorithm: :concurrently
 
-  private
-  def set_public_id
-    self.public_id = SecureRandom.uuid
+  def change
+    change_column_null :articles, :public_id, false
+    add_index :articles, :public_id, unique: true, algorithm: :concurrently
   end
+end</code></pre>
+                </div>
+                <pre><code># app/models/article.rb
+class Article < ApplicationRecord
+  # public_id already has a DB-level default no before_create needed
 end
 
 # config/routes.rb
 resources :articles, param: :public_id</code></pre>
+                <p style="font-size:0.85rem; color:var(--text3);">The <a href="https://github.com/ankane/strong_migrations" target="_blank" rel="noopener">strong_migrations</a> gem catches this exact class of mistake (unsafe index creation, missing <code>disable_ddl_transaction!</code>) at migration time — worth adding to any Rails project doing schema changes on a live table.</p>
 
-                <h2>Complete example: Laravel</h2>
+                <h3>Laravel</h3>
                 <pre><code>// database/migrations/xxxx_add_public_id_to_users.php
 public function up(): void
 {
     Schema::table('users', function (Blueprint $table) {
         $table->uuid('public_id')->nullable()->after('id');
     });
-    
+
     DB::statement('UPDATE users SET public_id = UUID()');
-    
+
     Schema::table('users', function (Blueprint $table) {
         $table->uuid('public_id')->nullable(false)->change();
         $table->unique('public_id');
     });
-}
-
-// app/Models/User.php
+}</code></pre>
+                <pre><code>// app/Models/User.php
 use Illuminate\Support\Str;
 
 class User extends Model
@@ -356,106 +428,117 @@ class User extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            $model->public_id = Str::uuid();
+            $model->public_id ??= Str::uuid();
         });
     }
-    
+
     public function getRouteKeyName(): string
     {
         return 'public_id';
     }
 }</code></pre>
+                <div class="callout callout-warn">On a large, actively-written MySQL table, this direct <code>Schema::table</code> migration has the same locking considerations covered in the <a href="#mysql">MySQL specifics</a> section above — reach for pt-online-schema-change or gh-ost rather than running it directly against production.</div>
 
-                <h2>Monitoring the migration progress</h2>
-                <p>Use these queries to track the update and index creation in real time:</p>
-                <pre><code>-- Track how many rows have been updated
-SELECT 
+                <h2 id="validation">Monitoring, validation, and rollback</h2>
+
+                <h3>Monitoring progress</h3>
+                <pre><code>-- Backfill progress
+SELECT
   COUNT(*) FILTER (WHERE public_id IS NOT NULL) as migrated,
   COUNT(*) FILTER (WHERE public_id IS NULL) as remaining,
-  COUNT(*) as total,
   ROUND(100.0 * COUNT(*) FILTER (WHERE public_id IS NOT NULL) / COUNT(*), 1) as pct_done
 FROM users;
 
--- Track index creation progress (PostgreSQL)
-SELECT phase, blocks_done, blocks_total, 
+-- Index build progress (PostgreSQL)
+SELECT phase, blocks_done, blocks_total,
        ROUND(100.0 * blocks_done / NULLIF(blocks_total, 0), 1) as pct
 FROM pg_stat_progress_create_index
 WHERE relid = 'users'::regclass;</code></pre>
 
-                <h2>Post‑migration validation — copy‑paste these checks</h2>
-                <pre><code>-- Verification 1: total uniqueness
-SELECT COUNT(*), COUNT(DISTINCT public_id) FROM users;
--- Both numbers must be identical
-
--- Verification 2: no NULL values remain
-SELECT COUNT(*) FROM users WHERE public_id IS NULL;
--- Must return 0
-
--- Verification 3: index is actually used
-EXPLAIN (ANALYZE, BUFFERS)
+                <h3>Validation checks</h3>
+                <div class="ap-card">
+                    <div class="ap-header"><div class="ap-name"><span class="ap-number">03</span>Testing index usage with a value that can't match</div><span class="sev-badge sev-medium">Medium</span></div>
+                    <p><code>gen_random_uuid()</code> generates a brand-new random value every time it's called — searching for it tests nothing meaningful about your data, since it (overwhelmingly likely) matches no row at all.</p>
+                    <div class="danger-tag">Doesn't test a real lookup</div>
+                    <pre><code>EXPLAIN (ANALYZE, BUFFERS)
 SELECT * FROM users WHERE public_id = gen_random_uuid();
--- Should show "Index Scan" not "Seq Scan"
+<span class="comment">-- searches for a value that (almost certainly) isn't in the table</span></pre>
+                    <div class="fix-tag">Fix use a value that actually exists</div>
+                    <pre><code>EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM users
+WHERE public_id = (SELECT public_id FROM users ORDER BY id LIMIT 1);
+<span class="comment"> should show "Index Scan" using idx_users_public_id, not "Seq Scan"</span></pre>
+                </div>
+                <pre><code> Uniqueness sanity check both counts must match
+SELECT COUNT(*), COUNT(DISTINCT public_id) FROM users;
 
--- Verification 4: point lookup performance
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT id FROM users WHERE public_id = '550e8400-e29b-41d4-a716-446655440000';
--- Target: < 1ms on a 1M-row table</code></pre>
+ No NULLs left must return 0
+SELECT COUNT(*) FROM users WHERE public_id IS NULL;</code></pre>
+                <p>For point-lookup latency, measure on a staging copy of your real data rather than trusting a fixed millisecond target — hardware, cache state, and table size all move that number. An indexed equality lookup on a properly-sized table should be fast enough not to show up in a p99 latency graph; if it does, that's a signal to investigate, not a number to design around in advance.</p>
 
-                <h2>Rollback plan — how to revert if something goes wrong</h2>
-                <pre><code>-- Step 1: drop the index (fast)
+                <h3>Rollback</h3>
+                <pre><code> Fast: drop the index without blocking
 DROP INDEX CONCURRENTLY idx_users_public_id;
 
--- Step 2: drop the column (fast)
+ Fast: dropping a column is metadata-only in PostgreSQL
 ALTER TABLE users DROP COLUMN public_id;
 
--- No impact on existing data — original IDs are intact
--- The API must be routed back to the old version before the DB rollback</code></pre>
+ No impact on existing data id and all foreign keys are untouched.
+ Route the API back to the old version before rolling back the schema,
+ not the other way around.</code></pre>
 
                 <h2>The golden rule: never migrate foreign keys to UUID</h2>
-                <p>This is the most important point of this article. Foreign keys as BIGINT are compact (8 bytes) and fast. If you convert them to UUID (16 bytes), you double the size of all your join indexes and degrade performance without any benefit. The <code>public_id</code> is meant for the outside; <code>id</code> remains the internal pillar of your database.</p>
+                <p>This is the point worth remembering after everything else in this article: a <code>BIGINT</code> foreign key is 8 bytes and fast to join on. Converting it to <code>UUID</code> doubles the size of every index that includes it, for no benefit — <code>public_id</code> exists for the outside world; <code>id</code> stays the internal backbone of the schema.</p>
 
-                <h2>Frequently Asked Questions</h2>
-                <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <summary itemprop="name">Can I remove my old auto-increment id after the migration?</summary>
-                    <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p itemprop="text">Keep it internally for joins. Don't expose it in the API, but don't delete it: all your foreign keys depend on it.</p>
-                    </div>
+                <h2 id="faq">Frequently asked questions</h2>
+                <details class="faq-item">
+                    <summary>Can I remove my old auto-increment id after the migration?<span></span></summary>
+                    <div class="faq-answer">Keep it internally — every foreign key depends on it. Stop exposing it in the API, but never drop the column.</div>
                 </details>
                 <details class="faq-item">
-                    <summary>How long does the migration take on a large table?</summary>
-                    <div class="faq-answer">
-                        <p>Adding a nullable column is almost instantaneous. Updating UUIDs takes a few seconds per million rows. The UNIQUE CONCURRENTLY index can take several minutes, but without blocking writes.</p>
-                    </div>
+                    <summary>Why add a DEFAULT instead of just backfilling with UPDATE?<span></span></summary>
+                    <div class="faq-answer">Without a default, any row inserted between the backfill and the NOT NULL step has no public_id and fails that step. Setting the default first — itself a fast, non-blocking statement — closes the gap before backfill even starts.</div>
                 </details>
                 <details class="faq-item">
-                    <summary>Should I migrate foreign keys to UUID?</summary>
-                    <div class="faq-answer">
-                        <p>No, that's the best way to kill your performance. Keep FKs as BIGINT and use UUID only for external identification.</p>
-                    </div>
+                    <summary>Does adding a column with DEFAULT gen_random_uuid() lock the table?<span></span></summary>
+                    <div class="faq-answer">Yes, if the default is set in the same ADD COLUMN statement — a volatile default forces an immediate rewrite of every row. Add the column with no default first, then set the default separately; that step only affects future inserts and is fast regardless of table size.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Why does my Rails migration fail with "CREATE INDEX CONCURRENTLY cannot run inside a transaction block"?<span></span></summary>
+                    <div class="faq-answer">Rails wraps migrations in a transaction by default, and PostgreSQL won't run CONCURRENTLY inside one. Add disable_ddl_transaction! to the migration class.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Should I migrate foreign keys to UUID too?<span></span></summary>
+                    <div class="faq-answer">No — that's the fastest way to hurt join performance across your schema. Keep foreign keys as BIGINT and reserve UUID for external identification.</div>
                 </details>
 
-                <section class="references">
-                    <h3>Sources and references</h3>
-                    <ul>
-                        <li><a href="https://www.postgresql.org/docs/16/sql-altertable.html" target="_blank" rel="noopener noreferrer">PostgreSQL Documentation — ALTER TABLE</a></li>
-                        <li><a href="https://dev.mysql.com/doc/refman/8.0/en/miscellaneous-functions.html#function_uuid-to-bin" target="_blank" rel="noopener noreferrer">MySQL 8.0 UUID_TO_BIN / BIN_TO_UUID</a></li>
-                        <li><a href="https://docs.djangoproject.com/en/stable/ref/models/fields/#uuidfield" target="_blank" rel="noopener noreferrer">Django Documentation — UUIDField</a></li>
-                        <li><a href="/tools/uuid-generator/">Online UUID Generator</a></li>
+                <div class="references" id="references">
+                    <h3 style="text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">References</h3>
+                    <ul class="ref-list">
+                        <li><a href="https://www.postgresql.org/docs/current/sql-altertable.html" target="_blank" rel="noopener">PostgreSQL docs — ALTER TABLE</a></li>
+                        <li><a href="https://www.postgresql.org/docs/current/sql-createindex.html" target="_blank" rel="noopener">PostgreSQL docs — CREATE INDEX (CONCURRENTLY)</a></li>
+                        <li><a href="https://dev.mysql.com/doc/refman/8.0/en/miscellaneous-functions.html#function_uuid-to-bin" target="_blank" rel="noopener">MySQL 8.0 docs — UUID_TO_BIN() / BIN_TO_UUID()</a></li>
+                        <li><a href="https://docs.djangoproject.com/en/stable/ref/models/fields/#uuidfield" target="_blank" rel="noopener">Django docs — UUIDField</a></li>
+                        <li><a href="https://guides.rubyonrails.org/active_record_migrations.html#transactional-migrations" target="_blank" rel="noopener">Rails Guides — Transactional Migrations</a></li>
+                        <li><a href="https://github.com/github/gh-ost" target="_blank" rel="noopener">GitHub — gh-ost, online schema migration for MySQL</a></li>
                     </ul>
-                </section>
+                </div>
 
-                <h3 style="margin-top:32px;">Complementary tools</h3>
-                <ul>
-                    <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a> sortable UUIDs for your new keys</li>
-                    <li><a href="/tools/blog/uuid-vs-autoincrement/">UUID vs Auto‑Increment</a>  choosing the right strategy</li>
-                    <li><a href="/tools/json-formatter/">JSON Formatter</a>  to check your API responses</li>
-                </ul>
+                <div class="related-tools">
+                    <h3>Related DevToolbox tools</h3>
+                    <ul>
+                        <li><a href="/tools/postgresql-uuid-primary-key/">PostgreSQL UUID Primary Key</a></li>
+                        <li><a href="/tools/mysql-uuid-primary-key/">MySQL UUID Primary Key</a></li>
+                        <li><a href="/tools/uuid-v7-generator/">UUID v7 Generator</a></li>
+                        <li><a href="/tools/json-formatter/">JSON Formatter</a></li>
+                    </ul>
+                </div>
             </div>
         </article>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers. <a href="/blog/">Blog</a> | <a href="/contact/">Contact</a></p>
+        <p>&copy; 2026 <a href="/">DevToolbox</a> — Free tools for developers. <a href="/blog/">Blog</a> | <a href="/about/">About</a> | <a href="/contact/">Contact</a></p>
     </footer>
 </div>
 
@@ -466,9 +549,9 @@ ALTER TABLE users DROP COLUMN public_id;
             const t = b.dataset.theme;
             document.body.classList.toggle('dark', t === 'dark');
             btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
-            localStorage.setItem('theme', t);
+            localStorage.setItem('devtoolbox-theme', t);
         }));
-        const saved = localStorage.getItem('theme') || 'light';
+        const saved = localStorage.getItem('devtoolbox-theme') || 'light';
         document.body.classList.toggle('dark', saved === 'dark');
         document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
     })();
