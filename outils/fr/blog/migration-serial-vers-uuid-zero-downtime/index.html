@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Migrer de SERIAL/AUTO_INCREMENT vers UUID sans downtime — Guide complet</title>
-    <meta name="description" content="La migration de clé primaire la plus demandée en Django, Rails et Laravel, expliquée pas à pas. Ajoutez un UUID public sans interrompre votre service, avec une stratégie en 4 phases, des exemples de code, MySQL, et un plan de rollback.">
-    <meta name="keywords" content="migration serial vers uuid, auto increment to uuid, django uuid migration, rails uuid primary key, laravel uuid migration, zero downtime migration uuid, postgresql uuid public id, mysql uuid migration">
+    <title>Migrer de SERIAL/AUTO_INCREMENT vers UUID sans interruption Guide complet</title>
+    <meta name="description" content="Ajoutez un UUID public à une table PostgreSQL ou MySQL existante sans bloquer les écritures : déploiement de colonne sans race condition, backfill par lots, NOT NULL sans verrou, code Django/Rails/Laravel, et plan de rollback.">
+    <meta name="keywords" content="migrer serial vers uuid, auto increment vers uuid, migration uuid django, rails uuid primary key disable_ddl_transaction, migration uuid laravel, migration zero downtime uuid, postgresql uuid public id, migration uuid mysql, postgres set not null sans verrou">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Mathias Kouadio">
     <link rel="canonical" href="https://www.devstoolsbox.dev/fr/blog/migration-serial-vers-uuid-zero-downtime/">
@@ -13,76 +13,89 @@
     <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
     <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/blog/migrate-serial-to-uuid-zero-downtime/">
 
-    <meta property="og:title" content="Migrer de SERIAL/AUTO_INCREMENT vers UUID sans downtime">
-    <meta property="og:description" content="Une stratégie en 4 phases pour exposer un UUID public sans casser votre API, avec Django, Rails, Laravel, MySQL, et un plan de rollback.">
+    <meta property="og:title" content="Migrer de SERIAL/AUTO_INCREMENT vers UUID sans interruption">
+    <meta property="og:description" content="Un déploiement de schéma sans race condition, un backfill par lots, un NOT NULL sans verrou, et du code spécifique à Django, Rails, Laravel et MySQL.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://www.devstoolsbox.dev/fr/blog/migration-serial-vers-uuid-zero-downtime/">
     <meta property="og:site_name" content="DevToolbox">
+    <meta property="og:image" content="https://www.devstoolsbox.dev/og/migrate-serial-to-uuid.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Migration SERIAL vers UUID sans downtime">
-    <meta name="twitter:description" content="Ajoutez un UUID à vos tables existantes sans interrompre le service. Guide complet avec table de décision, scripts de validation, et rollback.">
+    <meta name="twitter:title" content="Migrer de SERIAL à UUID sans interruption">
+    <meta name="twitter:description" content="Ajouter un UUID à une table existante sans bloquer les écritures — tableau de décision, scripts de validation, et rollback.">
+    <meta name="twitter:image" content="https://www.devstoolsbox.dev/og/migrate-serial-to-uuid.webp">
+
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('devtoolbox-theme');
+          var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
 
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Migrer de SERIAL/AUTO_INCREMENT vers UUID sans downtime — Guide complet",
-            "author": { "@type": "Person", "name": "Mathias Kouadio" },
-            "datePublished": "2026-06-08",
-            "dateModified": "2026-06-08",
-            "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/migration-serial-vers-uuid-zero-downtime/",
-            "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/" }
-        }
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Migrer de SERIAL/AUTO_INCREMENT vers UUID sans interruption — Guide complet",
+        "description": "Une méthode sans race condition pour ajouter une colonne UUID publique à une table existante : défauts prospectifs, backfill par lots, NOT NULL sans verrou, index CONCURRENTLY, et code de déploiement spécifique à chaque framework.",
+        "image": "https://www.devstoolsbox.dev/og/migrate-serial-to-uuid.webp",
+        "author": { "@type": "Person", "name": "Mathias Kouadio", "url": "https://www.devstoolsbox.dev/fr/a-propos/" },
+        "publisher": { "@type": "Organization", "name": "DevToolbox", "url": "https://www.devstoolsbox.dev/", "logo": { "@type": "ImageObject", "url": "https://www.devstoolsbox.dev/logo.png" } },
+        "datePublished": "2026-06-08",
+        "dateModified": "2026-07-04",
+        "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/blog/migration-serial-vers-uuid-zero-downtime/",
+        "inLanguage": "fr"
+    }
     </script>
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                { "@type": "Question", "name": "Puis-je supprimer mon ancien id auto-incrément après la migration ?", "acceptedAnswer": { "@type": "Answer", "text": "Gardez-le en interne pour les jointures. Ne l'exposez plus dans l'API, mais ne le supprimez pas : toutes vos clés étrangères en dépendent." } },
-                { "@type": "Question", "name": "Combien de temps prend la migration sur une grosse table ?", "acceptedAnswer": { "@type": "Answer", "text": "L'ajout d'une colonne nullable est quasi instantané. La mise à jour des UUID prend quelques secondes par million de lignes. L'index UNIQUE CONCURRENTLY peut prendre plusieurs minutes, mais sans bloquer les écritures." } },
-                { "@type": "Question", "name": "Dois-je migrer les clés étrangères vers UUID ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, c'est la meilleure façon de tuer vos performances. Gardez les FK en BIGINT et utilisez l'UUID uniquement pour l'identification externe." } }
-            ]
-        }
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            { "@type": "Question", "name": "Puis-je supprimer mon ancien id auto-incrémenté après la migration ?", "acceptedAnswer": { "@type": "Answer", "text": "Conservez-le en interne pour les jointures et les clés étrangères. Cessez de l'exposer dans l'API, mais ne supprimez jamais la colonne — l'intégrité référentielle de tout votre schéma en dépend." } },
+            { "@type": "Question", "name": "Pourquoi ajouter un DEFAULT à la colonne plutôt que de simplement la remplir avec UPDATE ?", "acceptedAnswer": { "@type": "Answer", "text": "Sans défaut, toute ligne insérée entre l'ajout de la colonne et la fin du backfill n'a pas de public_id et échouera à l'étape NOT NULL plus tard. Définir le défaut juste après l'ajout de la colonne (une opération rapide et non bloquante en soi) ferme cette faille pour toute insertion future avant même que le backfill ne commence." } },
+            { "@type": "Question", "name": "Ajouter une colonne avec DEFAULT gen_random_uuid() verrouille-t-il la table ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui si vous définissez le défaut dans la même instruction ADD COLUMN — un défaut volatile force PostgreSQL à réécrire immédiatement chaque ligne existante, contrairement à un défaut constant. Ajoutez d'abord la colonne sans défaut, puis définissez le défaut dans une instruction séparée quasi instantanée, et remplissez les lignes existantes séparément." } },
+            { "@type": "Question", "name": "Pourquoi ma migration Rails échoue-t-elle avec « CREATE INDEX CONCURRENTLY cannot run inside a transaction block » ?", "acceptedAnswer": { "@type": "Answer", "text": "Rails encapsule chaque migration dans une transaction par défaut, et PostgreSQL refuse d'exécuter CREATE INDEX CONCURRENTLY à l'intérieur. Ajoutez disable_ddl_transaction! en tête de la classe de migration pour vous en affranchir." } },
+            { "@type": "Question", "name": "Dois-je aussi migrer les clés étrangères vers UUID ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. Les clés étrangères en BIGINT font 8 octets et sont rapides ; les convertir en UUID double la taille de chaque index de jointure concerné sans aucun bénéfice. Gardez public_id pour l'identification externe uniquement." } }
+        ]
+    }
     </script>
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
-                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
-                { "@type": "ListItem", "position": 3, "name": "Migration SERIAL vers UUID", "item": "https://www.devstoolsbox.dev/fr/blog/migration-serial-vers-uuid-zero-downtime/" }
-            ]
-        }
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.devstoolsbox.dev/fr/blog/" },
+            { "@type": "ListItem", "position": 3, "name": "Migrer de SERIAL à UUID", "item": "https://www.devstoolsbox.dev/fr/blog/migration-serial-vers-uuid-zero-downtime/" }
+        ]
+    }
     </script>
-     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-JRBW78KE29');
-    </script>
+
     <style>
         :root {
             --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
             --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
-            --accent-green: #10b981; --accent-green-bg: #d1fae5;
-            --accent-red: #ef4444; --accent-red-bg: #fee2e2;
-            --accent-amber: #f59e0b; --accent-amber-bg: #fef3c7;
+            --pass: #10b981; --warn: #f59e0b; --fail: #ef4444;
+            --pass-bg: #d1fae5; --warn-bg: #fef3c7; --fail-bg: #fee2e2;
             --text: #0f172a; --text2: #374151; --text3: #64748b;
             --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
             --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
             --mono: 'SF Mono','Menlo','Cascadia Code',monospace;
-            --decision-bg: #f0fdf4; --decision-border: #10b981;
         }
-        body.dark {
+        [data-theme="dark"] body, body.dark {
             --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
-            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --primary-hover: #8b5cf6; --primary-light: rgba(167,139,250,0.1);
+            --pass: #34d399; --warn: #fbbf24; --fail: #f87171;
+            --pass-bg: #064e3b; --warn-bg: #451a03; --fail-bg: #450a0a;
+            --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
             --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
             --shadow: 0 4px 16px rgba(0,0,0,0.3);
-            --decision-bg: #064e3b; --decision-border: #34d399;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -92,195 +105,355 @@
         }
         .container { max-width:900px; margin:0 auto; }
 
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
         .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
         .logo::before { content:'🛠️'; }
-        .header-right { display:flex; gap:8px; align-items:center; }
+        .header-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
         .theme-toggle, .lang-switch { background:var(--surface); border:1px solid var(--border); border-radius:40px; padding:3px; box-shadow:var(--shadow); display:flex; }
         .lang-btn, .theme-btn { padding:7px 14px; border:none; background:transparent; font-weight:600; cursor:pointer; color:var(--text2); border-radius:32px; text-decoration:none; font-size:0.82rem; transition:0.2s; white-space:nowrap; font-family:inherit; }
         .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
 
-        .article-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:32px; box-shadow:var(--shadow); margin-bottom:32px;
-        }
-        h1 { font-size:2rem; font-weight:800; margin-bottom:8px; line-height:1.3; }
-        .meta { font-size:0.85rem; color:var(--text3); margin-bottom:24px; display: flex; gap: 16px; flex-wrap: wrap; }
-        .meta time { font-weight:500; color:var(--text2); }
-        h2 { font-size:1.5rem; margin-top:36px; margin-bottom:12px; font-weight:700; }
-        h3 { font-size:1.2rem; margin-top:28px; margin-bottom:8px; font-weight:600; }
-        p { margin-bottom:16px; color:var(--text2); }
+        .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
+        .breadcrumb ol { display:flex; list-style:none; flex-wrap:wrap; gap:4px; }
+        .breadcrumb li+li::before { content:'/'; margin:0 6px; color:var(--text3); }
+        .breadcrumb a { color:var(--text2); text-decoration:none; }
+        .breadcrumb a:hover { color:var(--primary); }
+
+        .article-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:36px; box-shadow:var(--shadow); margin-bottom:28px; }
+        .article-meta { display:flex; gap:14px; flex-wrap:wrap; font-size:0.83rem; color:var(--text3); margin-bottom:20px; }
+        .article-meta a { color:var(--primary); text-decoration:none; }
+        h1 { font-size:2rem; font-weight:800; letter-spacing:-.02em; margin-bottom:0; line-height:1.3; }
+
+        /* Image à la une */
+        .featured-figure { margin:0 0 24px; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:var(--surface2); }
+        .featured-figure img { display:block; width:100%; height:auto; }
+        .featured-figure figcaption { padding:10px 16px; font-size:.8rem; color:var(--text3); text-align:center; }
+
+        /* Barre de partage */
+        .share-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 0 24px; margin-bottom:8px; border-bottom:1px solid var(--border); }
+        .share-label { font-size:.76rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin-right:4px; }
+        .share-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; border:1px solid var(--border); background:var(--surface2); color:var(--text2); font-size:.8rem; font-weight:600; cursor:pointer; text-decoration:none; font-family:inherit; }
+        .share-btn:hover { border-color:var(--primary); color:var(--primary); text-decoration:none; }
+
+        .toc { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin:20px 0 32px; }
+        .toc-title { font-size:.78rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text3); margin-bottom:10px; }
+        .toc ol { padding-left:20px; }
+        .toc a { color:var(--text2); text-decoration:none; font-size:0.9rem; line-height:2; }
+        .toc a:hover { color:var(--primary); }
+
+        h2 { font-size:1.5rem; margin-top:44px; margin-bottom:14px; font-weight:800; letter-spacing:-.015em; scroll-margin-top:24px; }
+        h3 { font-size:1.15rem; margin-top:24px; margin-bottom:8px; font-weight:700; }
+        p { margin-bottom:16px; color:var(--text2); font-size:0.97rem; line-height:1.85; }
         ul, ol { margin-left:24px; margin-bottom:16px; color:var(--text2); }
-        li { margin-bottom:8px; }
+        li { margin-bottom:8px; font-size:0.93rem; }
         strong { color:var(--text); }
-        code {
-            background:var(--code-bg); color:var(--code-color); padding:2px 6px;
-            border-radius:4px; font-family:var(--mono); font-size:0.9em;
+        code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.9em; }
+        pre { background:var(--code-bg); color:var(--code-color); padding:16px 18px; border-radius:12px; overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.6; }
+        pre .comment { color:#6b7280; }
+        a { color: var(--primary); }
+        a:hover { text-decoration: underline; }
+
+        .table-responsive { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:20px 0; border-radius:12px; }
+        table { width:100%; border-collapse:collapse; min-width:560px; }
+        .dec-table th { background:var(--pass); color:#fff; padding:11px 12px; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; }
+        .dec-table td { padding:11px 12px; border-bottom:1px solid var(--border); color:var(--text2); }
+        .dec-table { border-radius:12px; overflow:hidden; font-size:0.87rem; }
+        .dec-table tr:last-child td { border-bottom:none; }
+
+        .sev-badge { display:inline-block; padding:3px 11px; border-radius:20px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+        .sev-critical { background:var(--fail-bg); color:var(--fail); }
+        .sev-high { background:var(--warn-bg); color:var(--warn); }
+        .sev-medium { background:var(--primary-light); color:var(--primary); }
+        .sev-low { background:var(--pass-bg); color:var(--pass); }
+
+        .ap-card { border:1px solid var(--border); border-radius:14px; padding:22px; margin:20px 0; background:var(--surface2); }
+        .ap-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+        .ap-name { font-weight:800; font-size:1.02rem; }
+        .ap-number { color:var(--primary); margin-right:6px; }
+        .danger-tag, .fix-tag { display:inline-block; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; margin:10px 0 6px; }
+        .danger-tag { color:var(--fail); }
+        .fix-tag { color:var(--pass); }
+
+        .callout { padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0; font-size:0.92rem; color:var(--text2); line-height:1.75; }
+        .callout-info { background:var(--primary-light); border-left:4px solid var(--primary); }
+        .callout-warn { background:var(--warn-bg); border-left:4px solid var(--warn); }
+        .callout-fail { background:var(--fail-bg); border-left:4px solid var(--fail); }
+        .callout-pass { background:var(--pass-bg); border-left:4px solid var(--pass); }
+        .callout strong { color:var(--text); }
+
+        .faq-item { border-top:1px solid var(--border); padding:14px 0; }
+        .faq-item summary { display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-weight:700; font-size:0.95rem; list-style:none; color:var(--text); }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after { content:'＋'; color:var(--primary); font-size:1.2rem; transition:transform 0.2s; }
+        .faq-item[open] summary::after { transform:rotate(45deg); }
+        .faq-answer { padding-top:10px; color:var(--text2); font-size:0.92rem; }
+
+        .references { margin-top:24px; font-size:0.9rem; }
+        .ref-list { list-style:none; padding-left:0; }
+        .ref-list li { font-size:0.85rem; margin-bottom:8px; color:var(--text3); }
+        .ref-list a::before { content:'→ '; color:var(--primary); font-weight:700; }
+
+        .related-tools { background:var(--primary-light); border:1px solid rgba(124,58,237,.2); border-radius:14px; padding:22px; margin-top:28px; }
+        .related-tools h3 { text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; color:var(--primary); margin-bottom:12px; margin-top:0; }
+        .related-tools ul { list-style:none; margin-left:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px; }
+        .related-tools li { margin-bottom: 0; }
+        .related-tools a { color:var(--text2); text-decoration:none; font-size:0.88rem; }
+        .related-tools a::before { content:'→ '; color:var(--primary); font-weight:700; }
+        .related-tools a:hover { color:var(--primary); }
+
+        /* ═══ Section auteur professionnelle ═══ */
+        .author-section { margin-top:40px; padding-top:32px; border-top:1px solid var(--border); }
+        .author-section-label { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); margin-bottom:14px; }
+        .author-card {
+            display:grid;
+            grid-template-columns:120px 1fr;
+            gap:24px;
+            padding:26px;
+            background:linear-gradient(135deg, var(--primary-light) 0%, var(--surface2) 100%);
+            border:1px solid rgba(124,58,237,.25);
+            border-radius:16px;
+            align-items:flex-start;
         }
-        pre {
-            background:var(--code-bg); color:var(--code-color); padding:16px; border-radius:12px;
-            overflow-x:auto; margin-bottom:20px; font-family:var(--mono); font-size:0.85rem; line-height:1.5;
+        @media(max-width:560px){ .author-card{ grid-template-columns:1fr; text-align:center; gap:16px; } }
+        .author-photo {
+            width:120px; height:120px; border-radius:50%; object-fit:cover;
+            border:4px solid var(--surface);
+            box-shadow:0 8px 24px rgba(124,58,237,.2);
+            display:block;
         }
-        .table-responsive {
-            overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 24px 0; border-radius: 12px;
+        @media(max-width:560px){ .author-photo{ width:96px; height:96px; margin:0 auto; } }
+        .author-body { display:flex; flex-direction:column; gap:10px; min-width:0; }
+        .author-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        @media(max-width:560px){ .author-head{ justify-content:center; } }
+        .author-name { margin:0; font-size:1.15rem; font-weight:800; color:var(--text); letter-spacing:-.01em; }
+        .author-verified {
+            display:inline-flex; align-items:center; gap:4px;
+            font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+            color:#065f46; background:var(--pass-bg);
+            padding:3px 10px; border-radius:12px;
         }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .decision-table {
-            background:var(--decision-bg); border:2px solid var(--decision-border); border-radius:12px;
-            overflow:hidden;
+        [data-theme="dark"] .author-verified, body.dark .author-verified { color:var(--pass); }
+        .author-role { font-size:.86rem; font-weight:700; color:var(--primary); margin:0; }
+        .author-bio-text { margin:0; font-size:.9rem; line-height:1.75; color:var(--text2); }
+        .author-bio-text strong { color:var(--text); }
+        .author-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+        @media(max-width:560px){ .author-tags{ justify-content:center; } }
+        .author-tag {
+            font-size:.72rem; font-weight:700;
+            padding:3px 10px; border-radius:999px;
+            background:var(--surface); color:var(--text2);
+            border:1px solid var(--border);
         }
-        .decision-table th, .decision-table td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); }
-        .decision-table th {
-            background:var(--decision-border); color:#fff; font-weight:700;
-            font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;
+        .author-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+        @media(max-width:560px){ .author-links{ justify-content:center; } }
+        .author-link {
+            display:inline-flex; align-items:center; gap:6px;
+            padding:6px 14px; border-radius:999px;
+            background:var(--surface); color:var(--text);
+            border:1px solid var(--border);
+            font-size:.8rem; font-weight:700;
+            transition:all .18s;
+            text-decoration:none;
         }
-        .decision-table tr:last-child td { border-bottom:none; }
-        .benchmark-table th, .benchmark-table td { border:1px solid var(--border); padding:10px 14px; text-align:left; }
-        .benchmark-table th { background:var(--surface2); font-weight:600; }
-        .btn-tool {
-            display:inline-block; background:var(--primary); color:#fff; padding:10px 20px; border-radius:40px;
-            text-decoration:none; font-weight:600; margin:16px 0; transition:0.2s;
-        }
-        .btn-tool:hover { background:var(--primary-hover); }
-        .footer { text-align:center; padding:20px; border-top:1px solid var(--border); margin-top:40px; color:var(--text3); font-size:0.8rem; }
+        .author-link:hover { border-color:var(--primary); color:var(--primary); text-decoration:none; transform:translateY(-1px); }
+        .author-link svg { width:14px; height:14px; flex-shrink:0; }
+        .author-link.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .author-link.primary:hover { background:var(--primary-hover); color:#fff; }
+
+        .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
         .footer a { color:var(--primary); text-decoration:none; }
-        .warning-box {
-            background:var(--accent-amber-bg); border-left:4px solid var(--accent-amber);
-            padding:14px 18px; border-radius:0 12px 12px 0; margin:20px 0;
-            font-size:0.9rem; color:var(--text2);
-        }
-        .references { margin-top: 32px; font-size: 0.9rem; }
-        .references h3 { margin-bottom: 8px; }
-        .references ul { list-style-type: disc; padding-left: 24px; color: var(--text2); }
-        .faq-item { margin-bottom: 16px; }
-        .faq-item summary {
-            font-weight: 600; color: var(--text); cursor: pointer; padding: 10px 0;
-            list-style: none; display: flex; justify-content: space-between; align-items: center;
-        }
-        .faq-item summary::-webkit-details-marker { display: none; }
-        .faq-item summary::after {
-            content: '＋'; font-size: 0.9rem; color: var(--text3);
-            transition: transform .2s; flex-shrink: 0; margin-left: 16px;
-        }
-        .faq-item[open] summary::after { transform: rotate(45deg); }
-        .faq-item .faq-answer { padding: 0 0 12px; color: var(--text2); line-height: 1.8; }
-        @media (max-width:600px) {
-            h1 { font-size:1.6rem; }
-            .article-card { padding:20px; }
-        }
+
+        @media (max-width:600px) { h1 { font-size:1.6rem; } .article-card { padding:20px; } }
     </style>
 </head>
 <body>
 <div class="container">
     <header class="header">
-        <a href="/fr/" class="logo">DevToolbox</a>
+        <a href="/" class="logo">DevToolbox</a>
         <div class="header-right">
             <div class="theme-toggle">
-                <button class="theme-btn active" data-theme="light">☀️ Clair</button>
-                <button class="theme-btn" data-theme="dark">🌙 Sombre</button>
+                <button class="theme-btn active" data-theme="light" aria-label="Passer au thème clair">☀️ Clair</button>
+                <button class="theme-btn" data-theme="dark" aria-label="Passer au thème sombre">🌙 Sombre</button>
             </div>
             <div class="lang-switch">
-                <a href="/fr/blog/migration-serial-vers-uuid-zero-downtime/" class="lang-btn active">FR</a>
                 <a href="/tools/blog/migrate-serial-to-uuid-zero-downtime/" class="lang-btn">EN</a>
+                <a href="/fr/blog/migration-serial-vers-uuid-zero-downtime/" class="lang-btn active" aria-current="page">FR</a>
             </div>
         </div>
     </header>
 
+    <nav class="breadcrumb" aria-label="Fil d'Ariane">
+        <ol>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/fr/blog/">Blog</a></li>
+            <li><span>Migrer de SERIAL à UUID</span></li>
+        </ol>
+    </nav>
+
     <main>
         <article itemscope itemtype="https://schema.org/Article" class="article-card">
             <meta itemprop="datePublished" content="2026-06-08">
+            <meta itemprop="dateModified" content="2026-07-04">
             <meta itemprop="author" content="Mathias Kouadio">
 
-            <h1 itemprop="headline">Migrer de SERIAL/AUTO_INCREMENT vers UUID sans downtime</h1>
-            <div class="meta">
+            <div class="article-meta">
                 <time datetime="2026-06-08">8 juin 2026</time>
-                <span>·</span>
-                <span>14 min de lecture</span>
-                <span>·</span>
-                <span>Par Mathias Kouadio</span>
+                <span>&middot; mis à jour le 4 juillet 2026</span>
+                <span>&middot; 15 min de lecture</span>
+                <span>&middot; Par <a href="/fr/a-propos/">Mathias Kouadio</a></span>
+            </div>
+            <h1 itemprop="headline">Migrer de SERIAL/AUTO_INCREMENT vers UUID sans interruption</h1>
+
+            <figure class="featured-figure">
+                <img src="/og/migrate-serial-to-uuid.webp" alt="Illustration de la migration d'une clé primaire SERIAL vers un UUID public dans une table PostgreSQL existante, avec backfill par lots et index créé en CONCURRENTLY" width="1200" height="630" loading="eager">
+                <figcaption>Ajouter une colonne <code>public_id</code> UUID à une table existante, sans bloquer les écritures — la séquence complète, étape par étape, avec le plan de rollback.</figcaption>
+            </figure>
+
+            <div class="share-bar" aria-label="Partager cet article">
+                <span class="share-label">Partager :</span>
+                <button class="share-btn" id="copy-link-btn" type="button">🔗 Copier le lien</button>
+                <a class="share-btn" id="share-x" href="#" target="_blank" rel="noopener">𝕏 X / Twitter</a>
+                <a class="share-btn" id="share-linkedin" href="#" target="_blank" rel="noopener">in LinkedIn</a>
             </div>
 
-            <div itemprop="articleBody">
-                <p>C'est la question qui revient chaque semaine sur les forums Django, Rails et Laravel : <strong>"Comment passer mes IDs auto-incrémentés en UUID sans casser la production ?"</strong> Vous avez des milliers d'utilisateurs, des clés étrangères partout, et vous voulez exposer des identifiants publics non énumérables dans votre API. La bonne nouvelle : c'est possible, sans downtime, et sans migrer vos clés étrangères. Cet article vous donne la méthode exacte, testée sur PostgreSQL, avec des variantes pour MySQL, Django, Rails, Laravel, et un plan de rollback complet.</p>
+            <nav class="toc" aria-label="Table des matières">
+                <div class="toc-title">Sur cette page</div>
+                <ol>
+                    <li><a href="#incident">La migration qui a échoué sur SET NOT NULL</a></li>
+                    <li><a href="#decision-table">Tableau de décision rapide</a></li>
+                    <li><a href="#schema">Ajouter la colonne sans bloquer les écritures</a></li>
+                    <li><a href="#api">Déployer public_id dans votre API</a></li>
+                    <li><a href="#mysql">Spécificités MySQL</a></li>
+                    <li><a href="#frameworks">Django, Rails et Laravel</a></li>
+                    <li><a href="#validation">Monitoring, validation et rollback</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#references">Références</a></li>
+                </ol>
+            </nav>
 
-                <h2>Table de décision — Choisissez votre stratégie de migration</h2>
+            <div itemprop="articleBody">
+                <p id="incident">Le plan semblait sans risque sur le papier : ajouter une colonne <code>public_id</code> nullable, la remplir avec <code>UPDATE ... WHERE public_id IS NULL</code>, puis exécuter <code>ALTER TABLE ... SET NOT NULL</code>. Le backfill s'est terminé. Le <code>SET NOT NULL</code> a échoué — une poignée de lignes, insérées par l'application en cours d'exécution dans les secondes entre la fin de la requête de backfill et le début de l'étape suivante de migration, n'avaient aucun <code>public_id</code>. La logique de backfill était correcte ; la colonne n'avait simplement pas encore de <em>défaut</em>, donc chaque insertion du code applicatif — pas encore modifié — créait un nouveau trou. La correction a pris une instruction supplémentaire, placée au bon endroit, avant même que le backfill ne s'exécute.</p>
+
+                <p>C'est le détail que la plupart des guides « ajoutez une colonne UUID » passent sous silence, et c'est la différence entre une migration qui fonctionne en staging et une qui échoue sous des écritures concurrentes réelles. Ce guide couvre la séquence complète — un déploiement de colonne sans race condition, un backfill par lots, une manière sans verrou d'imposer <code>NOT NULL</code> sur Postgres 12+, du code spécifique à Django, Rails et Laravel, et un plan de rollback testé — plus la règle d'or que presque toutes les versions de cette migration respectent : ne touchez jamais à vos clés étrangères.</p>
+
+                <h2 id="decision-table">Tableau de décision rapide</h2>
                 <div class="table-responsive">
-                    <table class="decision-table">
-                        <thead>
-                            <tr><th>Situation</th><th>Stratégie recommandée</th></tr>
-                        </thead>
+                    <table class="dec-table">
+                        <thead><tr><th>Situation</th><th>Gravité si ignorée</th><th>Approche recommandée</th></tr></thead>
                         <tbody>
-                            <tr><td>PostgreSQL, table &lt; 10M lignes</td><td>4 phases décrites ici, migration en &lt; 30 min</td></tr>
-                            <tr><td>PostgreSQL, table &gt; 10M lignes</td><td>Même stratégie, prévoir 1-2h pour l'index CONCURRENTLY</td></tr>
-                            <tr><td>MySQL 8+, table active</td><td>ALTER TABLE + UUID() natif, pas de CONCURRENTLY ; utiliser pt‑online‑schema‑change pour les grosses tables</td></tr>
-                            <tr><td>MySQL 5.7</td><td>Fenêtre de maintenance courte nécessaire ; envisagez une mise à niveau</td></tr>
-                            <tr><td>Clés étrangères sur la table à migrer</td><td>Ne pas migrer les FKs — conserver BIGINT en interne</td></tr>
-                            <tr><td>API avec clients externes actifs</td><td>Phase de dépréciation de 30 jours minimum</td></tr>
+                            <tr><td>Définir un DEFAULT volatile dans la même instruction que ADD COLUMN</td><td><span class="sev-badge sev-high">Élevée</span></td><td>Ajouter d'abord la colonne, définir le défaut dans une instruction séparée — évite une réécriture complète de la table</td></tr>
+                            <tr><td>Aucun défaut pendant le backfill sur une table activement écrite</td><td><span class="sev-badge sev-high">Élevée</span></td><td>Définir le défaut avant le backfill, pour que chaque insertion concurrente soit déjà couverte</td></tr>
+                            <tr><td>Migration Rails utilisant <code>algorithm: :concurrently</code></td><td><span class="sev-badge sev-high">Élevée</span></td><td>Ajouter <code>disable_ddl_transaction!</code> — Postgres refuse CONCURRENTLY dans une transaction</td></tr>
+                            <tr><td>Table MySQL avec fort trafic d'écriture</td><td><span class="sev-badge sev-medium">Moyenne</span></td><td>Utiliser pt-online-schema-change ou gh-ost au lieu d'un ALTER TABLE direct</td></tr>
+                            <tr><td>Tester « l'index est-il réellement utilisé » avec un UUID aléatoire</td><td><span class="sev-badge sev-medium">Moyenne</span></td><td>Tester avec un UUID qui existe réellement dans la table</td></tr>
+                            <tr><td>Tenté de migrer aussi les clés étrangères vers UUID</td><td><span class="sev-badge sev-high">Élevée</span></td><td>Ne pas le faire — garder les FK en BIGINT, l'UUID sert uniquement à l'identification externe</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <h2>Pourquoi cette migration est si demandée (et si mal documentée)</h2>
-                <p>Les SERIAL/BIGSERIAL sont rapides, compacts, mais ils fuient de l'information : un attaquant peut déduire votre volume d'activité, et une simple boucle suffit à énumérer vos ressources. Le passage à un UUID public résout ces problèmes de sécurité sans toucher à l'intégrité de vos données. Le piège classique est de vouloir remplacer la clé primaire elle-même — c'est une erreur qui bloque les écritures pendant des heures. La stratégie présentée ici est différente : on ajoute une colonne, on migre l'API, et on laisse l'ancien id en interne.</p>
+                <h2>Pourquoi les équipes migrent hors de SERIAL</h2>
+                <p><code>SERIAL</code>/<code>BIGSERIAL</code> (ou <code>AUTO_INCREMENT</code> en MySQL) sont rapides et compacts, mais ils fuient de l'information dès qu'ils sont exposés dans une URL ou une réponse d'API : un attaquant peut estimer votre rythme de croissance, et une simple boucle incrémentale énumère chaque ressource que vous avez. Une colonne <code>UUID</code> publique corrige cela sans toucher à la clé primaire interne ni à la performance de vos jointures — c'est exactement pourquoi la migration ci-dessous ne remplace jamais la clé primaire elle-même, elle ne fait que s'y ajouter.</p>
 
-                <h2>La stratégie zéro downtime en 4 phases (PostgreSQL)</h2>
+                <h2 id="schema">Ajouter la colonne sans bloquer les écritures</h2>
+                <p>Cette séquence cible PostgreSQL 12+. Chaque étape est choisie spécifiquement pour éviter les deux modes de défaillance qui rendent cette migration risquée : une réécriture complète de la table, et un verrou tenu longtemps.</p>
 
-                <h3>Phase 1 : ajouter la colonne UUID sans bloquer les écritures</h3>
-                <p>Sur PostgreSQL, l'ajout d'une colonne nullable est immédiat. Nous allons créer un champ <code>public_id</code> qui contiendra l'UUID public, tout en conservant <code>id</code> comme clé primaire interne.</p>
-                <pre><code>-- Ajouter la colonne (instantané, pas de verrou)
+                <h3>Étape 1 — ajouter la colonne, puis définir le défaut séparément</h3>
+                <p>Ajouter une colonne sans défaut ne touche que les métadonnées et est quasi instantané, quelle que soit la taille de la table. Ajouter un défaut <strong>volatile</strong> comme <code>gen_random_uuid()</code> dans la même instruction ne l'est pas — Postgres doit écrire une valeur distincte dans chaque ligne existante immédiatement, ce qui implique une réécriture complète de la table sous un verrou exclusif. Séparer les deux évite complètement cela, car définir un défaut sur une colonne déjà existante n'affecte que les insertions futures :</p>
+                <pre><code>-- Étape 1a : instantané, ne touche que les métadonnées
 ALTER TABLE users ADD COLUMN public_id UUID;
 
--- Remplir les valeurs pour les lignes existantes
-UPDATE users SET public_id = gen_random_uuid() WHERE public_id IS NULL;
+-- Étape 1b : également rapide — affecte uniquement les lignes insérées à partir de maintenant,
+-- ferme la race condition pour toute insertion concurrente avant que le backfill ne démarre
+ALTER TABLE users ALTER COLUMN public_id SET DEFAULT gen_random_uuid();</code></pre>
 
--- Rendre la colonne NOT NULL une fois toutes les lignes remplies
+                <h3>Étape 2 — remplir les lignes existantes par lots</h3>
+                <p>Un seul <code>UPDATE</code> sur toute la table fonctionne pour de petites tables, mais sur une grande, il tient des verrous de ligne longtemps et génère un pic de WAL et de tuples morts pour autovacuum. Un traitement par lots sur la plage de clé primaire garde chaque transaction courte :</p>
+                <pre><code>DO $$
+DECLARE
+  batch_size INT := 5000;
+  rows_updated INT;
+BEGIN
+  LOOP
+    UPDATE users
+    SET public_id = gen_random_uuid()
+    WHERE id IN (
+      SELECT id FROM users WHERE public_id IS NULL LIMIT batch_size
+    );
+    GET DIAGNOSTICS rows_updated = ROW_COUNT;
+    EXIT WHEN rows_updated = 0;
+    COMMIT;
+  END LOOP;
+END $$;</code></pre>
+
+                <h3>Étape 3 — imposer NOT NULL sans verrou tenu longtemps</h3>
+                <p>Un simple <code>ALTER COLUMN ... SET NOT NULL</code> force Postgres à scanner toute la table pour confirmer qu'aucune valeur <code>NULL</code> ne subsiste, en tenant un verrou <code>ACCESS EXCLUSIVE</code> pendant tout le scan. Depuis Postgres 12, vous pouvez valider la contrainte séparément d'abord, ce qui rend l'étape finale rapide :</p>
+                <pre><code>-- Instantané : appliqué immédiatement aux nouvelles lignes, ne scanne pas les existantes
+ALTER TABLE users ADD CONSTRAINT public_id_not_null
+  CHECK (public_id IS NOT NULL) NOT VALID;
+
+-- Scanne la table, mais ne prend qu'un verrou qui autorise lectures/écritures concurrentes
+ALTER TABLE users VALIDATE CONSTRAINT public_id_not_null;
+
+-- Rapide : Postgres peut faire confiance à la contrainte déjà validée au lieu de rescaner
 ALTER TABLE users ALTER COLUMN public_id SET NOT NULL;
+ALTER TABLE users DROP CONSTRAINT public_id_not_null;</code></pre>
 
--- Créer un index unique sans bloquer les écritures (CONCURRENTLY)
-CREATE UNIQUE INDEX CONCURRENTLY idx_users_public_id ON users(public_id);</code></pre>
-                <p>Le <code>CONCURRENTLY</code> est crucial : il construit l'index en arrière-plan sans poser de verrou sur la table. Comptez quelques minutes sur une table de plusieurs millions de lignes, mais les insertions continuent normalement.</p>
+                <h3>Étape 4 — construire l'index unique en CONCURRENTLY</h3>
+                <pre><code>CREATE UNIQUE INDEX CONCURRENTLY idx_users_public_id ON users(public_id);</code></pre>
+                <p><code>CONCURRENTLY</code> construit l'index en arrière-plan sans bloquer les lectures ou écritures. Prévoyez quelques minutes sur une table de plusieurs millions de lignes plutôt que de le traiter comme instantané — mesurez sur une copie de staging de vos vraies données plutôt que de supposer une durée fixe.</p>
 
-                <h3>Phase 2 : adapter l'API pour exposer public_id</h3>
-                <p>Modifiez vos sérialiseurs ou vos vues pour renvoyer <code>public_id</code> au lieu de <code>id</code> dans les réponses JSON. Voici un exemple avec Django REST Framework :</p>
+                <div class="ap-card">
+                    <div class="ap-header"><div class="ap-name"><span class="ap-number">01</span>Backfiller avant que la colonne n'ait un défaut</div><span class="sev-badge sev-high">Élevée</span></div>
+                    <p>Si vous backfillez avant de définir un défaut, chaque ligne que l'application insère entre la requête de backfill et l'étape NOT NULL n'a pas de <code>public_id</code> — exactement l'incident par lequel cet article commence.</p>
+                    <div class="fix-tag">Correction</div>
+                    <pre><code>-- L'ordre compte : défaut AVANT backfill, toujours
+ALTER TABLE users ADD COLUMN public_id UUID;
+ALTER TABLE users ALTER COLUMN public_id SET DEFAULT gen_random_uuid();
+<span class="comment">-- c'est seulement maintenant qu'on démarre le backfill des lignes NULL existantes</span></code></pre>
+                </div>
+
+                <h2 id="api">Déployer public_id dans votre API</h2>
+                <p>Une fois la colonne, le backfill, la contrainte et l'index en place, le déploiement vers votre API est une dépréciation en trois étapes bien définies, indépendante du travail de schéma ci-dessus.</p>
+
+                <h3>Exposer public_id à côté de id</h3>
+                <p>Retournez <code>public_id</code> dans les réponses d'API pendant que <code>id</code> est encore présent en interne. Un exemple Django REST Framework qui correspond à ce schéma hybride :</p>
                 <pre><code># serializers.py
 class ArticleSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='public_id', read_only=True)
-    
+
     class Meta:
         model = Article
         fields = ['id', 'title', 'content']
-        # 'id' dans l'API = public_id en base
-        # le vrai id (BIGINT) n'est jamais exposé</code></pre>
+        # 'id' dans la réponse d'API = public_id dans la base de données ;
+        # l'id BIGINT interne n'est jamais exposé</code></pre>
 
-                <h3>Phase 3 : déprécier l'ancien champ id</h3>
-                <p>Ajoutez un en-tête HTTP <code>Deprecation: true</code> ou un avertissement dans la documentation pour les clients qui utilisent encore l'ancien <code>id</code>. Donnez-leur un mois pour migrer. Surveillez les logs pour identifier les derniers appels avec l'ancien format.</p>
+                <h3>Déprécier l'ancien id</h3>
+                <p>Ajoutez un en-tête de réponse <code>Deprecation: true</code>, ou un avertissement documenté, pour tout chemin client qui utilise encore l'ancien id numérique. Fixez une fenêtre — 30 jours est un défaut raisonnable — et surveillez les logs d'accès pour les derniers appels utilisant l'ancien format avant de passer à la suite.</p>
 
-                <h3>Phase 4 : supprimer id des réponses API (garder en interne)</h3>
-                <p>Une fois tous les clients migrés, supprimez le champ <code>id</code> de vos réponses API. Ne supprimez jamais la colonne de la base : elle reste essentielle pour les jointures et les clés étrangères.</p>
+                <h3>Retirer id des réponses (jamais de la base)</h3>
+                <p>Une fois que les logs montrent plus aucun trafic sur l'ancien identifiant, retirez-le des réponses d'API. La colonne sous-jacente et ses clés étrangères restent exactement telles quelles — cette étape ne change que ce que l'API retourne, pas le schéma.</p>
 
-                <h2>Spécificités MySQL</h2>
-                <p>MySQL ne supporte pas <code>CONCURRENTLY</code> pour la création d'index. Pour les tables avec un fort trafic d'écriture, utilisez <strong>pt‑online‑schema‑change</strong> de la suite Percona pour éviter les verrous. Pour les petites tables ou les fenêtres de maintenance, un <code>ALTER TABLE</code> direct fonctionne.</p>
-                <pre><code>-- MySQL 8.0+ : UUID() natif mais pas de CONCURRENTLY
--- Nécessite une courte fenêtre de maintenance ou pt-online-schema-change
-
+                <h2 id="mysql">Spécificités MySQL</h2>
+                <p>MySQL n'a pas d'équivalent à <code>CREATE INDEX CONCURRENTLY</code>. Pour une table activement écrite, un simple <code>ALTER TABLE</code> peut encore bloquer ou sérieusement ralentir les écritures selon la version et le moteur de stockage — utilisez <strong>pt-online-schema-change</strong> (Percona Toolkit) ou <strong>gh-ost</strong> (l'outil de migration de schéma en ligne de GitHub) plutôt qu'un ALTER direct sur quoi que ce soit d'autre qu'une petite table ou une fenêtre de maintenance explicite.</p>
+                <pre><code>-- Approche directe : acceptable pour de petites tables ou une fenêtre de maintenance
 ALTER TABLE users ADD COLUMN public_id VARCHAR(36);
 UPDATE users SET public_id = UUID();
 ALTER TABLE users MODIFY public_id VARCHAR(36) NOT NULL;
 ALTER TABLE users ADD UNIQUE INDEX idx_users_public_id (public_id);
 
--- Pour les grosses tables MySQL : utiliser pt-online-schema-change
--- pt-online-schema-change --alter "ADD COLUMN public_id VARCHAR(36)" D=mydb,t=users</code></pre>
-                <p>Pour stocker les UUID de manière plus efficace, utilisez <strong>BINARY(16)</strong> avec <code>UUID_TO_BIN()</code> et <code>BIN_TO_UUID()</code> (MySQL 8.0+) :</p>
-                <pre><code>-- Stockage optimisé : BINARY(16) au lieu de VARCHAR(36)
-ALTER TABLE users ADD COLUMN public_id BINARY(16);
-UPDATE users SET public_id = UUID_TO_BIN(UUID(), 1);  -- 1 = flag swap pour UUID v1 ordonné
+-- Grande table activement écrite : utilisez un outil de changement de schéma en ligne
+-- pt-online-schema-change alter="ADD COLUMN public_id VARCHAR(36)" D=mydb,t=users
+-- ou gh-ost alter="ADD COLUMN public_id VARCHAR(36)" database=mydb table=users</code></pre>
+                <p>Pour un stockage compact, utilisez <code>BINARY(16)</code> avec <code>UUID_TO_BIN()</code>/<code>BIN_TO_UUID()</code> (MySQL 8.0+) plutôt qu'une chaîne de 36 caractères — le flag de swap maintient les valeurs à peu près triées par insertion, ce qui compte pour la localité d'index :</p>
+                <pre><code>ALTER TABLE users ADD COLUMN public_id BINARY(16);
+UPDATE users SET public_id = UUID_TO_BIN(UUID(), 1);  -- swap_flag=1 : ordonné, favorable à l'index
 
--- Lecture
 SELECT BIN_TO_UUID(public_id, 1) as public_id FROM users LIMIT 5;</code></pre>
 
-                <h2>Exemple complet : Django</h2>
-                <p>Voici le modèle Django recommandé pour une migration progressive :</p>
-                <pre><code># models.py — pattern hybride recommandé
+                <h2 id="frameworks">Django, Rails et Laravel</h2>
+
+                <h3>Django</h3>
+                <pre><code># models.py — schéma hybride recommandé
 import uuid
 from django.db import models
 
@@ -288,59 +461,63 @@ class Article(models.Model):
     id = models.AutoField(primary_key=True)  # interne, FK rapides
     public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     title = models.CharField(max_length=200)
-    content = models.TextField()
-
-    # L'API expose public_id, jamais id</code></pre>
-                <p>Dans vos vues Django REST Framework, utilisez <code>public_id</code> comme champ de lookup :</p>
-                <pre><code>class ArticleViewSet(viewsets.ModelViewSet):
+    content = models.TextField()</code></pre>
+                <pre><code># views.py — rechercher par public_id, jamais par id
+class ArticleViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
     lookup_field = 'public_id'</code></pre>
 
-                <h2>Exemple complet : Rails</h2>
-                <pre><code># db/migrate/20260608000001_add_public_id_to_articles.rb
+                <h3>Rails</h3>
+                <div class="ap-card">
+                    <div class="ap-header"><div class="ap-name"><span class="ap-number">02</span>disable_ddl_transaction! manquant</div><span class="sev-badge sev-high">Élevée</span></div>
+                    <p>Rails encapsule chaque migration dans une transaction par défaut. PostgreSQL refuse d'exécuter <code>CREATE INDEX CONCURRENTLY</code> à l'intérieur et lève <code>PG::ActiveSqlTransaction: CREATE INDEX CONCURRENTLY cannot run inside a transaction block</code> — un échec au premier lancement très courant pour exactement cette migration.</p>
+                    <div class="fix-tag">Correction — et découper le backfill dans sa propre migration</div>
+                    <pre><code># db/migrate/20260608000001_add_public_id_to_articles.rb
 class AddPublicIdToArticles < ActiveRecord::Migration[7.1]
-  def up
+  def change
     add_column :articles, :public_id, :uuid
-    execute "UPDATE articles SET public_id = gen_random_uuid()"
-    change_column_null :articles, :public_id, false
-    add_index :articles, :public_id, unique: true, algorithm: :concurrently
-  end
-
-  def down
-    remove_column :articles, :public_id
+    change_column_default :articles, :public_id, -> { 'gen_random_uuid()' }
+    # backfill des lignes existantes dans une tâche rake séparée ou une autre migration,
+    # par lots comme dans l'exemple SQL brut ci-dessus — pas un
+    # UPDATE géant à l'intérieur de cette migration
   end
 end
 
-# app/models/article.rb
-class Article < ApplicationRecord
-  before_create :set_public_id
+# db/migrate/20260608000002_add_public_id_index_to_articles.rb
+class AddPublicIdIndexToArticles < ActiveRecord::Migration[7.1]
+  disable_ddl_transaction!  # requis pour algorithm: :concurrently
 
-  private
-  def set_public_id
-    self.public_id = SecureRandom.uuid
+  def change
+    change_column_null :articles, :public_id, false
+    add_index :articles, :public_id, unique: true, algorithm: :concurrently
   end
+end</code></pre>
+                </div>
+                <pre><code># app/models/article.rb
+class Article < ApplicationRecord
+  # public_id a déjà un défaut au niveau base de données — pas de before_create nécessaire
 end
 
 # config/routes.rb
 resources :articles, param: :public_id</code></pre>
+                <p style="font-size:0.85rem; color:var(--text3);">La gem <a href="https://github.com/ankane/strong_migrations" target="_blank" rel="noopener">strong_migrations</a> attrape exactement cette classe d'erreur (création d'index non sûre, <code>disable_ddl_transaction!</code> manquant) au moment de la migration — à ajouter à tout projet Rails qui fait des changements de schéma sur une table vivante.</p>
 
-                <h2>Exemple complet : Laravel</h2>
+                <h3>Laravel</h3>
                 <pre><code>// database/migrations/xxxx_add_public_id_to_users.php
 public function up(): void
 {
     Schema::table('users', function (Blueprint $table) {
         $table->uuid('public_id')->nullable()->after('id');
     });
-    
+
     DB::statement('UPDATE users SET public_id = UUID()');
-    
+
     Schema::table('users', function (Blueprint $table) {
         $table->uuid('public_id')->nullable(false)->change();
         $table->unique('public_id');
     });
-}
-
-// app/Models/User.php
+}</code></pre>
+                <pre><code>// app/Models/User.php
 use Illuminate\Support\Str;
 
 class User extends Model
@@ -349,121 +526,226 @@ class User extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            $model->public_id = Str::uuid();
+            $model->public_id ??= Str::uuid();
         });
     }
-    
+
     public function getRouteKeyName(): string
     {
         return 'public_id';
     }
 }</code></pre>
+                <div class="callout callout-warn">Sur une grande table MySQL activement écrite, cette migration <code>Schema::table</code> directe a les mêmes considérations de verrouillage que celles de la section <a href="#mysql">Spécificités MySQL</a> ci-dessus — préférez pt-online-schema-change ou gh-ost plutôt que de l'exécuter directement contre la production.</div>
 
-                <h2>Surveiller la progression de la migration</h2>
-                <p>Utilisez ces requêtes pour suivre la mise à jour et la création de l'index en temps réel :</p>
-                <pre><code>-- Progression de l'UPDATE (lignes migrées / restantes)
-SELECT 
-  COUNT(*) FILTER (WHERE public_id IS NOT NULL) as migrees,
-  COUNT(*) FILTER (WHERE public_id IS NULL) as restantes,
-  COUNT(*) as total,
-  ROUND(100.0 * COUNT(*) FILTER (WHERE public_id IS NOT NULL) / COUNT(*), 1) as pct_termine
+                <h2 id="validation">Monitoring, validation et rollback</h2>
+
+                <h3>Suivre la progression</h3>
+                <pre><code>-- Progression du backfill
+SELECT
+  COUNT(*) FILTER (WHERE public_id IS NOT NULL) as migrated,
+  COUNT(*) FILTER (WHERE public_id IS NULL) as remaining,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE public_id IS NOT NULL) / COUNT(*), 1) as pct_done
 FROM users;
 
--- Progression de l'index CONCURRENTLY (PostgreSQL)
-SELECT phase, blocks_done, blocks_total, 
+-- Progression de la construction d'index (PostgreSQL)
+SELECT phase, blocks_done, blocks_total,
        ROUND(100.0 * blocks_done / NULLIF(blocks_total, 0), 1) as pct
 FROM pg_stat_progress_create_index
 WHERE relid = 'users'::regclass;</code></pre>
 
-                <h2>Validation post‑migration — copiez-collez ces vérifications</h2>
-                <pre><code>-- Vérification 1 : unicité totale
-SELECT COUNT(*), COUNT(DISTINCT public_id) FROM users;
--- Les deux nombres doivent être identiques
-
--- Vérification 2 : aucune valeur NULL restante
-SELECT COUNT(*) FROM users WHERE public_id IS NULL;
--- Doit retourner 0
-
--- Vérification 3 : l'index est bien utilisé
-EXPLAIN (ANALYZE, BUFFERS)
+                <h3>Vérifications de validation</h3>
+                <div class="ap-card">
+                    <div class="ap-header"><div class="ap-name"><span class="ap-number">03</span>Tester l'utilisation de l'index avec une valeur qui ne peut pas matcher</div><span class="sev-badge sev-medium">Moyenne</span></div>
+                    <p><code>gen_random_uuid()</code> génère une nouvelle valeur aléatoire à chaque appel — la chercher ne teste rien de significatif sur vos données, puisqu'elle ne correspond (très probablement) à aucune ligne.</p>
+                    <div class="danger-tag">Ne teste pas un vrai lookup</div>
+                    <pre><code>EXPLAIN (ANALYZE, BUFFERS)
 SELECT * FROM users WHERE public_id = gen_random_uuid();
--- Doit montrer "Index Scan" et non "Seq Scan"
+<span class="comment">-- cherche une valeur qui (presque certainement) n'est pas dans la table</span></code></pre>
+                    <div class="fix-tag">Correction — utilisez une valeur qui existe réellement</div>
+                    <pre><code>EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM users
+WHERE public_id = (SELECT public_id FROM users ORDER BY id LIMIT 1);
+<span class="comment">-- doit afficher "Index Scan" avec idx_users_public_id, pas "Seq Scan"</span></code></pre>
+                </div>
+                <pre><code>-- Vérification d'unicité — les deux comptes doivent correspondre
+SELECT COUNT(*), COUNT(DISTINCT public_id) FROM users;
 
--- Vérification 4 : performance du point lookup
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT id FROM users WHERE public_id = '550e8400-e29b-41d4-a716-446655440000';
--- Temps cible : < 1ms sur une table de 1M lignes</code></pre>
+-- Aucun NULL restant — doit retourner 0
+SELECT COUNT(*) FROM users WHERE public_id IS NULL;</code></pre>
+                <p>Pour la latence de lookup ponctuel, mesurez sur une copie de staging de vos vraies données plutôt que de vous fier à une cible fixe en millisecondes — le matériel, l'état du cache et la taille de table font tous bouger ce chiffre. Un lookup d'égalité indexé sur une table correctement dimensionnée devrait être assez rapide pour ne pas apparaître dans un graphique de latence p99 ; s'il apparaît, c'est un signal pour enquêter, pas un nombre autour duquel concevoir à l'avance.</p>
 
-                <h2>Plan de rollback — comment revenir en arrière</h2>
-                <pre><code>-- Étape 1 : supprimer l'index (rapide)
+                <h3>Rollback</h3>
+                <pre><code>-- Rapide : suppression de l'index sans bloquer
 DROP INDEX CONCURRENTLY idx_users_public_id;
 
--- Étape 2 : supprimer la colonne (rapide)
+-- Rapide : la suppression d'une colonne ne touche que les métadonnées dans PostgreSQL
 ALTER TABLE users DROP COLUMN public_id;
 
--- Aucun impact sur les données existantes — les id originaux sont intacts
--- L'API doit être reroutée vers l'ancienne version avant le rollback DB</code></pre>
+-- Aucun impact sur les données existantes : id et toutes les clés étrangères sont intactes.
+-- Repointez l'API vers l'ancienne version AVANT de rollback le schéma,
+-- pas l'inverse.</code></pre>
 
                 <h2>La règle d'or : ne jamais migrer les clés étrangères vers UUID</h2>
-                <p>C'est le point le plus important de cet article. Les clés étrangères en BIGINT sont compactes (8 octets) et rapides. Si vous les convertissez en UUID (16 octets), vous doublez la taille de tous vos index de jointure et vous dégradez les performances sans aucun bénéfice. Le <code>public_id</code> est fait pour l'extérieur ; <code>id</code> reste le pilier interne de votre base.</p>
+                <p>C'est le point à retenir après tout le reste de cet article : une clé étrangère <code>BIGINT</code> fait 8 octets et reste rapide à joindre. La convertir en <code>UUID</code> double la taille de chaque index qui la contient, sans aucun bénéfice — <code>public_id</code> existe pour le monde extérieur ; <code>id</code> reste la colonne vertébrale interne du schéma.</p>
 
-                <h2>Foire Aux Questions</h2>
-                <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <summary itemprop="name">Puis-je supprimer mon ancien id auto-incrément après la migration ?</summary>
-                    <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p itemprop="text">Gardez-le en interne pour les jointures. Ne l'exposez plus dans l'API, mais ne le supprimez pas : toutes vos clés étrangères en dépendent.</p>
-                    </div>
+                <h2 id="faq">Questions fréquentes</h2>
+                <details class="faq-item">
+                    <summary>Puis-je supprimer mon ancien id auto-incrémenté après la migration ?<span></span></summary>
+                    <div class="faq-answer">Conservez-le en interne — chaque clé étrangère en dépend. Cessez de l'exposer dans l'API, mais ne supprimez jamais la colonne.</div>
                 </details>
                 <details class="faq-item">
-                    <summary>Combien de temps prend la migration sur une grosse table ?</summary>
-                    <div class="faq-answer">
-                        <p>L'ajout d'une colonne nullable est quasi instantané. La mise à jour des UUID prend quelques secondes par million de lignes. L'index UNIQUE CONCURRENTLY peut prendre plusieurs minutes, mais sans bloquer les écritures.</p>
-                    </div>
+                    <summary>Pourquoi ajouter un DEFAULT plutôt que simplement backfiller avec UPDATE ?<span></span></summary>
+                    <div class="faq-answer">Sans défaut, toute ligne insérée entre le backfill et l'étape NOT NULL n'a pas de public_id et fait échouer cette étape. Définir le défaut en premier — une instruction rapide et non bloquante — ferme la faille avant même que le backfill ne démarre.</div>
                 </details>
                 <details class="faq-item">
-                    <summary>Dois-je migrer les clés étrangères vers UUID ?</summary>
-                    <div class="faq-answer">
-                        <p>Non, c'est la meilleure façon de tuer vos performances. Gardez les FK en BIGINT et utilisez l'UUID uniquement pour l'identification externe.</p>
-                    </div>
+                    <summary>Ajouter une colonne avec DEFAULT gen_random_uuid() verrouille-t-il la table ?<span></span></summary>
+                    <div class="faq-answer">Oui, si le défaut est défini dans la même instruction ADD COLUMN — un défaut volatile force une réécriture immédiate de chaque ligne. Ajoutez d'abord la colonne sans défaut, puis définissez le défaut séparément ; cette étape n'affecte que les insertions futures et reste rapide quelle que soit la taille de la table.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Pourquoi ma migration Rails échoue avec « CREATE INDEX CONCURRENTLY cannot run inside a transaction block » ?<span></span></summary>
+                    <div class="faq-answer">Rails encapsule les migrations dans une transaction par défaut, et PostgreSQL refuse d'exécuter CONCURRENTLY à l'intérieur. Ajoutez disable_ddl_transaction! à la classe de migration.</div>
+                </details>
+                <details class="faq-item">
+                    <summary>Dois-je aussi migrer les clés étrangères vers UUID ?<span></span></summary>
+                    <div class="faq-answer">Non — c'est le moyen le plus rapide de dégrader les performances de jointure sur tout votre schéma. Gardez les clés étrangères en BIGINT et réservez l'UUID à l'identification externe.</div>
                 </details>
 
-                <section class="references">
-                    <h3>Sources et références</h3>
-                    <ul>
-                        <li><a href="https://www.postgresql.org/docs/16/sql-altertable.html" target="_blank" rel="noopener noreferrer">Documentation PostgreSQL — ALTER TABLE</a></li>
-                        <li><a href="https://dev.mysql.com/doc/refman/8.0/en/miscellaneous-functions.html#function_uuid-to-bin" target="_blank" rel="noopener noreferrer">MySQL 8.0 UUID_TO_BIN / BIN_TO_UUID</a></li>
-                        <li><a href="https://docs.djangoproject.com/en/stable/ref/models/fields/#uuidfield" target="_blank" rel="noopener noreferrer">Documentation Django — UUIDField</a></li>
-                        <li><a href="/fr/outils/generateur-uuid/">Générateur UUID en ligne</a></li>
+                <div class="references" id="references">
+                    <h3 style="text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">Références</h3>
+                    <ul class="ref-list">
+                        <li><a href="https://www.postgresql.org/docs/current/sql-altertable.html" target="_blank" rel="noopener">Documentation PostgreSQL — ALTER TABLE</a></li>
+                        <li><a href="https://www.postgresql.org/docs/current/sql-createindex.html" target="_blank" rel="noopener">Documentation PostgreSQL — CREATE INDEX (CONCURRENTLY)</a></li>
+                        <li><a href="https://dev.mysql.com/doc/refman/8.0/en/miscellaneous-functions.html#function_uuid-to-bin" target="_blank" rel="noopener">Documentation MySQL 8.0 — UUID_TO_BIN() / BIN_TO_UUID()</a></li>
+                        <li><a href="https://docs.djangoproject.com/en/stable/ref/models/fields/#uuidfield" target="_blank" rel="noopener">Documentation Django — UUIDField</a></li>
+                        <li><a href="https://guides.rubyonrails.org/active_record_migrations.html#transactional-migrations" target="_blank" rel="noopener">Rails Guides — Migrations transactionnelles</a></li>
+                        <li><a href="https://github.com/github/gh-ost" target="_blank" rel="noopener">GitHub — gh-ost, migration de schéma en ligne pour MySQL</a></li>
                     </ul>
-                </section>
+                </div>
 
-                <h3 style="margin-top:32px;">Outils complémentaires</h3>
-                <ul>
-                    <li><a href="/fr/outils/generateur-uuid-v7/">UUID v7 Generator</a> — des UUID triables pour vos nouvelles clés</li>
-                    <li><a href="/fr/blog/uuid-vs-auto-increment/">UUID vs Auto‑Incrément</a> — choisir la bonne stratégie</li>
-                    <li><a href="/fr/outils/formateur-json/">JSON Formatter</a> — pour vérifier vos réponses d'API</li>
-                </ul>
+                <div class="related-tools">
+                    <h3>Outils DevToolbox associés</h3>
+                    <ul>
+                        <li><a href="/fr/outils/cle-primaire-uuid-postgresql/">Clé primaire UUID PostgreSQL</a></li>
+                        <li><a href="/fr/outils/cle-primaire-uuid-mysql/">Clé primaire UUID MySQL</a></li>
+                        <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a></li>
+                        <li><a href="/fr/outils/formateur-json/">Formateur JSON</a></li>
+                    </ul>
+                </div>
+
+                <!-- ═══ Section auteur professionnelle ═══ -->
+                <div class="author-section">
+                    <div class="author-section-label">À propos de l'auteur</div>
+                    <div class="author-card">
+                        <img
+                            class="author-photo"
+                            src="/images/authors/mathias-kouadio.webp"
+                            alt="Portrait de Mathias Kouadio, développeur web et mobile, fondateur de DevToolbox"
+                            width="240" height="240" loading="lazy"
+                        >
+                        <div class="author-body">
+                            <div class="author-head">
+                                <h3 class="author-name">Mathias Kouadio</h3>
+                                <span class="author-verified">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="11" height="11" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Auteur vérifié
+                                </span>
+                            </div>
+                            <p class="author-role">Développeur web &amp; mobile · Fondateur de DevToolbox</p>
+                            <p class="author-bio-text">
+                                Je construis des <strong>outils gratuits, 100 % côté client</strong> pour les développeurs — le genre
+                                d'outils que je cherchais moi-même et que je ne trouvais pas dans une version respectueuse de la vie
+                                privée et sans compte à créer. Tout ce que j'écris sur ce blog vient de problèmes réellement
+                                rencontrés en production : des fichiers <strong>.gitignore</strong> qui laissent fuiter des secrets,
+                                des migrations de base de données qui verrouillent une table en pleine journée,
+                                des <strong>UUID</strong> mal dimensionnés parce qu'on a compté les mauvais bits.
+                            </p>
+                            <div class="author-tags">
+                                <span class="author-tag">PostgreSQL</span>
+                                <span class="author-tag">MySQL</span>
+                                <span class="author-tag">Django</span>
+                                <span class="author-tag">Rails</span>
+                                <span class="author-tag">Laravel</span>
+                                <span class="author-tag">Migrations sans downtime</span>
+                            </div>
+                            <div class="author-links">
+                                <a class="author-link primary" href="/fr/a-propos/">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                    Profil complet
+                                </a>
+                                <a class="author-link" href="https://github.com/" target="_blank" rel="noopener">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.55v-1.94c-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.39-5.25 5.68.41.35.78 1.05.78 2.12v3.14c0 .31.21.66.8.55C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+                                    GitHub
+                                </a>
+                                <a class="author-link" href="https://www.linkedin.com/" target="_blank" rel="noopener">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+                                    LinkedIn
+                                </a>
+                                <a class="author-link" href="https://twitter.com/" target="_blank" rel="noopener">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                    X / Twitter
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </article>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2026 <a href="/fr/">DevToolbox</a> — Outils gratuits pour développeurs. <a href="/fr/blog/">Blog</a> | <a href="/fr/contact/">Contact</a></p>
+        <p>&copy; 2026 <a href="/">DevToolbox</a> — Outils gratuits pour développeurs. <a href="/fr/blog/">Blog</a> | <a href="/fr/a-propos/">À propos</a> | <a href="/fr/contact/">Contact</a></p>
     </footer>
 </div>
 
 <script>
     (function() {
+        /* ── Thème ── */
         const btns = document.querySelectorAll('.theme-btn');
         btns.forEach(b => b.addEventListener('click', () => {
             const t = b.dataset.theme;
             document.body.classList.toggle('dark', t === 'dark');
+            document.documentElement.setAttribute('data-theme', t);
             btns.forEach(x => x.classList.toggle('active', x.dataset.theme === t));
-            localStorage.setItem('theme', t);
+            try { localStorage.setItem('devtoolbox-theme', t); } catch (e) {}
         }));
-        const saved = localStorage.getItem('theme') || 'light';
+        const saved = localStorage.getItem('devtoolbox-theme')
+            || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.body.classList.toggle('dark', saved === 'dark');
-        document.querySelector(`.theme-btn[data-theme="${saved}"]`)?.classList.add('active');
+        document.documentElement.setAttribute('data-theme', saved);
+        const activeBtn = document.querySelector(`.theme-btn[data-theme="${saved}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        /* ── Partage ── */
+        var pageUrl = window.location.href;
+        var pageTitle = document.title;
+
+        var xBtn = document.getElementById('share-x');
+        if (xBtn) xBtn.href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(pageTitle);
+
+        var liBtn = document.getElementById('share-linkedin');
+        if (liBtn) liBtn.href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(pageUrl);
+
+        var copyBtn = document.getElementById('copy-link-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+                var done = function () {
+                    var original = copyBtn.textContent;
+                    copyBtn.textContent = '✓ Lien copié';
+                    setTimeout(function () { copyBtn.textContent = original; }, 1600);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(pageUrl).then(done).catch(function () {
+                        var ta = document.createElement('textarea');
+                        ta.value = pageUrl;
+                        ta.style.cssText = 'position:fixed;opacity:0';
+                        document.body.appendChild(ta);
+                        ta.select();
+                        try { document.execCommand('copy'); done(); } catch (e) {}
+                        document.body.removeChild(ta);
+                    });
+                }
+            });
+        }
     })();
 </script>
 </body>
