@@ -3,43 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculateur de collision UUID, Probabilité et unicité expliquées</title>
-    <meta name="description" content="Calculez la probabilité de collision d'UUID pour n'importe quel nombre d'identifiants. Découvrez à quel point les UUID sont uniques. Calculateur interactif pour UUID v4, v7, NanoID et ULID.">
-    <meta name="keywords" content="probabilité collision uuid, calculateur collision uuid, unicité uuid, uuid v4 collision, paradoxe anniversaire uuid, uuid unique, nano id collision, ulid collision">
+    <title>Calculateur de collision UUID, Probabilité, Temps avant collision &amp; Graphique</title>
+    <meta name="description" content="Calculez la probabilité réelle d'une collision UUID pour n'importe quel nombre d'identifiants, voyez combien de temps cela prendrait à votre rythme de génération et comparez UUID v4, v7, NanoID, ULID, ObjectID, Snowflake et des tailles d'entropie personnalisées sur un graphique interactif.">
+    <meta name="keywords" content="probabilité collision uuid, calculateur collision uuid, unicité uuid, collision uuid v4, collision uuid v7, problème des anniversaires uuid, collision nanoid, collision ulid, collision objectid, collision snowflake id">
     <meta name="robots" content="index, follow">
     <meta name="author" content="DevToolbox">
     <link rel="canonical" href="https://www.devstoolsbox.dev/fr/outils/calculateur-collision-uuid/">
-    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/calculateur-collision-uuid/">
     <link rel="alternate" hreflang="en" href="https://www.devstoolsbox.dev/tools/uuid-collision-calculator/">
+    <link rel="alternate" hreflang="fr" href="https://www.devstoolsbox.dev/fr/outils/calculateur-collision-uuid/">
     <link rel="alternate" hreflang="x-default" href="https://www.devstoolsbox.dev/tools/uuid-collision-calculator/">
 
-    <meta property="og:title" content="Calculateur de collision UUID — Quelle est la probabilité d'un doublon ?">
-    <meta property="og:description" content="Outil interactif pour estimer la probabilité de collision d'UUID v4, v7, NanoID et ULID.">
+    <meta property="og:title" content="Calculateur de collision UUID, Quelle est la vraie unicité des UUID ?">
+    <meta property="og:description" content="Outil interactif avec une formule de collision précise, un temps avant collision à votre rythme de génération et un graphique en échelle logarithmique comparant UUID v4, v7, NanoID, ULID, ObjectID et Snowflake.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.devstoolsbox.dev/fr/outils/calculateur-collision-uuid/">
     <meta property="og:site_name" content="DevToolbox">
 
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Calculateur de collision UUID">
-    <meta name="twitter:description" content="Découvrez la probabilité réelle d'une collision d'UUID avec notre outil interactif.">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRBW78KE29"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-JRBW78KE29');
-    </script>
-       <!-- Privacy-friendly analytics by Plausible -->
-<script async src="https://plausible.io/js/pa-HlpMMJ_kCCYxp8OttpLql.js"></script>
-<script>
-  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-  plausible.init()
-</script>
+    <meta name="twitter:description" content="Découvrez la probabilité réelle d'une collision UUID et combien de temps cela prendrait à votre rythme de génération.">
+
     <style>
         :root {
             --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9; --primary: #7c3aed;
             --primary-hover: #6d28d9; --primary-light: rgba(124,58,237,0.08);
-            --accent-green: #10b981; --accent-green-bg: #d1fae5;
+            --pass: #10b981; --warn: #f59e0b; --fail: #ef4444;
+            --pass-bg: #d1fae5; --warn-bg: #fef3c7; --fail-bg: #fee2e2;
             --text: #0f172a; --text2: #374151; --text3: #64748b;
             --border: #e2e8f0; --shadow: 0 4px 16px rgba(0,0,0,0.06);
             --radius: 16px; --code-bg: #1e293b; --code-color: #e2e8f0;
@@ -47,7 +36,10 @@
         }
         body.dark {
             --bg: #0b0f19; --surface: #151a28; --surface2: #1d2333; --primary: #a78bfa;
-            --primary-hover: #8b5cf6; --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+            --primary-hover: #8b5cf6; --primary-light: rgba(167,139,250,0.1);
+            --pass: #34d399; --warn: #fbbf24; --fail: #f87171;
+            --pass-bg: #064e3b; --warn-bg: #451a03; --fail-bg: #450a0a;
+            --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
             --border: #2d3548; --code-bg: #0f172a; --code-color: #cbd5e1;
             --shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
@@ -57,7 +49,7 @@
             background: var(--bg); color: var(--text); line-height:1.7; padding:20px; min-height:100vh;
             transition: background 0.3s, color 0.3s;
         }
-        .container { max-width:960px; margin:0 auto; }
+        .container { max-width:1050px; margin:0 auto; }
 
         .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
         .logo { font-weight:800; font-size:1.4rem; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; }
@@ -68,90 +60,151 @@
         .lang-btn.active, .theme-btn.active { background:var(--primary); color:#fff; }
 
         .breadcrumb { margin-bottom:16px; font-size:0.85rem; color:var(--text3); }
-        .breadcrumb a { color:var(--primary); text-decoration:none; }
+        .breadcrumb ol { display:flex; list-style:none; flex-wrap:wrap; gap:4px; }
+        .breadcrumb li+li::before { content:'/'; margin:0 6px; color:var(--text3); }
+        .breadcrumb a { color:var(--text2); text-decoration:none; }
+        .breadcrumb a:hover { color:var(--primary); }
 
-        .seo-hook {
-            background:var(--primary-light); border-left:4px solid var(--primary);
-            padding:10px 16px; border-radius:8px; margin-bottom:20px;
-            font-size:0.92rem; color:var(--text2);
-        }
+        .seo-hook { background:var(--primary-light); border-left:4px solid var(--primary); padding:10px 16px; border-radius:8px; margin-bottom:20px; font-size:0.92rem; color:var(--text2); }
 
-        .tool-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
-        }
+        .tool-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s; }
         h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px; color:var(--text); }
         .subhead { color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+
+        .id-select-row { display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+        .id-select { padding:10px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; font-size:0.88rem; }
+        .custom-bits-row { display:none; align-items:center; gap:8px; }
+        .custom-bits-row input { width:90px; padding:9px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:var(--mono); }
 
         .input-group { margin-bottom:20px; }
         .input-group label { font-weight:600; font-size:0.85rem; color:var(--text2); display:block; margin-bottom:6px; }
         .input-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-        .input-row input[type="number"] {
+        .input-row input[type="number"], .input-row input[type="text"] {
             flex:1; min-width:150px; padding:10px 14px; border-radius:8px; border:1.5px solid var(--border);
             background:var(--surface); color:var(--text); font-family:var(--mono); font-size:0.95rem;
             outline:none; transition:border 0.2s;
         }
         .input-row input:focus { border-color:var(--primary); }
-        .result-box {
-            background:var(--surface2); border:1px solid var(--border); border-radius:12px;
-            padding:18px; margin-top:16px; text-align:center;
-        }
-        .result-value { font-size:2rem; font-weight:700; color:var(--primary); }
+        input[type="range"] { width:100%; accent-color:var(--primary); margin-top:8px; }
+
+        .result-box { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:18px; margin-top:16px; text-align:center; }
+        .result-value { font-size:2rem; font-weight:700; color:var(--primary); word-break:break-word; }
         .result-label { font-size:0.85rem; color:var(--text3); margin-top:4px; }
-        .comparison-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:12px; margin:20px 0; }
-        .comparison-card {
-            background:var(--surface); border:1px solid var(--border); border-radius:12px;
-            padding:14px; text-align:center;
-        }
-        .comparison-card .id-type { font-weight:600; font-size:0.9rem; }
-        .comparison-card .prob { font-size:1.3rem; font-weight:700; color:var(--primary); }
-        .btn {
-            padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none;
-            cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text);
-            border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px;
-            font-family:inherit; white-space:nowrap;
-        }
+        .result-sub { font-size:0.8rem; color:var(--text3); margin-top:8px; }
+
+        .comparison-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:12px; margin:20px 0; }
+        .comparison-card { background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--border); border-radius:12px; padding:14px; }
+        .comparison-card.gauge-red { border-left-color:var(--fail); }
+        .comparison-card.gauge-orange { border-left-color:var(--warn); }
+        .comparison-card.gauge-green { border-left-color:var(--pass); }
+        .comparison-card .id-type { font-weight:700; font-size:0.9rem; margin-bottom:2px; }
+        .comparison-card .prob { font-size:1.25rem; font-weight:700; color:var(--primary); margin:4px 0; }
+        .comparison-card .id-note { font-size:0.74rem; color:var(--text3); line-height:1.4; margin-bottom:8px; min-height:2.6em; }
+
+        .btn { padding:10px 20px; border-radius:40px; font-weight:600; font-size:0.88rem; border:none; cursor:pointer; transition:all 0.18s; background:var(--surface); color:var(--text); border:1px solid var(--border); display:inline-flex; align-items:center; gap:7px; font-family:inherit; white-space:nowrap; }
         .btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
         .btn-primary:hover { background:var(--primary-hover); transform:translateY(-1px); }
         .btn-outline:hover { background:var(--surface2); border-color:var(--primary); }
         .btn-sm { padding:5px 13px; font-size:0.78rem; }
+        .btn-cta { display:flex; justify-content:center; text-align:center; margin:28px auto; max-width:360px; background:var(--primary); color:#fff; border-color:var(--primary); padding:13px 24px; font-size:0.92rem; text-decoration:none; }
+        .btn-cta:hover { background:var(--primary-hover); }
 
-        /* Article section */
-        .article-section {
-            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-            padding:28px; box-shadow:var(--shadow); margin-bottom:28px; transition:background 0.3s;
-        }
-        .article-section h2 { font-size:1.4rem; margin-bottom:14px; color:var(--text); }
-        .article-section h3 { font-size:1.1rem; margin-top:20px; margin-bottom:8px; color:var(--text); }
-        .article-section p { color:var(--text2); margin-bottom:12px; font-size:0.93rem; }
-        .article-section ul, .article-section ol { margin-left:20px; margin-bottom:14px; color:var(--text2); }
-        .article-section li { margin-bottom:6px; font-size:0.93rem; }
-        .article-section code { background:var(--code-bg); color:var(--code-color); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
-        .article-section a { color:var(--primary); text-decoration:none; }
-        .article-section a:hover { text-decoration:underline; }
-        .faq-item { margin-bottom:20px; }
-        .faq-question { font-weight:700; font-size:0.97rem; margin-bottom:5px; color:var(--text); }
+        .realworld-box { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:20px; margin:20px 0; }
+        .realworld-title { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--text3); margin-bottom:12px; }
+        .realworld-result { font-size:1.1rem; font-weight:700; color:var(--text); margin-top:10px; }
+        .realworld-result span { color:var(--primary); }
+
+        .chart-box { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:20px; margin:20px 0; }
+        .chart-box svg { width:100%; height:auto; display:block; }
+        .chart-title { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--text3); margin-bottom:12px; }
+
+        .code-block-wrapper { margin:14px 0; border-radius:12px; overflow:hidden; border:1px solid var(--border); }
+        .code-block-header { display:flex; justify-content:space-between; align-items:center; background:var(--code-bg); padding:8px 14px; }
+        .code-block-title { color:var(--text3); font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+        .code-copy-btn { background:transparent; border:1px solid #374151; color:var(--code-color); padding:3px 11px; border-radius:20px; font-size:0.72rem; cursor:pointer; font-family:inherit; }
+        .code-copy-btn:hover { background:rgba(255,255,255,0.1); }
+        .code-block { background:var(--code-bg); color:var(--code-color); padding:16px 18px; font-family:var(--mono); font-size:0.83rem; overflow-x:auto; line-height:1.65; }
+        .code-block .comment { color:#6b7280; }
+        .code-block .keyword { color:#c084fc; }
+        .code-block .string { color:#34d399; }
+        .code-block .func { color:#60a5fa; }
+
+        .article-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:36px; box-shadow:var(--shadow); margin-bottom:28px; }
+        .article-meta { display:flex; gap:14px; flex-wrap:wrap; font-size:0.83rem; color:var(--text3); margin-bottom:20px; }
+        .article-meta a { color:var(--primary); text-decoration:none; }
+        .article-card h1 { font-size:2rem; font-weight:800; letter-spacing:-.025em; line-height:1.25; }
+        .toc { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin:20px 0 32px; }
+        .toc-title { font-size:.78rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text3); margin-bottom:10px; }
+        .toc ol { padding-left:20px; }
+        .toc a { color:var(--text2); text-decoration:none; font-size:0.9rem; line-height:2; }
+        .toc a:hover { color:var(--primary); }
+        .article-card h2 { font-size:1.5rem; font-weight:800; margin-top:44px; margin-bottom:14px; scroll-margin-top:24px; letter-spacing:-.015em; }
+        .article-card h3 { font-size:1.15rem; font-weight:700; margin-top:24px; margin-bottom:10px; }
+        .article-card p { color:var(--text2); margin-bottom:16px; font-size:0.97rem; line-height:1.85; }
+        .article-card ul, .article-card ol { margin-left:20px; margin-bottom:16px; color:var(--text2); }
+        .article-card li { margin-bottom:6px; font-size:0.93rem; }
+        .article-card code { background:var(--surface2); color:var(--text); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:0.88em; }
+        .article-card a { color:var(--primary); text-decoration:none; }
+        .article-card a:hover { text-decoration:underline; }
+
+        .callout { padding:14px 18px; border-radius:0 12px 12px 0; margin:16px 0; border-left:4px solid; font-size:0.92rem; }
+        .callout-info { background:var(--primary-light); border-color:var(--primary); }
+        .callout-warn { background:var(--warn-bg); border-color:var(--warn); }
+        .callout-fail { background:var(--fail-bg); border-color:var(--fail); }
+        .callout-pass { background:var(--pass-bg); border-color:var(--pass); }
+
+        .dec-table { width:100%; border-collapse:collapse; margin:20px 0; border-radius:12px; overflow:hidden; font-size:0.87rem; }
+        .dec-table th { background:var(--pass); color:#fff; padding:11px 12px; text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; }
+        .dec-table td { padding:11px 12px; border-bottom:1px solid var(--border); color:var(--text2); }
+        .dec-table tr:last-child td { border-bottom:none; }
+
+        .sev-badge { display:inline-block; padding:3px 11px; border-radius:20px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+        .sev-critical { background:var(--fail-bg); color:var(--fail); }
+        .sev-high { background:var(--warn-bg); color:var(--warn); }
+        .sev-medium { background:var(--primary-light); color:var(--primary); }
+        .sev-low { background:var(--pass-bg); color:var(--pass); }
+
+        .ap-card { border:1px solid var(--border); border-radius:14px; padding:22px; margin:20px 0; background:var(--surface2); }
+        .ap-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+        .ap-name { font-weight:800; font-size:1.02rem; }
+        .ap-number { color:var(--primary); margin-right:6px; }
+        .danger-tag, .fix-tag { display:inline-block; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; margin:10px 0 6px; }
+        .danger-tag { color:var(--fail); }
+        .fix-tag { color:var(--pass); }
+
+        .faq-item { border-top:1px solid var(--border); padding:14px 0; }
+        .faq-item summary { display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-weight:700; font-size:0.95rem; list-style:none; }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after { content:'＋'; color:var(--primary); font-size:1.2rem; transition:transform 0.2s; }
+        .faq-item[open] summary::after { transform:rotate(45deg); }
+        .faq-answer { padding-top:10px; color:var(--text2); font-size:0.92rem; }
+
+        .references { margin-top:20px; }
+        .ref-list { list-style:none; margin-left:0 !important; }
+        .ref-list li { font-size:0.83rem; margin-bottom:8px; }
+        .ref-list a { color:var(--text2); text-decoration:none; }
+        .ref-list a::before { content:'→ '; color:var(--primary); font-weight:700; }
+        .ref-list a:hover { color:var(--primary); }
+
+        .related-tools { background:var(--primary-light); border:1px solid rgba(124,58,237,.2); border-radius:14px; padding:22px; margin-top:24px; }
+        .related-tools h3 { text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; color:var(--primary); margin-bottom:12px; margin-top:0; }
+        .related-tools ul { list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px; margin-left:0; }
+        .related-tools a { color:var(--text2); text-decoration:none; font-size:0.88rem; }
+        .related-tools a::before { content:'→ '; color:var(--primary); font-weight:700; }
+        .related-tools a:hover { color:var(--primary); }
 
         .footer { text-align:center; padding:20px; color:var(--text3); font-size:0.82rem; margin-top:24px; border-top:1px solid var(--border); }
         .footer a { color:var(--primary); text-decoration:none; }
-        .toast-msg {
-            position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface);
-            padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s;
-            pointer-events:none; box-shadow:var(--shadow); z-index:1000;
-        }
+        .toast-msg { position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface); padding:10px 20px; border-radius:40px; font-size:0.87rem; opacity:0; transition:opacity 0.3s; pointer-events:none; box-shadow:var(--shadow); z-index:1000; }
         body.dark .toast-msg { color:var(--text); background:var(--surface); }
 
-        @media (max-width:640px) {
-            body { padding:12px; }
-            h1 { font-size:1.5rem; }
-            .tool-card, .article-section { padding:18px; }
-        }
+        @media (max-width:640px) { body{padding:12px;} h1{font-size:1.5rem;} .tool-card,.article-card{padding:18px;} }
     </style>
 </head>
 <body id="rootBody">
 <div class="container">
     <header class="header">
-        <a href="/fr/" class="logo">DevToolbox</a>
+        <a href="/" class="logo">DevToolbox</a>
         <div class="header-right">
             <button class="theme-toggle" id="themeToggle" aria-label="Basculer le mode sombre">
                 <span id="themeIcon">&#9790;</span>
@@ -164,87 +217,190 @@
         </div>
     </header>
 
-    <div class="breadcrumb">
-        <a href="/fr/">Accueil</a> &rsaquo;
-        <a href="/fr/outils/">Outils</a> &rsaquo;
-        <span>Calculateur de collision UUID</span>
-    </div>
+    <nav class="breadcrumb" aria-label="Fil d'Ariane">
+        <ol>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/tools/">Outils</a></li>
+            <li><span>Calculateur de collision UUID</span></li>
+        </ol>
+    </nav>
 
     <div class="seo-hook">
-        Vous vous demandez <strong>à quel point un UUID est unique</strong> ? Utilisez notre <strong>calculateur de probabilité de collision UUID</strong> pour voir la chance de générer deux identifiants identiques. Comparez UUID v4, v7, NanoID et ULID. Aucune donnée ne quitte votre navigateur.
+        Vous vous demandez <strong>à quel point un UUID est vraiment unique</strong> ? Ce calculateur utilise une version numériquement précise de la formule du problème des anniversaires (sans perte de précision aux extrêmes), montre combien de temps il faudrait pour atteindre une collision à votre propre rythme de génération, et compare UUID v4, v7, NanoID, ULID, MongoDB ObjectID, Snowflake et une taille d'entropie personnalisée — avec un graphique interactif. Aucune donnée ne quitte votre navigateur.
     </div>
 
     <main>
         <div class="tool-card">
             <h1>Calculateur de probabilité de collision UUID</h1>
-            <div class="subhead">Saisissez le nombre d'UUID que vous prévoyez de générer et visualisez instantanément la probabilité d'une collision. Basé sur la formule du paradoxe des anniversaires, cet outil supporte UUID v4 (aléatoire), UUID v7 (triable), NanoID et ULID.</div>
+            <div class="subhead">Entrez combien d'identifiants vous prévoyez de générer et choisissez un type d'identifiant de référence — la probabilité, une estimation du temps avant collision à votre propre rythme et un graphique se mettent à jour instantanément.</div>
+
+            <div class="id-select-row">
+                <label for="idTypeSelect" style="font-weight:600; font-size:0.85rem; color:var(--text2);">Identifiant de référence :</label>
+                <select class="id-select" id="idTypeSelect"></select>
+                <span class="custom-bits-row" id="customBitsRow">
+                    <label for="customBits" style="font-size:0.85rem; color:var(--text2);">Bits :</label>
+                    <input type="number" id="customBits" value="128" min="1" max="512">
+                </span>
+            </div>
 
             <div class="input-group">
                 <label for="numIds">Nombre d'identifiants générés</label>
                 <div class="input-row">
-                    <input type="number" id="numIds" value="1000000" min="1" max="1e15" step="1" aria-label="Nombre d'UUID">
+                    <input type="number" id="numIds" value="1000000" min="0" step="1" aria-label="Nombre d'identifiants">
                     <button class="btn btn-primary" id="calculateBtn">Calculer</button>
                 </div>
-                <small style="color:var(--text3);">Saisissez un nombre ou utilisez la notation scientifique (ex. 1e9 pour 1 milliard)</small>
+                <input type="range" id="numIdsSlider" min="0" max="1000" value="500" aria-label="Nombre d'identifiants (échelle log)">
+                <small style="color:var(--text3);">Tapez un nombre (ex. 1e9 pour un milliard) ou faites glisser le curseur — il est en échelle logarithmique.</small>
             </div>
 
             <div class="result-box" id="resultBox">
-                <div class="result-value" id="probDisplay">0,000000000005 %</div>
-                <div class="result-label">Probabilité d'au moins une collision</div>
+                <div class="result-value" id="probDisplay">—</div>
+                <div class="result-label" id="probLabel">Probabilité d'au moins une collision</div>
+                <div class="result-sub" id="n50Sub"></div>
             </div>
 
-            <div class="comparison-grid" id="comparisonGrid">
-                <!-- Rempli par JavaScript -->
+            <div class="realworld-box">
+                <div class="realworld-title">Traduction en monde réel</div>
+                <div class="input-row">
+                    <label for="genRate" style="font-size:0.85rem; color:var(--text2); white-space:nowrap;">Générés par seconde :</label>
+                    <input type="number" id="genRate" value="1000" min="0.000001" step="any">
+                </div>
+                <div class="realworld-result" id="realworldResult"></div>
             </div>
+
+            <div class="chart-box">
+                <div class="chart-title">Probabilité de collision vs nombre généré (échelle log)</div>
+                <div id="chartContainer"></div>
+            </div>
+
+            <h3 style="font-size:1rem; margin-bottom:10px;">Comparer les types d'identifiants</h3>
+            <div class="comparison-grid" id="comparisonGrid"></div>
 
             <div class="options-row" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
                 <button class="btn btn-outline btn-sm" id="shareBtn">Partager</button>
             </div>
         </div>
 
-        <section class="article-section" aria-label="Documentation">
-            <h2>Comprendre la probabilité de collision des UUID</h2>
-            <p>
-                Les UUID (Universally Unique Identifiers) sont conçus pour être uniques, mais ils ne sont pas infinis. La probabilité que deux UUID générés aléatoirement entrent en collision est extrêmement faible, mais pas nulle. La probabilité suit le <strong>paradoxe des anniversaires</strong> : avec <em>n</em> identifiants et <em>d</em> valeurs possibles, la probabilité approximative d'au moins une collision est :
-            </p>
-            <p style="text-align:center; font-weight:600;"><code>p(n) ≈ 1 − exp(−n² / (2d))</code></p>
-            <p>Pour UUID v4, <em>d</em> = 2<sup>122</sup> (environ 5,3 × 10<sup>36</sup>) car 6 bits sont réservés pour la version et la variante. Cela signifie qu'il faudrait générer environ 2,7 × 10<sup>18</sup> UUID pour avoir 50 % de chance de rencontrer une seule collision. C'est 2,7 milliards de milliards.</p>
-
-            <h3>Probabilité de collision pour les identifiants courants</h3>
-            <p>Utilisez le calculateur pour voir comment les différents types d'identifiants se comparent :</p>
-            <ul>
-                <li><strong>UUID v4</strong> – 122 bits d'entropie, l'UUID aléatoire standard.</li>
-                <li><strong>UUID v7</strong> – mêmes 122 bits, mais ordonné dans le temps ; probabilité de collision identique à v4 pour la partie aléatoire.</li>
-                <li><strong>NanoID (21 caractères)</strong> – 126 bits d'entropie avec l'alphabet par défaut (64 symboles).</li>
-                <li><strong>ULID</strong> – 80 bits aléatoires, horodatage de 48 bits ; total de 128 bits, mais l'unicité repose sur les 80 bits aléatoires.</li>
-            </ul>
-
-            <h3>Foire Aux Questions</h3>
-            <div class="faq-item">
-                <div class="faq-question">Deux UUID peuvent-ils vraiment être identiques ?</div>
-                <p>Oui, c'est théoriquement possible, mais la probabilité est astronomiquement faible. Avec 122 bits aléatoires, vous devez générer environ 2,7 × 10<sup>18</sup> UUID pour atteindre 50 % de chance de collision. À titre de comparaison, générer 1 milliard d'UUID par seconde pendant 100 ans ne produirait que 3,2 × 10<sup>18</sup> UUID.</p>
+        <article class="article-card" aria-label="Documentation">
+            <div class="article-meta">
+                <time datetime="2026-07-03">3 juillet 2026</time>
+                <span>&middot; 10 min de lecture</span>
+                <span>&middot; Par <a href="/fr/a-propos/">Mathias Kouadio</a></span>
             </div>
-            <div class="faq-item">
-                <div class="faq-question">Les collisions d'UUID v4 sont-elles vraiment un problème en pratique ?</div>
-                <p>Non. Le nombre d'UUID nécessaire pour qu'une collision ait une probabilité significative est tellement élevé que ce n'est pas une préoccupation pratique dans un système réel. D'autres modes de défaillance (corruption de base de données, bugs) sont bien plus probables.</p>
-            </div>
-            <div class="faq-item">
-                <div class="faq-question">Comment UUID v7 se compare-t-il à v4 en termes de collision ?</div>
-                <p>UUID v7 possède la même taille de partie aléatoire (74 bits après l'horodatage), donc la probabilité de collision est identique à v4 pour la portion aléatoire. L'horodatage garantit l'ordre mais n'augmente pas l'entropie aléatoire.</p>
+            <h1>Probabilité de collision UUID : les vrais chiffres, pas les règles approximatives</h1>
+
+            <nav class="toc" aria-label="Table des matières">
+                <div class="toc-title">Sur cette page</div>
+                <ol>
+                    <li><a href="#incident">Le calculateur qui mentait aux deux extrêmes</a></li>
+                    <li><a href="#decision-table">Tableau de décision rapide</a></li>
+                    <li><a href="#pitfalls">Erreurs courantes de calcul de collision</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#references">Références</a></li>
+                </ol>
+            </nav>
+
+            <p id="incident">Une formule de probabilité de collision construite autour de <code>1 - Math.exp(x)</code> semble inoffensive jusqu'à ce que vous testiez ses limites. Donnez-lui un petit nombre d'identifiants réaliste et elle renvoie silencieusement exactement <code>0</code> au lieu d'une probabilité minuscule mais non nulle — l'annulation catastrophique en virgule flottante détruit chaque chiffre significatif. Donnez-lui un nombre énorme, au-delà du point où les collisions deviennent quasi certaines, et elle renvoie <code>0</code> à nouveau, pour la raison inverse : l'exposant sous-dépasse et une clause de garde précoce signale « impossible » alors que la réponse honnête est « presque certain ». Aucun des deux échecs ne lève d'erreur. Tous deux rendent simplement un chiffre confiant, mais faux. La correction tient en une seule fonction : <code>-Math.expm1(x)</code> au lieu de <code>1 - Math.exp(x)</code>, qui reste numériquement précise sur toute la plage.</p>
+
+            <p>L'autre chiffre qui mérite d'être vérifié est le nombre de bits aléatoires qu'un identifiant possède réellement. On suppose souvent que l'UUID v7 est « aussi unique que le v4 » parce que les deux font 128 bits au total — mais le v7 consacre 48 de ces bits à un horodatage, ce qui laisse 74 bits aléatoires, pas 122. Ce n'est pas une différence d'arrondi : le seuil de 50 % de collision pour un identifiant de 74 bits est environ 17 millions de fois plus bas que pour un identifiant de 122 bits.</p>
+
+            <h2 id="decision-table">Tableau de décision rapide</h2>
+            <table class="dec-table">
+                <thead><tr><th>#</th><th>Situation</th><th>Gravité</th><th>Conséquence</th><th>Correction</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td>Formule de collision utilisant <code>1 - Math.exp(x)</code> directement</td><td>Élevée</td><td>Perte de précision silencieuse près de zéro ; retour silencieux à 0 pour <em>n</em> énorme</td><td>Utilisez <code>-Math.expm1(x)</code>, précis aux deux extrêmes</td></tr>
+                    <tr><td>2</td><td>Considérer les 128 bits totaux de l'UUID v7 comme 128 bits aléatoires</td><td>Élevée</td><td>Surestime l'unicité d'environ 17 millions de fois au seuil de 50 %</td><td>Utilisez les 74 bits réellement aléatoires (après l'horodatage de 48 bits)</td></tr>
+                    <tr><td>3</td><td>Appliquer les mathématiques du paradoxe des anniversaires aux identifiants Snowflake ou auto-incrémentés</td><td>Moyenne</td><td>Ces identifiants ne sont pas générés aléatoirement — la formule ne s'applique pas comme pour les UUID</td><td>Considérez les schémas coordonnés/séquentiels comme sans collision par construction, pas par probabilité</td></tr>
+                    <tr><td>4</td><td>Supposer que les 96 bits de MongoDB ObjectID sont tous aléatoires</td><td>Moyenne</td><td>Seuls environ 40 bits sont réellement aléatoires par processus ; le reste est un horodatage et un compteur incrémental</td><td>Raisonnez spécifiquement sur la composante aléatoire, pas sur la largeur totale du champ</td></tr>
+                    <tr><td>5</td><td>Ajouter une requête de vérification de doublon avant chaque insertion UUID v4 « au cas où »</td><td>Faible</td><td>Lecture inutile à chaque écriture, pour un risque plus faible qu'une défaillance matérielle non détectée</td><td>Fiez-vous à une contrainte unique au niveau de la base de données ; évitez la pré-vérification</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-info">La formule du paradoxe des anniversaires ne s'applique qu'aux identifiants tirés <strong>indépendamment et uniformément au hasard</strong> dans un espace fixe. Les identifiants préfixés par horodatage, les compteurs et les schémas coordonnés nécessitent un argument d'unicité différent (généralement beaucoup plus fort).</div>
+
+            <button class="btn btn-cta" onclick="document.getElementById('numIds').scrollIntoView({behavior:'smooth'})">🎲 Essayer le calculateur ci-dessus</button>
+
+            <h2 id="pitfalls">Erreurs courantes de calcul de collision</h2>
+
+            <div class="ap-card">
+                <div class="ap-header"><div class="ap-name"><span class="ap-number">01</span>1 − exp(x) au lieu de −expm1(x)</div><span class="sev-badge sev-high">Élevée</span></div>
+                <p>Pour de petites valeurs de <code>|x|</code>, <code>Math.exp(x)</code> s'arrondit à quelque chose d'extrêmement proche de 1, et soustraire de 1 détruit presque tous les chiffres significatifs du résultat — un cas d'école d'annulation catastrophique.</p>
+                <div class="danger-tag">À éviter</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">javascript</span></div><div class="code-block"><span class="keyword">const</span> p = <span class="number">1</span> - Math.<span class="func">exp</span>(exponent);  <span class="comment">// s'arrondit à exactement 0 pour un petit |exponent|, et à 0 (faux) pour un grand exposant négatif aussi</span></div></div>
+                <div class="fix-tag">Correction</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">javascript</span></div><div class="code-block"><span class="keyword">const</span> p = -Math.<span class="func">expm1</span>(exponent);  <span class="comment">// précis près de 0, et approche correctement 1 pour un grand exposant négatif</span></div></div>
             </div>
 
-            <h3>Autres outils utiles</h3>
-            <ul>
-                <li><a href="/fr/outils/generateur-uuid/">Générateur UUID / ULID</a> — générez des lots d'identifiants</li>
-                <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a> — UUID triables dans le temps</li>
-                <li><a href="/fr/outils/generateur-nanoid/">Générateur NanoID</a> — identifiants courts et compatibles URL</li>
-                <li><a href="/fr/comparatif-uuid/">Comparatif UUID par langage</a> — découvrez tous nos outils UUID</li>
-            </ul>
-        </section>
+            <div class="ap-card">
+                <div class="ap-header"><div class="ap-name"><span class="ap-number">02</span>Confondre bits totaux et bits aléatoires</div><span class="sev-badge sev-high">Élevée</span></div>
+                <p>Tout identifiant qui intègre un horodatage, un compteur ou un préfixe fixe possède moins de bits aléatoires que sa longueur totale. Seule la partie aléatoire alimente les mathématiques du paradoxe des anniversaires.</p>
+                <div class="danger-tag">Faux</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">texte</span></div><div class="code-block">UUID v7 → 128 bits au total → traité comme 128 bits d'entropie  <span class="comment">// ignore l'horodatage de 48 bits</span></div></div>
+                <div class="fix-tag">Juste</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">texte</span></div><div class="code-block">UUID v7 → 128 bits au total − horodatage 48 bits − version 4 bits − variant 2 bits = 74 bits aléatoires</div></div>
+            </div>
+
+            <div class="ap-card">
+                <div class="ap-header"><div class="ap-name"><span class="ap-number">03</span>Appliquer la formule à des schémas non aléatoires</div><span class="sev-badge sev-medium">Moyenne</span></div>
+                <p>Les identifiants Snowflake et les compteurs auto-incrémentés sont uniques en raison de leur construction — un horodatage/travailleur/séquence coordonné, ou un compteur unique faisant autorité — et non parce qu'ils échantillonnent aléatoirement dans un grand espace. Faire des calculs de paradoxe des anniversaires dessus produit un chiffre qui ne signifie pas ce qu'il semble signifier.</p>
+                <div class="fix-tag">Correction</div>
+                <div class="code-block-wrapper"><div class="code-block-header"><span class="code-block-title">texte</span></div><div class="code-block">Auto-incrément : 0 % de collision par construction (autorité de séquence unique)
+Snowflake : sans collision tant que les ID de travailleur et les horloges n'entrent pas en conflit — ce n'est pas une question de probabilité</div></div>
+            </div>
+
+            <h2 id="faq">Foire aux questions</h2>
+
+            <details class="faq-item">
+                <summary>Deux UUID v4 peuvent-ils réellement être identiques ?<span></span></summary>
+                <div class="faq-answer">Oui, en théorie — mais il vous faudrait générer environ 2,7 × 10<sup>18</sup> UUID pour avoir 50 % de chance d'une seule collision. Générer un milliard d'UUID par seconde sans interruption prendrait environ 86 ans pour atteindre ce nombre.</div>
+            </details>
+            <details class="faq-item">
+                <summary>Les collisions UUID v4 sont-elles une réelle préoccupation en pratique ?<span></span></summary>
+                <div class="faq-answer">Non. À toute échelle réaliste, d'autres modes de défaillance — bogues applicatifs, délai de réplication, pannes matérielles — sont bien plus probables qu'une collision UUID aléatoire. Une contrainte unique au niveau de la base de données est un filet de sécurité raisonnable, mais une vérification d'existence pré-insertion n'est pas nécessaire.</div>
+            </details>
+            <details class="faq-item">
+                <summary>Comment l'UUID v7 se compare-t-il vraiment au v4 pour les collisions ?<span></span></summary>
+                <div class="faq-answer">Le v7 possède 74 bits aléatoires contre 122 pour le v4, car 48 bits sont consacrés à un horodatage en millisecondes. Le seuil de 50 % de collision passe d'environ 2,7 × 10<sup>18</sup> identifiants à environ 1,6 × 10<sup>11</sup> — un nombre encore énorme pour presque toute application, mais significativement plus petit, et qui mérite d'être connu si vous générez à très haut volume dans les mêmes salves de millisecondes.</div>
+            </details>
+            <details class="faq-item">
+                <summary>Les 96 bits d'un ObjectID MongoDB sont-ils tous aléatoires ?<span></span></summary>
+                <div class="faq-answer">Non. Un ObjectID est composé d'un horodatage de 4 octets, d'une valeur de 5 octets générée aléatoirement une fois par processus et d'un compteur de 3 octets qui s'incrémente par document. Seule la composante aléatoire de 5 octets (40 bits) varie de manière imprévisible entre les processus ; la partie compteur est séquentielle, pas aléatoire.</div>
+            </details>
+            <details class="faq-item">
+                <summary>Pourquoi le calculateur traite-t-il les identifiants Snowflake et auto-incrémentés différemment ?<span></span></summary>
+                <div class="faq-answer">Parce que le paradoxe des anniversaires décrit ce qui se passe lorsque des valeurs sont tirées indépendamment au hasard. Les identifiants Snowflake et les compteurs auto-incrémentés sont construits pour éviter les collisions par conception (coordination ou séquence unique), donc un cadrage de probabilité de collision ne s'y applique pas vraiment comme il le fait pour les UUID.</div>
+            </details>
+            <details class="faq-item">
+                <summary>Mes données sont-elles envoyées quelque part lorsque j'utilise ce calculateur ?<span></span></summary>
+                <div class="faq-answer">Non. Tous les calculs s'exécutent localement dans votre navigateur en JavaScript. Rien de ce que vous entrez ici n'est transmis où que ce soit.</div>
+            </details>
+
+            <div class="references" id="references">
+                <h3 style="text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; color:var(--text3); margin-bottom:10px;">Références</h3>
+                <ul class="ref-list">
+                    <li><a href="https://www.rfc-editor.org/rfc/rfc9562" target="_blank" rel="noopener">RFC 9562 — Spécification UUID (dispositions des bits des versions 4 et 7)</a></li>
+                    <li><a href="https://www.mongodb.com/docs/manual/reference/method/ObjectId/" target="_blank" rel="noopener">Documentation MongoDB — Structure ObjectId</a></li>
+                    <li><a href="https://github.com/ulid/spec" target="_blank" rel="noopener">Spécification ULID</a></li>
+                </ul>
+            </div>
+
+            <button class="btn btn-cta" onclick="document.getElementById('numIds').scrollIntoView({behavior:'smooth'})">🎲 Ouvrir le calculateur</button>
+
+            <div class="related-tools">
+                <h3>Outils DevToolbox associés</h3>
+                <ul>
+                    <li><a href="/fr/outils/python-uuid-to-string/">Boîte à outils UUID Python</a></li>
+                    <li><a href="/fr/outils/generateur-uuid-v7/">Générateur UUID v7</a></li>
+                    <li><a href="/fr/outils/generateur-nanoid/">Générateur NanoID</a></li>
+                    <li><a href="/fr/outils/uuid-mysql/">Clé primaire UUID MySQL</a></li>
+                    <li><a href="/fr/outils/uuid-postgresql/">Clé primaire UUID PostgreSQL</a></li>
+                </ul>
+            </div>
+        </article>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2025 <a href="/fr/">DevToolbox</a> — Outils 100 % côté client pour développeurs.</p>
+        <p>&copy; 2026 DevToolbox — Outils gratuits pour développeurs. <a href="/fr/blog/">Blog</a> | <a href="/fr/a-propos/">À propos</a> | <a href="/fr/contact/">Contact</a></p>
     </footer>
 </div>
 
@@ -257,11 +413,26 @@
   "@type": "WebApplication",
   "name": "Calculateur de collision UUID",
   "url": "https://www.devstoolsbox.dev/fr/outils/calculateur-collision-uuid/",
-  "description": "Calculez la probabilité de collision d'UUID pour n'importe quel nombre d'identifiants. Supporte UUID v4, v7, NanoID, ULID. 100 % côté client.",
+  "description": "Calculez la probabilité d'une collision UUID, le temps avant collision à un rythme de génération donné, et comparez UUID v4, v7, NanoID, ULID, ObjectID et Snowflake. 100% côté client.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "browserRequirements": "Nécessite JavaScript.",
+  "author": { "@type": "Person", "name": "Mathias Kouadio", "url": "https://www.devstoolsbox.dev/fr/a-propos/" },
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Probabilité de collision UUID : les vrais chiffres, pas les règles approximatives",
+  "description": "Un regard numériquement précis sur la probabilité de collision UUID : correction de l'annulation catastrophique dans la formule du paradoxe des anniversaires, et rectification de l'erreur courante sur les 128 bits aléatoires du v7.",
+  "author": { "@type": "Person", "name": "Mathias Kouadio", "url": "https://www.devstoolsbox.dev/about/" },
+  "publisher": { "@type": "Organization", "name": "DevToolbox", "logo": { "@type": "ImageObject", "url": "https://www.devstoolsbox.dev/logo.png" } },
+  "datePublished": "2026-07-03",
+  "dateModified": "2026-07-03",
+  "mainEntityOfPage": "https://www.devstoolsbox.dev/fr/outils/calculateur-collision-uuid/",
+  "inLanguage": "fr"
 }
 </script>
 <script type="application/ld+json">
@@ -269,9 +440,10 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    { "@type": "Question", "name": "Deux UUID peuvent-ils vraiment être identiques ?", "acceptedAnswer": { "@type": "Answer", "text": "Théoriquement oui, mais la probabilité est astronomiquement faible. Il faut environ 2,7×10^18 UUID pour 50 % de chance de collision." } },
-    { "@type": "Question", "name": "Les collisions d'UUID v4 sont-elles vraiment un problème en pratique ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, la probabilité est si faible que ce n'est pas une préoccupation réelle dans un système de production." } },
-    { "@type": "Question", "name": "Comment UUID v7 se compare-t-il à v4 en termes de collision ?", "acceptedAnswer": { "@type": "Answer", "text": "UUID v7 a la même entropie aléatoire que v4, donc la probabilité de collision est identique." } }
+    { "@type": "Question", "name": "Deux UUID v4 peuvent-ils réellement être identiques ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, en théorie — mais il faudrait générer environ 2,7×10^18 UUID pour 50 % de chance d'une collision. Générer un milliard par seconde prendrait environ 86 ans." } },
+    { "@type": "Question", "name": "Les collisions UUID v4 sont-elles une réelle préoccupation en pratique ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, d'autres modes de défaillance sont bien plus probables. Une contrainte unique en base de données suffit." } },
+    { "@type": "Question", "name": "Comment l'UUID v7 se compare-t-il au v4 pour les collisions ?", "acceptedAnswer": { "@type": "Answer", "text": "Le v7 a 74 bits aléatoires contre 122 pour le v4, car 48 bits sont consacrés à un horodatage, ce qui abaisse considérablement le seuil de collision à 50 %." } },
+    { "@type": "Question", "name": "Les 96 bits d'un ObjectID MongoDB sont-ils tous aléatoires ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, seuls environ 40 bits (une valeur aléatoire par processus) sont réellement aléatoires ; le reste est un horodatage et un compteur incrémental." } }
   ]
 }
 </script>
@@ -280,8 +452,8 @@
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/fr/" },
-    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/fr/outils/" },
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.devstoolsbox.dev/" },
+    { "@type": "ListItem", "position": 2, "name": "Outils", "item": "https://www.devstoolsbox.dev/tools/" },
     { "@type": "ListItem", "position": 3, "name": "Calculateur de collision UUID", "item": "https://www.devstoolsbox.dev/fr/outils/calculateur-collision-uuid/" }
   ]
 }
@@ -305,85 +477,272 @@
     themeToggle.addEventListener('click',()=>applyTheme(currentTheme==='dark'?'light':'dark'));
     applyTheme(savedTheme);
 
-    /* ── Calcul de probabilité de collision ── */
-    function collisionProb(n, d) {
-        // Approximation exponentielle : 1 - exp(-n^2 / (2d))
-        const exposant = -(n * n) / (2 * d);
-        if (exposant < -700) return 0; // sous la limite de précision
-        return 1 - Math.exp(exposant);
-    }
-
-    // Bits d'entropie pour les différents types d'ID
-    const ID_TYPES = [
-        { nom: 'UUID v4', bits: 122 },
-        { nom: 'UUID v7', bits: 122 }, // même entropie aléatoire
-        { nom: 'NanoID (21)', bits: 126 }, // 64^21 ≈ 2^126
-        { nom: 'ULID', bits: 80 } // 80 bits aléatoires
-    ];
-
-    const numInput = document.getElementById('numIds');
-    const probDisplay = document.getElementById('probDisplay');
-    const comparisonGrid = document.getElementById('comparisonGrid');
-
-    function formaterProbabilite(p) {
-        if (p === 0) return '0 % (effectivement impossible)';
-        if (p < 1e-12) return p.toExponential(4) + ' (extrêmement faible)';
-        if (p < 0.01) return (p * 100).toFixed(10) + ' %';
-        return (p * 100).toFixed(4) + ' %';
-    }
-
-    function mettreAJourResultats() {
-        let n = parseFloat(numInput.value);
-        if (isNaN(n) || n < 1) n = 1;
-        let d_v4 = Math.pow(2, 122);
-
-        const probV4 = collisionProb(n, d_v4);
-        probDisplay.textContent = formaterProbabilite(probV4);
-
-        // Générer les cartes comparatives
-        let html = '';
-        for (let type of ID_TYPES) {
-            let d = Math.pow(2, type.bits);
-            let prob = collisionProb(n, d);
-            html += `<div class="comparison-card">
-                <div class="id-type">${type.nom}</div>
-                <div class="prob">${formaterProbabilite(prob)}</div>
-                <div style="font-size:0.75rem;color:var(--text3);">${type.bits} bits</div>
-            </div>`;
-        }
-        comparisonGrid.innerHTML = html;
-    }
-
-    numInput.addEventListener('input', mettreAJourResultats);
-    document.getElementById('calculateBtn').addEventListener('click', mettreAJourResultats);
-
-    // Partager
-    document.getElementById('shareBtn').addEventListener('click', () => {
-        const etat = { n: parseFloat(numInput.value) || 1000000 };
-        const hash = btoa(encodeURIComponent(JSON.stringify(etat)));
-        window.location.hash = hash;
-        navigator.clipboard.writeText(window.location.href).then(()=>showToast('URL copiée !'));
-    });
-
-    function chargerDepuisHash() {
-        if (window.location.hash) {
-            try {
-                const etat = JSON.parse(decodeURIComponent(atob(window.location.hash.slice(1))));
-                if (etat.n) numInput.value = etat.n;
-                mettreAJourResultats();
-            } catch(e){}
-        }
-    }
-
-    // Toast
     function showToast(msg) {
         const t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
         clearTimeout(window._toastTimer); window._toastTimer=setTimeout(()=>t.style.opacity='0',2000);
     }
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('code-copy-btn')) {
+            const wrapper = e.target.closest('.code-block-wrapper');
+            const block = wrapper && wrapper.querySelector('.code-block');
+            if (block) navigator.clipboard.writeText(block.textContent.trim()).then(()=>showToast('Copié !'));
+        }
+    });
 
-    // Calcul initial
-    mettreAJourResultats();
-    chargerDepuisHash();
+    /* ── Mathématiques principales : probabilité de collision du paradoxe des anniversaires numériquement précise.
+       Corrige deux vrais bugs trouvés dans la version précédente :
+       1) 1 - Math.exp(x) perd toute précision pour les petits |x| (annulation catastrophique),
+          renvoyant silencieusement 0 au lieu d'une probabilité minuscule non nulle.
+       2) Le code précédent traitait aussi spécialement les très grands exposants négatifs pour
+          renvoyer 0 (destiné à se prémunir contre le sous-dépassement de Math.exp) — mais la
+          réponse honnête ici est que la collision est presque CERTAINE (probabilité ~1), pas 0.
+       -Math.expm1(x) est précis près de zéro et approche naturellement 1 pour les grands x
+       négatifs, donc les deux cas sont traités correctement sans traitement spécial. ── */
+    function collisionProb(n, bits) {
+        if (!(n > 0) || !(bits > 0)) return 0;
+        const d = Math.pow(2, bits);
+        const exponent = -(n * n) / (2 * d);
+        return -Math.expm1(exponent);
+    }
+    // n auquel la probabilité de collision atteint 50 % (forme fermée de la même formule)
+    function n50(bits) {
+        const d = Math.pow(2, bits);
+        return Math.sqrt(2 * d * Math.LN2);
+    }
+
+    /* ── Types d'identifiants, avec des comptes de bits aléatoires précis et un indicateur "mode" pour
+       les types auxquels la formule des anniversaires ne s'applique pas proprement. ── */
+    const ID_TYPES = [
+        { key:'uuidv4', name:'UUID v4', bits:122, mode:'random', note:'128 bits − 6 bits version/variant, entièrement aléatoire' },
+        { key:'uuidv7', name:'UUID v7', bits:74, mode:'random', note:'128 bits − horodatage 48 bits − 6 bits version/variant = 74 bits aléatoires' },
+        { key:'nanoid', name:'NanoID (21 car.)', bits:126, mode:'random', note:'21 × 6 bits avec l\'alphabet par défaut de 64 symboles' },
+        { key:'ulid', name:'ULID', bits:80, mode:'random', note:'80 bits aléatoires + horodatage 48 bits (128 bits au total)' },
+        { key:'objectid', name:'MongoDB ObjectID', bits:40, mode:'random', note:'Seuls environ 40 bits (valeur de 5 octets par processus) sont vraiment aléatoires, sur 96 bits au total' },
+        { key:'snowflake', name:'Snowflake ID', bits:64, mode:'na', note:'Unique par construction coordonnée (horodatage+travailleur+séquence) — les mathématiques des anniversaires ne s\'appliquent pas vraiment' },
+        { key:'autoincrement', name:'Auto-incrément', bits:64, mode:'zero', note:'Séquence unique faisant autorité — 0 % de collision par construction' },
+        { key:'nil', name:'UUID Nil', bits:0, mode:'special', note:'Une seule valeur réservée fixe (tout à zéro) — pas un identifiant généré' },
+        { key:'custom', name:'Personnalisé', bits:128, mode:'random', note:'Définissez votre propre taille d\'entropie, ex. un jeton API de 256 bits', editable:true }
+    ];
+
+    const idTypeSelect = document.getElementById('idTypeSelect');
+    const customBitsRow = document.getElementById('customBitsRow');
+    const customBitsInput = document.getElementById('customBits');
+    ID_TYPES.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.key; opt.textContent = t.name;
+        idTypeSelect.appendChild(opt);
+    });
+    idTypeSelect.value = 'uuidv4';
+
+    function currentType() { return ID_TYPES.find(t => t.key === idTypeSelect.value); }
+    function currentBits() {
+        const t = currentType();
+        return t.key === 'custom' ? (parseFloat(customBitsInput.value) || 1) : t.bits;
+    }
+
+    idTypeSelect.addEventListener('change', () => {
+        customBitsRow.style.display = idTypeSelect.value === 'custom' ? 'inline-flex' : 'none';
+        updateAll();
+    });
+    customBitsInput.addEventListener('input', updateAll);
+
+    /* ── Formatage des nombres ── */
+    function formatProbability(p) {
+        if (p <= 0) return '0 %';
+        if (p >= 0.999999) return '≈100 % (pratiquement certain)';
+        if (p < 1e-6) return (p * 100).toExponential(3) + ' %';
+        if (p < 0.01) return (p * 100).toPrecision(4) + ' %';
+        return (p * 100).toFixed(4) + ' %';
+    }
+    function formatBigNumber(x) {
+        if (!isFinite(x)) return '∞';
+        if (x < 1e6) return Math.round(x).toLocaleString('fr-FR');
+        return x.toExponential(3);
+    }
+    const AGE_OF_UNIVERSE_YEARS = 13.8e9;
+    function formatDuration(seconds) {
+        if (!isFinite(seconds)) return 'pratiquement jamais';
+        const years = seconds / (365.25 * 24 * 3600);
+        if (years > AGE_OF_UNIVERSE_YEARS * 1000) return `${(years / AGE_OF_UNIVERSE_YEARS).toExponential(2)} fois l'âge de l'univers`;
+        if (years > AGE_OF_UNIVERSE_YEARS) return `environ ${(years / AGE_OF_UNIVERSE_YEARS).toFixed(1)}× l'âge de l'univers (${years.toExponential(2)} ans)`;
+        if (years >= 1) return `environ ${formatBigNumber(years)} ans`;
+        const days = seconds / 86400;
+        if (days >= 1) return `environ ${days.toFixed(1)} jours`;
+        const hours = seconds / 3600;
+        if (hours >= 1) return `environ ${hours.toFixed(1)} heures`;
+        const minutes = seconds / 60;
+        if (minutes >= 1) return `environ ${minutes.toFixed(1)} minutes`;
+        return `environ ${seconds.toFixed(2)} secondes`;
+    }
+
+    /* ── Synchronisation curseur échelle log <-> champ numérique ── */
+    const numIdsInput = document.getElementById('numIds');
+    const numIdsSlider = document.getElementById('numIdsSlider');
+    const SLIDER_MIN_EXP = 0, SLIDER_MAX_EXP = 30; // 10^0 .. 10^30
+    function sliderToN(sliderVal) { return Math.pow(10, SLIDER_MIN_EXP + (SLIDER_MAX_EXP - SLIDER_MIN_EXP) * (sliderVal / 1000)); }
+    function nToSlider(n) {
+        if (n <= 1) return 0;
+        const exp = Math.log10(n);
+        return Math.round(1000 * (exp - SLIDER_MIN_EXP) / (SLIDER_MAX_EXP - SLIDER_MIN_EXP));
+    }
+    numIdsSlider.addEventListener('input', () => {
+        numIdsInput.value = formatBigNumber(sliderToN(+numIdsSlider.value)).replace(/,/g,'').replace(/\s/g,'');
+        updateAll();
+    });
+    numIdsInput.addEventListener('input', () => {
+        const n = parseFloat(numIdsInput.value);
+        if (!isNaN(n)) numIdsSlider.value = nToSlider(n);
+        updateAll();
+    });
+
+    /* ── Graphique SVG : probabilité vs log10(n), point actuel mis en évidence ── */
+    function buildChartSVG(bits, currentN) {
+        const width = 620, height = 220, padL = 46, padR = 16, padT = 14, padB = 30;
+        const n50v = n50(bits);
+        const maxExp = Math.max(3, Math.log10(n50v) + 3);
+        const minExp = 0;
+        const steps = 80;
+        let path = '';
+        for (let i = 0; i <= steps; i++) {
+            const exp = minExp + (maxExp - minExp) * i / steps;
+            const n = Math.pow(10, exp);
+            const p = collisionProb(n, bits);
+            const x = padL + (exp - minExp) / (maxExp - minExp) * (width - padL - padR);
+            const y = height - padB - p * (height - padT - padB);
+            path += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+        }
+        const curExp = Math.min(maxExp, Math.max(minExp, Math.log10(Math.max(currentN, 1))));
+        const curP = collisionProb(currentN, bits);
+        const curX = padL + (curExp - minExp) / (maxExp - minExp) * (width - padL - padR);
+        const curY = height - padB - curP * (height - padT - padB);
+        // quadrillage à 0%, 25%, 50%, 75%, 100%
+        let grid = '';
+        for (let g = 0; g <= 4; g++) {
+            const gy = height - padB - (g / 4) * (height - padT - padB);
+            grid += `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${width - padR}" y2="${gy.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
+            grid += `<text x="${padL - 8}" y="${(gy + 3).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--text3)">${g * 25}%</text>`;
+        }
+        return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+            ${grid}
+            <path d="${path}" fill="none" stroke="var(--primary)" stroke-width="2"/>
+            <line x1="${curX.toFixed(1)}" y1="${padT}" x2="${curX.toFixed(1)}" y2="${height - padB}" stroke="var(--text3)" stroke-width="1" stroke-dasharray="3,3"/>
+            <circle cx="${curX.toFixed(1)}" cy="${curY.toFixed(1)}" r="5" fill="var(--primary)"/>
+            <text x="${padL}" y="${height - 8}" font-size="10" fill="var(--text3)">10^${minExp}</text>
+            <text x="${width - padR}" y="${height - 8}" text-anchor="end" font-size="10" fill="var(--text3)">10^${maxExp.toFixed(0)} identifiants générés</text>
+        </svg>`;
+    }
+
+    /* ── Rendu principal ── */
+    const probDisplay = document.getElementById('probDisplay');
+    const probLabel = document.getElementById('probLabel');
+    const n50Sub = document.getElementById('n50Sub');
+    const comparisonGrid = document.getElementById('comparisonGrid');
+    const realworldResult = document.getElementById('realworldResult');
+    const chartContainer = document.getElementById('chartContainer');
+    const genRateInput = document.getElementById('genRate');
+
+    function gaugeClass(p) {
+        if (p > 0.01) return 'gauge-red';
+        if (p > 0.001) return 'gauge-orange';
+        return 'gauge-green';
+    }
+
+    function updateAll() {
+        let n = parseFloat(numIdsInput.value);
+        if (isNaN(n) || n < 0) n = 0;
+        const type = currentType();
+        const bits = currentBits();
+
+        // Résultat principal
+        if (type.mode === 'zero') {
+            probDisplay.textContent = '0 %';
+            probLabel.textContent = 'Auto-incrément : sans collision par construction';
+            n50Sub.textContent = '';
+        } else if (type.mode === 'na') {
+            probDisplay.textContent = 'N/D';
+            probLabel.textContent = 'Pas un schéma généré aléatoirement — les mathématiques des anniversaires ne s\'appliquent pas directement';
+            n50Sub.textContent = '';
+        } else if (type.mode === 'special') {
+            probDisplay.textContent = 'N/D';
+            probLabel.textContent = 'L\'UUID Nil est une valeur fixe unique, pas quelque chose que vous générez';
+            n50Sub.textContent = '';
+        } else {
+            const p = collisionProb(n, bits);
+            probDisplay.textContent = formatProbability(p);
+            probLabel.textContent = `Probabilité d'au moins une collision parmi ${formatBigNumber(n)} identifiants ${type.name}`;
+            n50Sub.textContent = `Seuil de 50 % de collision : ≈ ${formatBigNumber(n50(bits))} identifiants`;
+        }
+
+        // Traduction en monde réel
+        const rate = parseFloat(genRateInput.value);
+        if (type.mode === 'random' && rate > 0) {
+            const seconds = n50(bits) / rate;
+            realworldResult.innerHTML = `À <span>${formatBigNumber(rate)}</span> générés par seconde, atteindre une chance de collision de 50 % prendrait <span>${formatDuration(seconds)}</span>.`;
+        } else {
+            realworldResult.innerHTML = `Non applicable pour ce type d'identifiant.`;
+        }
+
+        // Graphique
+        chartContainer.innerHTML = (type.mode === 'random') ? buildChartSVG(bits, n) : '<p style="color:var(--text3); font-size:0.85rem;">Graphique non applicable pour les schémas d\'identifiants non aléatoires.</p>';
+
+        // Grille de comparaison
+        comparisonGrid.innerHTML = ID_TYPES.filter(t => t.key !== 'custom' || true).map(t => {
+            let probText, gauge = '';
+            if (t.mode === 'zero') { probText = '0 %'; gauge = 'gauge-green'; }
+            else if (t.mode === 'na') { probText = 'N/D*'; }
+            else if (t.mode === 'special') { probText = '—'; }
+            else {
+                const b = t.key === 'custom' ? bits : t.bits;
+                const p = collisionProb(n, b);
+                probText = formatProbability(p);
+                gauge = gaugeClass(p);
+            }
+            return `<div class="comparison-card ${gauge}">
+                <div class="id-type">${t.name}</div>
+                <div class="prob">${probText}</div>
+                <div class="id-note">${t.note}</div>
+                <button class="btn btn-sm set-ref-btn" data-key="${t.key}">Définir comme référence</button>
+            </div>`;
+        }).join('');
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('set-ref-btn')) {
+            idTypeSelect.value = e.target.dataset.key;
+            customBitsRow.style.display = idTypeSelect.value === 'custom' ? 'inline-flex' : 'none';
+            updateAll();
+            showToast(`Référence définie sur ${currentType().name}`);
+        }
+    });
+
+    document.getElementById('calculateBtn').addEventListener('click', updateAll);
+    genRateInput.addEventListener('input', updateAll);
+
+    /* ── Partager ── */
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        const url = new URL(window.location.href);
+        url.hash = '';
+        url.searchParams.set('n', numIdsInput.value);
+        url.searchParams.set('type', idTypeSelect.value);
+        if (idTypeSelect.value === 'custom') url.searchParams.set('bits', customBitsInput.value);
+        url.searchParams.set('rate', genRateInput.value);
+        navigator.clipboard.writeText(url.toString()).then(()=>showToast('URL copiée !'));
+        window.history.replaceState(null, '', url.toString());
+    });
+
+    function loadFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('n')) numIdsInput.value = params.get('n');
+        if (params.has('type') && ID_TYPES.some(t => t.key === params.get('type'))) idTypeSelect.value = params.get('type');
+        if (params.has('bits')) customBitsInput.value = params.get('bits');
+        if (params.has('rate')) genRateInput.value = params.get('rate');
+        customBitsRow.style.display = idTypeSelect.value === 'custom' ? 'inline-flex' : 'none';
+        const n = parseFloat(numIdsInput.value);
+        if (!isNaN(n)) numIdsSlider.value = nToSlider(n);
+    }
+
+    loadFromQuery();
+    updateAll();
 })();
 </script>
 </body>
